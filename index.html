@@ -307,7 +307,10 @@ function chip(text, cls) { return text === '' || text === null || text === undef
 function north(n) {
   if (!n) return '';
   return '<div class="north"><div><div class="l">التسجيلات المدفوعة هذا الأسبوع</div><div class="n">' + esc(n.enrolled_paid_week) + '</div></div>' +
-    '<div class="side-stats">عملاء جدد: ' + esc(n.leads_week) + '<br>الإيراد: ' + esc(Number(n.revenue_week || 0).toLocaleString('en')) + ' ر.س</div></div>';
+    '<div class="side-stats">عملاء جدد: ' + esc(n.leads_week) + '<br>الإيراد: ' + esc(Number(n.revenue_week || 0).toLocaleString('en')) + ' ر.س</div></div>' +
+    (n.claude_ready === false ? '<div class="card small" style="border-color:var(--warn);margin-top:-6px">⏸ <b>الميزات الذكية متوقفة مؤقتاً</b> — ' +
+      (n.claude_reason === 'nokey' ? 'لا يوجد رصيد/مفتاح Claude بعد (مؤجّل للإطلاق الرسمي).' : esc(n.claude_reason)) +
+      ' تتوقف: الردود المقترحة، المنشور التلقائي، الرادار، الأخبار، الاكتشافات. كل الإدخال اليدوي يعمل.</div>' : '');
 }
 function empty(t) { return '<div class="empty">' + esc(t) + '</div>'; }
 function section(title, items, fn, emptyText) {
@@ -567,18 +570,54 @@ SCREENS.targets = {
       '<div class="stat"><div class="v" style="color:var(--good)">' + t.available + '</div><div class="k">متاح مؤكد</div></div>' +
       '<div class="stat"><div class="v" style="color:var(--warn)">' + t.pending + '</div><div class="k">قيد التحقق</div></div>' +
       '<div class="stat"><div class="v" style="color:var(--bad)">' + t.excluded + '</div><div class="k">مستبعَد</div></div></div>' +
-      '<div class="muted small" style="margin:6px 0 10px">' + t.unverified + ' مشغّلاً بلا عدد فروع متحقق — لا تُحسب في المجاميع.</div>';
+      '<div class="muted small" style="margin:6px 0 10px">' + t.unverified + ' مشغّلاً بلا عدد فروع متحقق — لا تُحسب في المجاميع. ' +
+      'تتحدّث تلقائياً من الأخبار وخريطة صنّاع القرار (تحتاج Claude)، ويدوياً من هنا.</div>' +
+      '<div class="btns"><button class="btn pri" data-act="opNew">＋ إضافة جهة</button></div>';
+    var editing = S.args && S.args.edit;
+    if (editing === 'new') html += opForm_({}, d);
     html += d.operators.map(function (o) {
+      if (editing && String(editing) === String(o.op_id)) return opForm_(o, d);
       var cls = { 'متاح': 'good', 'مستبعَد': 'bad', 'قيد التحقق': 'warn' }[o.b2b_status] || '';
       return '<div class="card"><div class="row between"><b>' + esc(o.company) + '</b>' + chip(o.b2b_status, cls) + '</div>' +
         '<div class="chips" style="margin-top:4px">' + chip(o.branches !== '' ? o.branches + ' فرعاً' : 'فروع غير متحققة') +
         (o.priority !== '' ? chip('أولوية ' + o.priority, 'acc') : '') + chip(o.hq_city) + chip(o.pipeline_stage) + '</div>' +
         (o.brands ? '<div class="muted small">' + esc(o.brands) + '</div>' : '') +
         (o.b2b_blocker ? '<div class="small" style="color:var(--' + (cls || 'muted') + ')">السبب: ' + esc(o.b2b_blocker) +
-          (o.renewal_from ? ' · التجديد: ' + fmtDate(o.renewal_from) : '') + '</div>' : '') + '</div>';
+          (o.renewal_from ? ' · التجديد: ' + fmtDate(o.renewal_from) : '') + '</div>' : '') +
+        (o.next_step ? '<div class="small"><b>الخطوة التالية:</b> ' + esc(o.next_step) + '</div>' : '') +
+        '<div class="row between" style="margin-top:6px"><span class="muted small">' + (o.count_date ? 'آخر تحديث للفروع: ' + fmtDate(o.count_date) : '') +
+        (o.branches_note ? ' · ' + esc(o.branches_note) : '') + '</span>' +
+        '<button class="btn sm" data-act="opEdit" data-id="' + esc(o.op_id) + '">تعديل</button></div></div>';
     }).join('');
     return html;
   }
+};
+function opForm_(o, d) {
+  var f = function (k, label, type) {
+    return '<label class="f">' + label + '</label><input id="of_' + k + '" type="' + (type || 'text') + '" value="' + esc(o[k] === undefined ? '' : o[k]) + '">';
+  };
+  var sel = function (k, label, list) {
+    return '<label class="f">' + label + '</label><select id="of_' + k + '"><option value="">—</option>' + (list || []).map(function (v) {
+      return '<option' + (String(o[k]) === v ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join('') + '</select>';
+  };
+  return '<div class="card" style="border-color:var(--accent)"><b>' + (o.op_id ? 'تعديل: ' + esc(o.company) : 'جهة جديدة') + '</b>' +
+    f('company', 'الاسم *') + f('brands', 'العلامات التجارية') + f('branches', 'عدد الفروع (تحققت منه)', 'number') + f('hq_city', 'المدينة') +
+    f('website', 'الموقع الرسمي', 'url') + sel('b2b_status', 'حالة B2B', d.statuses) + f('b2b_blocker', 'السبب / العائق') +
+    sel('pipeline_stage', 'المرحلة', d.stages) + f('next_step', 'الخطوة التالية') +
+    '<label class="f">ملاحظات</label><textarea id="of_notes">' + esc(o.notes || '') + '</textarea>' +
+    '<div class="btns"><button class="btn good" data-act="opSave" data-id="' + esc(o.op_id || '') + '">حفظ</button>' +
+    '<button class="btn ghost" data-act="opCancel">إلغاء</button></div></div>';
+}
+ACT.opNew = function () { go('targets', { edit: 'new' }); };
+ACT.opEdit = function (el) { go('targets', { edit: el.dataset.id }, true); };
+ACT.opCancel = function () { go('targets', {}, true); };
+ACT.opSave = function (el) {
+  var op = { op_id: el.dataset.id };
+  ['company', 'brands', 'branches', 'hq_city', 'website', 'b2b_status', 'b2b_blocker', 'pipeline_stage', 'next_step', 'notes'].forEach(function (k) { op[k] = val('of_' + k); });
+  if (!op.company.trim()) return toast('الاسم مطلوب', true);
+  el.disabled = true;
+  api('action', 'operatorSave', { op: op }).then(function () { toast('حُفظ'); go('targets', {}, true); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 
 /* ═══════════ البدء ═══════════ */
@@ -839,7 +878,17 @@ SCREENS.kpis = { render: function (d) {
 /* ─── منشور اليوم ─── */
 SCREENS.dailyPost = { render: function (d) {
   var html = north(d.north) + '<h1>منشور اليوم</h1>';
-  if (!d.today.length) return html + empty('لا منشور بعد') + '<div class="btns"><button class="btn pri" data-act="postGen">توليد الآن</button></div>';
+  var manual = '<details class="card"' + (d.today.length ? '' : ' open') + '><summary><b>✍️ اكتب منشوراً بنفسك</b> <span class="muted small">(يعمل بدون Claude)</span></summary>' +
+    '<textarea id="pm_body" placeholder="نص المنشور…" style="min-height:120px"></textarea>' +
+    '<div class="chips" style="margin:6px 0">' + (d.platforms || []).map(function (p) {
+      return '<label class="chip" style="cursor:pointer"><input type="checkbox" class="pm_pl" value="' + esc(p) + '" checked> ' + esc(p) + '</label>';
+    }).join(' ') + '</div>' +
+    '<select id="pm_pillar"><option value="">الركيزة (اختياري)</option>' + (d.pillars || []).map(function (p) { return '<option>' + esc(p) + '</option>'; }).join('') + '</select>' +
+    '<div class="btns"><button class="btn pri" data-act="postManual">أنشئ المنشور للمنصات المختارة</button>' +
+    '<button class="btn" data-act="postGen">توليد تلقائي (Claude)</button></div>' +
+    '<div class="muted small">بعد الإنشاء: أضف الصورة، شغّل/ألغِ المنصات، ثم اعتمد.</div></details>';
+  html += manual;
+  if (!d.today.length) return html;
   html += '<div class="muted small">لا يُنشر أي شيء بلا موافقتك. المرحلة صفر: بعد الاعتماد انسخ النص وانشره بنفسك، ثم سجّل الرابط.</div>';
   var open = d.today.filter(function (p) { return p.status !== 'منشور'; });
   S.postIds = open.map(function (p) { return p.post_id; });
@@ -890,6 +939,14 @@ ACT.postApproveOn = function () {
   if (!ids.length) return toast('لا منصات مشغّلة بانتظار الموافقة', true);
   ids.reduce(function (pr, id) { return pr.then(function () { return api('action', 'postEdit', { post_id: id, body: val('pb_' + id) }); }).then(function () { return api('action', 'postApprove', { post_id: id }); }); }, Promise.resolve())
     .then(function () { toast('اعتُمدت ' + ids.length + ' منصة — انسخ وانشر'); go('dailyPost'); }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.postManual = function (el) {
+  var pls = Array.prototype.slice.call(document.querySelectorAll('.pm_pl')).filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+  if (!val('pm_body').trim()) return toast('اكتب نص المنشور', true);
+  if (!pls.length) return toast('اختر منصة واحدة على الأقل', true);
+  el.disabled = true;
+  act('postManual', { body: val('pm_body'), platforms: pls, pillar: val('pm_pillar') }, function (r) { return 'أُنشئ لـ ' + r.created + ' منصة'; })
+    .catch(function () { el.disabled = false; });
 };
 ACT.postGen = function (el) { el.disabled = true; act('postGenerate', {}, function (r) { return r.message || 'تم'; }); };
 ACT.postApprove = function (el) {
