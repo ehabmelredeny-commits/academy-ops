@@ -1,0 +1,17 @@
+{
+  "name": "Academy OPS",
+  "short_name": "Academy OPS",
+  "start_url": "./",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#111318",
+  "theme_color": "#0b6e7f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
