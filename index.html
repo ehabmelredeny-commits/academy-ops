@@ -251,17 +251,48 @@ function go(screen, args, keepScroll) {
   S.screen = screen; S.args = args || {};
   renderNav();
   var y = window.scrollY;
-  if (!keepScroll) $('main').innerHTML = '<div class="loading">جارٍ التحميل…</div>';
-  api('screen', screen, S.args).then(function (data) {
+  var ck = cacheKey_(screen, S.args), token = S.token = (S.token || 0) + 1;
+  var draw = function (data, stale) {
+    if (token !== S.token) return; // المستخدم انتقل لشاشة أخرى
+    var typing = document.activeElement && /^(TEXTAREA|INPUT|SELECT)$/.test(document.activeElement.tagName);
+    if (!stale && S.shownStale && typing) return; // لا نمسح ما يكتبه المستخدم فوق النسخة المحفوظة
     S.data = data; S.fresh = false;
-    var sc = SCREENS[screen];
-    $('main').innerHTML = sc.render(data, S.args);
+    var sc = SCREENS[screen], sy = window.scrollY;
+    $('main').innerHTML = sc.render(data, S.args) + (stale ? '<div class="muted small" id="staleNote" style="text-align:center">يتحدّث…</div>' : '');
     if (sc.after) sc.after(data, S.args);
-    if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
+    if (stale || !S.shownStale) window.scrollTo(0, keepScroll ? y : 0); else window.scrollTo(0, sy);
     if (data && data.poll) S.sig = data.poll.sig;
+  };
+  // عرض فوري من آخر نسخة محفوظة، ثم التحديث من النظام (ثوانٍ في Google)
+  var cached = keepScroll ? null : cacheGet_(ck); // بعد إجراء: لا نعرض نسخة قديمة قبل التغيير
+  S.shownStale = false;
+  if (cached) { draw(cached, true); S.shownStale = true; }
+  else if (!keepScroll) $('main').innerHTML = '<div class="loading">جارٍ التحميل…</div>';
+  api('screen', screen, S.args).then(function (data) {
+    cachePut_(ck, data);
+    draw(data, false);
   }).catch(function (e) {
+    if (token !== S.token) return;
+    if (cached) { var n = $('staleNote'); if (n) n.textContent = 'تعذّر التحديث — تعرض آخر نسخة محفوظة'; return; }
     $('main').innerHTML = '<div class="card"><b>تعذّر التحميل</b><div class="muted">' + esc(errMsg(e)) + '</div>' +
       '<div class="btns"><button class="btn" data-go="' + esc(screen) + '">إعادة المحاولة</button></div></div>';
+  });
+}
+
+/* نسخة محلية من كل شاشة (في هذا المتصفح فقط) لفتح فوري */
+function cacheKey_(screen, args) { return 'ops_scr_' + screen + '_' + JSON.stringify(args || {}); }
+function cacheGet_(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+function cachePut_(k, data) {
+  try { localStorage.setItem(k, JSON.stringify(data)); }
+  catch (e) { try { Object.keys(localStorage).forEach(function (x) { if (x.indexOf('ops_scr_') === 0) localStorage.removeItem(x); }); } catch (e2) {} }
+}
+/** تجهيز الشاشات الرئيسية في الخلفية بعد أول فتح */
+function prefetch_() {
+  ['today', 'reply', 'dailyPost', 'targets', 'flow'].forEach(function (s, i) {
+    setTimeout(function () {
+      if (S.screen === s) return;
+      api('screen', s, {}).then(function (d) { cachePut_(cacheKey_(s, {}), d); }).catch(function () {});
+    }, 1500 + i * 1200);
   });
 }
 
@@ -623,6 +654,7 @@ ACT.opSave = function (el) {
 /* ═══════════ البدء ═══════════ */
 window.addEventListener('load', function () {
   go(START_SCREEN || 'today');
+  prefetch_();
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
 });
