@@ -288,12 +288,15 @@ function cachePut_(k, data) {
 }
 /** تجهيز الشاشات الرئيسية في الخلفية بعد أول فتح */
 function prefetch_() {
-  ['today', 'reply', 'dailyPost', 'targets', 'flow'].forEach(function (s, i) {
-    setTimeout(function () {
-      if (S.screen === s) return;
-      api('screen', s, {}).then(function (d) { cachePut_(cacheKey_(s, {}), d); }).catch(function () {});
-    }, 1500 + i * 1200);
-  });
+  // واحدة بعد الأخرى (لا طلبات متزامنة تزاحم الشاشة المفتوحة)
+  var list = ['today', 'reply', 'dailyPost', 'targets'];
+  (function next(i) {
+    if (i >= list.length) return;
+    var s = list[i];
+    if (S.screen === s || cacheGet_(cacheKey_(s, {}))) return next(i + 1);
+    api('screen', s, {}).then(function (d) { cachePut_(cacheKey_(s, {}), d); }).catch(function () {})
+      .then(function () { setTimeout(function () { next(i + 1); }, 800); });
+  })(0);
 }
 
 var BADGES = {};
@@ -654,7 +657,7 @@ ACT.opSave = function (el) {
 /* ═══════════ البدء ═══════════ */
 window.addEventListener('load', function () {
   go(START_SCREEN || 'today');
-  prefetch_();
+  setTimeout(prefetch_, 6000); // بعد اكتمال الشاشة الأولى
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
 });
