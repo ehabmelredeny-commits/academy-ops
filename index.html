@@ -871,10 +871,10 @@ SCREENS.dailyPost = { render: function (d) {
 } };
 function postMediaUpload_(input, ids) {
   var f = input.files && input.files[0]; if (!f) return;
-  if (!/^image//.test(f.type)) return toast('اختر صورة', true);
+  if (!/^image\//.test(f.type)) return toast('اختر صورة', true);
   if (f.size > 10 * 1024 * 1024) return toast('الصورة أكبر من ١٠ ميغا', true);
   var r = new FileReader();
-  r.onload = function () { toast('جارٍ رفع الصورة…'); act('postMedia', { post_ids: ids, data: String(r.result).split(',')[1], mime: f.type, name: f.name.replace(/.[^.]+$/, '') }, 'رُفعت الصورة'); };
+  r.onload = function () { toast('جارٍ رفع الصورة…'); act('postMedia', { post_ids: ids, data: String(r.result).split(',')[1], mime: f.type, name: f.name.replace(/\.[^.]+$/, '') }, 'رُفعت الصورة'); };
   r.readAsDataURL(f);
 }
 document.addEventListener('change', function (e) {
