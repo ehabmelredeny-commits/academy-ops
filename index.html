@@ -2631,13 +2631,15 @@ SCREENS.search = { render: function (d, args) {
       var c = srcCat_(k) || { label: 'بدون فئة', extractFields: [] }, rows = groups[k], restricted = c.pdplRestricted;
       var fields = restricted ? ['query', 'resultCount', 'sentimentThemes', 'commonPhrasing'] : (c.extractFields || []);
       html += '<div class="card"><div class="row between"><b>' + esc(c.label) + ' ' + chip(rows.length) + '</b>' +
-        (restricted ? '<span class="chip bad">PDPL: التصدير معطّل</span>' : '<button class="btn sm" data-act="srcExport" data-cat="' + esc(k) + '">تصدير CSV</button>') + '</div>' +
+        (restricted ? '<span class="chip bad">PDPL: التصدير معطّل</span>' : '<span><button class="btn sm" data-act="srcCopyTable" data-cat="' + esc(k) + '">📋 انسخ كجدول</button> ' +
+          '<button class="btn sm" data-act="srcExport" data-cat="' + esc(k) + '">تصدير CSV</button></span>') + '</div>' +
         '<div style="overflow-x:auto"><table class="small" style="width:100%;border-collapse:collapse"><tr>' + fields.map(function (x) { return '<th style="text-align:right;border-bottom:1px solid var(--line)">' + esc(FIELD_AR[x] || x) + '</th>'; }).join('') +
-        '<th>الوسم</th><th></th></tr>' + rows.map(function (r) {
+        '<th>الوسم</th><th>إلى فعل</th><th></th></tr>' + rows.map(function (r) {
           return '<tr>' + fields.map(function (x) {
             var v = r.fields[x] !== undefined ? r.fields[x] : (x === 'sourceUrl' ? r.url : '');
             return '<td style="border-bottom:1px dashed var(--line);padding:3px">' + (/^https?:/.test(v) ? '<a target="_blank" rel="noopener" href="' + esc(v) + '">رابط</a>' : esc(v)) + '</td>';
           }).join('') + '<td>' + (r.non_compete ? chip(r.non_compete, r.non_compete === 'blocked' ? 'bad' : r.non_compete === 'allowed' ? 'good' : 'warn') : '') + '</td>' +
+            '<td style="white-space:nowrap">' + srcActions_(k, r) + '</td>' +
             '<td><a href="#" data-act="srcArchive" data-id="' + esc(r.res_id) + '">أرشفة</a></td></tr>';
         }).join('') + '</table></div></div>';
     });
@@ -2673,6 +2675,40 @@ SCREENS.search = { render: function (d, args) {
   }
   return html;
 } };
+
+/* ── من النتيجة إلى فعل ── */
+var SRC_ACTS = {
+  b2b_leads: [['b2b', '🏢 فرصة B2B'], ['discovery', 'للاكتشافات']], buying_signals: [['b2b', '⚡ فرصة B2B (١٤ يوماً)']],
+  pricing_comparison: [['offer', '💰 لعروض المنافسين']], competitive_intel: [['offer', '💰 لعروض المنافسين'], ['discovery', 'للاكتشافات']],
+  trainer_sourcing: [['trainer', '🏋️ للمدربين']], events_networking: [['content', '📅 فكرة/فعالية']], regulatory: [['content', '📄 فكرة محتوى']],
+  high_intent_students: [['ask', '🎯 لفرص الرد'], ['content', 'فكرة محتوى']], broad_discovery: [['discovery', 'للاكتشافات']], generic_templates: [['discovery', 'للاكتشافات']]
+};
+var SRC_DONE = { b2b: 'فرصة B2B', offer: 'عرض منافس', trainer: 'مدرب', discovery: 'اكتشاف', content: 'فكرة محتوى', ask: 'فرصة رد' };
+function srcActions_(cat, r) {
+  if (r.pdpl_restricted === 'نعم') return '<span class="muted">مجمّع</span>';
+  if (r.action_taken) return chip('✓ ' + (SRC_DONE[r.action_taken] || r.action_taken), 'good');
+  return (SRC_ACTS[cat] || [['discovery', 'للاكتشافات']]).filter(function (x) { return !(x[0] === 'b2b' && r.non_compete === 'blocked'); })
+    .map(function (x) { return '<button class="btn sm" data-act="srcAct" data-id="' + esc(r.res_id) + '" data-a="' + x[0] + '">' + x[1] + '</button>'; }).join(' ');
+}
+ACT.srcAct = function (el) {
+  el.disabled = true;
+  api('action', 'searchResultAct', { res_id: el.dataset.id, action: el.dataset.a }).then(function (r) { toast(r.message); go('search', S.args, true); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+/** انسخ كجدول: يُلصق مباشرة في إكسل/شيت (مفصول بعلامات Tab)، بلا المحظور، ومعطّل لفئات PDPL */
+ACT.srcCopyTable = function (el) {
+  var c = srcCat_(el.dataset.cat) || { extractFields: [] };
+  if (c.pdplRestricted) return toast('النسخ معطّل لهذه الفئة (PDPL)', true);
+  var TAB = String.fromCharCode(9), NL = String.fromCharCode(10);
+  var fields = c.extractFields || [], clean = function (v) { return String(v === undefined || v === null ? '' : v).split(TAB).join(' ').split(NL).join(' ').split(String.fromCharCode(13)).join(' '); };
+  var rows = SRC.data.results.filter(function (r) { return (r.category_id || '—') === el.dataset.cat && r.non_compete !== 'blocked'; });
+  var tsv = SRC_TAG + NL + fields.map(function (f) { return FIELD_AR[f] || f; }).concat(['الرابط', 'الوسم', 'تاريخ الرصد']).join(TAB) + NL +
+    rows.map(function (r) { return fields.map(function (f) { return clean(r.fields[f]); }).concat([clean(r.url), clean(r.non_compete), clean(fmtDate(r.captured_at))]).join(TAB); }).join(NL);
+  var done = function () { toast('نُسخ ' + rows.length + ' صفاً — الصقه في إكسل أو Google Sheets'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(tsv).then(done).catch(function () { srcCopyFallback_(tsv); done(); });
+  else { srcCopyFallback_(tsv); done(); }
+};
+function srcCopyFallback_(t) { var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); } catch (e) {} a.remove(); }
 
 /* ── الأحداث ── */
 ACT.srcFilter = function () { go('search', { tab: 'catalog', cat: val('sf_cat'), intent: val('sf_int'), aud: val('sf_aud') }, true); };
