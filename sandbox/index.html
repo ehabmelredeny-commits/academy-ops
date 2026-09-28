@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <title>Academy OPS</title>
+  <title>Academy OPS 🧪 تجريبي</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="mobile-web-app-capable" content="yes">
@@ -209,13 +209,13 @@ body.is-sandbox nav.side { top: 24px; }
 </head>
 <body>
 <script>
-  var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
+  var EXEC_URL = "https://script.google.com/macros/s/AKfycbx1822CMX1VLUeyNJ7-C6YtRyGj1B25EJzYwFj3pyyEfbSlch6HEvabKkBa9XI8i0PfAw/exec";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([\w-]+)/.exec(location.hash);
-    if (m) { try { localStorage.setItem("ops_k", m[1]); } catch (e) {} history.replaceState(null, '', location.pathname + location.search); }
+    if (m) { try { localStorage.setItem("ops_k_sbx", m[1]); } catch (e) {} history.replaceState(null, '', location.pathname + location.search); }
   })();
-  function opsKey_() { try { return localStorage.getItem("ops_k") || ''; } catch (e) { return ''; } }
+  function opsKey_() { try { return localStorage.getItem("ops_k_sbx") || ''; } catch (e) { return ''; } }
   var google = { script: {} };
   Object.defineProperty(google.script, 'run', { get: function () {
     var r = { s: null, f: null };
