@@ -172,6 +172,18 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .fc-node summary::-webkit-details-marker { display: none; }
 .fc-node .btnrow { border-top: 1px dashed var(--line); padding: 6px 0 2px; font-size: 13px; }
 .fc-node .btnrow b { color: var(--accent); }
+/* ─── مخطط شجري: رأس ← فروع ─── */
+.tree { margin: 12px 0 22px; }
+.tr-head { max-width: 560px; margin: 0 auto; background: var(--accent); color: var(--accent-ink); border-radius: 14px; padding: 10px 14px; text-align: center; position: relative; }
+.tr-head .chip { background: rgba(255,255,255,.2); color: inherit; }
+.tr-head a { color: inherit; text-decoration: underline; }
+.tr-title { font-weight: 700; font-size: 15px; }
+.tr-kids { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 22px; padding-top: 14px; border-top: 2px solid var(--accent); position: relative; }
+.tr-kids::before { content: ''; position: absolute; top: -24px; left: 50%; height: 22px; border-left: 2px solid var(--accent); }
+.tr-kid { position: relative; flex: 1 1 240px; max-width: 320px; }
+.tr-kid::before { content: ''; position: absolute; top: -16px; left: 50%; height: 14px; border-left: 2px solid var(--accent); }
+.tr-node { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; height: 100%; box-shadow: var(--shadow); }
+.tr-node .tr-title { color: var(--accent); margin-bottom: 4px; }
 .fcx { display: flex; flex-direction: column; align-items: center; }
 .fcx-stage { width: 100%; max-width: 820px; border: 2px solid; border-radius: 14px; overflow: hidden; background: var(--card); }
 .fcx-t { color: #fff; font-weight: 700; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -260,7 +272,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -2127,6 +2139,180 @@ ACT.calSheet = function (el) {
 };
 </script>
 
+  <script>
+/* ═══════════ المنافسون: مقارنة الدورات · ملفات المنافسين · حساباتهم ═══════════ */
+var COMP = { data: null };
+
+function compMoney_(v) { return v === '' || v === undefined || v === null ? '' : Number(v).toLocaleString('en') + ' ر.س'; }
+function compPrice_(o) {
+  var b = o.base_price, d = o.discount_price;
+  if (d !== '' && d !== undefined && b !== '' && b !== undefined && Number(d) < Number(b))
+    return '<s class="muted">' + compMoney_(b) + '</s> <b style="color:var(--good)">' + compMoney_(d) + '</b> <span class="chip warn">خصم ' + Math.round((1 - d / b) * 100) + '%</span>';
+  return b !== '' && b !== undefined ? '<b>' + compMoney_(b) + '</b>' : '<span class="muted">السعر غير معلن</span>';
+}
+/** بطاقة عرض واحد داخل المخطط */
+function compOfferCard_(o, showComp) {
+  return '<div class="tr-node">' + (showComp ? '<div class="tr-title">' + esc(o.entity) + '</div>' : '<div class="tr-title">' + esc(o.course_name || '') + '</div>') +
+    '<div>' + compPrice_(o) + '</div>' +
+    '<div class="small">' + (o.start_date ? '🗓 ' + fmtDate(o.start_date) + (o.end_date ? ' ← ' + fmtDate(o.end_date) : '') : '<span class="muted">البداية غير معلنة</span>') + '</div>' +
+    '<div class="chips">' + chip(o.delivery, o.delivery === 'أونلاين' ? 'acc' : '') + chip(o.location) + chip(o.duration) + (o.instructor ? chip('👤 ' + o.instructor) : '') + chip(o.accreditation) + '</div>' +
+    (o.notes ? '<div class="muted small">' + esc(o.notes) + '</div>' : '') +
+    '<div class="row between small"><span class="muted">رُصد ' + fmtDate(o.captured_at) + (o.source ? ' · ' + esc(o.source) : ' · الرادار') + '</span>' +
+    '<span>' + (extUrl(o.url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(o.url)) + '">المصدر</a> · ' : '') +
+    '<a href="#" data-act="compOfferEdit" data-id="' + esc(o.offer_id) + '">تعديل</a></span></div></div>';
+}
+/** أحدث عرض لكل (منافس × دورة) */
+function compLatest_(offers, keyFn) {
+  var seen = {}, out = [];
+  offers.forEach(function (o) { var k = keyFn(o); if (!seen[k]) { seen[k] = 1; out.push(o); } }); // مرتبة من الأحدث
+  return out;
+}
+
+SCREENS.competitors = { render: function (d, args) {
+  COMP.data = d;
+  var tab = args.tab || 'courses';
+  var html = north(d.north) + '<h1>المنافسون ' + chip(d.competitors.length) + '</h1>' +
+    '<div class="tabs">' + [['courses', 'مقارنة الدورات'], ['profiles', 'ملفات المنافسين'], ['accounts', 'حساباتهم على السوشال']].map(function (t) {
+      return '<button class="btn sm ' + (t[0] === tab ? 'pri' : '') + '" data-go="competitors" data-args="' + attr({ tab: t[0] }) + '">' + t[1] + '</button>'; }).join('') +
+    '<button class="btn sm" data-act="compNew">＋ منافس</button><button class="btn sm good" data-act="compOfferNew">＋ عرض دورة</button></div>';
+
+  if (tab === 'courses') {
+    // المخطط: الدورة (أو مجموعة دورات) رأس، وتحتها الجهات التي تقدّمها
+    var sel = (args.topics || '').split('|').filter(String);
+    var withOffers = d.topics.filter(function (t) { return d.offers.some(function (o) { return o.course_key === t; }); });
+    html += '<div class="card small">اختر دورة أو أكثر — تظهر كرأس المخطط وتحتها المنافسون الذين يقدّمونها بآخر عرض لكل منهم.</div><div class="chips" style="margin:6px 0">' +
+      d.topics.map(function (t) {
+        var n = compLatest_(d.offers.filter(function (o) { return o.course_key === t; }), function (o) { return o.ac_id; }).length;
+        var on = sel.indexOf(t) > -1;
+        return '<button class="chip ' + (on ? 'acc' : '') + '" style="cursor:pointer;border:1px solid var(--line)" data-act="compTopic" data-t="' + esc(t) + '">' + (on ? '✓ ' : '') + esc(t) + (n ? ' (' + n + ')' : '') + '</button>';
+      }).join(' ') + '</div>';
+    if (!sel.length) sel = withOffers.slice(0, 1);
+    if (!sel.length) html += empty('لا عروض مصنّفة بعد — أضف عرضاً بزر «＋ عرض دورة» (حدد نوع الدورة)، أو انتظر الرادار اليومي');
+    sel.forEach(function (t) {
+      var list = compLatest_(d.offers.filter(function (o) { return o.course_key === t; }), function (o) { return o.ac_id; });
+      var prices = list.map(function (o) { return Number(o.discount_price !== '' ? o.discount_price : o.base_price); }).filter(function (x) { return x > 0; });
+      var stat = prices.length ? 'الأقل ' + compMoney_(Math.min.apply(null, prices)) + ' · الأعلى ' + compMoney_(Math.max.apply(null, prices)) +
+        ' · المتوسط ' + compMoney_(Math.round(prices.reduce(function (a, b) { return a + b; }, 0) / prices.length)) : 'لا أسعار معلنة';
+      var ours = d.ours.filter(function (c) { return Text_norm_(c.name_ar).indexOf(Text_norm_(t)) > -1; })[0];
+      html += '<div class="tree"><div class="tr-head"><div class="tr-title">📚 ' + esc(t) + '</div><div class="small">' + list.length + ' منافس · ' + stat + '</div>' +
+        (ours ? '<div class="small">دورتنا: ' + esc(ours.name_ar) + ' — ' + compMoney_(ours.price_sar) + (ours.next_cohort_date ? ' · تبدأ ' + fmtDate(ours.next_cohort_date) : '') + '</div>' : '') + '</div>' +
+        (list.length ? '<div class="tr-kids">' + list.map(function (o) { return '<div class="tr-kid">' + compOfferCard_(o, true) + '</div>'; }).join('') + '</div>' : '<div class="muted small" style="text-align:center">لا منافس مسجَّل لهذه الدورة</div>') + '</div>';
+    });
+  }
+
+  if (tab === 'profiles') {
+    var pick = args.ac || '';
+    html += '<select id="cmpPick" data-act="compPick" style="margin:6px 0"><option value="">كل المنافسين</option>' + d.competitors.map(function (c) {
+      return '<option value="' + esc(c.ac_id) + '"' + (String(c.ac_id) === String(pick) ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select>';
+    d.competitors.filter(function (c) { return !pick || String(c.ac_id) === String(pick); }).forEach(function (c) {
+      var offers = compLatest_(d.offers.filter(function (o) { return String(o.ac_id) === String(c.ac_id); }), function (o) { return Text_norm_(o.course_name); });
+      var accs = d.accounts.filter(function (x) { return String(x.ac_id) === String(c.ac_id); });
+      var cls = { 'عالي': 'bad', 'متوسط': 'warn' }[c.threat_level] || '';
+      html += '<div class="tree"><div class="tr-head"><div class="row between"><div class="tr-title">🏢 ' + esc(c.name) + '</div>' + chip('تهديد ' + (c.threat_level || '—'), cls) + '</div>' +
+        '<div class="chips">' + chip(c.type) + chip(c.city ? '📍 ' + c.city : '') + (c.has_operator_contract === 'نعم' ? chip('متعاقد مع مشغّل', 'bad') : '') + '</div>' +
+        (c.programs ? '<div class="small">البرامج: ' + esc(c.programs) + '</div>' : '') +
+        '<div class="small">' + [c.phone ? '☎ ' + esc(c.phone) : '', c.email ? '✉ ' + esc(c.email) : '', extUrl(c.website) ? '<a target="_blank" href="' + esc(extUrl(c.website)) + '">الموقع</a>' : '',
+          c.ad_library_url ? '<a target="_blank" href="' + esc(extUrl(c.ad_library_url)) + '">إعلاناتهم على Meta</a>' : ''].filter(String).join(' · ') + '</div>' +
+        (accs.length ? '<div class="chips">' + accs.map(function (x) { return '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">' + esc(x.platform) + ' · ' + esc(x.handle) + '</a>'; }).join('') + '</div>' : '') +
+        (c.notes ? '<div class="muted small">' + esc(c.notes) + '</div>' : '') +
+        '<div class="btns"><button class="btn sm" data-act="compEdit" data-id="' + esc(c.ac_id) + '">تعديل البيانات</button><button class="btn sm good" data-act="compOfferNew" data-ac="' + esc(c.ac_id) + '">＋ دورة/عرض</button></div></div>' +
+        (offers.length ? '<div class="tr-kids">' + offers.map(function (o) { return '<div class="tr-kid">' + compOfferCard_(o, false) + '</div>'; }).join('') + '</div>' :
+          '<div class="muted small" style="text-align:center;margin:6px 0 14px">لا دورات مسجّلة لهذا المنافس</div>') + '</div>';
+    });
+  }
+
+  if (tab === 'accounts') {
+    html += '<div class="card small">حسابات المنافسين على السوشال — تُضاف يدوياً. اضغط أي حساب لفتحه وتفقّد عروضه، ثم سجّل العرض بزر «＋ عرض دورة». (لا سحب آلي من المنصات).</div>';
+    html += '<div class="grid2">' + d.competitors.map(function (c) {
+      var accs = d.accounts.filter(function (x) { return String(x.ac_id) === String(c.ac_id); });
+      return '<div class="card"><b>' + esc(c.name) + '</b>' + (extUrl(c.website) ? ' · <a class="small" target="_blank" href="' + esc(extUrl(c.website)) + '">الموقع</a>' : '') +
+        (accs.length ? accs.map(function (x) {
+          return '<div class="row between small" style="margin-top:4px"><a target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">' + esc(x.platform) + ' · ' + esc(x.handle) + '</a>' +
+            '<span><a href="#" data-act="compAccEdit" data-id="' + esc(x.cacc_id) + '">تعديل</a> · <a href="#" data-act="compAccDel" data-id="' + esc(x.cacc_id) + '">حذف</a></span></div>'; }).join('') :
+          '<div class="muted small">لا حسابات بعد</div>') +
+        '<div class="btns"><button class="btn sm" data-act="compAccNew" data-ac="' + esc(c.ac_id) + '">＋ حساب</button></div></div>';
+    }).join('') + '</div>';
+  }
+  return html;
+} };
+function Text_norm_(s) { return String(s || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ًٌٍَُِّْـ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
+
+ACT.compTopic = function (el) {
+  var cur = ((S.args || {}).topics || '').split('|').filter(String), t = el.dataset.t, i = cur.indexOf(t);
+  if (i > -1) cur.splice(i, 1); else cur.push(t);
+  go('competitors', { tab: 'courses', topics: cur.join('|') }, true);
+};
+ACT.compPick = function () { go('competitors', { tab: 'profiles', ac: val('cmpPick') }, true); };
+
+/* ── النماذج (نافذة منبثقة) ── */
+function compField_(id, label, v, type) { return '<label class="f">' + label + '</label><input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(v === undefined || v === null ? '' : v) + '">'; }
+function compIso_(v) { var d = v ? new Date(v) : null; return d && !isNaN(d) ? d.toISOString().slice(0, 10) : ''; }
+
+ACT.compNew = function () { compForm_({}); };
+ACT.compEdit = function (el) { compForm_(COMP.data.competitors.filter(function (c) { return String(c.ac_id) === el.dataset.id; })[0] || {}); };
+function compForm_(c) {
+  openSheet('<h1>' + (c.ac_id ? 'تعديل منافس' : 'منافس جديد') + '</h1>' + compField_('cf_name', 'الاسم *', c.name) + compField_('cf_type', 'النوع (أكاديمية / معهد / مدرب مستقل…)', c.type) +
+    compField_('cf_city', 'المدينة / المكان', c.city) + compField_('cf_programs', 'البرامج التي يقدمها', c.programs) + compField_('cf_website', 'الموقع', c.website, 'url') +
+    compField_('cf_phone', 'هاتف الجهة', c.phone) + compField_('cf_email', 'بريد الجهة', c.email) +
+    '<label class="f">متعاقد مع مشغّل أندية؟</label><select id="cf_contract">' + opt(['لا', 'نعم'], c.has_operator_contract || 'لا') + '</select>' +
+    '<label class="f">ملاحظات</label><textarea id="cf_notes">' + esc(c.notes || '') + '</textarea>' +
+    '<div class="btns"><button class="btn good" data-act="compSave" data-id="' + esc(c.ac_id || '') + '">حفظ</button></div>');
+}
+ACT.compSave = function (el) {
+  var c = { ac_id: el.dataset.id, name: val('cf_name'), type: val('cf_type'), city: val('cf_city'), programs: val('cf_programs'), website: val('cf_website'),
+    phone: val('cf_phone'), email: val('cf_email'), has_operator_contract: val('cf_contract'), notes: val('cf_notes') };
+  if (!c.name.trim()) return toast('الاسم مطلوب', true);
+  api('action', 'competitorSave', { competitor: c }).then(function () { closeSheet(); toast('حُفظ'); go('competitors', S.args, true); }).catch(function (e) { toast(errMsg(e), true); });
+};
+
+ACT.compOfferNew = function (el) { compOfferForm_({ ac_id: el.dataset.ac || '', course_key: ((S.args || {}).topics || '').split('|')[0] || '' }); };
+ACT.compOfferEdit = function (el) { compOfferForm_(COMP.data.offers.filter(function (o) { return o.offer_id === el.dataset.id; })[0] || {}); };
+function compOfferForm_(o) {
+  var d = COMP.data;
+  openSheet('<h1>' + (o.offer_id ? 'تعديل عرض' : 'عرض دورة لمنافس') + '</h1>' +
+    '<label class="f">المنافس *</label><select id="of_ac">' + d.competitors.map(function (c) { return '<option value="' + esc(c.ac_id) + '"' + (String(c.ac_id) === String(o.ac_id) ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select>' +
+    '<label class="f">نوع الدورة (للمقارنة)</label><select id="of_key"><option value="">—</option>' + opt(d.topics, o.course_key) + '</select>' +
+    compField_('of_name', 'اسم الدورة كما يعلنها *', o.course_name) +
+    '<div class="row"><div class="grow">' + compField_('of_base', 'السعر الأساسي (ر.س)', o.base_price, 'number') + '</div><div class="grow">' + compField_('of_disc', 'بعد الخصم (إن وُجد)', o.discount_price, 'number') + '</div></div>' +
+    '<div class="row"><div class="grow">' + compField_('of_start', 'البداية', compIso_(o.start_date), 'date') + '</div><div class="grow">' + compField_('of_end', 'النهاية', compIso_(o.end_date), 'date') + '</div></div>' +
+    '<label class="f">طريقة الحضور</label><select id="of_del"><option value="">—</option>' + opt(d.delivery, o.delivery) + '</select>' +
+    compField_('of_loc', 'المكان', o.location) + compField_('of_dur', 'المدة (ساعات/أيام)', o.duration) + compField_('of_ins', 'مقدّم الدورة', o.instructor) +
+    compField_('of_acc', 'الاعتماد المعلن', o.accreditation) + compField_('of_url', 'رابط المصدر (منشور/صفحة)', o.url, 'url') +
+    '<label class="f">ملاحظات</label><textarea id="of_notes">' + esc(o.notes || '') + '</textarea>' +
+    '<div class="btns"><button class="btn good" data-act="compOfferSave" data-id="' + esc(o.offer_id || '') + '">حفظ</button>' +
+    (o.offer_id ? '<button class="btn bad" data-act="compOfferDel" data-id="' + esc(o.offer_id) + '">حذف</button>' : '') + '</div>');
+}
+ACT.compOfferSave = function (el) {
+  var o = { offer_id: el.dataset.id, ac_id: val('of_ac'), course_key: val('of_key'), course_name: val('of_name'), base_price: val('of_base'), discount_price: val('of_disc'),
+    start_date: val('of_start'), end_date: val('of_end'), delivery: val('of_del'), location: val('of_loc'), duration: val('of_dur'), instructor: val('of_ins'),
+    accreditation: val('of_acc'), url: val('of_url'), notes: val('of_notes') };
+  if (!o.course_name.trim()) return toast('اكتب اسم الدورة', true);
+  api('action', 'compOfferSave', { offer: o }).then(function () { closeSheet(); toast('حُفظ العرض'); go('competitors', S.args, true); }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.compOfferDel = function (el) {
+  if (!confirm('حذف هذا العرض؟')) return;
+  api('action', 'compOfferDelete', { offer_id: el.dataset.id }).then(function () { closeSheet(); toast('حُذف'); go('competitors', S.args, true); }).catch(function (e) { toast(errMsg(e), true); });
+};
+
+ACT.compAccNew = function (el) { compAccForm_({ ac_id: el.dataset.ac }); };
+ACT.compAccEdit = function (el) { compAccForm_(COMP.data.accounts.filter(function (x) { return x.cacc_id === el.dataset.id; })[0] || {}); };
+function compAccForm_(x) {
+  var d = COMP.data, c = d.competitors.filter(function (y) { return String(y.ac_id) === String(x.ac_id); })[0] || {};
+  openSheet('<h1>حساب ' + esc(c.name || '') + '</h1><label class="f">المنصة</label><select id="ca_pl">' + opt(d.platforms, x.platform || 'instagram') + '</select>' +
+    compField_('ca_h', 'اسم الحساب *', x.handle) + compField_('ca_u', 'الرابط', x.url, 'url') + compField_('ca_n', 'ملاحظات', x.notes) +
+    '<div class="btns"><button class="btn good" data-act="compAccSave" data-id="' + esc(x.cacc_id || '') + '" data-ac="' + esc(x.ac_id) + '">حفظ</button></div>');
+}
+ACT.compAccSave = function (el) {
+  var x = { cacc_id: el.dataset.id, ac_id: el.dataset.ac, platform: val('ca_pl'), handle: val('ca_h'), url: val('ca_u'), notes: val('ca_n') };
+  if (!x.handle.trim()) return toast('اكتب اسم الحساب', true);
+  api('action', 'compAccountSave', { account: x }).then(function () { closeSheet(); toast('حُفظ'); go('competitors', { tab: 'accounts' }, true); }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.compAccDel = function (el) {
+  if (!confirm('حذف الحساب؟')) return;
+  api('action', 'compAccountDelete', { cacc_id: el.dataset.id }).then(function () { toast('حُذف'); go('competitors', { tab: 'accounts' }, true); }).catch(function (e) { toast(errMsg(e), true); });
+};
+</script>
+
   ﻿<script>
 /* ═══════════ دليل النظام: وصف كل صفحة وكل زر ووظيفته في التسويق والبيع ═══════════
  * مصدر واحد تستخدمه: (١) السطر التعريفي أعلى كل صفحة (٢) صفحة INFO كمخطط تفاعلي (٣) شرح الوحدات.
@@ -2164,6 +2350,12 @@ var PAGE_INFO = {
     btns: [['＋ إضافة جهة', 'تضيف نادياً أو سلسلة جديدة.', 'توسّع السوق المستهدف.'],
       ['تعديل', 'تحدّث الفروع، الحالة، المرحلة، الخطوة التالية.', 'الأولوية تُحسب تلقائياً من الفروع × الإتاحة.'],
       ['متاح / مستبعَد / قيد التحقق', 'هل يمكن بيعه تدريباً الآن أم مرتبط بمنافس.', 'لا تضيّع وقتك على جهة مغلقة.']] },
+  competitors: { t: 'المنافسون', what: 'من يقدّم نفس دوراتك، بأي سعر وخصم ومتى تبدأ دوراتهم وكيف (حضوري/أونلاين)، مع حساباتهم على السوشال — في مخطط مقارنة.', why: 'تسعّر وتوقّت دفعاتك بذكاء: تعرف متى تنافس بالسعر ومتى بالقيمة، وتسبق خصوماتهم.',
+    btns: [['مقارنة الدورات', 'اختر دورة أو أكثر ← تصبح رأس المخطط وتحتها كل منافس يقدّمها بآخر عرض (السعر، الخصم، البداية، الحضور).', 'ترى السوق كله لدورة واحدة في شاشة: الأقل والأعلى والمتوسط.'],
+      ['ملفات المنافسين', 'كل منافس رأس، وتحته دوراته: البداية والنهاية، طريقة الحضور، المكان، المقدّم، الاعتماد.', 'تفهم استراتيجية كل منافس وتجد الفجوة التي تدخل منها.'],
+      ['حساباتهم على السوشال', 'روابط حسابات كل منافس (يدوي) تفتحها بضغطة.', 'متابعة سريعة لعروضهم المنشورة.'],
+      ['＋ منافس / ＋ عرض دورة', 'إضافة منافس أو تسجيل عرض رأيته.', 'السوق يتحدّث فوراً حتى بلا Claude.'],
+      ['الرادار اليومي', 'يفحص مواقع المنافسين يومياً ويسجّل العروض الجديدة (يحتاج Claude).', 'لا يفوتك عرض منافس.']] },
   radar: { t: 'الرادار', what: 'مراقبة المنافسين وعروضهم وأسعارهم أسبوعياً.', why: 'تعرف متى تنافس بالسعر ومتى بالقيمة، ولا تُفاجأ بعرض منافس.',
     btns: [['الموقع', 'موقع المنافس.', 'مراجعة سريعة.'], ['مكتبة إعلانات Meta', 'إعلانات المنافس الحالية (تفتحها يدوياً).', 'ترى رسائلهم التسويقية وتتفوق عليها.']] },
   discovery: { t: 'الاكتشافات', what: 'جهات جديدة (أندية/أكاديميات) لم تكن في قوائمك.', why: 'عملاء B2B جدد ومنافسون جدد قبل غيرك.',
@@ -2259,7 +2451,7 @@ var INFO_STAGES = [
   { t: '٣) الفهم والرد', c: '#2a9d8f', pages: ['today'], mods: ['classify', 'lead_scoring', 'answer_bank', 'draft', 'decide', 'owner_approval', 'sla_monitor', 'dispatch'] },
   { t: '٤) الإغلاق والتسجيل', c: '#52b788', pages: ['courses', 'calendar', 'lead'], mods: ['closing', 'followup', 'payment_hooks'] },
   { t: '٥) بيع الشركات B2B', c: '#e76f51', pages: ['targets', 'people', 'opps', 'b2b', 'operator'], mods: ['b2b_pipeline', 'org_map', 'intel_synth'] },
-  { t: '٦) استخبارات السوق', c: '#e9a23b', pages: ['news', 'exams', 'radar', 'discovery'], mods: ['news_watch', 'exam_watch', 'radar_competitors', 'discovery_weekly'] },
+  { t: '٦) استخبارات السوق', c: '#e9a23b', pages: ['news', 'exams', 'competitors', 'radar', 'discovery'], mods: ['news_watch', 'exam_watch', 'radar_competitors', 'discovery_weekly'] },
   { t: '٧) ما بعد البيع', c: '#d6457a', pages: ['alumni'], mods: ['alumni_recert'] },
   { t: '٨) القياس والإدارة', c: '#8a817c', pages: ['kpis', 'flow', 'modules', 'settings', 'info'], mods: ['weekly_report', 'advisor', 'housekeeping', 'flow'] }
 ];
