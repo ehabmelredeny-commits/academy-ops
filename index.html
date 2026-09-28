@@ -195,6 +195,9 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .fcx-arr { font-size: 18px; font-weight: 700; }
 .fcx-down { font-size: 26px; line-height: 1.3; }
 .fc-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-inline-end: 4px; }
+/* ─── فقاعة الشرح الصفراء ─── */
+.tipbox { position: absolute; z-index: 9999; background: #fff3b0; color: #3a2e00; border: 1px solid #e6c84f; border-radius: 10px; padding: 7px 10px;
+  font-size: 13px; line-height: 1.6; box-shadow: 0 6px 18px rgba(0,0,0,.25); pointer-events: none; display: none; direction: rtl; }
 </style>
 
 </head>
@@ -1086,6 +1089,17 @@ ACT.postEdit = function (el) { act('postEdit', { post_id: el.dataset.id, body: v
 ACT.postReject = function (el) { var r = prompt('سبب الرفض (يتعلّم منه النظام):'); if (r) act('postReject', { post_id: el.dataset.id, reason: r }, 'رُفض — سيتجنّبه غداً'); };
 ACT.postPub = function (el) { act('postPublished', { post_id: el.dataset.id, ref: val('pu_' + el.dataset.id) }, 'سُجّل النشر'); };
 
+ACT.secretSave = function (el) {
+  var k = el.dataset.k, v = val('sk_' + k);
+  if (!v && !confirm('حذف ' + k + '؟')) return;
+  api('action', 'secretSet', { key: k, value: v }).then(function (r) { toast(r.set ? 'حُفظ ' + k : 'حُذف ' + k); $('sk_' + k).value = ''; go('settings', { tab: 'channels' }, true); })
+    .catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.outboundToggle = function (el) {
+  if (el.checked && !confirm('تشغيل الإرسال الآلي؟ ستُرسل الرسائل المجدولة تلقائياً (بحد يومي) لمن وافقوا فقط.')) { el.checked = false; return; }
+  api('action', 'saveSetting', { key: 'outbound_enabled', value: el.checked ? 'true' : 'false' }).then(function () { toast(el.checked ? 'الإرسال الآلي مفعّل' : 'الإرسال الآلي مقفل'); })
+    .catch(function (e) { el.checked = !el.checked; toast(errMsg(e), true); });
+};
 ACT.accSave = function (el) {
   var x = { account_id: el.dataset.id };
   ['platform', 'handle', 'url', 'owner', 'purpose', 'status', 'use_for_posts', 'notes'].forEach(function (k) { x[k] = val('ac_' + k); });
@@ -1159,9 +1173,27 @@ ACT.courseSave = function (el) {
 /* ─── الإعدادات ─── */
 SCREENS.settings = { render: function (d, args) {
   var tab = args.tab || 'accounts';
-  var html = north(d.north) + '<h1>الإعدادات</h1><div class="tabs">' + [['accounts', 'الحسابات'], ['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
+  var html = north(d.north) + '<h1>الإعدادات</h1>' + tipsToggleHtml_() + '<div class="tabs">' + [['accounts', 'الحسابات'], ['channels', 'القنوات والإرسال'], ['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
     return '<button class="btn sm ' + (t[0] === tab ? 'pri' : '') + '" data-go="settings" data-args="' + attr({ tab: t[0] }) + '">' + t[1] + '</button>';
   }).join('') + '<button class="btn sm good" data-act="applyNow">تطبيق التغييرات الآن</button><button class="btn sm" data-act="reportPrev">معاينة التقرير الأسبوعي</button></div>';
+  if (tab === 'channels') {
+    var st = d.channels || {}, outb = (d.settings.filter(function (x) { return x.key === 'outbound_enabled'; })[0] || {}).value;
+    var key = function (k, label, ph, pw) { return '<div class="row" style="gap:6px;margin:4px 0"><label class="f grow">' + label + '<input id="sk_' + k + '" type="' + (pw ? 'password' : 'text') + '" placeholder="' + esc(ph || '') + '" autocomplete="off"></label>' +
+      '<button class="btn sm" data-act="secretSave" data-k="' + k + '">حفظ</button></div>'; };
+    html += '<div class="card"><div class="row between"><b>مفتاح الإرسال الآلي العام</b><span>' + switchHtml(String(outb) === 'true', 'outboundToggle', 'x') + '</span></div>' +
+      '<div class="small muted">عند الإيقاف لا يخرج أي شيء آلياً مهما جُدول. التشغيل = المرحلة ١.</div></div>' +
+      '<div class="card"><b>واتساب ' + (st.whatsapp ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">من حساب Meta للأعمال باسم الأكاديمية (System User) — لا حساب شخصي. رقم مخصص للأكاديمية. ' +
+      'بدء المحادثة بقالب يوافق عليه واتساب؛ المتغيّر الأول = الاسم الأول، ورأس صورة اختياري.</div>' +
+      key('WA_TOKEN', 'رمز الوصول (Access Token)', 'EAAG…', true) + key('WA_PHONE_ID', 'معرّف رقم الهاتف (Phone number ID)', '1234567890') +
+      key('WA_TEMPLATE', 'اسم القالب المعتمد', 'academy_intro' + (st.whatsapp_template ? ' — الحالي: ' + st.whatsapp_template : '')) + key('WA_TEMPLATE_LANG', 'لغة القالب', 'ar') +
+      key('WA_TEMPLATE_IMAGE', 'للقالب رأس صورة؟ اكتب نعم', 'نعم / فارغ') + '</div>' +
+      '<div class="card"><b>X ' + (st.x ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">رسائل X الخاصة تحتاج اشتراك X API المدفوع ورمز مستخدم بصلاحية dm.write من حساب الأكاديمية. تصل فقط لمن يسمح بالرسائل.</div>' +
+      key('X_TOKEN', 'رمز المستخدم (OAuth 2.0)', '…', true) + '</div>' +
+      '<div class="card"><b>انستغرام ' + (st.instagram ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">للرد الآلي فقط على من راسل الأكاديمية (سياسة Meta — لا رسائل باردة).</div>' +
+      key('IG_TOKEN', 'رمز الوصول', '…', true) + key('IG_USER_ID', 'معرّف حساب انستغرام للأعمال', '1784…') + '</div>' +
+      '<div class="card small"><b>تيك توك وسناب ولينكدإن:</b> لا تتيح للنشاطات التجارية بدء رسائل خاصة عبر برنامج. التواصل عليها يدوي من ملف كل عميل.</div>' +
+      '<div class="card small muted">المفاتيح تُحفظ في Script Properties فقط، لا في الشيت، ولا تُعرض بعد الحفظ. لحذف مفتاح: احفظ الخانة فارغة.</div>';
+  }
   if (tab === 'accounts') {
     html += '<div class="muted small" style="margin:6px 0">كل حسابات السوشال ميديا والتواصل التي يتعامل معها النظام. الحسابات النشطة المعلَّمة «للمنشورات» تظهر في «منشور اليوم». لا تُكتب كلمات السر هنا أبداً.</div>';
     var ed = args.edit;
@@ -2824,15 +2856,26 @@ SCREENS.sources = { render: function (d, args) {
     '<select id="sdf_b" class="grow" data-act="srcdbFilter"><option value="">كل الدفعات</option>' + d.batches.map(function (b) { return '<option value="' + esc(b.batch_id) + '"' + (f.batch === b.batch_id ? ' selected' : '') + '>' + esc(b.source_name) + '</option>'; }).join('') + '</select>' +
     '<select id="sdf_s" class="grow" data-act="srcdbFilter"><option value="">كل الشرائح</option>' + opt(d.segments, f.seg) + '</select>' +
     '<select id="sdf_o" class="grow" data-act="srcdbFilter"><option value="">كل الحالات</option>' + opt(d.outreach, f.st) + '</select></div>';
+  var chs = d.channels || {};
+  html += '<div class="card small" style="border-color:' + (chs.outbound_enabled && (chs.whatsapp || chs.x) ? 'var(--good)' : 'var(--warn)') + '"><b>الإرسال الآلي:</b> ' +
+    (chs.outbound_enabled ? '<span style="color:var(--good)">مفعّل</span>' : '<span style="color:var(--warn)">مقفل</span>') + ' · واتساب ' + (chs.whatsapp ? '✓' + (chs.whatsapp_template ? ' (قالب: ' + esc(chs.whatsapp_template) + ')' : ' — ينقصه القالب') : '✗') +
+    ' · X ' + (chs.x ? '✓' : '✗') + ' · الحد اليومي ' + d.cap + ' · <a href="#" data-go="settings" data-args="' + attr({ tab: 'channels' }) + '">الإعدادات ← القنوات</a>' +
+    '<div class="muted">يُرسل آلياً فقط لمن حالة موافقته «وافق» أو «عميل سابق». البقية زر واتساب اليدوي.</div></div>';
+  html += '<div class="card small row" style="flex-wrap:wrap;gap:6px;align-items:center"><label class="chip" style="cursor:pointer"><input type="checkbox" id="sd_all" data-act="srcdbAll"> تحديد الظاهرين</label>' +
+    '<select id="sd_ch"><option>واتساب</option><option>X</option></select>' +
+    '<label class="btn sm">🖼️ صورة للرسالة<input type="file" id="sd_media" accept="image/*" hidden></label><span id="sd_media_n" class="muted"></span>' +
+    '<button class="btn sm pri" data-act="srcdbSchedule">⏱ جدول الإرسال الآلي للمحدَّدين</button><button class="btn sm" data-act="srcdbUnschedule">إلغاء الجدولة</button></div>';
   html += rows.length ? '<div class="grid2">' + rows.slice(0, 200).map(function (r) {
     var stop = r.outreach_status === 'لا تراسل' || r.consent_status === 'رفض';
     var wa = r.phone ? 'https://wa.me/' + String(r.phone).replace(/\D/g, '') + '?text=' + encodeURIComponent(r.draft_msg || '') : '';
     var mail = r.email ? 'mailto:' + r.email + '?body=' + encodeURIComponent(r.draft_msg || '') : '';
     var searchQ = 'https://www.google.com/search?q=' + encodeURIComponent('"' + (r.name || '') + '"' + (r.email ? ' "' + r.email + '"' : '') + (r.city ? ' ' + r.city : ''));
-    return '<div class="card" style="' + (stop ? 'opacity:.6' : '') + '"><div class="row between"><b>' + esc(r.name || '(بلا اسم)') + '</b>' +
+    return '<div class="card" style="' + (stop ? 'opacity:.6' : '') + '"><div class="row between"><label style="cursor:pointer"><input type="checkbox" class="sd_pick" value="' + esc(r.imp_id) + '"' + (stop ? ' disabled' : '') + '> <b>' + esc(r.name || '(بلا اسم)') + '</b></label>' +
       chip(r.outreach_status, stop ? 'bad' : r.outreach_status === 'أُرسل' ? 'good' : r.outreach_status === 'جاهز للإرسال' ? 'acc' : '') + '</div>' +
       '<div class="chips">' + chip(r.segment || 'لم يُحلَّل', r.segment ? 'acc' : '') + chip(r.course_interest) + chip(r.city) + chip(r.consent_status) + chip(r.analysis_by ? 'تحليل: ' + r.analysis_by : '') + '</div>' +
       (r.need_summary ? '<div class="small"><b>الاحتياج:</b> ' + esc(r.need_summary) + '</div>' : '') +
+      (r.outreach_status === 'مجدول للإرسال' ? '<div class="small" style="color:var(--accent)">⏱ مجدول عبر ' + esc(r.send_channel) + (r.send_media ? ' + صورة' : '') + '</div>' : '') +
+      (r.send_error ? '<div class="small" style="color:var(--bad)">' + esc(r.send_error) + '</div>' : '') +
       '<div class="small muted">' + [r.phone, r.email].filter(String).map(esc).join(' · ') + ' · ' + esc(r.source_name) + '</div>' +
       (r.handles ? '<div class="small">الحسابات: ' + esc(r.handles) + '</div>' : '') +
       '<div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '" data-act="srcdbSearched" data-id="' + esc(r.imp_id) + '">🔎 ابحث عنه</a>' +
@@ -2904,6 +2947,35 @@ ACT.srcdbImport = function (el) {
     toast('استُورد ' + r.imported + (r.duplicates ? ' · تجاهل ' + r.duplicates + ' مكرراً' : '')); SRCDB.parsed = null;
     go('sources', { batch: r.batch_id });
   }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.srcdbAll = function (el) { q('.sd_pick').forEach(function (c) { if (!c.disabled) c.checked = el.checked; }); };
+SRCDB.media = '';
+document.addEventListener('change', function (e) {
+  if (!e.target || e.target.id !== 'sd_media') return;
+  var f = e.target.files && e.target.files[0]; if (!f) return;
+  if (f.size > 5 * 1024 * 1024) return toast('الصورة أكبر من ٥ ميغا', true);
+  var rd = new FileReader();
+  rd.onload = function () {
+    toast('جارٍ رفع الصورة…');
+    api('action', 'sourcesMedia', { data: String(rd.result).split(',')[1], mime: f.type }).then(function (r) { SRCDB.media = r.file_id; $('sd_media_n').textContent = '✓ ' + f.name; toast('الصورة جاهزة'); })
+      .catch(function (x) { toast(errMsg(x), true); });
+  };
+  rd.readAsDataURL(f);
+});
+ACT.srcdbSchedule = function (el) {
+  var ids = q('.sd_pick').filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+  if (!ids.length) return toast('حدّد أشخاصاً أولاً', true);
+  if (!confirm('جدولة ' + ids.length + ' رسالة عبر ' + val('sd_ch') + '؟ تُرسل تلقائياً بالتدريج (حتى ' + SRCDB.data.cap + ' يومياً) بعد تفعيل الإرسال.')) return;
+  el.disabled = true;
+  api('action', 'sourcesSchedule', { ids: ids, channel: val('sd_ch'), media: SRCDB.media }).then(function (r) {
+    toast('جُدول ' + r.scheduled + (r.skipped_count ? ' · تُخطّي ' + r.skipped_count + ': ' + r.skipped.slice(0, 3).join('، ') : ''), !!r.skipped_count && !r.scheduled);
+    go('sources', S.args, true);
+  }).catch(function (x) { el.disabled = false; toast(errMsg(x), true); });
+};
+ACT.srcdbUnschedule = function () {
+  var ids = q('.sd_pick').filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+  if (!ids.length) return toast('حدّد أشخاصاً أولاً', true);
+  act('sourcesUnschedule', { ids: ids }, 'أُلغيت الجدولة');
 };
 ACT.srcdbFilter = function () { go('sources', { batch: val('sdf_b'), seg: val('sdf_s'), st: val('sdf_o') }, true); };
 ACT.srcdbRules = function (el) { el.disabled = true; act('sourcesAnalyzeRules', { batch_id: el.dataset.b }, function (r) { return 'حُلّل ' + r.analyzed + ' — الرسائل جاهزة'; }); };
@@ -3286,6 +3358,98 @@ window.infoPick = function (k) {
     }).join('') + '</div></div>';
   box.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
+
+/* ═══════════ شرح عند الوقوف: فقاعة صفراء تشرح أي زر أو خانة (تُشغَّل/تُطفأ من الإعدادات) ═══════════ */
+var TIP_EXTRA = {
+  'حفظ': 'يحفظ ما كتبته في النظام (الشيت) فوراً.', 'تعديل': 'يفتح البيانات لتعديلها.', 'حذف': 'يحذف هذا العنصر نهائياً — سيُطلب تأكيدك.',
+  'إلغاء': 'يغلق النموذج بلا حفظ.', 'أرشفة': 'يخفيه من القائمة دون حذفه (يبقى في الشيت).', 'تصدير CSV': 'ينزّل القائمة كملف يُفتح في إكسل.',
+  'رجوع': 'يعود للصفحة السابقة.', 'المزيد': 'خيارات إضافية لهذا العنصر.', 'قرأته': 'يعلّم الخبر كمقروء فيخفت لونه.',
+  'اعتماد': 'توافق على المنشور/الرد ليصبح جاهزاً.', 'رفض': 'ترفض المقترح — يتعلّم النظام من السبب.', 'افتح الصفحة': 'ينتقل إلى الصفحة نفسها.',
+  'تطبيق التغييرات الآن': 'يطبّق أي تعديل في الإعدادات فوراً ويكمل الأجزاء الناقصة في النظام.', 'إعادة المحاولة': 'يعيد تحميل الصفحة من النظام.',
+  'راجعته': 'يخفي الحساب من مراجعة اليوم حتى الغد.', 'سجّل عرضاً': 'يسجّل عرض منافس رأيته ليدخل مخطط المقارنة.',
+  'أرسلت': 'تسجّل أنك أرسلت الرسالة بنفسك — تبدأ المتابعة.', 'تواصلت معه': 'تسجّل تواصلك الفردي مع المدرب.', 'ردّ': 'تسجّل أن الشخص ردّ عليك.',
+  'لا تراسل': 'يوقف أي تواصل مع هذا الشخص نهائياً (احترام طلبه).', 'أضف كعميل': 'ينقله إلى قائمة العملاء ليمر بمسار البيع حتى الدفع.',
+  'ابحث عنه': 'يفتح بحث Google باسمه وإيميله لتكمل معلوماته بنفسك.', 'واتساب': 'يفتح واتساب والرسالة مكتوبة — ترسلها أنت.',
+  'إيميل': 'يفتح بريدك والرسالة مكتوبة — ترسلها أنت.', 'مهم': 'الحساب المهم يظهر لك يومياً في شاشة «اليوم» لمراجعته.',
+  'تحديد الظاهرين': 'يحدد كل الأشخاص الظاهرين في القائمة دفعة واحدة.', 'جدول الإرسال الآلي للمحدَّدين': 'يضع المحدَّدين في طابور الإرسال الآلي — يُرسل بالتدريج وبحد يومي لمن وافق فقط.',
+  'إلغاء الجدولة': 'يخرجهم من طابور الإرسال الآلي.', 'صورة للرسالة': 'صورة تُرسل مع رسالة واتساب (رأس القالب).',
+  'تكرار': 'ينسخ الدفعة بتواريخ جديدة بعد الحالية.', 'ورقة الدورة': 'صفحة كاملة للطباعة أو PDF: تفاصيل الدفعة وجدول الجلسات.',
+  'للمُركِّب': 'ينقل الاستعلام إلى المُركِّب لتضيف عليه طبقات تضييق أو توسيع.', 'افتح في Google وسجّل النتائج': 'يفتح البحث في Google ثم نموذج لتسجيل ما وجدته.',
+  'تشغيل عبر Claude': 'Claude يبحث ويستخرج النتائج تلقائياً (يحتاج رصيداً).', 'مسح': 'يفرّغ المُركِّب لتبدأ من جديد.'
+};
+var TIP_FIELDS = [
+  [/رابط المصدر/, 'من أين عرفت هذه المعلومة؟ رابط يثبتها (إلزامي للتوثيق).'], [/السعر الأساسي/, 'سعر الدورة المعلن قبل أي خصم.'],
+  [/بعد الخصم/, 'السعر بعد الخصم إن وُجد — يظهر في المخطط بنسبة الخصم.'], [/نوع الدورة/, 'يحدد في أي مقارنة يظهر هذا العرض.'],
+  [/الاستعلام الأساسي/, 'نقطة البداية للبحث — أضف عليها طبقات للتضييق.'], [/اسم المصدر/, 'اسم يميّز هذه القائمة (معرض، عملاء قدامى…).'],
+  [/حالة الموافقة/, 'هل وافق هؤلاء على التواصل؟ الإرسال الآلي فقط لمن «وافق» أو «عميل سابق».'], [/الصق الجدول/, 'انسخ الجدول من إكسل (مع العناوين) والصقه هنا.'],
+  [/رمز الوصول|Access Token|رمز المستخدم/, 'مفتاح سري من حساب الأعمال — يُحفظ مخفياً ولا يُعرض بعد الحفظ.'], [/القالب/, 'اسم رسالة الترحيب التي وافق عليها واتساب.'],
+  [/البداية/, 'تاريخ أول جلسة.'], [/النهاية/, 'تاريخ آخر جلسة.'], [/المقاعد/, 'عدد المقاعد الحقيقي — يُستخدم في الإلحاح الصادق.'],
+  [/أيام الجلسات/, 'أيام الأسبوع التي تُعقد فيها الجلسات — تُحسب منها الجلسات وجدول الورقة.']
+];
+function tipNorm_(s) { return String(s || '').replace(/[＋➕🔎📥🔄⏱🖼️📄🔁⭐★☆✓✕📷🤖⚡→←\[\]()«»]/g, '').replace(/\s+/g, ' ').trim(); }
+var TIP_MAP = null;
+function tipMap_() {
+  if (TIP_MAP) return TIP_MAP;
+  TIP_MAP = {};
+  Object.keys(TIP_EXTRA).forEach(function (k) { TIP_MAP[tipNorm_(k)] = TIP_EXTRA[k]; });
+  Object.keys(PAGE_INFO).forEach(function (pg) {
+    (PAGE_INFO[pg].btns || []).forEach(function (b) {
+      tipNorm_(b[0]).split(/\s*\/\s*|\s*\+\s*/).forEach(function (part) { if (part) TIP_MAP[part] = b[1] + ' — ' + b[2]; });
+    });
+  });
+  NAV_MAIN.concat(NAV_MORE).forEach(function (n) { var p = PAGE_INFO[n[0]]; if (p) TIP_MAP[tipNorm_(n[1])] = 'صفحة: ' + p.what; });
+  return TIP_MAP;
+}
+function tipsOn_() { try { return localStorage.getItem('ops_tips') !== '0'; } catch (e) { return true; } }
+function tipFor_(el) {
+  if (el.dataset && el.dataset.tip) return el.dataset.tip;
+  var tag = el.tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') {
+    var lab = el.closest('label'), prev = el.previousElementSibling;
+    var text = (lab && lab.textContent) || (prev && prev.tagName === 'LABEL' && prev.textContent) || el.placeholder || '';
+    for (var i = 0; i < TIP_FIELDS.length; i++) if (TIP_FIELDS[i][0].test(text)) return TIP_FIELDS[i][1];
+    return text ? 'خانة: ' + tipNorm_(text).slice(0, 60) : '';
+  }
+  var t = tipNorm_(el.textContent), m = tipMap_();
+  if (!t) return el.title || '';
+  if (m[t]) return m[t];
+  var keys = Object.keys(m);
+  for (var j = 0; j < keys.length; j++) if (keys[j].length > 3 && (t.indexOf(keys[j]) === 0 || keys[j].indexOf(t) === 0)) return m[keys[j]];
+  return el.title || '';
+}
+var TIP = { el: null, timer: null };
+function tipShow_(target) {
+  var txt = tipFor_(target); if (!txt) return;
+  var b = TIP.el || (TIP.el = document.createElement('div'));
+  b.className = 'tipbox'; b.textContent = txt; document.body.appendChild(b);
+  var r = target.getBoundingClientRect(), bw = Math.min(300, window.innerWidth - 16);
+  b.style.maxWidth = bw + 'px';
+  var left = Math.max(8, Math.min(window.innerWidth - bw - 8, r.left + r.width / 2 - bw / 2));
+  var top = r.bottom + 8 + window.scrollY;
+  if (r.bottom + 90 > window.innerHeight) top = r.top + window.scrollY - b.offsetHeight - 8;
+  b.style.left = left + 'px'; b.style.top = top + 'px'; b.style.display = 'block';
+}
+function tipHide_() { clearTimeout(TIP.timer); if (TIP.el) TIP.el.style.display = 'none'; }
+var TIP_SEL = 'button, .btn, a.btn, .chip[data-act], input, select, textarea, nav button, [data-go], [data-act], [data-tip]';
+document.addEventListener('mouseover', function (e) {
+  if (!tipsOn_()) return;
+  var t = e.target.closest && e.target.closest(TIP_SEL); if (!t || t === TIP.cur) return;
+  TIP.cur = t; tipHide_(); TIP.timer = setTimeout(function () { tipShow_(t); }, 350);
+});
+document.addEventListener('mouseout', function (e) { var t = e.target.closest && e.target.closest(TIP_SEL); if (t && t === TIP.cur && !t.contains(e.relatedTarget)) { TIP.cur = null; tipHide_(); } });
+document.addEventListener('focusin', function (e) { if (tipsOn_() && /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) { tipHide_(); tipShow_(e.target); } });
+document.addEventListener('focusout', tipHide_);
+// الجوال: ضغطة مطوّلة (نصف ثانية) تعرض الشرح
+document.addEventListener('touchstart', function (e) {
+  if (!tipsOn_()) return; var t = e.target.closest && e.target.closest(TIP_SEL); if (!t) return;
+  clearTimeout(TIP.timer); TIP.timer = setTimeout(function () { tipShow_(t); setTimeout(tipHide_, 3500); }, 500);
+}, { passive: true });
+document.addEventListener('touchend', function () { clearTimeout(TIP.timer); }, { passive: true });
+document.addEventListener('scroll', tipHide_, { passive: true });
+function tipsToggleHtml_() {
+  return '<div class="card row between small"><span>💡 <b>شرح الأزرار والخانات عند الوقوف عليها</b> (فقاعة صفراء — على الجوال: ضغطة مطوّلة)</span>' + switchHtml(tipsOn_(), 'tipsToggle', 'x') + '</div>';
+}
+ACT.tipsToggle = function (el) { try { localStorage.setItem('ops_tips', el.checked ? '1' : '0'); } catch (e) {} tipHide_(); toast(el.checked ? 'الشرح عند الوقوف: مفعّل' : 'الشرح عند الوقوف: متوقف'); };
 
 /** الجدول الزمني بلغة بسيطة */
 function schedAr_(s) {
