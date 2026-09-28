@@ -142,6 +142,37 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .kcol { background: var(--soft); border-radius: 12px; padding: 8px; min-height: 60px; }
 .kcol h3 { font-size: 13px; margin: 2px 4px 8px; display: flex; justify-content: space-between; }
 .kcol.drop { outline: 2px dashed var(--accent); }
+/* ─── تقويم الدورات ─── */
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin: 10px 0 14px; }
+.cal-h { text-align: center; font-size: 11.5px; color: var(--muted); padding: 4px 0; }
+.cal-c { min-height: 64px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 3px; overflow: hidden; }
+.cal-c.off { background: transparent; border: 0; }
+.cal-c.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.cal-n { font-size: 11px; color: var(--muted); }
+.cal-b { color: #fff; font-size: 10.5px; border-radius: 4px; padding: 1px 4px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.cal-b.ex { background: var(--warn); color: #111; cursor: default; }
+@media (min-width: 700px) { .cal-c { min-height: 88px; } .cal-b { font-size: 12px; } }
+
+/* ─── شريط الرجوع + وصف الصفحة ─── */
+.pagebar { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+.pagebar .back { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 6px 12px; cursor: pointer; color: var(--ink); }
+.intro { background: var(--accent-soft); color: var(--ink); border-radius: 10px; padding: 8px 12px; font-size: 13.5px; margin: 0 0 10px; }
+.intro b { color: var(--accent); }
+
+/* ─── INFO: مخطط النظام ─── */
+.fc { display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.fc-stage { border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: var(--card); }
+.fc-stage > .t { font-weight: 700; margin-bottom: 6px; display: flex; gap: 8px; align-items: center; }
+.fc-arrow { text-align: center; color: var(--accent); font-size: 22px; line-height: 1.2; }
+.fc-nodes { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 700px) { .fc-nodes { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .fc-nodes { grid-template-columns: 1fr 1fr 1fr; } }
+.fc-node { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--bg); }
+.fc-node summary { cursor: pointer; font-weight: 600; list-style: none; }
+.fc-node summary::-webkit-details-marker { display: none; }
+.fc-node .btnrow { border-top: 1px dashed var(--line); padding: 6px 0 2px; font-size: 13px; }
+.fc-node .btnrow b { color: var(--accent); }
+.fc-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-inline-end: 4px; }
 </style>
 
 </head>
@@ -210,9 +241,9 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['targets', 'الأهداف'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
-  ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات']];
+  ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
 function esc(s) {
   return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -227,6 +258,14 @@ function api(kind, name, args) {
     google.script.run.withSuccessHandler(resolve).withFailureHandler(function (e) { reject(e); })
       [kind === 'screen' ? 'apiScreen' : 'apiAction'](name, Object.assign({}, args || {}, { __k: UI_KEY }));
   });
+}
+
+/** رابط خارجي آمن: يضيف https:// للنطاقات المكتوبة بلا بروتوكول، ويعيد '' إن لم يكن رابطاً (فلا يفتح صفحة 404) */
+function extUrl(u) {
+  u = String(u || '').trim();
+  if (/^(https?:|mailto:|tel:)/i.test(u)) return u;
+  var m = u.match(/(?:^|\s)((?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?:\/\S*)?)\s*$/i);
+  return m ? 'https://' + m[1] : '';
 }
 
 function toast(msg, err) {
@@ -248,6 +287,10 @@ function act(name, args, okMsg, reload) {
 
 function go(screen, args, keepScroll) {
   if (screen === 'more') { renderMore(); return; }
+  // سجل التنقل لزر «رجوع» (لا يُسجَّل تحديث نفس الشاشة ولا الرجوع نفسه)
+  S.hist = S.hist || [];
+  if (!S.backing && S.screen && S.screen !== screen) { S.hist.push({ screen: S.screen, args: S.args }); if (S.hist.length > 30) S.hist.shift(); }
+  S.backing = false;
   S.screen = screen; S.args = args || {};
   renderNav();
   var y = window.scrollY;
@@ -258,7 +301,7 @@ function go(screen, args, keepScroll) {
     if (!stale && S.shownStale && typing) return; // لا نمسح ما يكتبه المستخدم فوق النسخة المحفوظة
     S.data = data; S.fresh = false;
     var sc = SCREENS[screen], sy = window.scrollY;
-    $('main').innerHTML = sc.render(data, S.args) + (stale ? '<div class="muted small" id="staleNote" style="text-align:center">يتحدّث…</div>' : '');
+    $('main').innerHTML = pageHead_(screen) + sc.render(data, S.args) + (stale ? '<div class="muted small" id="staleNote" style="text-align:center">يتحدّث…</div>' : '');
     if (sc.after) sc.after(data, S.args);
     if (stale || !S.shownStale) window.scrollTo(0, keepScroll ? y : 0); else window.scrollTo(0, sy);
     if (data && data.poll) S.sig = data.poll.sig;
@@ -679,15 +722,15 @@ SCREENS.radar = { render: function (d) {
     section('أحدث عروض المنافسين', d.offers, function (o) {
       return '<div class="card"><div class="row between"><b>' + esc(o.entity) + '</b><span class="muted">' + fmtDate(o.captured_at) + '</span></div>' +
         '<div>' + esc(o.headline) + '</div><div class="chips">' + chip(o.type) + chip(o.price ? o.price + ' ' + o.currency : '') + chip(o.duration) + chip(o.start_date) + '</div>' +
-        (o.url ? '<a class="small" target="_blank" href="' + esc(o.url) + '">المصدر</a>' : '') + '</div>';
+        (o.url ? '<a class="small" target="_blank" href="' + esc(extUrl(o.url)) + '">المصدر</a>' : '') + '</div>';
     }, 'لا عروض بعد — يعمل الرادار أسبوعياً') +
     section('المنافسون', d.academies, function (a) {
       var cls = { 'عالي': 'bad', 'متوسط': 'warn', 'منخفض': '', 'خارج المنافسة': '' }[a.threat_level];
       return '<div class="card"><div class="row between"><b>' + esc(a.name) + '</b>' + chip(a.threat_level, cls) + '</div>' +
         '<div class="chips">' + chip(a.type) + chip(a.city) + (a.has_operator_contract === 'نعم' ? chip('متعاقد مع مشغّل', 'bad') : '') + '</div>' +
         (a.notes ? '<div class="muted small">' + esc(a.notes) + '</div>' : '') +
-        '<div class="row small">' + (a.website ? '<a target="_blank" href="' + esc(a.website) + '">الموقع</a>' : '') +
-        (a.ad_library_url ? ' · <a target="_blank" href="' + esc(a.ad_library_url) + '">مكتبة إعلانات Meta (يدوياً)</a>' : '') + '</div></div>';
+        '<div class="row small">' + (a.website ? '<a target="_blank" href="' + esc(extUrl(a.website)) + '">الموقع</a>' : '') +
+        (a.ad_library_url ? ' · <a target="_blank" href="' + esc(extUrl(a.ad_library_url)) + '">مكتبة إعلانات Meta (يدوياً)</a>' : '') + '</div></div>';
     });
 } };
 
@@ -703,7 +746,7 @@ SCREENS.discovery = { render: function (d) {
         r.status === 'مؤكَّد' ? '<button class="btn sm" data-act="discPromote" data-id="' + esc(r.disc_id) + '" data-t="Operators">دمج في المشغّلين</button><button class="btn sm" data-act="discPromote" data-id="' + esc(r.disc_id) + '" data-t="Academies">دمج في الأكاديميات</button>' : '';
       return '<div class="card"><div class="row between"><b>' + esc(r.name) + '</b>' + chip(r.status, r.status === 'جديد' ? 'acc' : r.status === 'مرفوض' ? '' : 'good') + '</div>' +
         '<div class="chips">' + chip(r.kind) + chip(r.city) + chip(r.claimed_branches ? r.claimed_branches + ' فرعاً (معلن)' : '') + '</div>' +
-        '<div class="muted small">' + esc(r.why_flagged) + '</div>' + (r.evidence_url ? '<a class="small" target="_blank" href="' + esc(r.evidence_url) + '">الدليل</a>' : '') +
+        '<div class="muted small">' + esc(r.why_flagged) + '</div>' + (r.evidence_url ? '<div class="small"><b>الدليل:</b> ' + (extUrl(r.evidence_url) ? '<a target="_blank" href="' + esc(extUrl(r.evidence_url)) + '">' + esc(r.evidence_url) + '</a>' : esc(r.evidence_url)) + '</div>' : '') +
         (btns ? '<div class="btns">' + btns + '</div>' : '') + '</div>';
     }).join('') : empty('لا اكتشافات بعد'));
 } };
@@ -726,7 +769,7 @@ SCREENS.news = { render: function (d, args) {
       (n.notes ? '<div class="muted small">' + esc(n.notes) + '</div>' : '') +
       '<div class="btns">' + (n.seen !== 'نعم' ? '<button class="btn sm" data-act="newsSeen" data-id="' + esc(n.news_id) + '">قرأته</button>' : '') +
       '<button class="btn sm" data-act="newsContent" data-id="' + esc(n.news_id) + '">هذا يستحق محتوى</button>' +
-      (n.url ? '<a class="btn sm" target="_blank" href="' + esc(n.url) + '">المصدر</a>' : '') + '</div></div>';
+      (n.url ? '<a class="btn sm" target="_blank" href="' + esc(extUrl(n.url)) + '">المصدر</a>' : '') + '</div></div>';
   }).join('') : empty('لا أخبار');
   html += '<h2>المصادر ' + chip(d.sources.length) + '</h2>' + d.sources.map(function (s) {
     return '<div class="card"><div class="row between"><b class="grow">' + esc(s.name) + '</b>' + switchHtml(s.enabled === 'مفعّل', 'srcToggle', s.src_id) + '</div>' +
@@ -758,7 +801,9 @@ SCREENS.modules = { render: function (d) {
     d.modules.map(function (m) {
       return '<div class="card"><div class="row between"><b class="grow">' + esc(m.module_name_ar) + '</b>' +
         (m.kind === 'human' ? chip('لا يُعطَّل', 'owner') : switchHtml(m.enabled === 'مفعّل', 'modToggle', m.module_key)) + '</div>' +
-        '<div class="chips">' + chip(m.kind) + chip(m.schedule) + chip(m.last_status, m.last_status === 'error' ? 'bad' : m.last_status === 'deferred' ? 'warn' : '') +
+        (MODULE_INFO[m.module_key] ? '<div class="small">' + esc(MODULE_INFO[m.module_key]) + '</div>' : '') +
+        '<div class="chips">' + chip({ scheduled: 'مجدولة', pipeline_stage: 'مرحلة في مسار الرسائل', human: 'قرارك أنت', hook: 'تُستدعى عند حدث', ui: 'واجهة' }[m.kind] || m.kind) +
+        chip(schedAr_(m.schedule)) + chip({ ok: 'آخر تشغيل: نجح', error: 'آخر تشغيل: خطأ', deferred: 'تنتظر Claude', never: 'لم تعمل بعد', skipped: 'تخطّت' }[m.last_status] || m.last_status, m.last_status === 'error' ? 'bad' : m.last_status === 'deferred' ? 'warn' : '') +
         (m.last_run ? chip(fmtDate(m.last_run, true)) : '') + (m.critical === 'نعم' ? chip('حرجة', 'acc') : '') + '</div>' +
         (m.handler ? '<div class="btns"><button class="btn sm" data-act="modRun" data-id="' + esc(m.module_key) + '">شغّلها الآن</button></div>' : '') + '</div>';
     }).join('');
@@ -918,10 +963,12 @@ SCREENS.dailyPost = { render: function (d) {
     '<div class="chips" style="margin:6px 0">' + (d.platforms || []).map(function (p) {
       return '<label class="chip" style="cursor:pointer"><input type="checkbox" class="pm_pl" value="' + esc(p) + '" checked> ' + esc(p) + '</label>';
     }).join(' ') + '</div>' +
+    '<label class="btn" style="display:block;text-align:center;margin:6px 0">📷 أضف صورة للمنشور<input type="file" accept="image/*" hidden id="pm_img"></label>' +
+    '<div id="pm_prev" class="muted small"></div>' +
     '<select id="pm_pillar"><option value="">الركيزة (اختياري)</option>' + (d.pillars || []).map(function (p) { return '<option>' + esc(p) + '</option>'; }).join('') + '</select>' +
     '<div class="btns"><button class="btn pri" data-act="postManual">أنشئ المنشور للمنصات المختارة</button>' +
     '<button class="btn" data-act="postGen">توليد تلقائي (Claude)</button></div>' +
-    '<div class="muted small">بعد الإنشاء: أضف الصورة، شغّل/ألغِ المنصات، ثم اعتمد.</div></details>';
+    '<div class="muted small">الحسابات هنا هي الحسابات النشطة في الإعدادات ← الحسابات. بعد الإنشاء: شغّل/ألغِ الحسابات ثم اعتمد.</div></details>';
   html += manual;
   if (!d.today.length) return html;
   html += '<div class="muted small">لا يُنشر أي شيء بلا موافقتك. المرحلة صفر: بعد الاعتماد انسخ النص وانشره بنفسك، ثم سجّل الرابط.</div>';
@@ -963,6 +1010,11 @@ function postMediaUpload_(input, ids) {
 }
 document.addEventListener('change', function (e) {
   var t = e.target; if (!t || !t.dataset) return;
+  if (t.id === 'pm_img') {
+    var f = t.files && t.files[0], pv = $('pm_prev');
+    if (f && pv) { var u = URL.createObjectURL(f); pv.innerHTML = '<img src="' + u + '" style="max-width:100%;max-height:180px;border-radius:10px"><div>' + esc(f.name) + '</div>'; }
+    return;
+  }
   if (t.dataset.mediaAll) postMediaUpload_(t, S.postIds || []);
   else if (t.dataset.media) postMediaUpload_(t, [t.dataset.media]);
 });
@@ -980,8 +1032,11 @@ ACT.postManual = function (el) {
   if (!val('pm_body').trim()) return toast('اكتب نص المنشور', true);
   if (!pls.length) return toast('اختر منصة واحدة على الأقل', true);
   el.disabled = true;
-  act('postManual', { body: val('pm_body'), platforms: pls, pillar: val('pm_pillar') }, function (r) { return 'أُنشئ لـ ' + r.created + ' منصة'; })
-    .catch(function () { el.disabled = false; });
+  var img = $('pm_img');
+  api('action', 'postManual', { body: val('pm_body'), platforms: pls, pillar: val('pm_pillar') }).then(function (r) {
+    toast('أُنشئ لـ ' + r.created + ' حساب');
+    if (img && img.files && img.files[0]) postMediaUpload_(img, r.post_ids); else go('dailyPost', {}, true);
+  }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 ACT.postGen = function (el) { el.disabled = true; act('postGenerate', {}, function (r) { return r.message || 'تم'; }); };
 ACT.postApprove = function (el) {
@@ -991,6 +1046,14 @@ ACT.postApprove = function (el) {
 ACT.postEdit = function (el) { act('postEdit', { post_id: el.dataset.id, body: val('pb_' + el.dataset.id) }, 'حُفظ'); };
 ACT.postReject = function (el) { var r = prompt('سبب الرفض (يتعلّم منه النظام):'); if (r) act('postReject', { post_id: el.dataset.id, reason: r }, 'رُفض — سيتجنّبه غداً'); };
 ACT.postPub = function (el) { act('postPublished', { post_id: el.dataset.id, ref: val('pu_' + el.dataset.id) }, 'سُجّل النشر'); };
+
+ACT.accSave = function (el) {
+  var x = { account_id: el.dataset.id };
+  ['platform', 'handle', 'url', 'owner', 'purpose', 'status', 'use_for_posts', 'notes'].forEach(function (k) { x[k] = val('ac_' + k); });
+  if (!x.handle.trim()) return toast('اكتب اسم الحساب', true);
+  api('action', 'accountSave', { account: x }).then(function () { toast('حُفظ'); go('settings', { tab: 'accounts' }, true); }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.accDel = function (el) { if (confirm('حذف هذا الحساب من القائمة؟')) api('action', 'accountDelete', { account_id: el.dataset.id }).then(function () { toast('حُذف'); go('settings', { tab: 'accounts' }, true); }).catch(function (e) { toast(errMsg(e), true); }); };
 
 /* ─── الكلمات ─── */
 SCREENS.keywords = { render: function (d) {
@@ -1056,10 +1119,38 @@ ACT.courseSave = function (el) {
 
 /* ─── الإعدادات ─── */
 SCREENS.settings = { render: function (d, args) {
-  var tab = args.tab || 'settings';
-  var html = north(d.north) + '<h1>الإعدادات</h1><div class="tabs">' + [['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
+  var tab = args.tab || 'accounts';
+  var html = north(d.north) + '<h1>الإعدادات</h1><div class="tabs">' + [['accounts', 'الحسابات'], ['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
     return '<button class="btn sm ' + (t[0] === tab ? 'pri' : '') + '" data-go="settings" data-args="' + attr({ tab: t[0] }) + '">' + t[1] + '</button>';
   }).join('') + '<button class="btn sm good" data-act="applyNow">تطبيق التغييرات الآن</button><button class="btn sm" data-act="reportPrev">معاينة التقرير الأسبوعي</button></div>';
+  if (tab === 'accounts') {
+    html += '<div class="muted small" style="margin:6px 0">كل حسابات السوشال ميديا والتواصل التي يتعامل معها النظام. الحسابات النشطة المعلَّمة «للمنشورات» تظهر في «منشور اليوم». لا تُكتب كلمات السر هنا أبداً.</div>';
+    var ed = args.edit;
+    var accForm = function (x) {
+      var fld = function (k, label, ph) { return '<label class="f">' + label + '</label><input type="text" id="ac_' + k + '" value="' + esc(x[k] || '') + '" placeholder="' + esc(ph || '') + '">'; };
+      return '<div class="card" style="border-color:var(--accent)"><b>' + (x.account_id ? 'تعديل حساب' : 'حساب جديد') + '</b>' +
+        '<label class="f">المنصة</label><select id="ac_platform">' + opt(d.platforms, x.platform) + '</select>' +
+        fld('handle', 'اسم الحساب / الرقم', '@academy') + fld('url', 'الرابط', 'https://') + fld('owner', 'ملك من؟', 'الأكاديمية / شخصي') +
+        fld('purpose', 'الاستخدام', 'منشورات، رسائل، إعلانات…') +
+        '<div class="row"><div class="grow"><label class="f">الحالة</label><select id="ac_status">' + opt(['نشط', 'موقوف'], x.status || 'نشط') + '</select></div>' +
+        '<div class="grow"><label class="f">يظهر في منشور اليوم؟</label><select id="ac_use_for_posts">' + opt(['نعم', 'لا'], x.use_for_posts || 'نعم') + '</select></div></div>' +
+        fld('notes', 'ملاحظات') +
+        '<div class="btns"><button class="btn good" data-act="accSave" data-id="' + esc(x.account_id || '') + '">حفظ</button>' +
+        '<button class="btn ghost" data-go="settings" data-args="' + attr({ tab: 'accounts' }) + '">إلغاء</button>' +
+        (x.account_id ? '<button class="btn bad" data-act="accDel" data-id="' + esc(x.account_id) + '">حذف</button>' : '') + '</div></div>';
+    };
+    html += '<div class="btns"><button class="btn pri" data-go="settings" data-args="' + attr({ tab: 'accounts', edit: 'new' }) + '">＋ إضافة حساب</button></div>';
+    if (ed === 'new') html += accForm({});
+    html += '<div class="grid2">' + (d.accounts || []).map(function (x) {
+      if (ed && ed === x.account_id) return accForm(x);
+      return '<div class="card" style="' + (x.status === 'موقوف' ? 'opacity:.55' : '') + '"><div class="row between"><b>' + esc(x.platform) + '</b>' +
+        chip(x.status, x.status === 'نشط' ? 'good' : '') + '</div>' +
+        '<div>' + (x.url ? '<a target="_blank" href="' + esc(extUrl(x.url)) + '">' + esc(x.handle) + '</a>' : esc(x.handle)) + '</div>' +
+        '<div class="chips">' + chip(x.owner) + (x.use_for_posts === 'نعم' ? chip('للمنشورات', 'acc') : '') + chip(x.connected) + '</div>' +
+        (x.purpose ? '<div class="muted small">' + esc(x.purpose) + '</div>' : '') +
+        '<div class="btns"><button class="btn sm" data-go="settings" data-args="' + attr({ tab: 'accounts', edit: x.account_id }) + '">تعديل</button></div></div>';
+    }).join('') + '</div>';
+  }
   if (tab === 'settings') html += d.settings.map(function (s) {
     return '<div class="card"><label class="f"><b>' + esc(s.key) + '</b> · ' + esc(s.type) + ' — ' + esc(s.description) + '</label><div class="row">' +
       (s.type === 'boolean' ? '<select class="grow" id="set_' + esc(s.key) + '">' + opt(['true', 'false'], String(s.value)) + '</select>' :
@@ -1502,6 +1593,7 @@ SCREENS.exams = { render: function (d, args) {
   var html = north(d.north) + '<h1>الاختبارات ' + (d.pass_rate !== null ? chip('نسبة اجتياز متدربيك ' + d.pass_rate + '%', 'good') : '') + '</h1>' +
     '<div class="row between"><button class="btn sm" data-go="exams" data-args="' + attr({ month: prev }) + '">◀</button><b>' + (args.month || d.month) + '</b>' +
     '<button class="btn sm" data-go="exams" data-args="' + attr({ month: next }) + '">▶</button></div>' + cal +
+    '<div class="btns"><button class="btn" data-go="calendar">📅 تقويم دوراتك (البداية والنهاية لكل دفعة + ورقة الطباعة)</button></div>' +
     '<div class="muted small" style="margin:6px 0">«مرجّح» = من مصدر صحفي أو يدوي — لا يُستخدم في أي رسالة لعميل.</div>';
   html += d.events.length ? d.events.map(function (e) {
     var dt = function (v) { return v ? fmtDate(v) : '—'; };
@@ -1511,11 +1603,16 @@ SCREENS.exams = { render: function (d, args) {
       (e.attempts ? chip('متدربون: ' + e.attempts) : '') + '</div>' +
       '<div class="kv small" style="margin-top:6px"><b>فتح التسجيل</b><span>' + dt(e.registration_open) + '</span><b>إغلاقه</b><span>' + dt(e.registration_close) +
       '</span><b>الاختبار</b><span>' + dt(e.exam_date) + '</span><b>النتائج</b><span>' + dt(e.results_date) + '</span></div>' +
-      (e.source_url ? '<a class="small" target="_blank" href="' + esc(e.source_url) + '">المصدر</a>' : '') +
+      (e.source_url ? '<a class="small" target="_blank" href="' + esc(extUrl(e.source_url)) + '">المصدر</a>' : '') +
       '<div class="btns">' + (e.calendar_link ? '<a class="btn sm" target="_blank" href="' + esc(e.calendar_link) + '">أضف إلى تقويمي</a>' : '') +
       '<button class="btn sm" data-act="exCamp" data-id="' + esc(e.event_id) + '">أنشئ حملة</button>' +
       '<button class="btn sm" data-act="exPost" data-id="' + esc(e.event_id) + '">أنشئ منشوراً</button>' +
-      '<button class="btn sm" data-act="exAtt" data-id="' + esc(e.event_id) + '">أضف متدرباً للاختبار</button></div></div>';
+      '<button class="btn sm" data-act="exAtt" data-id="' + esc(e.event_id) + '">أضف متدرباً للاختبار</button></div>' +
+      '<details class="small"><summary>ماذا تفعل هذه الأزرار؟</summary>' +
+      '<div><b>أنشئ حملة:</b> مسودة حملة تسويقية بعدّ تنازلي حتى إغلاق التسجيل، تستهدف من يحتاج الرخصة — تراجعها في «الحملات» قبل إطلاقها.</div>' +
+      '<div><b>أنشئ منشوراً:</b> فكرة منشور عن هذا الموعد تُضاف إلى «المحتوى» — تذكير الجمهور بالموعد يجلب تسجيلات في دورات التحضير.</div>' +
+      '<div><b>أضف متدرباً:</b> تسجّل أن أحد متدربيك سيدخل الاختبار، ثم نتيجته — نسبة الاجتياز تصبح دليلاً تسويقياً قوياً.</div>' +
+      '<div><b>أضف إلى تقويمي:</b> الموعد في تقويم Google فلا يفوتك.</div></details></div>';
   }).join('') : empty('لا مواعيد بعد — تُجلب يومياً');
   html += '<details class="card"><summary>أضف موعداً يدوياً (مرجّح)</summary><label class="f">الصنف</label><select id="ext">' +
     d.types.map(function (t) { return '<option value="' + esc(t.exam_type_id) + '">' + esc(t.name_ar) + '</option>'; }).join('') + '</select>' +
@@ -1584,7 +1681,7 @@ SCREENS.operator = { render: function (d) {
     });
     html += section('آخر الإشارات', d.signals, function (s) {
       return '<div class="card small"><div class="chips">' + chip(s.kind) + chip(fmtDate(s.captured_at)) + '</div>' + esc(s.text_excerpt) +
-        (s.source_url ? ' <a target="_blank" href="' + esc(s.source_url) + '">المصدر</a>' : '') + '</div>';
+        (s.source_url ? ' <a target="_blank" href="' + esc(extUrl(s.source_url)) + '">المصدر</a>' : '') + '</div>';
     });
     html += section('آخر التواصلات', d.touches, function (t) {
       return '<div class="card small"><div class="chips">' + chip(t.channel) + chip(fmtDate(t.date)) + '</div>' + esc(t.summary) + (t.next_step ? '<br>التالي: ' + esc(t.next_step) : '') + '</div>';
@@ -1725,7 +1822,7 @@ ACT.personCard = function (el) {
   openSheet('<div class="row">' + pframe(p, true) + '<div><h1 style="margin:0">' + esc(p.full_name) + '</h1><div class="muted">' + esc(p.title_ar) + ' · ' + esc(p.department) + '</div>' +
     '<div class="chips">' + chip(p.status, p.status === 'متحقق' ? 'good' : p.status === 'غادر الجهة؟' ? 'bad' : 'warn') + chip(p.relationship) + '</div></div></div>' +
     (p.intro_path ? '<div class="small">من يوصلك: ' + esc(p.intro_path) + '</div>' : '') +
-    '<div class="btns">' + (p.linkedin_url ? '<a class="btn sm" target="_blank" href="' + esc(p.linkedin_url) + '">لينكدإن</a>' : '') +
+    '<div class="btns">' + (p.linkedin_url ? '<a class="btn sm" target="_blank" href="' + esc(extUrl(p.linkedin_url)) + '">لينكدإن</a>' : '') +
     (p.x_handle ? '<a class="btn sm" target="_blank" href="https://x.com/' + esc(String(p.x_handle).replace('@', '')) + '">X</a>' : '') +
     (p.work_email ? '<button class="btn sm" data-act="copyVal" data-text="' + esc(p.work_email) + '">نسخ البريد المهني</button>' : '') +
     (p.photo_status !== 'موجودة' ? '<button class="btn sm" data-act="photoPick" data-id="' + esc(p.contact_id) + '">ارفع صورة</button>' : '') + '</div>' +
@@ -1823,12 +1920,12 @@ SCREENS.people = { render: function (d, args) {
     '<select id="pf_r" class="grow" data-act="pplFilter">' + opt(d.relationships, f.relationship, true) + '</select>' +
     '<select id="pf_s" class="grow" data-act="pplFilter">' + opt(['متحقق', 'غير متحقق', 'غادر الجهة؟'], f.status, true) + '</select>' +
     '<button class="btn sm" data-act="pplCsv">تصدير CSV</button></div>';
-  html += rows.length ? rows.map(function (r) {
+  html += rows.length ? '<div class="grid2">' + rows.map(function (r) {
     return '<div class="card click" ' + (r.entity_type === 'مشغّل' && /^\d+$/.test(r.op_id) ? 'data-go="operator" data-args="' + attr({ op_id: r.op_id }) + '"' : '') + '><div class="row">' + pframe(r, false) +
       '<div class="grow"><b>' + esc(r.full_name) + '</b><div class="muted small">' + esc(r.title_ar) + ' · ' + esc(r.company) + ' · ' + esc(r.department) + '</div>' + (r.role_for_us ? '<div class="small">دوره لنا: ' + esc(r.role_for_us) + '</div>' : '') +
       '<div class="chips">' + chip(r.relationship) + chip(r.status, r.status === 'متحقق' ? 'good' : r.status === 'غادر الجهة؟' ? 'bad' : 'warn') +
       (r.stale ? chip('معرّض للانتهاء', 'warn') : '') + chip('تحقق: ' + fmtDate(r.last_verified_at)) + '</div></div></div></div>';
-  }).join('') : empty('لا أشخاص بعد — تُبنى الخريطة تدريجياً (مشغّلان يومياً)');
+  }).join('') + '</div>' : empty('لا أشخاص بعد — تُبنى الخريطة تدريجياً (مشغّلان يومياً)');
   if (d.review.length) html += section('مراجعة الحذف (لم يُتحقق منهم منذ سنة)', d.review, function (r) {
     return '<div class="card"><b>' + esc(r.full_name) + '</b> — ' + esc(r.company) + '<div class="btns"><button class="btn sm" data-act="pplKeep" data-id="' + esc(r.contact_id) + '">ما زال صحيحاً</button>' +
       '<button class="btn sm bad" data-act="pplDel" data-id="' + esc(r.contact_id) + '">احذف</button></div></div>';
@@ -1861,6 +1958,360 @@ SCREENS.opps = { render: function (d) {
 ACT.oppStart = function (el) { el.disabled = true; act('oppStart', { opp_id: el.dataset.id }, 'أُنشئت مسودة B2B — راجعها في شاشة «الرد»'); };
 ACT.oppDefer = function (el) { act('oppStatus', { opp_id: el.dataset.id, status: 'مؤجّلة' }, 'أُجّلت'); };
 ACT.oppReject = function (el) { var r = prompt('سبب الرفض:'); if (r) act('oppStatus', { opp_id: el.dataset.id, status: 'مرفوضة', reason: r }, 'رُفضت'); };
+</script>
+
+  <script>
+/* ═══════════ تقويم الدورات ═══════════ */
+var CAL_DAYS = [['SUN', 'أحد'], ['MON', 'اثنين'], ['TUE', 'ثلاثاء'], ['WED', 'أربعاء'], ['THU', 'خميس'], ['FRI', 'جمعة'], ['SAT', 'سبت']];
+var CAL_COLORS = ['#2a9d8f', '#e76f51', '#8d6cd8', '#e9a23b', '#3a86ff', '#d6457a', '#52b788', '#8a817c'];
+
+function calDay_(v) { var d = v ? new Date(v) : null; if (!d || isNaN(d)) return null; return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function calIso_(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function calColor_(courseId, courses) {
+  var i = courses.map(function (c) { return String(c.course_id); }).indexOf(String(courseId));
+  return CAL_COLORS[(i < 0 ? 0 : i) % CAL_COLORS.length];
+}
+/** أيام الجلسات الفعلية للدفعة (حسب أيام الأسبوع المختارة، أو كل الأيام) */
+function calSessions_(c) {
+  var s = calDay_(c.start_date), e = calDay_(c.end_date) || s, out = [];
+  if (!s) return out;
+  var want = String(c.days || '').split(',').filter(String);
+  for (var d = new Date(s); d <= e && out.length < 400; d.setDate(d.getDate() + 1)) {
+    if (!want.length || want.indexOf(CAL_DAYS[d.getDay()][0]) > -1) out.push(new Date(d));
+  }
+  return out;
+}
+
+SCREENS.calendar = { render: function (d, args) {
+  var now = new Date(), ym = (args.month || calIso_(now).slice(0, 7)).split('-');
+  var y = Number(ym[0]), m = Number(ym[1]) - 1;
+  var first = new Date(y, m, 1), last = new Date(y, m + 1, 0);
+  var prev = calIso_(new Date(y, m - 1, 1)).slice(0, 7), next = calIso_(new Date(y, m + 1, 1)).slice(0, 7);
+  var byDay = {};
+  d.cohorts.forEach(function (c) {
+    if (c.status === 'ملغاة') return;
+    calSessions_(c).forEach(function (x) { var k = calIso_(x); (byDay[k] = byDay[k] || []).push(c); });
+  });
+  var exDay = {};
+  d.exams.forEach(function (e) {
+    [['exam_date', 'اختبار'], ['registration_close', 'إغلاق تسجيل']].forEach(function (f) {
+      var x = calDay_(e[f[0]]); if (x) (exDay[calIso_(x)] = exDay[calIso_(x)] || []).push(f[1] + ': ' + e.name);
+    });
+  });
+  var html = north(d.north) + '<h1>تقويم الدورات</h1>' +
+    '<div class="row between"><button class="btn sm" data-go="calendar" data-args="' + attr({ month: next }) + '">‹ التالي</button>' +
+    '<b>' + first.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'long', year: 'numeric' }) + '</b>' +
+    '<button class="btn sm" data-go="calendar" data-args="' + attr({ month: prev }) + '">السابق ›</button></div>';
+  html += '<div class="cal">' + CAL_DAYS.map(function (x) { return '<div class="cal-h">' + x[1] + '</div>'; }).join('');
+  for (var i = 0; i < first.getDay(); i++) html += '<div class="cal-c off"></div>';
+  for (var day = 1; day <= last.getDate(); day++) {
+    var k = calIso_(new Date(y, m, day)), list = byDay[k] || [], ex = exDay[k] || [];
+    html += '<div class="cal-c' + (k === calIso_(now) ? ' today' : '') + '"><div class="cal-n">' + day + '</div>' +
+      list.map(function (c) {
+        return '<div class="cal-b" style="background:' + calColor_(c.course_id, d.courses) + '" data-act="calOpen" data-id="' + esc(c.cohort_id) + '" title="' + esc(c.title) + '">' + esc(String(c.title).slice(0, 14)) + '</div>';
+      }).join('') + ex.map(function (t) { return '<div class="cal-b ex" title="' + esc(t) + '">📝 ' + esc(t.slice(0, 12)) + '</div>'; }).join('') + '</div>';
+  }
+  html += '</div>';
+  if (!d.courses.length) html += '<div class="card small">لا دورات بعد — أضف دوراتك أولاً من <a href="#" data-go="courses">شاشة الدورات</a>، ثم أنشئ لكل دورة دفعاتها هنا.</div>';
+
+  var ed = args.edit;
+  var form = function (c) {
+    var dayChecks = CAL_DAYS.map(function (x) {
+      var on = String(c.days || '').split(',').indexOf(x[0]) > -1;
+      return '<label class="chip" style="cursor:pointer"><input type="checkbox" class="ch_day" value="' + x[0] + '"' + (on ? ' checked' : '') + '> ' + x[1] + '</label>';
+    }).join(' ');
+    var f = function (k, label, type) { return '<label class="f">' + label + '</label><input id="ch_' + k + '" type="' + (type || 'text') + '" value="' + esc(c[k] === undefined ? '' : c[k]) + '">'; };
+    return '<div class="card" style="border-color:var(--accent)" id="chForm"><b>' + (c.cohort_id ? 'تعديل الدفعة' : c._repeat ? 'تكرار الدفعة (تواريخ جديدة)' : 'دفعة جديدة') + '</b>' +
+      '<label class="f">الدورة *</label><select id="ch_course_id">' + d.courses.map(function (co) {
+        return '<option value="' + esc(co.course_id) + '"' + (String(co.course_id) === String(c.course_id) ? ' selected' : '') + '>' + esc(co.name_ar) + '</option>'; }).join('') + '</select>' +
+      f('title', 'اسم الدفعة (اختياري)') +
+      '<div class="row"><div class="grow">' + f('start_date', 'البداية *', 'date') + '</div><div class="grow">' + f('end_date', 'النهاية *', 'date') + '</div></div>' +
+      '<label class="f">أيام الجلسات (اتركها فارغة = كل الأيام)</label><div class="chips">' + dayChecks + '</div>' +
+      '<div class="row"><div class="grow">' + f('time', 'الوقت', 'text') + '</div><div class="grow">' + f('location', 'المكان') + '</div></div>' +
+      f('trainer', 'المدرب') +
+      '<div class="row"><div class="grow">' + f('seats_total', 'المقاعد', 'number') + '</div><div class="grow">' + f('seats_left', 'المتبقي', 'number') + '</div></div>' +
+      '<label class="f">الحالة</label><select id="ch_status">' + opt(d.statuses, c.status || 'مخطط') + '</select>' +
+      '<label class="f">ملاحظات</label><textarea id="ch_notes">' + esc(c.notes || '') + '</textarea>' +
+      '<div class="btns"><button class="btn good" data-act="calSave" data-id="' + esc(c.cohort_id || '') + '">حفظ</button>' +
+      '<button class="btn ghost" data-go="calendar" data-args="' + attr({ month: args.month }) + '">إلغاء</button>' +
+      (c.cohort_id ? '<button class="btn bad" data-act="calDel" data-id="' + esc(c.cohort_id) + '">حذف</button>' : '') + '</div></div>';
+  };
+  if (d.courses.length) html += '<div class="btns"><button class="btn pri" data-go="calendar" data-args="' + attr({ month: args.month, edit: 'new' }) + '">＋ دفعة جديدة</button></div>';
+  if (ed === 'new') html += form({});
+  if (ed && String(ed).indexOf('repeat:') === 0) {
+    var src = d.cohorts.filter(function (x) { return x.cohort_id === ed.slice(7); })[0];
+    if (src) {
+      var s0 = calDay_(src.start_date), e0 = calDay_(src.end_date) || s0, len = Math.round((e0 - s0) / 864e5);
+      var ns = new Date(e0); ns.setDate(ns.getDate() + 7); var ne = new Date(ns); ne.setDate(ne.getDate() + len);
+      html += form({ course_id: src.course_id, title: src.title, start_date: calIso_(ns), end_date: calIso_(ne), days: src.days, time: src.time,
+        location: src.location, trainer: src.trainer, seats_total: src.seats_total, seats_left: src.seats_total, status: 'مخطط', _repeat: true });
+    }
+  }
+  html += '<h2>الدفعات ' + chip(d.cohorts.length) + '</h2><div class="grid2">' + d.cohorts.map(function (c) {
+    if (ed === c.cohort_id) {
+      var cc = {}; Object.keys(c).forEach(function (k) { cc[k] = c[k]; });
+      cc.start_date = calDay_(c.start_date) ? calIso_(calDay_(c.start_date)) : ''; cc.end_date = calDay_(c.end_date) ? calIso_(calDay_(c.end_date)) : '';
+      return form(cc);
+    }
+    var n = calSessions_(c).length;
+    return '<div class="card" style="border-inline-start:5px solid ' + calColor_(c.course_id, d.courses) + '"><div class="row between"><b>' + esc(c.title) + '</b>' + chip(c.status, c.status === 'التسجيل مفتوح' ? 'good' : c.status === 'ملغاة' ? 'bad' : '') + '</div>' +
+      '<div class="small">' + fmtDate(c.start_date) + ' ← ' + fmtDate(c.end_date) + ' · ' + n + ' جلسة' + (c.time ? ' · ' + esc(c.time) : '') + '</div>' +
+      '<div class="chips">' + chip(c.location) + chip(c.trainer) + (c.seats_total !== '' ? chip('المقاعد: ' + (c.seats_left !== '' ? c.seats_left + '/' : '') + c.seats_total, 'acc') : '') + '</div>' +
+      '<div class="btns"><button class="btn sm" data-go="calendar" data-args="' + attr({ month: args.month, edit: c.cohort_id }) + '">تعديل</button>' +
+      '<button class="btn sm" data-go="calendar" data-args="' + attr({ month: args.month, edit: 'repeat:' + c.cohort_id }) + '">🔁 تكرار</button>' +
+      '<button class="btn sm" data-act="calSheet" data-id="' + esc(c.cohort_id) + '">📄 ورقة الدورة</button></div></div>';
+  }).join('') + '</div>';
+  if (!d.cohorts.length) html += empty('لا دفعات بعد');
+  return html;
+}, after: function () { var f = $('chForm'); if (f) f.scrollIntoView({ block: 'center' }); } };
+
+ACT.calOpen = function (el) { go('calendar', { month: (S.args || {}).month, edit: el.dataset.id }); };
+ACT.calSave = function (el) {
+  var c = { cohort_id: el.dataset.id };
+  ['course_id', 'title', 'start_date', 'end_date', 'time', 'location', 'trainer', 'seats_total', 'seats_left', 'status', 'notes'].forEach(function (k) { c[k] = val('ch_' + k); });
+  c.days = q('.ch_day').filter(function (x) { return x.checked; }).map(function (x) { return x.value; }).join(',');
+  if (!c.start_date || !c.end_date) return toast('حدد البداية والنهاية', true);
+  el.disabled = true;
+  api('action', 'cohortSave', { cohort: c }).then(function () { toast('حُفظت الدفعة'); go('calendar', { month: c.start_date.slice(0, 7) }, true); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.calDel = function (el) {
+  if (!confirm('حذف هذه الدفعة؟ (للإيقاف فقط اختر الحالة «ملغاة»)')) return;
+  api('action', 'cohortDelete', { cohort_id: el.dataset.id }).then(function () { toast('حُذفت'); go('calendar', { month: (S.args || {}).month }, true); }).catch(function (e) { toast(errMsg(e), true); });
+};
+/** ورقة كاملة للدفعة — تُفتح في نافذة وتُطبع أو تُحفظ PDF */
+ACT.calSheet = function (el) {
+  var d = S.data, c = d.cohorts.filter(function (x) { return x.cohort_id === el.dataset.id; })[0]; if (!c) return;
+  var co = d.courses.filter(function (x) { return String(x.course_id) === String(c.course_id); })[0] || {};
+  var ses = calSessions_(c);
+  var row = function (k, v) { return v === '' || v === undefined || v === null ? '' : '<tr><th>' + k + '</th><td>' + esc(v) + '</td></tr>'; };
+  var html = '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>' + esc(c.title) + '</title><style>' +
+    'body{font-family:Tahoma,Arial,sans-serif;margin:32px;color:#111}h1{margin:0 0 4px;font-size:22px}.sub{color:#555;margin-bottom:18px}' +
+    'table{border-collapse:collapse;width:100%;margin:10px 0}th,td{border:1px solid #ccc;padding:7px 10px;text-align:right;font-size:14px}th{background:#f2f5f6;width:30%}' +
+    '.ses td,.ses th{width:auto}.foot{margin-top:24px;color:#666;font-size:12px}@media print{button{display:none}}</style></head><body>' +
+    '<button onclick="print()" style="float:left;padding:8px 16px">طباعة / حفظ PDF</button>' +
+    '<h1>' + esc(co.name_ar || c.title) + '</h1><div class="sub">' + esc(d.academy && !/يحتاج/.test(d.academy) ? d.academy : '') + ' · ' + esc(c.title) + '</div>' +
+    '<table>' + row('البداية', fmtDate(c.start_date)) + row('النهاية', fmtDate(c.end_date)) + row('عدد الجلسات', ses.length) +
+    row('الأيام', String(c.days || '').split(',').filter(String).map(function (x) { return (CAL_DAYS.filter(function (y) { return y[0] === x; })[0] || [x, x])[1]; }).join('، ') || 'كل الأيام') +
+    row('الوقت', c.time) + row('المكان', c.location) + row('المدرب', c.trainer) + row('نمط الحضور', co.delivery) + row('المدة', co.duration) +
+    row('جهة الاعتماد', co.cert_body) + row('الرسوم', co.price_sar !== '' && co.price_sar !== undefined ? co.price_sar + ' ر.س' : '') +
+    row('المقاعد', c.seats_total !== '' ? c.seats_total + (c.seats_left !== '' ? ' (المتبقي ' + c.seats_left + ')' : '') : '') +
+    row('الحالة', c.status) + row('ملاحظات', c.notes) + '</table>' +
+    '<h3>جدول الجلسات</h3><table class="ses"><tr><th>#</th><th>اليوم</th><th>التاريخ</th><th>الوقت</th><th>الحضور</th></tr>' +
+    ses.map(function (x, i) { return '<tr><td>' + (i + 1) + '</td><td>' + CAL_DAYS[x.getDay()][1] + '</td><td>' + x.toLocaleDateString('ar-SA-u-ca-gregory') + '</td><td>' + esc(c.time || '') + '</td><td></td></tr>'; }).join('') +
+    '</table><div class="foot">أُعدّت من Academy OPS · ' + new Date().toLocaleDateString('ar-SA-u-ca-gregory') + '</div></body></html>';
+  var w = window.open('', '_blank');
+  if (!w) return toast('اسمح بالنوافذ المنبثقة لفتح الورقة', true);
+  w.document.write(html); w.document.close();
+};
+</script>
+
+  <script>
+/* ═══════════ دليل النظام: وصف كل صفحة وكل زر ووظيفته في التسويق والبيع ═══════════
+ * مصدر واحد تستخدمه: (١) السطر التعريفي أعلى كل صفحة (٢) صفحة INFO كمخطط تفاعلي (٣) شرح الوحدات.
+ * كل صفحة: t = الاسم · what = ماذا تفعل · why = قيمتها في التسويق/البيع · btns = [الزر، ماذا يفعل، لماذا يهمك]
+ */
+var PAGE_INFO = {
+  today: { t: 'اليوم', what: 'كل ما يحتاج قرارك اليوم في مكان واحد، مرتّب بالأولوية.', why: 'لا يضيع عميل ولا فرصة: تبدأ يومك من هنا وتنهيه وهي فارغة.',
+    btns: [['البطاقات الرقمية', 'عدد الرسائل بانتظارك، والمعتمدة التي لم تُرسل، والمتابعات، والمنشور.', 'تعرف حجم العمل في ثانية.'],
+      ['رسائل تجاوزت ٣٠ دقيقة', 'عملاء لم يُرد عليهم بعد.', 'سرعة الرد أكبر عامل لإغلاق البيع — كل ساعة تأخير تقلّل فرصة التسجيل.'],
+      ['عملاء بنقاط عالية', 'من يُظهر نية شراء قوية.', 'تتصل بهم أولاً — هم الأقرب للدفع.'],
+      ['نوافذ تجديد B2B', 'مشغّلون يقترب موعد تجديد عقودهم التدريبية.', 'أفضل توقيت لعرض الأكاديمية على الشركات.']] },
+  reply: { t: 'الرد', what: 'رسائل العملاء الواردة، مع الرد المقترح أو خانة لردك اليدوي.', why: 'الرد السريع والموحّد يحوّل الاستفسار إلى تسجيل، وكل رد تعتمده يتعلّمه النظام.',
+    btns: [['اعتماد وإرسال', 'يوافق على الرد المقترح كما هو.', 'يدخل «بنك الأجوبة» فيُقترح تلقائياً للأسئلة المشابهة.'],
+      ['تعديل ثم إرسال', 'تحسّن الرد قبل اعتماده.', 'النظام يتعلّم أسلوبك.'],
+      ['رفض', 'ترفض المقترح وتكتب ردك.', 'يمنع تكرار رد غير مناسب.'],
+      ['حفظ الرد اليدوي', 'تكتب الرد بنفسك (يعمل بلا Claude).', 'لا يُترك عميل بلا رد.'],
+      ['نسختُ وأرسلت', 'في المرحلة صفر تنسخ الرد وترسله بنفسك ثم تضغطه.', 'يُسجَّل أن العميل خُدم فتبدأ متابعته.'],
+      ['إغلاق بلا رد', 'رسالة لا تحتاج رداً (إزعاج/شكر).', 'تنظيف القائمة.']] },
+  dailyPost: { t: 'منشور اليوم', what: 'تجهيز منشور واحد يومياً لكل حسابات السوشال المفعّلة، مع الصورة.', why: 'الظهور اليومي يبني الثقة ويجلب رسائل عملاء جدد بتكلفة صفر.',
+    btns: [['اكتب منشوراً بنفسك', 'تكتب النص وتختار الحسابات وتضيف صورة.', 'يعمل الآن بلا Claude.'],
+      ['توليد تلقائي (Claude)', 'Claude يكتب المنشور من أسئلة العملاء والأخبار.', 'محتوى من كلام العملاء الحقيقي = تفاعل أعلى.'],
+      ['تحميل صورة للكل', 'صورة واحدة لكل الحسابات.', 'المنشورات بصورة تحصل على وصول أعلى بكثير.'],
+      ['تشغيل الكل / إلغاء الكل', 'اختيار الحسابات التي سيُنشر عليها.', 'تتحكم أين يظهر المنشور.'],
+      ['اعتماد المنصات المشغّلة', 'يعتمد المنشور للحسابات المختارة.', 'لا يُنشر شيء بلا موافقتك.'],
+      ['نشرته ✓', 'بعد النشر اليدوي تلصق الرابط.', 'يُقاس لاحقاً: أي منشور جلب عملاء.']] },
+  flow: { t: 'المخطط', what: 'خريطة حية لكل أجزاء النظام وحالتها الآن (تعمل/متوقفة/خطأ) واستهلاك الحصة.', why: 'تطمئن أن الماكينة التسويقية تعمل وحدها، وتعرف أين الخلل فوراً.',
+    btns: [['عرض للاجتماع', 'نسخة مبسطة للعرض على شريك أو مستثمر.', 'تشرح نظامك في دقيقة.'],
+      ['إيقاف كل الأتمتة', 'زر طوارئ يوقف كل شيء.', 'أمان عند أي خطأ.']] },
+  calendar: { t: 'تقويم الدورات', what: 'بداية ونهاية كل دفعة لكل دورة على تقويم شهري، مع التكرار وورقة طباعة لكل دفعة.', why: 'مواعيد حقيقية = إلحاح حقيقي في التسويق («تبدأ الدفعة ١٥ أكتوبر، بقي ٤ مقاعد») بدون اختراع.',
+    btns: [['＋ دفعة جديدة', 'تحدد الدورة، البداية، النهاية، أيام الجلسات، المقاعد.', 'أقرب دفعة تُحدّث الدورة تلقائياً فتستخدمها الردود والمنشورات.'],
+      ['🔁 تكرار', 'ينسخ الدفعة بتواريخ جديدة بعد الحالية.', 'تجدول السنة كاملة في دقائق.'],
+      ['📄 ورقة الدورة', 'صفحة كاملة للطباعة أو PDF: التفاصيل وجدول الجلسات وخانة الحضور.', 'ترسلها للعميل أو الشركة أو تعلّقها في القاعة.'],
+      ['📝 على التقويم', 'مواعيد الاختبارات المهنية تظهر أيضاً.', 'تربط دوراتك بمواعيد اختبارات المتدربين.']] },
+  targets: { t: 'الأهداف', what: 'قائمة المشغّلين (سلاسل الأندية) كأهداف بيع للشركات B2B: الفروع، الحالة، المرحلة.', why: 'عقد شركة واحد = عشرات المتدربين. هنا تعرف من تستهدف أولاً.',
+    btns: [['＋ إضافة جهة', 'تضيف نادياً أو سلسلة جديدة.', 'توسّع السوق المستهدف.'],
+      ['تعديل', 'تحدّث الفروع، الحالة، المرحلة، الخطوة التالية.', 'الأولوية تُحسب تلقائياً من الفروع × الإتاحة.'],
+      ['متاح / مستبعَد / قيد التحقق', 'هل يمكن بيعه تدريباً الآن أم مرتبط بمنافس.', 'لا تضيّع وقتك على جهة مغلقة.']] },
+  radar: { t: 'الرادار', what: 'مراقبة المنافسين وعروضهم وأسعارهم أسبوعياً.', why: 'تعرف متى تنافس بالسعر ومتى بالقيمة، ولا تُفاجأ بعرض منافس.',
+    btns: [['الموقع', 'موقع المنافس.', 'مراجعة سريعة.'], ['مكتبة إعلانات Meta', 'إعلانات المنافس الحالية (تفتحها يدوياً).', 'ترى رسائلهم التسويقية وتتفوق عليها.']] },
+  discovery: { t: 'الاكتشافات', what: 'جهات جديدة (أندية/أكاديميات) لم تكن في قوائمك.', why: 'عملاء B2B جدد ومنافسون جدد قبل غيرك.',
+    btns: [['تأكيد / رفض', 'تحكم هل الاكتشاف حقيقي.', 'قائمة نظيفة.'], ['دمج في المشغّلين', 'ينقله لقائمة الأهداف.', 'يصبح هدف بيع.'],
+      ['دمج في الأكاديميات', 'ينقله لقائمة المنافسين.', 'يدخل الرادار.'], ['إدخال يدوي', 'تضيف جهة سمعت عنها.', 'مثل افتتاح عرفته من مورّد.'],
+      ['الدليل', 'المصدر أو الملاحظة التي بُني عليها الاكتشاف.', 'تتحقق بنفسك.']] },
+  news: { t: 'الأخبار', what: 'أخبار الجهات الرسمية والسوق (وزارة الرياضة، هيئة التقويم...) مع الرابط وملخص.', why: 'قرار تنظيمي جديد = سبب قوي للتسجيل الآن («الرخصة أصبحت إلزامية»).',
+    btns: [['قرأته', 'يعلّم الخبر كمقروء.', 'تبقى القائمة مركّزة على الجديد.'],
+      ['هذا يستحق محتوى', 'يحوّل الخبر إلى فكرة منشور في تقويم المحتوى.', 'محتوى في وقته = انتشار وسلطة.'],
+      ['المصدر', 'يفتح الخبر الأصلي.', 'تقرأ التفاصيل كاملة.'],
+      ['الزر الأخضر في المصادر', 'تشغيل/إيقاف مراقبة ذلك المصدر.', 'تراقب ما يهمك فقط.'],
+      ['إضافة مصدر', 'تضيف موقعاً أو بحثاً لمراقبته.', 'توسّع عيونك على السوق.']] },
+  exams: { t: 'الاختبارات', what: 'مواعيد الاختبارات والرخص المهنية للمدربين (التسجيل، الاختبار، النتائج) ونتائج متدربيك.', why: 'كل موعد اختبار = موسم تسجيل في دورات التحضير. التسويق هنا مرتبط بتاريخ حقيقي.',
+    btns: [['أنشئ حملة', 'يجهّز حملة تسويقية مرتبطة بموعد الاختبار (عد تنازلي للتسجيل).', 'يستهدف من يحتاج الرخصة قبل إغلاق التسجيل.'],
+      ['أنشئ منشوراً', 'يجهّز منشوراً عن الموعد في «منشور اليوم».', 'تذكير الجمهور = تسجيلات.'],
+      ['أضف إلى التقويم', 'يضيف الموعد إلى تقويم Google.', 'لا يفوتك موعد.'],
+      ['سجّل محاولة', 'تسجّل نتيجة متدرب (اجتاز/لم يجتز).', 'نسبة النجاح = أقوى دليل تسويقي لك.']] },
+  opps: { t: 'الفرص', what: 'فرص بيع للشركات يركّبها النظام من الأخبار والأشخاص والتوقيت، مرتبة بالقيمة.', why: 'بدل البحث العشوائي: من تكلّم، ولماذا الآن، وبأي زاوية.',
+    btns: [['ابدأ', 'تنقل الفرصة إلى «قيد العمل».', 'التزام بخطوة.'], ['أجّل / أغلق', 'تحدّث حالتها مع السبب.', 'النظام يتعلّم ما لا يناسبك.']] },
+  people: { t: 'صنّاع القرار', what: 'الأشخاص في الشركات والشركاء (من بطاقات الأعمال والبحث) ودورهم لك.', why: 'البيع للشركات يبدأ بالشخص الصحيح أو الوسيط الذي يعرّفك عليه.',
+    btns: [['الفلاتر', 'حسب نوع الجهة، الجهة، القسم، العلاقة، التحقق.', 'تصل للشخص المطلوب فوراً.'],
+      ['تصدير CSV', 'ملف للقائمة.', 'للاستخدام في برامج أخرى.'],
+      ['ما زال صحيحاً / احذف', 'مراجعة سنوية للبيانات.', 'بيانات نظيفة ومتوافقة مع الخصوصية.']] },
+  modules: { t: 'الوحدات', what: 'كل «عامل آلي» في النظام: متى يعمل، وآخر نتيجة، وتشغيله/إيقافه.', why: 'تتحكم في الماكينة: توقف ما لا تحتاجه وتشغّل ما تريد الآن.',
+    btns: [['المفتاح', 'تشغيل/إيقاف الوحدة.', 'تحكم كامل.'], ['شغّلها الآن', 'تشغيل فوري بدل انتظار موعدها.', 'نتيجة الآن.'],
+      ['حرجة', 'وحدة تخدم العملاء مباشرة فلا تتوقف عند ضغط الحصة.', 'العملاء أولاً.']] },
+  campaigns: { t: 'الحملات', what: 'متابعة حملاتك الإعلانية: الميزانية، الإنفاق، العملاء، التكلفة لكل تسجيل، مع روابط تتبّع UTM وتجارب A/B.', why: 'تعرف أي إعلان يجلب تسجيلات مدفوعة فعلاً فتضاعفه، وأيها يخسر فتوقفه.',
+    btns: [['حفظ الحملة', 'تسجّل حملة (هدف، شريحة، ميزانية، إنفاق).', 'يحسب النظام التكلفة لكل عميل ولكل تسجيل.'],
+      ['مولّد الروابط (UTM)', 'رابط خاص لكل إعلان/منشور.', 'تعرف مصدر كل عميل بدقة.'],
+      ['تجربة جديدة', 'تختبر نسختين من رسالة أو عرض.', 'تقرر بالأرقام لا بالتخمين.'],
+      ['تنبيه الخسارة', 'حملة تخسر أسابيع متتالية تُعلَّم.', 'توقف النزيف مبكراً.']] },
+  content: { t: 'المحتوى', what: 'تقويم أفكار المحتوى: ماذا تنشر ومتى ولمن، من أسئلة العملاء والأخبار والشركاء.', why: 'محتوى مخطط يبني «سلطة» الأكاديمية ويرد على الاعتراضات قبل أن تُطرح.',
+    btns: [['تغيير الحالة', 'فكرة ← مسودة ← منشور.', 'تتابع التنفيذ.'], ['الركيزة', 'نوع المحتوى (سلطة، دليل، عرض...).', 'توازن بين التثقيف والبيع.']] },
+  b2b: { t: 'B2B', what: 'خط بيع الشركات مرحلة بمرحلة (بحث ← صانع قرار ← تواصل ← اجتماع ← عرض ← تفاوض ← فوز).', why: 'ترى قيمة الصفقات المتوقعة وأين تتعطل.', btns: [] },
+  alumni: { t: 'الخرّيجون', what: 'خريجوك ومواعيد تجديد شهاداتهم وشهاداتهم (التوصيات).', why: 'الخريج الراضي = عميل تجديد + مصدر توصيات + قصة نجاح للتسويق.',
+    btns: [['اكتمل', 'تسجيل إتمام متدرب.', 'يبدأ عداد التجديد.'], ['شهادة عميل', 'حفظ رأي خريج.', 'دليل اجتماعي في المنشورات.']] },
+  kpis: { t: 'المؤشرات', what: 'أرقامك الأساسية أسبوعياً مقابل الهدف.', why: 'تدير بالأرقام: ما يُقاس يتحسّن.', btns: [] },
+  keywords: { t: 'الكلمات', what: 'الكلمات التي يبحث بها عملاؤك وكلمات التعليق في المنشورات.', why: 'إعلانات بحث أرخص وأدق، ومحتوى بلغة العميل.',
+    btns: [['قبول / رفض الاقتراح', 'النظام يقترح كلمات من رسائل العملاء.', 'تتعلم لغة السوق.'], ['إضافة', 'كلمة يدوية.', 'تغطية كاملة.']] },
+  courses: { t: 'الدورات', what: 'دوراتك: السعر، التكلفة، المدة، الاعتماد، المقاعد.', why: 'كل رد ومنشور يعتمد على بيانات حقيقية من هنا — لا أسعار مخترعة.',
+    btns: [['حفظ الدورة', 'إضافة/تعديل دورة.', 'الهامش يُحسب تلقائياً.']] },
+  settings: { t: 'الإعدادات', what: 'حسابات السوشال، والإعدادات العامة، والقواعد، والقوائم.', why: 'تضبط النظام على طريقتك دون مبرمج.',
+    btns: [['الحسابات', 'كل حسابات السوشال والتواصل: إضافة/تعديل/إيقاف.', 'منشور اليوم يُجهَّز لها تلقائياً.'],
+      ['تطبيق التغييرات الآن', 'يطبّق أي تعديل فوراً ويكمل التبويبات الناقصة.', 'لا انتظار.'], ['معاينة التقرير الأسبوعي', 'ترى التقرير قبل إرساله.', 'مراجعة الأداء.']] },
+  info: { t: 'INFO — دليل النظام', what: 'مخطط كامل للنظام: كل صفحة، كل زر، وظيفته، وقيمته في التسويق والبيع، مع حالة كل جزء الآن.', why: 'تفهم نظامك كاملاً وتشرحه لأي شخص.', btns: [] },
+  operator: { t: 'لوحة المشغّل', what: 'كل ما يخص شركة واحدة: أشخاصها، إشاراتها، زاوية التواصل، التواصلات السابقة.', why: 'تدخل أي اجتماع وأنت تعرف كل شيء.', btns: [] },
+  lead: { t: 'ملف العميل', what: 'كل ما يخص عميلاً: رسائله، نقاطه، حالته، الدفع.', why: 'متابعة شخصية حتى التسجيل.', btns: [] }
+};
+
+/** شرح بسيط لكل وحدة آلية (يظهر في صفحة الوحدات وفي INFO) */
+var MODULE_INFO = {
+  inbox_email: 'يقرأ إيميلات العملاء (الموسومة Academy-Inbox) كل ١٠ دقائق ويضعها في «الرد».',
+  inbox_forms: 'يستقبل طلبات التسجيل من نموذج Google Forms.',
+  whatsapp: 'استقبال رسائل واتساب تلقائياً — المرحلة ١ (يحتاج إذنك ورقماً مخصصاً).',
+  instagram: 'رسائل وتعليقات انستغرام/فيسبوك — المرحلة ١.',
+  payment_hooks: 'تأكيد الدفع من بوابة الدفع تلقائياً — المرحلة ١.',
+  news_watch: 'يفحص مواقع الجهات الرسمية والسوق يومياً ويضيف الأخبار الجديدة مع الرابط والملخص.',
+  discovery_weekly: 'يبحث أسبوعياً عن أندية وأكاديميات جديدة لم تكن في قوائمك (يحتاج Claude).',
+  radar_competitors: 'يراقب مواقع المنافسين أسبوعياً ويلتقط عروضهم وأسعارهم (يحتاج Claude).',
+  ingest: 'يوحّد شكل كل رسالة واردة من أي قناة ويربطها بملف العميل.',
+  opt_out: 'يكشف من طلب عدم التواصل (إلغاء/توقف) فلا يُراسَل أبداً.',
+  classify: 'يفهم نية العميل: سعر؟ موعد؟ اعتراض؟ شكوى؟ (يحتاج Claude).',
+  lead_scoring: 'يعطي كل عميل نقاطاً حسب جدّيته، فتعرف من تتصل به أولاً.',
+  answer_bank: 'يتذكّر كل رد اعتمدته ويعيد استخدامه للأسئلة المتشابهة.',
+  draft: 'يكتب رداً مقترحاً بأسلوب الأكاديمية ومن بيانات حقيقية فقط (يحتاج Claude).',
+  experiments: 'يدير تجارب A/B على الرسائل والعروض.',
+  decide: 'يقرر: يُرسل الرد تلقائياً (إن كان مكرراً ومعتمداً مسبقاً) أم ينتظر موافقتك.',
+  owner_approval: 'أنت: تعتمد أو تعدّل أو ترفض — لا تُعطَّل.',
+  closing: 'مسار الإغلاق: عرض السعر، المقاعد الحقيقية، رابط الدفع.',
+  sla_monitor: 'ينبّهك إن تأخر رد على عميل أكثر من ٣٠ دقيقة.',
+  dispatch: 'يرسل الردود المعتمدة — مقفل في المرحلة صفر (أنت ترسل يدوياً).',
+  followup: 'يذكّرك بمتابعة العملاء الذين لم يسجّلوا بعد، في توقيتات مدروسة.',
+  daily_posts: 'يكتب منشور اليوم لكل حساب (يحتاج Claude) — ويمكنك الكتابة يدوياً.',
+  unified_publish: 'ينشر على كل الحسابات مرة واحدة — المرحلة ١.',
+  alumni_recert: 'يتابع مواعيد تجديد شهادات الخريجين ويذكّرك بعرض التجديد.',
+  b2b_pipeline: 'يحسب قيمة صفقات الشركات واحتمالها ومرحلتها.',
+  campaigns: 'يحسب أداء الحملات يومياً وينبّه على الحملة الخاسرة.',
+  content_calendar: 'يقترح أفكار المحتوى الأسبوعية من أسئلة العملاء والأخبار (يحتاج Claude).',
+  keywords: 'يستخرج كلمات البحث من رسائل العملاء ويقترحها للإعلانات.',
+  advisor: 'مستشار أسبوعي يقرأ أرقامك ويقترح ٣ قرارات (يحتاج Claude).',
+  weekly_report: 'تقرير أسبوعي بالبريد: تسجيلات، عملاء، حملات، أخبار.',
+  housekeeping: 'صيانة يومية: نسخة احتياطية، أرشفة القديم، تنظيف.',
+  exam_watch: 'يراقب مواعيد الاختبارات والرخص المهنية ويحدّث التواريخ.',
+  org_map: 'يبني خريطة صنّاع القرار في الشركات المستهدفة (يحتاج Claude).',
+  intel_synth: 'يركّب «فرصاً» من الأخبار والأشخاص والتوقيت ويقترح الوسيط الأنسب.',
+  flow: 'يرسم المخطط الحي لحالة النظام.'
+};
+
+/** مراحل المخطط: الترتيب الذي يمر به العميل والمال */
+var INFO_STAGES = [
+  { t: '١) جذب الانتباه', c: '#8d6cd8', pages: ['dailyPost', 'content', 'campaigns', 'keywords'], mods: ['daily_posts', 'content_calendar', 'campaigns', 'keywords', 'experiments', 'unified_publish'] },
+  { t: '٢) استقبال العميل', c: '#3a86ff', pages: ['reply'], mods: ['inbox_email', 'inbox_forms', 'whatsapp', 'instagram', 'ingest', 'opt_out'] },
+  { t: '٣) الفهم والرد', c: '#2a9d8f', pages: ['today', 'reply'], mods: ['classify', 'lead_scoring', 'answer_bank', 'draft', 'decide', 'owner_approval', 'sla_monitor', 'dispatch'] },
+  { t: '٤) الإغلاق والتسجيل', c: '#52b788', pages: ['courses', 'calendar', 'lead'], mods: ['closing', 'followup', 'payment_hooks'] },
+  { t: '٥) بيع الشركات B2B', c: '#e76f51', pages: ['targets', 'people', 'opps', 'b2b', 'operator'], mods: ['b2b_pipeline', 'org_map', 'intel_synth'] },
+  { t: '٦) استخبارات السوق', c: '#e9a23b', pages: ['news', 'exams', 'radar', 'discovery'], mods: ['news_watch', 'exam_watch', 'radar_competitors', 'discovery_weekly'] },
+  { t: '٧) ما بعد البيع', c: '#d6457a', pages: ['alumni'], mods: ['alumni_recert'] },
+  { t: '٨) القياس والإدارة', c: '#8a817c', pages: ['kpis', 'flow', 'modules', 'settings', 'info'], mods: ['weekly_report', 'advisor', 'housekeeping', 'flow'] }
+];
+
+/** شريط الرجوع + السطر التعريفي أعلى كل صفحة */
+function pageHead_(screen) {
+  var p = PAGE_INFO[screen];
+  var back = (S.hist && S.hist.length) ? '<button class="back" data-act="goBack">→ رجوع</button>' : '';
+  var intro = p ? '<div class="intro"><b>' + esc(p.t) + ':</b> ' + esc(p.what) +
+    '<details class="small" style="margin-top:4px"><summary>لماذا تهمك؟ وماذا يفعل كل زر؟</summary><div style="margin:4px 0"><b>في التسويق والبيع:</b> ' + esc(p.why) + '</div>' +
+    (p.btns || []).map(function (b) { return '<div style="margin:3px 0"><b>[' + esc(b[0]) + ']</b> ' + esc(b[1]) + ' <span class="muted">— ' + esc(b[2]) + '</span></div>'; }).join('') +
+    '<a href="#" data-go="info" data-args="' + attr({ focus: screen }) + '">مخطط النظام كاملاً ←</a></details></div>' : '';
+  return (back ? '<div class="pagebar">' + back + '</div>' : '') + intro;
+}
+ACT.goBack = function () {
+  var h = S.hist.pop(); if (!h) return;
+  S.backing = true; go(h.screen, h.args);
+};
+
+SCREENS.info = { render: function (d, args) {
+  var mods = {}; (d.modules || []).forEach(function (m) { mods[m.module_key] = m; });
+  var stColor = function (m) {
+    if (!m) return 'var(--muted)';
+    if (m.enabled !== 'مفعّل') return 'var(--off)';
+    if (m.last_status === 'error') return 'var(--bad)';
+    if (m.last_status === 'deferred') return 'var(--warn)';
+    return 'var(--good)';
+  };
+  var stText = function (m) {
+    if (!m) return '';
+    if (m.enabled !== 'مفعّل') return 'متوقفة';
+    return { ok: 'تعمل', error: 'خطأ', deferred: 'تنتظر (Claude)', never: 'لم تعمل بعد', skipped: 'تخطّت' }[m.last_status] || m.last_status;
+  };
+  var html = north(d.north) + '<h1>INFO — دليل النظام</h1>' +
+    '<div class="card small">اضغط أي صفحة لترى أزرارها ووظيفة كل زر في التسويق والبيع. النقطة الملوّنة بجانب كل «عامل آلي» = حالته الآن: ' +
+    '<span class="fc-dot" style="background:var(--good)"></span>يعمل <span class="fc-dot" style="background:var(--warn)"></span>ينتظر Claude ' +
+    '<span class="fc-dot" style="background:var(--bad)"></span>خطأ <span class="fc-dot" style="background:var(--off)"></span>متوقف</div>';
+  if (d.counts) html += '<div class="row" style="flex-wrap:wrap">' + d.counts.map(function (c) {
+    return '<div class="stat"><div class="v">' + esc(c[1]) + '</div><div class="k">' + esc(c[0]) + '</div></div>'; }).join('') + '</div>';
+  html += '<div class="fc">' + INFO_STAGES.map(function (st, i) {
+    var pages = st.pages.map(function (k) {
+      var p = PAGE_INFO[k]; if (!p) return '';
+      var open = args.focus === k;
+      return '<details class="fc-node"' + (open ? ' open id="infoFocus"' : '') + '><summary>📄 ' + esc(p.t) + ' <span class="muted small">— ' + esc(p.what) + '</span></summary>' +
+        '<div class="small" style="margin:6px 0"><b>قيمتها في التسويق والبيع:</b> ' + esc(p.why) + '</div>' +
+        (p.btns || []).map(function (b) { return '<div class="btnrow"><b>[' + esc(b[0]) + ']</b> ← ' + esc(b[1]) + '<br><span class="muted">💡 ' + esc(b[2]) + '</span></div>'; }).join('') +
+        (k !== 'info' && k !== 'operator' && k !== 'lead' ? '<div class="btns"><button class="btn sm" data-go="' + k + '">افتح الصفحة</button></div>' : '') + '</details>';
+    }).join('');
+    var ms = st.mods.map(function (k) {
+      var m = mods[k];
+      return '<div class="fc-node small"><span class="fc-dot" style="background:' + stColor(m) + '"></span><b>' + esc(m ? m.module_name_ar : k) + '</b> ' +
+        '<span class="muted">(' + esc(stText(m)) + (m && m.schedule ? ' · ' + esc(schedAr_(m.schedule)) : '') + ')</span><div>' + esc(MODULE_INFO[k] || '') + '</div></div>';
+    }).join('');
+    return (i ? '<div class="fc-arrow">⬇</div>' : '') + '<div class="fc-stage" style="border-inline-start:6px solid ' + st.c + '"><div class="t">' + esc(st.t) + '</div>' +
+      '<div class="fc-nodes">' + pages + '</div><div class="muted small" style="margin:8px 0 4px">العوامل الآلية في هذه المرحلة:</div><div class="fc-nodes">' + ms + '</div></div>';
+  }).join('') + '</div>';
+  return html;
+}, after: function () { var f = $('infoFocus'); if (f) f.scrollIntoView({ block: 'start' }); } };
+
+/** الجدول الزمني بلغة بسيطة */
+function schedAr_(s) {
+  s = String(s || '');
+  var dayAr = { SUN: 'الأحد', MON: 'الاثنين', TUE: 'الثلاثاء', WED: 'الأربعاء', THU: 'الخميس', FRI: 'الجمعة', SAT: 'السبت' };
+  var m;
+  if (s === '10m') return 'كل ١٠ دقائق';
+  if ((m = s.match(/^(\d+)m$/))) return 'كل ' + m[1] + ' دقيقة';
+  if ((m = s.match(/^(\d+)h$/))) return 'كل ' + m[1] + ' ساعة';
+  if ((m = s.match(/^daily (\d\d:\d\d)$/))) return 'يومياً ' + m[1];
+  if ((m = s.match(/^weekly (\w+) (\d\d:\d\d)$/))) return 'أسبوعياً ' + (dayAr[m[1]] || m[1]) + ' ' + m[2];
+  if (s === 'manual') return 'يدوي';
+  if (s === 'realtime' || s === 'event') return 'فوري';
+  return s;
+}
 </script>
 
 </body>
