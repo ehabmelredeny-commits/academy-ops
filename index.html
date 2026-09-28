@@ -772,7 +772,7 @@ SCREENS.news = { render: function (d, args) {
     '<select id="nc" class="grow" data-act="newsFilter">' + opt(d.categories, args.category, true) + '</select>' +
     '<select id="ni" style="width:auto" data-act="newsFilter">' + opt(['عالي', 'متوسط', 'منخفض'], args.impact, true) + '</select></div>';
   html += d.rows.length ? d.rows.map(function (n) {
-    return '<div class="card" style="' + (n.seen === 'نعم' ? 'opacity:.7' : '') + '"><div class="chips">' + chip(n.impact, n.impact === 'عالي' ? 'bad' : n.impact === 'متوسط' ? 'warn' : '') +
+    return '<div class="card" style="' + (n.seen === 'نعم' ? 'opacity:.7' : '') + '"><div class="chips">' + chip(n.impact || 'غير مقيّم', n.impact === 'عالي' ? 'bad' : n.impact === 'متوسط' ? 'warn' : '') +
       chip(n.category) + (n.official === 'نعم' ? chip('رسمي', 'good') : chip('غير رسمي')) + chip(fmtDate(n.captured_at)) + '</div>' +
       '<b>' + esc(n.title) + '</b><div class="small">' + esc(n.summary_ar) + '</div>' +
       (n.impact_why_ar ? '<div class="small"><b>ما الذي يتغيّر في عرضنا:</b> ' + esc(n.impact_why_ar) + '</div>' : '') +
