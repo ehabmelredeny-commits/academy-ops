@@ -281,7 +281,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -528,6 +528,7 @@ SCREENS.today = {
       return '<div class="card click" data-go="news"><div class="row">' + chip('عالي', 'bad') + chip(n.category) + '</div><b>' + esc(n.title) + '</b>' +
         '<div class="muted small">' + esc(n.impact_why_ar) + '</div></div>';
     });
+    if (d.ask_new) html += '<div class="card click" data-go="ask" style="border-color:var(--good)"><b>🎯 ' + d.ask_new + ' شخص يسأل عن دورة الآن</b> <span class="muted small">— رد عليهم قبل غيرك</span></div>';
     if ((d.watch || []).length) html += section('٧) حسابات منافسين للمراجعة اليوم', d.watch, function (w) {
       return '<div class="card row between"><span><b>' + esc(w.name) + '</b> · ' + esc(w.platform) + ' <a target="_blank" rel="noopener" href="' + esc(extUrl(w.url)) + '" data-act="watchOpen" data-id="' + esc(w.cacc_id) + '">' + esc(w.handle) + '</a></span>' +
         '<span><button class="btn sm" data-go="competitors" data-args="' + attr({ tab: 'profiles' }) + '">سجّل عرضاً</button> <button class="btn sm good" data-act="watchDone" data-id="' + esc(w.cacc_id) + '">راجعته ✓</button></span></div>';
@@ -3178,6 +3179,74 @@ ACT.sbxReset = function (el) {
 };
 </script>
 
+  <script>
+/* ═══════════ من يسأل الآن (رادار الأسئلة) ═══════════ */
+var ASK = { data: null };
+SCREENS.ask = { render: function (d, args) {
+  ASK.data = d;
+  var st = d.stats, rate = st.total ? Math.round(st.replied / st.total * 100) : 0;
+  var fresh = d.opps.filter(function (o) { return o.status === 'جديد'; });
+  var html = north(d.north) + '<h1>🎯 من يسأل الآن ' + chip(fresh.length + ' فرصة', fresh.length ? 'good' : '') + '</h1>';
+  html += '<div class="row" style="flex-wrap:wrap">' +
+    '<div class="stat"><div class="v">' + st.total + '</div><div class="k">سؤالاً رُصد (٣٠ يوماً)</div></div>' +
+    '<div class="stat"><div class="v" style="color:var(--good)">' + rate + '%</div><div class="k">نسبة ما رددت عليه</div></div>' +
+    Object.keys(st.by_platform).slice(0, 4).map(function (k) { return '<div class="stat"><div class="v">' + st.by_platform[k] + '</div><div class="k">' + esc(k) + '</div></div>'; }).join('') + '</div>';
+  if (Object.keys(st.by_persona).length) html += '<div class="chips">' + Object.keys(st.by_persona).map(function (k) { return chip(k + ': ' + st.by_persona[k], 'acc'); }).join('') + '</div>';
+
+  // ── فرص الرد ──
+  html += '<h2>فرص رد ' + chip(d.opps.length) + '</h2><div class="muted small">كل فرصة تُحذف تلقائياً بعد ' + d.ttl + ' يوماً (حماية البيانات). الرد تنشره أنت من حساب الأكاديمية — المنصات تمنع الردود الآلية على الغرباء.</div>';
+  html += d.opps.length ? '<div class="grid2">' + d.opps.map(function (o) {
+    var done = o.status !== 'جديد', left = Math.max(0, Math.ceil(((Time_(o.expires_at) || 0) - Date.now()) / 864e5));
+    return '<div class="card" style="' + (done ? 'opacity:.6' : '') + '"><div class="row between"><span>' + chip(o.platform, 'acc') + chip(o.persona) + '</span>' +
+      '<span title="قوة النية">' + '★★★★★'.slice(0, Number(o.intent_score) || 1) + '<span class="muted">' + '★★★★★'.slice(0, 5 - (Number(o.intent_score) || 1)) + '</span></span></div>' +
+      '<div style="margin:6px 0;white-space:pre-wrap">«' + esc(o.question) + '»</div>' +
+      '<div class="muted small">' + (o.city ? '📍 ' + esc(o.city) + ' · ' : '') + fmtDate(o.found_at, true) + ' · ' + esc(o.source) + ' · يُحذف بعد ' + left + ' يوماً</div>' +
+      (done ? '<div class="small">' + chip(o.status, o.status === 'تم الرد' ? 'good' : '') + '</div>' :
+        '<label class="f">الرد المقترح (عدّله كما تحب)</label><textarea id="ar_' + esc(o.ask_id) + '" style="min-height:80px">' + esc(o.suggested_reply) + '</textarea>' +
+        '<div class="btns">' + (extUrl(o.url) ? '<button class="btn sm good" data-act="askOpen" data-id="' + esc(o.ask_id) + '">📋 افتح وردّ</button>' :
+          '<button class="btn sm good" data-act="askCopy" data-id="' + esc(o.ask_id) + '">📋 انسخ الرد</button>') +
+        '<button class="btn sm" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="تم الرد">تم الرد ✓</button>' +
+        '<button class="btn sm ghost" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="ليست فرصة">ليست فرصة</button></div>') + '</div>';
+  }).join('') + '</div>' : empty(d.claude_ready ? 'لا فرص الآن — المسح اليومي يعمل ٨ صباحاً، أو ابحث بنفسك بالأسفل' : 'لا فرص بعد — ابحث بنفسك بالأزرار بالأسفل، والصق أي سؤال تجده (المسح التلقائي يعمل مع رصيد Claude)');
+
+  // ── لصق سريع ──
+  html += '<details class="card"' + (d.opps.length ? '' : ' open') + '><summary><b>➕ وجدت شخصاً يسأل؟ الصقه هنا</b></summary>' +
+    '<label class="f">رابط المنشور</label><input id="ap_url" dir="ltr" placeholder="https://x.com/…">' +
+    '<label class="f">نص السؤال</label><textarea id="ap_q" placeholder="مثال: أبي دورة مدرب شخصي بالرياض أحد يعرف مكان زين؟"></textarea>' +
+    '<label class="f">المدينة (إن ذُكرت)</label><input id="ap_city" value="' + esc(d.city) + '">' +
+    '<div class="btns"><button class="btn pri" data-act="askPaste">أضف واقترح رداً</button></div></details>';
+
+  // ── البحث المباشر ──
+  html += '<h2>🔎 ابحث بنفسك الآن (مجاني — نتائج اللحظة داخل كل منصة)</h2><div class="muted small">اضغط أي منصة فتفتح أحدث من كتب هذه العبارة. عدّل العبارات من الإعدادات ← ask_phrases.</div>';
+  html += d.phrases.map(function (p) {
+    return '<div class="card small"><b>«' + esc(p.phrase) + '»</b><div class="chips" style="margin-top:4px">' +
+      p.links.map(function (l) { return '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(l[1]) + '">' + esc(l[0]) + '</a>'; }).join(' ') + '</div></div>';
+  }).join('');
+  html += '<div class="card small muted">🔮 <b>فرصة مستقبلية:</b> اشتراك X API المدفوع (~٢٠٠$ شهرياً) يجعل رصد X لحظياً وتلقائياً بالكامل. حالياً: المسح اليومي عبر Claude + أزرار البحث المباشر المجانية.</div>';
+  return html;
+} };
+function Time_(v) { var d = v ? new Date(v) : null; return d && !isNaN(d) ? d.getTime() : 0; }
+function askCopy_(id) {
+  var t = val('ar_' + id);
+  try { navigator.clipboard.writeText(t); } catch (e) {}
+  api('action', 'askUpdate', { ask_id: id, suggested_reply: t }).catch(function () {});
+  return t;
+}
+ACT.askOpen = function (el) {
+  var o = ASK.data.opps.filter(function (x) { return x.ask_id === el.dataset.id; })[0]; if (!o) return;
+  askCopy_(o.ask_id); window.open(extUrl(o.url), '_blank', 'noopener');
+  toast('نُسخ الرد — الصقه في المنشور، ثم اضغط «تم الرد»');
+};
+ACT.askCopy = function (el) { askCopy_(el.dataset.id); toast('نُسخ الرد'); };
+ACT.askSet = function (el) { act('askUpdate', { ask_id: el.dataset.id, status: el.dataset.st }, el.dataset.st === 'تم الرد' ? 'أحسنت 👏 سُجّل الرد' : 'حُدّث'); };
+ACT.askPaste = function (el) {
+  if (!val('ap_q').trim()) return toast('الصق نص السؤال', true);
+  el.disabled = true;
+  api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city') }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+</script>
+
   ﻿<script>
 /* ═══════════ دليل النظام: وصف كل صفحة وكل زر ووظيفته في التسويق والبيع ═══════════
  * مصدر واحد تستخدمه: (١) السطر التعريفي أعلى كل صفحة (٢) صفحة INFO كمخطط تفاعلي (٣) شرح الوحدات.
@@ -3241,6 +3310,12 @@ var PAGE_INFO = {
       ['ابحث عن مدربين', 'يفتح فئة «استقطاب مدربين» في صفحة البحث.', 'مصدر منهجي لمدربين جدد.'],
       ['تواصلت معه / ردّ', 'تسجّل التواصل الفردي المهني.', 'متابعة العلاقة.'],
       ['لا تراسل / احذف', 'احترام طلبه — حذف فعلي عند الطلب.', 'امتثال لحماية البيانات وسمعة الأكاديمية.']] },
+  ask: { t: '🎯 من يسأل الآن', what: 'رادار الأسئلة: أشخاص يسألون علناً عن دورات التدريب على X وتيك توك وانستغرام وغيرها، مع رد مقترح جاهز لكل واحد.', why: 'من يسأل الآن هو أقرب عميل للشراء — أول من يرد عليه بإفادة يكسبه.',
+    btns: [['افتح وردّ', 'ينسخ الرد المقترح ويفتح المنشور — تلصقه وتنشره من حساب الأكاديمية.', 'رد خلال دقائق بدل ساعات.'],
+      ['تم الرد / ليست فرصة', 'تسجّل ما فعلته — تُحسب نسبة ردودك.', 'تقيس سرعتك ونتيجتك.'],
+      ['الصق هنا', 'وجدت سؤالاً بنفسك؟ الصق رابطه ونصه فيُقترح الرد فوراً.', 'يعمل الآن بلا Claude.'],
+      ['ابحث بنفسك الآن', 'أزرار تفتح أحدث المنشورات لكل عبارة داخل كل منصة.', 'مجاني ولحظي.'],
+      ['المسح اليومي', 'Claude يبحث كل صباح ويجمع الأسئلة الجديدة (مع الرصيد).', 'فرص جاهزة كل يوم بلا بحث.']] },
   radar: { t: 'الرادار', what: 'مراقبة المنافسين وعروضهم وأسعارهم أسبوعياً.', why: 'تعرف متى تنافس بالسعر ومتى بالقيمة، ولا تُفاجأ بعرض منافس.',
     btns: [['الموقع', 'موقع المنافس.', 'مراجعة سريعة.'], ['مكتبة إعلانات Meta', 'إعلانات المنافس الحالية (تفتحها يدوياً).', 'ترى رسائلهم التسويقية وتتفوق عليها.']] },
   discovery: { t: 'الاكتشافات', what: 'جهات جديدة (أندية/أكاديميات) لم تكن في قوائمك.', why: 'عملاء B2B جدد ومنافسون جدد قبل غيرك.',
@@ -3324,6 +3399,7 @@ var MODULE_INFO = {
   weekly_report: 'تقرير أسبوعي بالبريد: تسجيلات، عملاء، حملات، أخبار.',
   housekeeping: 'صيانة يومية: نسخة احتياطية، أرشفة القديم، تنظيف.',
   search_expansion: 'يشغّل وصفة «رادار التوسّع» من صفحة البحث أسبوعياً ويرصد افتتاحات الأندية (يحتاج Claude).',
+  ask_radar: 'يمسح كل صباح المنشورات العلنية التي يسأل فيها أشخاص عن الدورات، ويحذف الفرص الأقدم من ١٤ يوماً (يحتاج Claude للمسح).',
   exam_watch: 'يراقب مواعيد الاختبارات والرخص المهنية ويحدّث التواريخ.',
   org_map: 'يبني خريطة صنّاع القرار في الشركات المستهدفة (يحتاج Claude).',
   intel_synth: 'يركّب «فرصاً» من الأخبار والأشخاص والتوقيت ويقترح الوسيط الأنسب.',
@@ -3332,7 +3408,7 @@ var MODULE_INFO = {
 
 /** مراحل المخطط: الترتيب الذي يمر به العميل والمال */
 var INFO_STAGES = [
-  { t: '١) جذب الانتباه', c: '#8d6cd8', pages: ['dailyPost', 'content', 'campaigns', 'keywords'], mods: ['daily_posts', 'content_calendar', 'campaigns', 'keywords', 'experiments', 'unified_publish'] },
+  { t: '١) جذب الانتباه', c: '#8d6cd8', pages: ['ask', 'dailyPost', 'content', 'campaigns', 'keywords'], mods: ['ask_radar', 'daily_posts', 'content_calendar', 'campaigns', 'keywords', 'experiments', 'unified_publish'] },
   { t: '٢) استقبال العميل', c: '#3a86ff', pages: ['reply', 'sources'], mods: ['inbox_email', 'inbox_forms', 'whatsapp', 'instagram', 'ingest', 'opt_out'] },
   { t: '٣) الفهم والرد', c: '#2a9d8f', pages: ['today'], mods: ['classify', 'lead_scoring', 'answer_bank', 'draft', 'decide', 'owner_approval', 'sla_monitor', 'dispatch'] },
   { t: '٤) الإغلاق والتسجيل', c: '#52b788', pages: ['courses', 'calendar', 'lead'], mods: ['closing', 'followup', 'payment_hooks'] },
