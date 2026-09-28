@@ -272,7 +272,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['sources', 'قواعد عملاء المصادر'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -518,11 +518,17 @@ SCREENS.today = {
       return '<div class="card click" data-go="news"><div class="row">' + chip('عالي', 'bad') + chip(n.category) + '</div><b>' + esc(n.title) + '</b>' +
         '<div class="muted small">' + esc(n.impact_why_ar) + '</div></div>';
     });
+    if ((d.watch || []).length) html += section('٧) حسابات منافسين للمراجعة اليوم', d.watch, function (w) {
+      return '<div class="card row between"><span><b>' + esc(w.name) + '</b> · ' + esc(w.platform) + ' <a target="_blank" rel="noopener" href="' + esc(extUrl(w.url)) + '" data-act="watchOpen" data-id="' + esc(w.cacc_id) + '">' + esc(w.handle) + '</a></span>' +
+        '<span><button class="btn sm" data-go="competitors" data-args="' + attr({ tab: 'profiles' }) + '">سجّل عرضاً</button> <button class="btn sm good" data-act="watchDone" data-id="' + esc(w.cacc_id) + '">راجعته ✓</button></span></div>';
+    });
     var nothing = !d.overdue.length && !d.escalations.length && !d.hot_leads.length && !d.failed.length && !d.renewals.length && !d.high_news.length;
     if (nothing) html += empty('لا شيء يحتاج إجراءً الآن ✓');
     return html;
   }
 };
+ACT.watchDone = function (el) { act('compAccountChecked', { cacc_id: el.dataset.id }, 'سُجّلت المراجعة'); };
+ACT.watchOpen = function (el) { window.open(el.href, '_blank', 'noopener'); };
 ACT.retry = function (el) { act('retry', { msg_id: el.dataset.id }, 'أُعيدت للطابور'); };
 
 /* ═══════════ الرد ═══════════ */
@@ -2193,9 +2199,11 @@ SCREENS.competitors = { render: function (d, args) {
       var prices = list.map(function (o) { return Number(o.discount_price !== '' ? o.discount_price : o.base_price); }).filter(function (x) { return x > 0; });
       var stat = prices.length ? 'الأقل ' + compMoney_(Math.min.apply(null, prices)) + ' · الأعلى ' + compMoney_(Math.max.apply(null, prices)) +
         ' · المتوسط ' + compMoney_(Math.round(prices.reduce(function (a, b) { return a + b; }, 0) / prices.length)) : 'لا أسعار معلنة';
-      var ours = d.ours.filter(function (c) { return Text_norm_(c.name_ar).indexOf(Text_norm_(t)) > -1; })[0];
+      var ours = compOurs_(d.ours, t);
       html += '<div class="tree"><div class="tr-head"><div class="tr-title">📚 ' + esc(t) + '</div><div class="small">' + list.length + ' منافس · ' + stat + '</div>' +
-        (ours ? '<div class="small">دورتنا: ' + esc(ours.name_ar) + ' — ' + compMoney_(ours.price_sar) + (ours.next_cohort_date ? ' · تبدأ ' + fmtDate(ours.next_cohort_date) : '') + '</div>' : '') + '</div>' +
+        (ours ? '<div class="small" style="margin-top:6px;border-top:1px solid rgba(255,255,255,.3);padding-top:4px">⭐ عرضنا' + (ours.active === 'لا' ? ' (محتمل — غير مفعّل)' : '') + ': ' + esc(ours.name_ar) +
+          (ours.duration ? ' · ' + esc(ours.duration) : '') + ' · ' + (ours.price_sar !== '' && ours.price_sar !== undefined ? compMoney_(ours.price_sar) : 'السعر لم يُحدد') +
+          (ours.next_cohort_date ? ' · تبدأ ' + fmtDate(ours.next_cohort_date) : '') + '</div>' : '') + '</div>' +
         (list.length ? '<div class="tr-kids">' + list.map(function (o) { return '<div class="tr-kid">' + compOfferCard_(o, true) + '</div>'; }).join('') + '</div>' : '<div class="muted small" style="text-align:center">لا منافس مسجَّل لهذه الدورة</div>') + '</div>';
     });
   }
@@ -2223,19 +2231,27 @@ SCREENS.competitors = { render: function (d, args) {
   }
 
   if (tab === 'accounts') {
-    html += '<div class="card small">حسابات المنافسين على السوشال — تُضاف يدوياً. اضغط أي حساب لفتحه وتفقّد عروضه، ثم سجّل العرض بزر «＋ عرض دورة». (لا سحب آلي من المنصات).</div>';
+    html += '<div class="card small">حسابات المنافسين الرسمية (جُمعت من مواقعهم، وتضيف غيرها يدوياً). انستغرام وتيك توك لا يسمحان لأي برنامج بقراءة منشورات الآخرين، لذلك: ' +
+      'الحساب المعلَّم <b>★ مهم</b> يظهر لك كل يوم في شاشة «اليوم» لتفتحه بضغطة، وإن رأيت عرضاً تسجّله بزر «＋ عرض دورة» فيدخل المقارنة.</div>';
     html += '<div class="grid2">' + d.competitors.map(function (c) {
       var accs = d.accounts.filter(function (x) { return String(x.ac_id) === String(c.ac_id); });
       return '<div class="card"><b>' + esc(c.name) + '</b>' + (extUrl(c.website) ? ' · <a class="small" target="_blank" href="' + esc(extUrl(c.website)) + '">الموقع</a>' : '') +
         (accs.length ? accs.map(function (x) {
           return '<div class="row between small" style="margin-top:4px"><a target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">' + esc(x.platform) + ' · ' + esc(x.handle) + '</a>' +
-            '<span><a href="#" data-act="compAccEdit" data-id="' + esc(x.cacc_id) + '">تعديل</a> · <a href="#" data-act="compAccDel" data-id="' + esc(x.cacc_id) + '">حذف</a></span></div>'; }).join('') :
+            '<span><a href="#" data-act="compAccWatch" data-id="' + esc(x.cacc_id) + '" data-on="' + (x.watch === 'نعم' ? '0' : '1') + '" title="مهم للمتابعة = يظهر في شاشة اليوم لتراجعه يومياً">' + (x.watch === 'نعم' ? '★ مهم' : '☆') + '</a> · ' +
+            '<a href="#" data-act="compAccEdit" data-id="' + esc(x.cacc_id) + '">تعديل</a> · <a href="#" data-act="compAccDel" data-id="' + esc(x.cacc_id) + '">حذف</a></span></div>'; }).join('') :
           '<div class="muted small">لا حسابات بعد</div>') +
         '<div class="btns"><button class="btn sm" data-act="compAccNew" data-ac="' + esc(c.ac_id) + '">＋ حساب</button></div></div>';
     }).join('') + '</div>';
   }
   return html;
 } };
+/** مطابقة دورتنا مع نوع الدورة: «مدرب شخصي» يطابق «المدرب الشخصي» */
+function compOurs_(ours, topic) {
+  var strip = function (s) { return ' ' + Text_norm_(s).split(' ').map(function (w) { return w.indexOf('ال') === 0 && w.length > 3 ? w.slice(2) : w; }).join(' ') + ' '; };
+  var t = strip(topic).trim().split(' ');
+  return ours.filter(function (c) { var n = strip(c.name_ar); return t.every(function (w) { return n.indexOf(' ' + w + ' ') > -1; }); })[0];
+}
 function Text_norm_(s) { return String(s || '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ًٌٍَُِّْـ]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
 
 ACT.compTopic = function (el) {
@@ -2308,6 +2324,7 @@ ACT.compAccSave = function (el) {
   if (!x.handle.trim()) return toast('اكتب اسم الحساب', true);
   api('action', 'compAccountSave', { account: x }).then(function () { closeSheet(); toast('حُفظ'); go('competitors', { tab: 'accounts' }, true); }).catch(function (e) { toast(errMsg(e), true); });
 };
+ACT.compAccWatch = function (el) { act('compAccountWatch', { cacc_id: el.dataset.id, on: el.dataset.on === '1' }, el.dataset.on === '1' ? 'أُضيف لمراجعتك اليومية' : 'أُزيل من المراجعة'); };
 ACT.compAccDel = function (el) {
   if (!confirm('حذف الحساب؟')) return;
   api('action', 'compAccountDelete', { cacc_id: el.dataset.id }).then(function () { toast('حُذف'); go('competitors', { tab: 'accounts' }, true); }).catch(function (e) { toast(errMsg(e), true); });
@@ -2818,6 +2835,8 @@ SCREENS.sources = { render: function (d, args) {
       (r.need_summary ? '<div class="small"><b>الاحتياج:</b> ' + esc(r.need_summary) + '</div>' : '') +
       '<div class="small muted">' + [r.phone, r.email].filter(String).map(esc).join(' · ') + ' · ' + esc(r.source_name) + '</div>' +
       (r.handles ? '<div class="small">الحسابات: ' + esc(r.handles) + '</div>' : '') +
+      '<div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '" data-act="srcdbSearched" data-id="' + esc(r.imp_id) + '">🔎 ابحث عنه</a>' +
+      '<button class="btn sm pri" data-act="srcdbFound" data-id="' + esc(r.imp_id) + '">➕ أضف ما وجدته وانقله للتسويق</button></div>' +
       (stop ? '<div class="small" style="color:var(--bad)">طلب عدم التواصل — لا تُرسل له.</div>' :
         '<textarea id="dm_' + esc(r.imp_id) + '" style="min-height:90px">' + esc(r.draft_msg || '') + '</textarea>' +
         '<div class="btns">' + (wa ? '<a class="btn sm good" target="_blank" rel="noopener" href="' + esc(wa) + '" data-sent="' + esc(r.imp_id) + '" data-ch="واتساب">واتساب</a>' : '') +
@@ -2828,9 +2847,7 @@ SCREENS.sources = { render: function (d, args) {
       '<button class="btn sm" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="ردّ">ردّ</button>' +
       '<button class="btn sm pri" data-act="srcdbLead" data-id="' + esc(r.imp_id) + '">أضف كعميل</button>' +
       '<button class="btn sm bad" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="لا تراسل">لا تراسل</button>' +
-      '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '">🔎 ابحث عنه</a></div>' +
-      '<label class="f">حساباته على السوشال (تضيفها أنت بعد البحث)</label><div class="row"><input id="hd_' + esc(r.imp_id) + '" value="' + esc(r.handles || '') + '" placeholder="@instagram · linkedin.com/in/…">' +
-      '<button class="btn sm" data-act="srcdbHandles" data-id="' + esc(r.imp_id) + '">حفظ</button></div>' +
+      '</div>' +
       '<label class="f">الشريحة</label><select data-act="srcdbSeg" data-id="' + esc(r.imp_id) + '">' + opt(d.segments, r.segment, true) + '</select></details></div>';
   }).join('') + '</div>' + (rows.length > 200 ? '<div class="muted small">يُعرض أول ٢٠٠ — استخدم الفلاتر.</div>' : '') : empty('لا أشخاص بعد — استورد قائمة');
   return html;
@@ -2892,6 +2909,29 @@ ACT.srcdbFilter = function () { go('sources', { batch: val('sdf_b'), seg: val('s
 ACT.srcdbRules = function (el) { el.disabled = true; act('sourcesAnalyzeRules', { batch_id: el.dataset.b }, function (r) { return 'حُلّل ' + r.analyzed + ' — الرسائل جاهزة'; }); };
 ACT.srcdbClaude = function (el) { el.disabled = true; toast('جارٍ التحليل عبر Claude…'); act('sourcesAnalyzeClaude', { batch_id: el.dataset.b }, function (r) { return 'حُلّل ' + r.analyzed + ' (حتى ٤٠ في المرة)'; }); };
 ACT.srcdbSave = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, draft_msg: val('dm_' + el.dataset.id) }, 'حُفظت', false); };
+ACT.srcdbSearched = function (el) { window.open(el.href, '_blank', 'noopener'); setTimeout(function () { ACT.srcdbFound(el); }, 800); };
+var SRCDB_PL = [['instagram', 'انستغرام'], ['x', 'X (تويتر)'], ['tiktok', 'تيك توك'], ['snapchat', 'سناب شات'], ['linkedin', 'لينكدإن'], ['facebook', 'فيسبوك'], ['other', 'أخرى']];
+/** بعد البحث: تلصق ما وجدته ← يُحفظ في ملفه ويُنقل إلى العملاء ليدخل مسار التسويق */
+ACT.srcdbFound = function (el) {
+  var r = SRCDB.data.rows.filter(function (x) { return x.imp_id === el.dataset.id; })[0]; if (!r) return;
+  var cur = {}; String(r.handles || '').split(/\s*[؛;]\s*/).forEach(function (p) { var m = p.match(/^(\w+):\s*(.+)$/); if (m) cur[m[1]] = m[2]; });
+  openSheet('<h1>ما وجدته عن ' + esc(r.name) + '</h1><div class="muted small">الصق الحسابات المهنية العلنية التي وجدتها في البحث.</div>' +
+    SRCDB_PL.map(function (p) { return '<label class="f">' + p[1] + '</label><input id="fh_' + p[0] + '" dir="ltr" value="' + esc(cur[p[0]] || '') + '" placeholder="@ أو رابط">'; }).join('') +
+    '<label class="f">معلومة مهمة أخرى (المدينة، جهة العمل…)</label><input id="fh_note" value="">' +
+    '<label class="chip" style="margin-top:8px;cursor:pointer"><input type="checkbox" id="fh_lead" checked> انقله إلى العملاء ليمر بمسار التسويق</label>' +
+    '<div class="btns"><button class="btn good" data-act="srcdbFoundSave" data-id="' + esc(r.imp_id) + '">حفظ</button></div>');
+};
+ACT.srcdbFoundSave = function (el) {
+  var id = el.dataset.id, parts = [];
+  SRCDB_PL.forEach(function (p) { var v = val('fh_' + p[0]).trim(); if (v) parts.push(p[0] + ': ' + v); });
+  var note = val('fh_note').trim(), toLead = $('fh_lead') && $('fh_lead').checked;
+  var r = SRCDB.data.rows.filter(function (x) { return x.imp_id === id; })[0] || {};
+  el.disabled = true;
+  api('action', 'sourcesUpdate', { imp_id: id, handles: parts.join('؛ '), notes: note ? (r.notes ? r.notes + ' · ' : '') + note : undefined })
+    .then(function () { return toLead ? api('action', 'sourcesToLead', { imp_id: id }) : null; })
+    .then(function (x) { closeSheet(); toast(x ? 'حُفظ ونُقل إلى العملاء' : 'حُفظ'); go('sources', S.args, true); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
 ACT.srcdbHandles = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, handles: val('hd_' + el.dataset.id) }, 'حُفظ', false); };
 ACT.srcdbSeg = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, segment: el.value }, 'حُدّثت الشريحة', false); };
 ACT.srcdbMark = function (el) {
@@ -2906,6 +2946,88 @@ document.addEventListener('click', function (e) {
   api('action', 'sourcesUpdate', { imp_id: id, draft_msg: val('dm_' + id) }).catch(function () {});
   setTimeout(function () { if (confirm('هل أرسلت الرسالة عبر ' + ch + '؟')) act('sourcesUpdate', { imp_id: id, outreach_status: 'أُرسل', channel: ch }, 'سُجّل الإرسال'); }, 1500);
 });
+</script>
+
+  <script>
+/* ═══════════ المدربون ═══════════ */
+var TRN = { data: null };
+SCREENS.trainers = { render: function (d, args) {
+  TRN.data = d;
+  var f = { type: args.type || '', gender: args.gender || '', city: args.city || '', role: args.role || '', q: args.q || '' };
+  var rows = d.rows.filter(function (t) {
+    return (!f.type || t.entity_type === f.type) && (!f.gender || t.gender === f.gender) && (!f.city || t.city === f.city) && (!f.role || t.role_for_us === f.role) &&
+      (!f.q || (t.name + ' ' + t.entity_name + ' ' + t.specialty + ' ' + t.certifications).toLowerCase().indexOf(f.q.toLowerCase()) > -1);
+  });
+  var cities = []; d.rows.forEach(function (t) { if (t.city && cities.indexOf(t.city) === -1) cities.push(t.city); });
+  var html = north(d.north) + '<h1>المدربون ' + chip(d.rows.length) + '</h1>' +
+    '<div class="card small">مدربون داخل الأكاديميات والمراكز والأندية (رجالي/نسائي)، مجمّعون من كل أدوات النظام ويدوياً. <b>بيانات مهنية علنية فقط</b> مع مصدر كل معلومة، ' +
+    'والتواصل فردي مهني — لا قوائم جماعية. من يطلب ذلك يُحذف فوراً.</div>' +
+    '<div class="btns"><button class="btn pri" data-act="trnCollect">🔄 اجمع من كل أدوات النظام</button><button class="btn good" data-act="trnNew">＋ مدرب يدوياً</button>' +
+    '<button class="btn" data-act="trnSearch">🔎 ابحث عن مدربين (صفحة البحث)</button></div>';
+  html += '<div class="row" style="flex-wrap:wrap;gap:6px;margin:8px 0"><input id="tf_q" class="grow" placeholder="بحث بالاسم / الجهة / التخصص" value="' + esc(f.q) + '" data-act="trnFilter">' +
+    '<select id="tf_t" data-act="trnFilter"><option value="">كل الجهات</option>' + opt(d.types, f.type) + '</select>' +
+    '<select id="tf_g" data-act="trnFilter"><option value="">مدرب ومدربة</option>' + opt(d.genders, f.gender) + '</select>' +
+    '<select id="tf_c" data-act="trnFilter"><option value="">كل المدن</option>' + opt(cities, f.city) + '</select>' +
+    '<select id="tf_r" data-act="trnFilter"><option value="">كل الأدوار</option>' + opt(d.roles, f.role) + '</select></div>';
+  html += rows.length ? '<div class="grid2">' + rows.map(function (t) {
+    var stop = t.outreach_status === 'لا تراسل';
+    return '<div class="card" style="' + (stop ? 'opacity:.6' : '') + '"><div class="row between"><b>' + esc(t.name) + '</b>' + chip(t.status, t.status === 'متحقق' ? 'good' : 'warn') + '</div>' +
+      '<div class="chips">' + chip(t.gender) + chip(t.entity_type) + chip(t.entity_name ? '🏢 ' + t.entity_name : '') + chip(t.city ? '📍 ' + t.city : '') + chip(t.role_for_us, 'acc') + '</div>' +
+      (t.specialty ? '<div class="small">التخصص: ' + esc(t.specialty) + '</div>' : '') + (t.certifications ? '<div class="small">الشهادات: ' + esc(t.certifications) + '</div>' : '') +
+      '<div class="small">' + [extUrl(t.public_handle) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(t.public_handle)) + '">حسابه المهني</a>' : esc(t.public_handle), esc(t.public_contact)].filter(String).join(' · ') + '</div>' +
+      '<div class="muted small">المصدر: ' + esc(t.source_kind) + (extUrl(t.source_url) ? ' · <a target="_blank" href="' + esc(extUrl(t.source_url)) + '">الرابط</a>' : '') + (t.last_contact ? ' · آخر تواصل ' + fmtDate(t.last_contact) : '') + '</div>' +
+      (t.notes ? '<div class="muted small">' + esc(t.notes) + '</div>' : '') +
+      '<div class="btns">' + chip(t.outreach_status, stop ? 'bad' : t.outreach_status === 'أُرسل' ? 'good' : '') +
+      (stop ? '' : '<button class="btn sm" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="أُرسل">تواصلت معه ✓</button><button class="btn sm" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="ردّ">ردّ</button>') +
+      '<button class="btn sm" data-act="trnEdit" data-id="' + esc(t.tr_id) + '">تعديل</button>' +
+      '<details class="small" style="display:inline-block"><summary>المزيد</summary>' +
+      '<button class="btn sm bad" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="لا تراسل">لا تراسل</button>' +
+      '<button class="btn sm bad" data-act="trnDel" data-id="' + esc(t.tr_id) + '">احذف (بطلبه)</button></details></div></div>';
+  }).join('') + '</div>' : empty('لا مدربين بعد — اضغط «اجمع من كل أدوات النظام» أو أضف يدوياً');
+  if (d.review.length) html += section('مراجعة سنوية (لم يُتحقق منهم منذ سنة)', d.review, function (t) {
+    return '<div class="card small row between"><span>' + esc(t.name) + ' — ' + esc(t.entity_name) + '</span><span><button class="btn sm" data-act="trnVerify" data-id="' + esc(t.tr_id) + '">ما زال صحيحاً</button>' +
+      '<button class="btn sm bad" data-act="trnDel" data-id="' + esc(t.tr_id) + '">احذف</button></span></div>';
+  });
+  return html;
+} };
+ACT.trnFilter = function () { go('trainers', { q: val('tf_q'), type: val('tf_t'), gender: val('tf_g'), city: val('tf_c'), role: val('tf_r') }, true); };
+ACT.trnCollect = function (el) { el.disabled = true; act('trainersCollect', {}, function (r) { return r.added ? 'أُضيف ' + r.added + ' مدرباً من أدوات النظام' : 'لا جديد — كل المدربين المعروفين موجودون'; }); };
+ACT.trnSearch = function () {
+  if (window.SRC) { SRC.compose = srcNewCompose_(SEARCH_CATALOG.categories.filter(function (c) { return c.id === 'trainer_sourcing'; })[0].queries[2], 'trainer_sourcing', ''); }
+  go('search', { tab: 'catalog', cat: 'trainer_sourcing' });
+};
+ACT.trnNew = function () { trnForm_({}); };
+ACT.trnEdit = function (el) { trnForm_(TRN.data.rows.filter(function (t) { return t.tr_id === el.dataset.id; })[0] || {}); };
+function trnForm_(t) {
+  var d = TRN.data, fld = function (id, label, v, ph) { return '<label class="f">' + label + '</label><input id="' + id + '" value="' + esc(v || '') + '" placeholder="' + esc(ph || '') + '">'; };
+  openSheet('<h1>' + (t.tr_id ? 'تعديل مدرب' : 'مدرب جديد') + '</h1><div class="muted small">بيانات مهنية علنية فقط.</div>' +
+    fld('tr_name', 'الاسم *', t.name) +
+    '<div class="row"><div class="grow"><label class="f">مدرب / مدربة</label><select id="tr_gender"><option value="">—</option>' + opt(d.genders, t.gender) + '</select></div>' +
+    '<div class="grow"><label class="f">نوع الجهة</label><select id="tr_type"><option value="">—</option>' + opt(d.types, t.entity_type) + '</select></div></div>' +
+    '<label class="f">الجهة (اختر من قوائمنا أو اكتب)</label><input id="tr_entity" list="tr_ents" value="' + esc(t.entity_name || '') + '"><datalist id="tr_ents">' +
+    d.entities.map(function (e) { return '<option value="' + esc(e.name) + '">'; }).join('') + '</datalist>' +
+    fld('tr_city', 'المدينة', t.city) + fld('tr_spec', 'التخصص', t.specialty, 'قوة، تغذية، إعادة تأهيل…') + fld('tr_certs', 'الشهادات', t.certifications, 'NASM CPT، ACE…') +
+    fld('tr_handle', 'حسابه المهني العلني', t.public_handle, 'رابط انستغرام/لينكدإن المهني') + fld('tr_contact', 'وسيلة تواصل نشرها للعمل', t.public_contact) +
+    fld('tr_src', 'رابط المصدر *', t.source_url, 'من أين عرفت هذه المعلومة؟') +
+    '<div class="row"><div class="grow"><label class="f">دوره لنا</label><select id="tr_role">' + opt(d.roles, t.role_for_us || 'غير محدد') + '</select></div>' +
+    '<div class="grow"><label class="f">التحقق</label><select id="tr_status">' + opt(d.statuses, t.status || 'غير متحقق') + '</select></div></div>' +
+    '<label class="f">ملاحظات مهنية</label><textarea id="tr_notes">' + esc(t.notes || '') + '</textarea>' +
+    '<div class="btns"><button class="btn good" data-act="trnSave" data-id="' + esc(t.tr_id || '') + '">حفظ</button></div>');
+}
+ACT.trnSave = function (el) {
+  var ent = val('tr_entity'), e = TRN.data.entities.filter(function (x) { return x.name === ent; })[0];
+  var t = { tr_id: el.dataset.id, name: val('tr_name'), gender: val('tr_gender'), entity_type: val('tr_type'), entity_name: ent, entity_ref: e ? e.ref : '',
+    city: val('tr_city') || (e ? e.city : ''), specialty: val('tr_spec'), certifications: val('tr_certs'), public_handle: val('tr_handle'), public_contact: val('tr_contact'),
+    source_url: val('tr_src'), role_for_us: val('tr_role'), status: val('tr_status'), notes: val('tr_notes') };
+  if (!t.name.trim()) return toast('الاسم مطلوب', true);
+  api('action', 'trainerSave', { trainer: t }).then(function () { closeSheet(); toast('حُفظ'); go('trainers', S.args, true); }).catch(function (x) { toast(errMsg(x), true); });
+};
+ACT.trnMark = function (el) {
+  if (el.dataset.st === 'لا تراسل' && !confirm('لن يُراسل هذا المدرب مرة أخرى. متأكد؟')) return;
+  act('trainerUpdate', { tr_id: el.dataset.id, outreach_status: el.dataset.st }, 'حُدّث');
+};
+ACT.trnVerify = function (el) { act('trainerUpdate', { tr_id: el.dataset.id, verified: true }, 'سُجّل التحقق'); };
+ACT.trnDel = function (el) { if (confirm('حذف نهائي لبيانات هذا المدرب؟')) act('trainerDelete', { tr_id: el.dataset.id }, 'حُذف'); };
 </script>
 
   ﻿<script>
@@ -2965,6 +3087,12 @@ var PAGE_INFO = {
       ['🔎 ابحث عنه', 'يفتح بحث Google باسمه وإيميله لتكمل حساباته بنفسك.', 'إحاطة أفضل بالعميل قبل التواصل.'],
       ['أضف كعميل', 'ينقله إلى العملاء (Leads) لمتابعته حتى الدفع.', 'يدخل مسار البيع الكامل.'],
       ['لا تراسل', 'يوقف التواصل معه نهائياً.', 'احترام الخصوصية وسمعة الأكاديمية.']] },
+  trainers: { t: 'المدربون', what: 'دليل المدربين داخل الأكاديميات والمراكز والأندية (رجالي/نسائي)، مجمّع من كل أدوات النظام ويدوياً، مع جهة كل مدرب وتخصصه وشهاداته ومصدر المعلومة.', why: 'المدرب عميل مباشر (تطوير وشهادات)، ووسيط إلى إدارة ناديه لعقد B2B، ومرشّح ليكون مدرّباً معك.',
+    btns: [['اجمع من كل أدوات النظام', 'يسحب المدربين من صنّاع القرار ونتائج البحث وقواعد المصادر والعملاء والخرّيجين بلا تكرار.', 'دليل يكبر تلقائياً مع كل ما تضيفه في النظام.'],
+      ['＋ مدرب يدوياً', 'إضافة مدرب مع رابط المصدر (إلزامي).', 'توثيق من أين عرفت المعلومة.'],
+      ['ابحث عن مدربين', 'يفتح فئة «استقطاب مدربين» في صفحة البحث.', 'مصدر منهجي لمدربين جدد.'],
+      ['تواصلت معه / ردّ', 'تسجّل التواصل الفردي المهني.', 'متابعة العلاقة.'],
+      ['لا تراسل / احذف', 'احترام طلبه — حذف فعلي عند الطلب.', 'امتثال لحماية البيانات وسمعة الأكاديمية.']] },
   radar: { t: 'الرادار', what: 'مراقبة المنافسين وعروضهم وأسعارهم أسبوعياً.', why: 'تعرف متى تنافس بالسعر ومتى بالقيمة، ولا تُفاجأ بعرض منافس.',
     btns: [['الموقع', 'موقع المنافس.', 'مراجعة سريعة.'], ['مكتبة إعلانات Meta', 'إعلانات المنافس الحالية (تفتحها يدوياً).', 'ترى رسائلهم التسويقية وتتفوق عليها.']] },
   discovery: { t: 'الاكتشافات', what: 'جهات جديدة (أندية/أكاديميات) لم تكن في قوائمك.', why: 'عملاء B2B جدد ومنافسون جدد قبل غيرك.',
@@ -3060,7 +3188,7 @@ var INFO_STAGES = [
   { t: '٢) استقبال العميل', c: '#3a86ff', pages: ['reply', 'sources'], mods: ['inbox_email', 'inbox_forms', 'whatsapp', 'instagram', 'ingest', 'opt_out'] },
   { t: '٣) الفهم والرد', c: '#2a9d8f', pages: ['today'], mods: ['classify', 'lead_scoring', 'answer_bank', 'draft', 'decide', 'owner_approval', 'sla_monitor', 'dispatch'] },
   { t: '٤) الإغلاق والتسجيل', c: '#52b788', pages: ['courses', 'calendar', 'lead'], mods: ['closing', 'followup', 'payment_hooks'] },
-  { t: '٥) بيع الشركات B2B', c: '#e76f51', pages: ['targets', 'people', 'opps', 'b2b', 'operator'], mods: ['b2b_pipeline', 'org_map', 'intel_synth'] },
+  { t: '٥) بيع الشركات B2B', c: '#e76f51', pages: ['targets', 'people', 'trainers', 'opps', 'b2b', 'operator'], mods: ['b2b_pipeline', 'org_map', 'intel_synth'] },
   { t: '٦) استخبارات السوق', c: '#e9a23b', pages: ['news', 'exams', 'competitors', 'search', 'radar', 'discovery'], mods: ['news_watch', 'exam_watch', 'radar_competitors', 'search_expansion', 'discovery_weekly'] },
   { t: '٧) ما بعد البيع', c: '#d6457a', pages: ['alumni'], mods: ['alumni_recert'] },
   { t: '٨) القياس والإدارة', c: '#8a817c', pages: ['kpis', 'flow', 'modules', 'settings', 'info'], mods: ['weekly_report', 'advisor', 'housekeeping', 'flow'] }
