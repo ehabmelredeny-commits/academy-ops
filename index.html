@@ -782,8 +782,8 @@ SCREENS.news = { render: function (d, args) {
       '</div>' +
       (extUrl(n.url) ? '<a class="btn" style="display:block;text-align:center;margin-top:8px" target="_blank" rel="noopener" href="' + esc(extUrl(n.url)) + '">🔗 اقرأ الخبر كاملاً — ' +
         esc(extUrl(n.url).replace(/^https?:\/\/(www\.)?/, '').split('/')[0]) + '</a>' : '<div class="muted small">لا رابط لهذا الخبر</div>') + '</div>';
-  }).join('') : empty('لا أخبار');
-  html += '<h2>المصادر ' + chip(d.sources.length) + '</h2>' + d.sources.map(function (s) {
+  }).join('') : empty(args.category || args.impact ? 'لا أخبار في هذا التصنيف — اختر «—» لعرض الكل' : 'لا أخبار');
+  html += '<h2>المصادر ' + chip(d.sources.length) + '</h2><div class="muted small" style="margin:-4px 0 8px">هذه ليست أخباراً: هي المواقع التي يراقبها النظام. المفتاح الأخضر = المراقبة تعمل. الأخبار التي تُجلب منها تظهر في الأعلى برابطها.</div>' + d.sources.map(function (s) {
     return '<div class="card"><div class="row between"><b class="grow">' + esc(s.name) + '</b>' + switchHtml(s.enabled === 'مفعّل', 'srcToggle', s.src_id) + '</div>' +
       '<div class="chips">' + chip(s.kind) + chip(s.category) + chip(s.check_frequency) + (s.instant_alert === 'نعم' ? chip('تنبيه فوري', 'bad') : '') + '</div>' +
       '<div class="muted small">' + esc(s.last_status || 'لم يُفحص') + (s.last_checked ? ' · ' + fmtDate(s.last_checked, true) : '') + '</div></div>';
