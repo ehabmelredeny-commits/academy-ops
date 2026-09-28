@@ -2106,7 +2106,7 @@ ACT.calSheet = function (el) {
 };
 </script>
 
-  <script>
+  ﻿<script>
 /* ═══════════ دليل النظام: وصف كل صفحة وكل زر ووظيفته في التسويق والبيع ═══════════
  * مصدر واحد تستخدمه: (١) السطر التعريفي أعلى كل صفحة (٢) صفحة INFO كمخطط تفاعلي (٣) شرح الوحدات.
  * كل صفحة: t = الاسم · what = ماذا تفعل · why = قيمتها في التسويق/البيع · btns = [الزر، ماذا يفعل، لماذا يهمك]
@@ -2235,7 +2235,7 @@ var MODULE_INFO = {
 var INFO_STAGES = [
   { t: '١) جذب الانتباه', c: '#8d6cd8', pages: ['dailyPost', 'content', 'campaigns', 'keywords'], mods: ['daily_posts', 'content_calendar', 'campaigns', 'keywords', 'experiments', 'unified_publish'] },
   { t: '٢) استقبال العميل', c: '#3a86ff', pages: ['reply'], mods: ['inbox_email', 'inbox_forms', 'whatsapp', 'instagram', 'ingest', 'opt_out'] },
-  { t: '٣) الفهم والرد', c: '#2a9d8f', pages: ['today', 'reply'], mods: ['classify', 'lead_scoring', 'answer_bank', 'draft', 'decide', 'owner_approval', 'sla_monitor', 'dispatch'] },
+  { t: '٣) الفهم والرد', c: '#2a9d8f', pages: ['today'], mods: ['classify', 'lead_scoring', 'answer_bank', 'draft', 'decide', 'owner_approval', 'sla_monitor', 'dispatch'] },
   { t: '٤) الإغلاق والتسجيل', c: '#52b788', pages: ['courses', 'calendar', 'lead'], mods: ['closing', 'followup', 'payment_hooks'] },
   { t: '٥) بيع الشركات B2B', c: '#e76f51', pages: ['targets', 'people', 'opps', 'b2b', 'operator'], mods: ['b2b_pipeline', 'org_map', 'intel_synth'] },
   { t: '٦) استخبارات السوق', c: '#e9a23b', pages: ['news', 'exams', 'radar', 'discovery'], mods: ['news_watch', 'exam_watch', 'radar_competitors', 'discovery_weekly'] },
@@ -2247,7 +2247,7 @@ var INFO_STAGES = [
 function pageHead_(screen) {
   var p = PAGE_INFO[screen];
   var back = (S.hist && S.hist.length) ? '<button class="back" data-act="goBack">→ رجوع</button>' : '';
-  var intro = p ? '<div class="intro"><b>' + esc(p.t) + ':</b> ' + esc(p.what) +
+  var intro = p ? '<div class="intro"><b>' + esc(navName_(screen)) + ':</b> ' + esc(p.what) +
     '<details class="small" style="margin-top:4px"><summary>لماذا تهمك؟ وماذا يفعل كل زر؟</summary><div style="margin:4px 0"><b>في التسويق والبيع:</b> ' + esc(p.why) + '</div>' +
     (p.btns || []).map(function (b) { return '<div style="margin:3px 0"><b>[' + esc(b[0]) + ']</b> ' + esc(b[1]) + ' <span class="muted">— ' + esc(b[2]) + '</span></div>'; }).join('') +
     '<a href="#" data-go="info" data-args="' + attr({ focus: screen }) + '">مخطط النظام كاملاً ←</a></details></div>' : '';
@@ -2258,45 +2258,99 @@ ACT.goBack = function () {
   S.backing = true; go(h.screen, h.args);
 };
 
+/** الاسم الرسمي للصفحة = نفس اسمها في القائمة (مصدر واحد) */
+function navName_(k) {
+  var all = NAV_MAIN.concat(NAV_MORE);
+  for (var i = 0; i < all.length; i++) if (all[i][0] === k) return all[i][1];
+  return (PAGE_INFO[k] || {}).t || k;
+}
+
+var INFO = { data: null };
 SCREENS.info = { render: function (d, args) {
-  var mods = {}; (d.modules || []).forEach(function (m) { mods[m.module_key] = m; });
-  var stColor = function (m) {
-    if (!m) return 'var(--muted)';
-    if (m.enabled !== 'مفعّل') return 'var(--off)';
-    if (m.last_status === 'error') return 'var(--bad)';
-    if (m.last_status === 'deferred') return 'var(--warn)';
-    return 'var(--good)';
-  };
-  var stText = function (m) {
-    if (!m) return '';
-    if (m.enabled !== 'مفعّل') return 'متوقفة';
-    return { ok: 'تعمل', error: 'خطأ', deferred: 'تنتظر (Claude)', never: 'لم تعمل بعد', skipped: 'تخطّت' }[m.last_status] || m.last_status;
-  };
-  var html = north(d.north) + '<h1>INFO — دليل النظام</h1>' +
-    '<div class="card small">اضغط أي صفحة لترى أزرارها ووظيفة كل زر في التسويق والبيع. النقطة الملوّنة بجانب كل «عامل آلي» = حالته الآن: ' +
+  INFO.data = d;
+  var html = north(d.north) + '<h1>' + esc(navName_('info')) + '</h1>' +
+    '<div class="card small">المخطط يبيّن رحلة العميل والمال داخل النظام. <b>اضغط أي مربع</b> لترى وظيفة الصفحة وأزرارها، والعوامل الآلية التي تغذيها وحالتها الآن: ' +
     '<span class="fc-dot" style="background:var(--good)"></span>يعمل <span class="fc-dot" style="background:var(--warn)"></span>ينتظر Claude ' +
     '<span class="fc-dot" style="background:var(--bad)"></span>خطأ <span class="fc-dot" style="background:var(--off)"></span>متوقف</div>';
   if (d.counts) html += '<div class="row" style="flex-wrap:wrap">' + d.counts.map(function (c) {
     return '<div class="stat"><div class="v">' + esc(c[1]) + '</div><div class="k">' + esc(c[0]) + '</div></div>'; }).join('') + '</div>';
-  html += '<div class="fc">' + INFO_STAGES.map(function (st, i) {
-    var pages = st.pages.map(function (k) {
-      var p = PAGE_INFO[k]; if (!p) return '';
-      var open = args.focus === k;
-      return '<details class="fc-node"' + (open ? ' open id="infoFocus"' : '') + '><summary>📄 ' + esc(p.t) + ' <span class="muted small">— ' + esc(p.what) + '</span></summary>' +
-        '<div class="small" style="margin:6px 0"><b>قيمتها في التسويق والبيع:</b> ' + esc(p.why) + '</div>' +
-        (p.btns || []).map(function (b) { return '<div class="btnrow"><b>[' + esc(b[0]) + ']</b> ← ' + esc(b[1]) + '<br><span class="muted">💡 ' + esc(b[2]) + '</span></div>'; }).join('') +
-        (k !== 'info' && k !== 'operator' && k !== 'lead' ? '<div class="btns"><button class="btn sm" data-go="' + k + '">افتح الصفحة</button></div>' : '') + '</details>';
-    }).join('');
-    var ms = st.mods.map(function (k) {
-      var m = mods[k];
-      return '<div class="fc-node small"><span class="fc-dot" style="background:' + stColor(m) + '"></span><b>' + esc(m ? m.module_name_ar : k) + '</b> ' +
-        '<span class="muted">(' + esc(stText(m)) + (m && m.schedule ? ' · ' + esc(schedAr_(m.schedule)) : '') + ')</span><div>' + esc(MODULE_INFO[k] || '') + '</div></div>';
-    }).join('');
-    return (i ? '<div class="fc-arrow">⬇</div>' : '') + '<div class="fc-stage" style="border-inline-start:6px solid ' + st.c + '"><div class="t">' + esc(st.t) + '</div>' +
-      '<div class="fc-nodes">' + pages + '</div><div class="muted small" style="margin:8px 0 4px">العوامل الآلية في هذه المرحلة:</div><div class="fc-nodes">' + ms + '</div></div>';
-  }).join('') + '</div>';
+  html += '<div class="card" style="overflow-x:auto"><div id="infoChart" class="muted">جارٍ رسم المخطط…</div></div>' +
+    '<div id="infoDetail"></div>';
   return html;
-}, after: function () { var f = $('infoFocus'); if (f) f.scrollIntoView({ block: 'start' }); } };
+}, after: function (d, args) {
+  infoDraw_();
+  if (args && args.focus) infoPick(args.focus);
+} };
+
+/** نص المخطط (Mermaid): مرحلة = صندوق، صفحة = مربع قابل للضغط، والأسهم بين المراحل */
+function infoChartDef_() {
+  var lines = ['flowchart TB'];
+  var q = function (s) { return '"' + String(s).replace(/"/g, "'") + '"'; };
+  INFO_STAGES.forEach(function (st, i) {
+    lines.push('  subgraph ST' + i + '[' + q(st.t) + ']');
+    lines.push('    direction LR');
+    st.pages.forEach(function (k) { lines.push('    ' + k + '_' + i + '[' + q(navName_(k)) + ']'); });
+    lines.push('  end');
+    lines.push('  style ST' + i + ' fill:transparent,stroke:' + st.c + ',stroke-width:2px');
+    st.pages.forEach(function (k) {
+      lines.push('  style ' + k + '_' + i + ' fill:' + st.c + ',stroke:' + st.c + ',color:#fff');
+      lines.push('  click ' + k + '_' + i + ' call infoPick("' + k + '")');
+    });
+  });
+  for (var i = 0; i < INFO_STAGES.length - 1; i++) lines.push('  ST' + i + ' --> ST' + (i + 1));
+  lines.push('  ST7 -. "الأرقام تحسّن الجذب" .-> ST0');
+  return lines.join('\n');
+}
+
+function infoDraw_() {
+  var box = $('infoChart'); if (!box) return;
+  var render = function () {
+    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    window.mermaid.initialize({ startOnLoad: false, securityLevel: 'loose', theme: dark ? 'dark' : 'default',
+      flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' }, fontFamily: 'IBM Plex Sans Arabic, Tahoma, sans-serif' });
+    window.mermaid.render('infoSvg' + Date.now(), infoChartDef_()).then(function (r) {
+      box.innerHTML = r.svg; box.classList.remove('muted');
+      if (r.bindFunctions) r.bindFunctions(box);
+    }).catch(function (e) { box.textContent = 'تعذّر رسم المخطط: ' + e.message; });
+  };
+  if (window.mermaid) return render();
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+  s.onload = render;
+  s.onerror = function () { box.textContent = 'تعذّر تحميل أداة الرسم — تحقق من الإنترنت'; };
+  document.head.appendChild(s);
+}
+
+/** تفاصيل صفحة عند الضغط على مربعها */
+window.infoPick = function (k) {
+  var p = PAGE_INFO[k], d = INFO.data || {}, box = $('infoDetail');
+  if (!p || !box) return;
+  var mods = {}; (d.modules || []).forEach(function (m) { mods[m.module_key] = m; });
+  var st = INFO_STAGES.filter(function (x) { return x.pages.indexOf(k) > -1; })[0] || { mods: [], c: 'var(--accent)' };
+  var color = function (m) {
+    if (!m) return 'var(--muted)';
+    if (m.enabled !== 'مفعّل') return 'var(--off)';
+    return { error: 'var(--bad)', deferred: 'var(--warn)' }[m.last_status] || 'var(--good)';
+  };
+  var state = function (m) {
+    if (!m) return '';
+    if (m.enabled !== 'مفعّل') return 'متوقفة';
+    return { ok: 'تعمل', error: 'خطأ', deferred: 'تنتظر Claude', never: 'لم تعمل بعد', skipped: 'تخطّت' }[m.last_status] || m.last_status;
+  };
+  box.innerHTML = '<div class="card" style="border-inline-start:6px solid ' + st.c + '"><div class="row between"><b style="font-size:17px">' + esc(navName_(k)) + '</b>' +
+    (k !== 'info' && k !== 'operator' && k !== 'lead' ? '<button class="btn sm pri" data-go="' + k + '">افتح الصفحة ←</button>' : '') + '</div>' +
+    '<div style="margin:6px 0">' + esc(p.what) + '</div>' +
+    '<div class="small" style="margin-bottom:6px"><b>قيمتها في التسويق والبيع:</b> ' + esc(p.why) + '</div>' +
+    ((p.btns || []).length ? '<div class="fc-nodes">' + p.btns.map(function (b) {
+      return '<div class="fc-node small"><b>[' + esc(b[0]) + ']</b><div>' + esc(b[1]) + '</div><div class="muted">💡 ' + esc(b[2]) + '</div></div>'; }).join('') + '</div>' : '') +
+    '<div class="muted small" style="margin:10px 0 4px">العوامل الآلية في هذه المرحلة (' + esc(st.t || '') + '):</div><div class="fc-nodes">' +
+    st.mods.map(function (mk) {
+      var m = mods[mk];
+      return '<div class="fc-node small"><span class="fc-dot" style="background:' + color(m) + '"></span><b>' + esc(m ? m.module_name_ar : mk) + '</b> ' +
+        '<span class="muted">(' + esc(state(m)) + (m && m.schedule ? ' · ' + esc(schedAr_(m.schedule)) : '') + ')</span><div>' + esc(MODULE_INFO[mk] || '') + '</div></div>';
+    }).join('') + '</div></div>';
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
 /** الجدول الزمني بلغة بسيطة */
 function schedAr_(s) {
