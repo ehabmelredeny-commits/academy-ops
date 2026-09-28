@@ -201,7 +201,7 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload'];
+  var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude'];
   (function () {
     var m = /[#&]k=([\w-]+)/.exec(location.hash);
     if (m) { try { localStorage.setItem('ops_k', m[1]); } catch (e) {} history.replaceState(null, '', location.pathname + location.search); }
@@ -272,7 +272,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['sources', 'قواعد عملاء المصادر'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -454,7 +454,7 @@ document.addEventListener('click', function (e) {
   var g = e.target.closest('[data-go]');
   if (g) { e.preventDefault(); closeSheet(); go(g.getAttribute('data-go'), g.dataset.args ? JSON.parse(g.dataset.args) : {}); return; }
   var a = e.target.closest('[data-act]');
-  if (a && a.tagName !== 'INPUT' && a.tagName !== 'SELECT') {
+  if (a && a.tagName !== 'INPUT' && a.tagName !== 'SELECT' && a.tagName !== 'TEXTAREA') {
     e.preventDefault();
     var f = ACT[a.getAttribute('data-act')];
     if (f) f(a);
@@ -462,7 +462,7 @@ document.addEventListener('click', function (e) {
 });
 document.addEventListener('change', function (e) {
   var a = e.target.closest('[data-act]');
-  if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT')) { var f = ACT[a.getAttribute('data-act')]; if (f) f(a); }
+  if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT' || a.tagName === 'TEXTAREA')) { var f = ACT[a.getAttribute('data-act')]; if (f) f(a); }
 });
 
 /* ─── التحديث الحي: استدعاء خفيف كل ٦٠ ثانية، شارة «جديد» بدل إعادة التحميل ─── */
@@ -2209,7 +2209,8 @@ SCREENS.competitors = { render: function (d, args) {
       var accs = d.accounts.filter(function (x) { return String(x.ac_id) === String(c.ac_id); });
       var cls = { 'عالي': 'bad', 'متوسط': 'warn' }[c.threat_level] || '';
       html += '<div class="tree"><div class="tr-head"><div class="row between"><div class="tr-title">🏢 ' + esc(c.name) + '</div>' + chip('تهديد ' + (c.threat_level || '—'), cls) + '</div>' +
-        '<div class="chips">' + chip(c.type) + chip(c.city ? '📍 ' + c.city : '') + (c.has_operator_contract === 'نعم' ? chip('متعاقد مع مشغّل', 'bad') : '') + '</div>' +
+        '<div class="chips">' + chip(c.type) + chip(c.city ? '📍 ' + c.city : '') + chip(c.apply_method ? '🎓 ' + c.apply_method : '') + (c.has_operator_contract === 'نعم' ? chip('متعاقد مع مشغّل', 'bad') : '') + '</div>' +
+        (c.address ? '<div class="small">العنوان: ' + esc(c.address) + (extUrl(c.maps_url) ? ' · <a target="_blank" href="' + esc(extUrl(c.maps_url)) + '">الخريطة</a>' : '') + (c.address_status ? ' <span class="muted">(' + esc(c.address_status) + ')</span>' : '') + '</div>' : '') +
         (c.programs ? '<div class="small">البرامج: ' + esc(c.programs) + '</div>' : '') +
         '<div class="small">' + [c.phone ? '☎ ' + esc(c.phone) : '', c.email ? '✉ ' + esc(c.email) : '', extUrl(c.website) ? '<a target="_blank" href="' + esc(extUrl(c.website)) + '">الموقع</a>' : '',
           c.ad_library_url ? '<a target="_blank" href="' + esc(extUrl(c.ad_library_url)) + '">إعلاناتهم على Meta</a>' : ''].filter(String).join(' · ') + '</div>' +
@@ -2252,7 +2253,7 @@ ACT.compNew = function () { compForm_({}); };
 ACT.compEdit = function (el) { compForm_(COMP.data.competitors.filter(function (c) { return String(c.ac_id) === el.dataset.id; })[0] || {}); };
 function compForm_(c) {
   openSheet('<h1>' + (c.ac_id ? 'تعديل منافس' : 'منافس جديد') + '</h1>' + compField_('cf_name', 'الاسم *', c.name) + compField_('cf_type', 'النوع (أكاديمية / معهد / مدرب مستقل…)', c.type) +
-    compField_('cf_city', 'المدينة / المكان', c.city) + compField_('cf_programs', 'البرامج التي يقدمها', c.programs) + compField_('cf_website', 'الموقع', c.website, 'url') +
+    compField_('cf_city', 'المدينة / المكان', c.city) + compField_('cf_addr', 'العنوان', c.address) + compField_('cf_apply', 'طريقة التقديم / الحضور', c.apply_method) + compField_('cf_programs', 'البرامج التي يقدمها', c.programs) + compField_('cf_website', 'الموقع', c.website, 'url') +
     compField_('cf_phone', 'هاتف الجهة', c.phone) + compField_('cf_email', 'بريد الجهة', c.email) +
     '<label class="f">متعاقد مع مشغّل أندية؟</label><select id="cf_contract">' + opt(['لا', 'نعم'], c.has_operator_contract || 'لا') + '</select>' +
     '<label class="f">ملاحظات</label><textarea id="cf_notes">' + esc(c.notes || '') + '</textarea>' +
@@ -2260,7 +2261,7 @@ function compForm_(c) {
 }
 ACT.compSave = function (el) {
   var c = { ac_id: el.dataset.id, name: val('cf_name'), type: val('cf_type'), city: val('cf_city'), programs: val('cf_programs'), website: val('cf_website'),
-    phone: val('cf_phone'), email: val('cf_email'), has_operator_contract: val('cf_contract'), notes: val('cf_notes') };
+    phone: val('cf_phone'), email: val('cf_email'), address: val('cf_addr'), apply_method: val('cf_apply'), has_operator_contract: val('cf_contract'), notes: val('cf_notes') };
   if (!c.name.trim()) return toast('الاسم مطلوب', true);
   api('action', 'competitorSave', { competitor: c }).then(function () { closeSheet(); toast('حُفظ'); go('competitors', S.args, true); }).catch(function (e) { toast(errMsg(e), true); });
 };
@@ -2313,6 +2314,600 @@ ACT.compAccDel = function (el) {
 };
 </script>
 
+  <script>
+/* ⚠️ مولَّد من seed/search-queries.json و src/core/SearchQuery.gs — لا تعدّله يدوياً. */
+var SEARCH_CATALOG = {"meta":{"name":"Market & Lead Search Query Catalog","domain":"Fitness education / Personal Trainer academy — KSA","locale":"ar-SA","version":"1.0.0","lastUpdated":"2026-09-28","owner":"Ehab Mohamed Elredeny","notes":"بيانات سوقية استكشافية فقط. لا تُستخدم كمرجع علمي في أي منهج تدريبي."},"placeholders":{"CITY":{"label":"المدينة","default":"الرياض","options":["الرياض","جدة","الدمام","الخبر","مكة","المدينة","NEOM","القدية"]},"COUNTRY":{"label":"الدولة","default":"السعودية","options":["السعودية","الإمارات","الكويت","قطر","البحرين","عُمان"]},"TLD":{"label":"نطاق الدولة","default":"sa","options":["sa","ae","kw","qa","bh","om"]},"FIELD":{"label":"المجال","default":"لياقة"},"SERVICE":{"label":"الخدمة","default":"دورة مدرب شخصي"},"JOB_TITLE":{"label":"المسمى المهني","default":"مدرب لياقة"},"FACILITY":{"label":"نوع المنشأة","default":"نادي رياضي"},"COMPETITOR_DOMAIN":{"label":"نطاق منافس","default":""},"DATE_FROM":{"label":"من تاريخ","default":"2026-01-01"},"DATE_TO":{"label":"إلى تاريخ","default":"2027-01-01"},"EXCLUDE":{"label":"كلمة مستبعدة","default":"وظائف"},"INTEREST_PHRASE":{"label":"عبارة اهتمام","default":"تواصل معنا"}},"intentLevels":{"transactional":{"label":"نيّة شرائية مباشرة","weight":5,"description":"الباحث في مرحلة القرار — أعلى تحويل"},"commercial":{"label":"مقارنة وتسعير","weight":4,"description":"يقارن بين مزوّدين قبل القرار"},"buying_signal":{"label":"إشارة شراء مؤسسية","weight":5,"description":"توسّع أو نقص كوادر — توقيت التواصل حرج"},"informational":{"label":"استكشاف ومعلومات","weight":2,"description":"يبني وعياً — هدف محتوى لا مبيعات"},"navigational":{"label":"بحث عن كيان بعينه","weight":3,"description":"يستهدف جهة محددة"},"monitoring":{"label":"رصد سوقي","weight":1,"description":"قياس حجم وصياغة رسائل — لا استخراج أفراد"}},"audiences":{"b2b_operator":"مشغّل نادٍ أو سلسلة","b2b_academy":"أكاديمية أو معهد","b2c_student":"طالب دورة تدريب مدربين","b2c_client":"عميل تدريب شخصي","trainer":"مدرب — توظيف أو تأهيل","regulator":"جهة تنظيمية أو اعتماد","competitor":"منافس"},"compliance":{"PDPL":{"label":"نظام حماية البيانات الشخصية (السعودية)","rule":"جمع بيانات أفراد من منشوراتهم واستخدامها في تسويق مباشر يتطلب أساساً نظامياً والأصل فيه الموافقة.","systemBehavior":"الفئات الموسومة pdpl_restricted تعرض النتائج كإحصاءات مجمّعة فقط. تعطيل تصدير معرّفات الأفراد وروابط الحسابات الشخصية وبيانات التواصل. عرض تنبيه قبل التشغيل.","actionRequired":"مراجعة قانونية قبل أي تواصل تسويقي مع أفراد."},"NON_COMPETE":{"label":"قيد عدم المنافسة","rule":"استبعاد السلاسل التجارية الكبرى المنافسة لأكاديميات التدريب الرياضي.","blocklist":["Leejam","ليجام","Fitness Time","فتنس تايم","وقت اللياقة","Fitness First","فتنس فيرست"],"allowlistConfirmed":["Body Master","بودي ماستر"],"systemBehavior":"وسم كل كيان في نتائج B2B بحالة: blocked / allowed / review. منع تصدير blocked إلى قوائم التواصل."},"EVIDENCE_SCOPE":{"label":"نطاق الاستخدام العلمي","rule":"نتائج هذا النظام بيانات سوقية. غير صالحة كمرجع علمي في أي منهج تدريبي.","systemBehavior":"وسم كل تصدير بـ 'Market Intelligence — Not Scientific Evidence'."}},"operators":{"site":{"syntax":"site:example.com","use":"حصر النتائج في نطاق واحد"},"intitle":{"syntax":"intitle:\"عبارة\"","use":"العبارة في عنوان الصفحة — يستبعد الذكر العرضي"},"inurl":{"syntax":"inurl:كلمة","use":"الكلمة في المسار — يكشف صفحات الدورات والتواصل"},"allintext":{"syntax":"allintext:كلمة1 كلمة2","use":"كل الكلمات في نص الصفحة"},"filetype":{"syntax":"filetype:pdf","use":"أدلة ومناهج ووثائق رسمية"},"related":{"syntax":"related:example.com","use":"مواقع مشابهة بنيوياً — يكشف منافسين غير متوقعين"},"AROUND":{"syntax":"\"أ\" AROUND(5) \"ب\"","use":"تقارب لفظي — يرفع دقة النيّة"},"OR":{"syntax":"(\"أ\" OR \"ب\") \"ج\"","use":"الأقواس إلزامية وإلا طُبّق OR على الطرف الأخير فقط"},"exclude":{"syntax":"-كلمة  /  -inurl:job","use":"استبعاد الضوضاء"},"wildcard_site":{"syntax":"site:*.gov.sa","use":"كل النطاقات الفرعية"},"after_before":{"syntax":"after:2026-01-01 before:2027-01-01","use":"التاريخ تقدير من محرك البحث — موثوق للأخبار، ضعيف للسوشيال"}},"composer":{"description":"طبقة تركيبية: يُبنى الاستعلام النهائي من استعلام أساسي + مُضيِّقات متعددة تُدمج بالترتيب. كل مُضيِّق مستقل ويمكن تفعيل أكثر من واحد معاً.","assemblyOrder":["base","scope","precision","recency","format","exclusion"],"joinWith":" ","rules":["لا تكرر نفس المعامل مرتين في استعلام واحد إلا site: عبر OR داخل أقواس.","allintext: و allintitle: يُلغيان المعاملات الأخرى في نفس الاستعلام — استخدمهما منفردين.","related: لا يُدمج مع site: — تعارض منطقي.","الحد العملي: 32 كلمة لكل استعلام. تجاوزها يُسقط الزائد صامتاً.","عند تفعيل أكثر من 4 مُضيِّقات، النتائج تقترب من الصفر — يوصى بالتدرج."],"layers":{"scope":{"label":"نطاق البحث","multiSelect":true,"modifiers":[{"id":"saudi_domains","label":"مواقع سعودية فقط","fragment":"site:*.{TLD}"},{"id":"gov_only","label":"جهات حكومية فقط","fragment":"site:*.gov.{TLD}"},{"id":"edu_only","label":"جهات تعليمية فقط","fragment":"site:*.edu.{TLD}"},{"id":"linkedin_company","label":"صفحات شركات LinkedIn","fragment":"site:linkedin.com/company/"},{"id":"linkedin_people","label":"ملفات أشخاص LinkedIn","fragment":"site:linkedin.com/in/","compliance":["PDPL"]},{"id":"instagram","label":"Instagram","fragment":"site:instagram.com"},{"id":"x_platform","label":"X","fragment":"site:x.com"},{"id":"social_all","label":"كل المنصات الاجتماعية","fragment":"(site:instagram.com OR site:x.com OR site:tiktok.com OR site:linkedin.com)"},{"id":"jadarat","label":"جدارات","fragment":"site:jadarat.sa"},{"id":"similar_to","label":"مواقع شبيهة بمنافس","fragment":"related:{COMPETITOR_DOMAIN}","conflictsWith":["saudi_domains","gov_only","edu_only","linkedin_company","linkedin_people","instagram","x_platform","social_all","jadarat"]}]},"precision":{"label":"دقة المطابقة","multiSelect":true,"modifiers":[{"id":"in_title","label":"العبارة في عنوان الصفحة","fragment":"intitle:\"{TERM}\"","effect":"يستبعد الذكر العرضي — أقوى مُضيِّق منفرد"},{"id":"in_url_courses","label":"صفحة دورات","fragment":"inurl:courses"},{"id":"in_url_contact","label":"صفحة تواصل","fragment":"inurl:contact"},{"id":"in_url_register","label":"صفحة تسجيل","fragment":"(inurl:register OR inurl:signup OR inurl:تسجيل)"},{"id":"in_url_price","label":"صفحة أسعار","fragment":"(inurl:price OR inurl:pricing OR inurl:الاسعار)"},{"id":"proximity","label":"تقارب لفظي","fragment":"\"{TERM_A}\" AROUND(5) \"{TERM_B}\"","effect":"يرفع دقة النيّة — الكلمتان في سياق واحد"},{"id":"all_text","label":"كل الكلمات في النص","fragment":"allintext:{TERMS}","exclusive":true,"warning":"يُلغي بقية المعاملات"}]},"recency":{"label":"الحداثة","multiSelect":false,"warning":"التاريخ تقدير من محرك البحث — موثوق للأخبار والمواقع المؤسسية، ضعيف للسوشيال","modifiers":[{"id":"last_30d","label":"آخر 30 يوماً","fragment":"after:{DATE_MINUS_30}"},{"id":"last_90d","label":"آخر 90 يوماً","fragment":"after:{DATE_MINUS_90}"},{"id":"this_year","label":"هذا العام","fragment":"after:{DATE_FROM}"},{"id":"custom_range","label":"فترة مخصصة","fragment":"after:{DATE_FROM} before:{DATE_TO}"}]},"format":{"label":"نوع الملف","multiSelect":false,"modifiers":[{"id":"pdf","label":"PDF","fragment":"filetype:pdf","useFor":"أدلة ومناهج ووثائق رسمية"},{"id":"docs","label":"مستندات","fragment":"(filetype:doc OR filetype:docx)"},{"id":"sheets","label":"جداول","fragment":"(filetype:xls OR filetype:xlsx)"},{"id":"slides","label":"عروض","fragment":"(filetype:ppt OR filetype:pptx)"}]},"exclusion":{"label":"استبعاد الضوضاء","multiSelect":true,"modifiers":[{"id":"no_jobs","label":"بدون إعلانات وظائف","fragment":"-وظائف -راتب -inurl:job -inurl:vacancy -inurl:careers"},{"id":"no_products","label":"بدون ملابس ومعدات","fragment":"-ملابس -معدات -مكملات -بروتين"},{"id":"no_video","label":"بدون فيديو","fragment":"-site:youtube.com -site:tiktok.com"},{"id":"no_aggregators","label":"بدون مواقع تجميع","fragment":"-site:pinterest.com -site:quora.com -site:slideshare.net"},{"id":"no_competitors","label":"استبعاد منافسين محددين","fragment":"-site:{COMPETITOR_DOMAIN}"},{"id":"non_compete_block","label":"استبعاد قيد عدم المنافسة","fragment":"-\"Fitness Time\" -\"وقت اللياقة\" -Leejam -ليجام -\"Fitness First\"","auto":true,"appliesTo":["b2b_leads","buying_signals"],"compliance":["NON_COMPETE"]},{"id":"custom_exclude","label":"كلمة مستبعدة مخصصة","fragment":"-{EXCLUDE}","repeatable":true}]}},"presets":[{"id":"hot_b2b_lead","label":"عميل B2B ساخن","description":"نادٍ يتوسع، سعودي، حديث، مع صفحة تواصل، خارج قيد عدم المنافسة","base":"\"{FACILITY}\" \"{CITY}\"","layers":{"scope":["saudi_domains"],"precision":["in_url_contact"],"recency":"last_90d","exclusion":["no_jobs","non_compete_block"]},"example":"\"نادي رياضي\" \"الرياض\" site:*.sa inurl:contact after:2026-06-30 -وظائف -راتب -inurl:job -\"Fitness Time\" -Leejam"},{"id":"ready_to_enroll","label":"طالب جاهز للتسجيل","description":"نيّة تسجيل صريحة، صفحة تسجيل فعلية، بدون ضوضاء وظائف","base":"\"دورة مدرب شخصي\" \"{CITY}\"","layers":{"precision":["in_title","in_url_register"],"exclusion":["no_jobs","no_video"]},"example":"intitle:\"دورة مدرب شخصي\" \"الرياض\" (inurl:register OR inurl:signup) -وظائف -راتب -inurl:job -site:youtube.com"},{"id":"competitor_pricing","label":"تسعير المنافسين","description":"صفحات أسعار فعلية لدى مزوّدين سعوديين، محدّثة","base":"\"دورة مدرب شخصي\" \"رسوم\"","layers":{"scope":["saudi_domains"],"precision":["in_url_price"],"recency":"this_year","exclusion":["no_video","no_aggregators"]},"example":"\"دورة مدرب شخصي\" \"رسوم\" site:*.sa (inurl:price OR inurl:pricing) after:2026-01-01 -site:youtube.com"},{"id":"regulatory_docs","label":"وثائق تنظيمية","description":"أدلة ولوائح رسمية بصيغة PDF من جهات حكومية","base":"\"ترخيص\" \"معهد تدريب رياضي\"","layers":{"scope":["gov_only"],"format":"pdf"},"example":"\"ترخيص\" \"معهد تدريب رياضي\" site:*.gov.sa filetype:pdf"},{"id":"expansion_radar","label":"رادار التوسّع","description":"إشارات افتتاح فروع حديثة — يُجدول أسبوعياً","base":"(\"افتتاح فرع\" OR \"افتتاح قريباً\") \"{FACILITY}\" \"{CITY}\"","layers":{"recency":"last_30d","exclusion":["non_compete_block","no_aggregators"]},"schedule":"weekly"}]},"categories":[{"id":"b2b_leads","order":2,"label":"توليد عملاء B2B","labelEn":"B2B Lead Generation","audience":"b2b_operator","intent":"navigational","priority":2,"outputType":"entity_list","extractFields":["entityName","website","phone","email","branchCount","city","nonCompeteStatus"],"compliance":["NON_COMPETE"],"queries":["\"نادي رياضي\" \"{CITY}\" \"تواصل معنا\"","\"أكاديمية رياضية\" \"{CITY}\"","\"أكاديمية كرة قدم\" \"{CITY}\"","\"سلسلة أندية\" \"{COUNTRY}\"","(\"نادي صحي\" OR \"صالة رياضية\" OR \"جيم\") \"{CITY}\" \"فروعنا\"","\"نادي نسائي\" \"{CITY}\" \"فروع\"","site:linkedin.com/company/ \"fitness\" \"Riyadh\"","site:instagram.com \"أكاديمية رياضية\" \"{CITY}\"","intitle:\"نادي رياضي\" \"{CITY}\"","inurl:contact \"fitness\" site:*.{TLD}","allintext:\"نادي رياضي\" \"{CITY}\" \"فروع\""]},{"id":"buying_signals","order":1,"label":"إشارات شراء — توسّع ونقص كوادر","labelEn":"Buying Signals","audience":"b2b_operator","intent":"buying_signal","priority":1,"outputType":"entity_list","extractFields":["entityName","signalType","signalDate","city","sourceUrl","nonCompeteStatus"],"compliance":["NON_COMPETE"],"timing":"التواصل خلال 14 يوماً من رصد الإشارة","recommendedSchedule":"weekly","queries":["\"افتتاح فرع\" \"نادي رياضي\" \"{CITY}\"","\"افتتاح نادي رياضي\" \"{CITY}\" after:{DATE_FROM}","\"مطلوب مدربين\" \"{CITY}\"","\"تدريب موظفي الأندية\" \"{COUNTRY}\"","site:jadarat.sa \"مدرب لياقة\"","site:jadarat.sa \"مدرب رياضي\" \"{CITY}\"","\"توسع\" \"أندية رياضية\" \"{COUNTRY}\" after:{DATE_FROM}","\"نادي رياضي\" AROUND(5) \"افتتاح قريباً\"","intitle:\"وظائف\" \"مدرب لياقة\" \"{CITY}\""]},{"id":"high_intent_students","order":3,"label":"نيّة عالية — طلاب جاهزون للتسجيل","labelEn":"High-Intent Students","audience":"b2c_student","intent":"transactional","priority":1,"outputType":"keyword_map","extractFields":["query","topRankingPages","competitorPresence","contentGap"],"useFor":["SEO","PPC","content_planning"],"queries":["\"وين دورة مدرب شخصي\"","\"كيف أصير مدرب رياضي\"","\"كيف احصل على شهادة مدرب\"","\"أبي دورة تدريب\" \"{CITY}\"","\"ابغى ادرس مدرب شخصي\"","\"شروط الالتحاق\" \"دورة مدرب شخصي\"","\"مدة دورة مدرب شخصي\"","\"التسجيل في دورة مدرب شخصي\" \"{CITY}\"","intitle:\"دورة مدرب شخصي\" \"{CITY}\"","\"دورة مدرب\" \"{CITY}\" -وظائف -راتب -inurl:job","\"مدرب شخصي\" AROUND(5) \"تسجيل\"","site:x.com \"دورة مدرب شخصي\""]},{"id":"pricing_comparison","order":4,"label":"نيّة متوسطة — مقارنة وتسعير","labelEn":"Pricing & Comparison","audience":"b2c_student","intent":"commercial","priority":2,"outputType":"pricing_table","extractFields":["provider","courseName","hours","priceSAR","accreditationClaimed","accreditationVerified","capturedAt","sourceUrl"],"compliance":["EVIDENCE_SCOPE"],"requireSnapshot":true,"queries":["\"كم سعر دورة مدرب شخصي\"","\"كم سعر دورة مدرب شخصي\" \"{COUNTRY}\"","\"أفضل دورة مدرب شخصي\" \"{COUNTRY}\"","\"شهادة مدرب لياقة\" \"معتمدة\"","\"دبلوم مدرب شخصي\" \"{COUNTRY}\"","\"معهد تدريب رياضي\" \"{CITY}\" \"رسوم\"","(\"CPT\" OR \"REPs\" OR \"EREPs\") \"{COUNTRY}\" \"اعتماد\"","allintext:\"مدرب شخصي\" \"معتمد\" \"{CITY}\"","inurl:courses \"fitness\" site:*.{TLD}"]},{"id":"competitive_intel","order":5,"label":"استخبارات تنافسية","labelEn":"Competitive Intelligence","audience":"competitor","intent":"monitoring","priority":2,"outputType":"competitor_profile","extractFields":["provider","positioning","channels","offerings","claims","sourceUrl"],"queries":["related:{COMPETITOR_DOMAIN}","\"دورات رياضية\" -site:youtube.com","\"دورة مدرب شخصي\" after:{DATE_FROM}","site:instagram.com/p/ \"دورات رياضية\" \"{COUNTRY}\"","site:instagram.com/reel/ \"تدريب رياضي\" \"{CITY}\"","site:youtube.com \"شهادة مدرب شخصي\"","intitle:\"معهد\" \"تدريب رياضي\" \"{COUNTRY}\""]},{"id":"regulatory","order":6,"label":"التحقق والامتثال التنظيمي","labelEn":"Regulatory & Accreditation","audience":"regulator","intent":"informational","priority":3,"outputType":"document_list","extractFields":["authority","documentTitle","requirement","issuedDate","sourceUrl"],"useFor":["licensing","sales_differentiation","competitor_claim_verification"],"queries":["site:*.gov.sa \"ترخيص\" \"معهد\" \"رياضي\"","(\"ترخيص\" OR \"اعتماد\") \"معهد تدريب\" site:gov.sa","\"وزارة الرياضة\" (\"اعتماد\" OR \"ترخيص\") \"مدرب\"","site:hrsd.gov.sa \"مدرب لياقة\"","\"المؤسسة العامة للتدريب التقني والمهني\" \"مدرب رياضي\"","filetype:pdf \"تدريب المدربين\" \"{COUNTRY}\"","\"دليل المدرب\" filetype:pdf \"{COUNTRY}\""]},{"id":"events_networking","order":7,"label":"شبكات ومؤتمرات","labelEn":"Events & Networking","audience":"b2b_operator","intent":"navigational","priority":3,"outputType":"event_list","extractFields":["eventName","date","city","audience","registrationUrl"],"recommendedSchedule":"monthly","queries":["\"مؤتمر رياضي\" after:{DATE_FROM} before:{DATE_TO}","(\"Fitness Expo\" OR \"معرض رياضي\") \"{CITY}\" 2027","\"ملتقى\" \"اللياقة البدنية\" \"{COUNTRY}\"","site:reddit.com \"personal trainer\" \"Riyadh\""]},{"id":"trainer_sourcing","order":8,"label":"استقطاب مدربين","labelEn":"Trainer Sourcing","audience":"trainer","intent":"navigational","priority":3,"outputType":"profile_list","extractFields":["displayName","platform","profileUrl","city","certifications"],"compliance":["PDPL"],"pdplNote":"بيانات مهنية منشورة علناً. التواصل المهني مقبول؛ الإدراج في قوائم تسويقية جماعية غير مقبول دون موافقة.","queries":["site:linkedin.com/in/ \"fitness trainer\" \"Riyadh\"","site:linkedin.com/in/ \"مدرب رياضي\" \"{COUNTRY}\"","site:instagram.com \"مدرب شخصي\" \"{CITY}\"","site:instagram.com \"مدربة شخصية\" \"{CITY}\"","site:instagram.com \"personal trainer\" \"Riyadh\"","(\"كابتن\" OR \"كوتش\") \"لياقة\" \"{CITY}\"","site:facebook.com/groups/ \"لياقة\" \"{CITY}\""]},{"id":"b2c_demand_monitoring","order":9,"label":"نيّة عملاء أفراد — رصد سوقي فقط","labelEn":"B2C Demand Monitoring","audience":"b2c_client","intent":"monitoring","priority":4,"outputType":"aggregate_only","extractFields":["query","resultCount","sentimentThemes","commonPhrasing"],"compliance":["PDPL"],"pdplRestricted":true,"systemBehavior":"عرض إحصاءات مجمّعة فقط. تعطيل تصدير الحسابات والروابط الشخصية وبيانات التواصل. تنبيه إلزامي قبل التشغيل.","queries":["(\"مدرب شخصي\" OR \"مدرب لياقة\") \"{CITY}\"","\"أبحث عن مدرب\" \"{CITY}\"","\"ابحث عن مدرب\" \"{CITY}\"","\"أحتاج مدرب شخصي\" \"{CITY}\"","\"ابي مدرب\" \"{CITY}\"","(\"أبغى\" OR \"ادور\" OR \"ودي\") مدرب \"{CITY}\"","\"مدرب خاص\" \"{CITY}\"","site:x.com \"أبحث عن مدرب\" \"{CITY}\"","site:tiktok.com \"مدرب لياقة\" \"{CITY}\""]},{"id":"broad_discovery","order":10,"label":"مسح واسع — استكشاف أولي","labelEn":"Broad Discovery","audience":"b2b_operator","intent":"informational","priority":5,"outputType":"raw_results","noiseLevel":"high","queries":["site:instagram.com \"رياضة\" \"{CITY}\"","site:instagram.com \"لياقة\" \"{CITY}\"","site:instagram.com \"fitness\" \"Riyadh\"","\"لياقة\" \"{CITY}\" -ملابس -معدات"]},{"id":"generic_templates","order":11,"label":"قوالب قابلة للتعميم","labelEn":"Reusable Templates","audience":"b2b_operator","intent":"navigational","priority":5,"outputType":"template","isTemplate":true,"queries":["site:instagram.com \"{FIELD}\" \"{CITY}\"","site:x.com \"أبحث عن {SERVICE}\" \"{CITY}\"","site:linkedin.com/in/ \"{JOB_TITLE}\" \"{CITY}\"","site:linkedin.com/company/ \"{FIELD}\" \"{CITY}\"","\"{FIELD}\" \"{CITY}\" \"{INTEREST_PHRASE}\"","\"{FIELD}\" \"{CITY}\" \"تواصل معنا\"","\"أفضل {SERVICE}\" \"{CITY}\"","\"كم سعر {SERVICE}\" \"{CITY}\"","\"التسجيل في {SERVICE}\" \"{CITY}\"","\"مطلوب {JOB_TITLE}\" \"{CITY}\"","\"افتتاح\" \"{FACILITY}\" \"{CITY}\" after:{DATE_FROM}","intitle:\"{SERVICE}\" \"{CITY}\"","inurl:courses \"{FIELD}\" site:*.{TLD}","related:{COMPETITOR_DOMAIN}","\"{FIELD}\" \"{CITY}\" -{EXCLUDE}"]}],"externalSources":[{"id":"keyword_planner","name":"Google Keyword Planner","purpose":"أحجام البحث الفعلية وتكلفة النقرة","cost":"مجاني مع حساب إعلانات","fillsGap":"قياس حجم الطلب رقمياً — غير متاح عبر استعلامات Google","priority":1},{"id":"google_trends","name":"Google Trends","purpose":"الموسمية والاتجاه حسب المنطقة","cost":"مجاني","priority":1},{"id":"jadarat","name":"جدارات","url":"jadarat.sa","purpose":"إعلانات توظيف المدربين كمؤشر طلب كمّي","priority":1},{"id":"google_maps","name":"Google Maps / Places API","purpose":"حصر الأندية بالحي مع بيانات التواصل","fillsGap":"أسرع مصدر لبناء قائمة B2B","priority":1},{"id":"google_alerts","name":"Google Alerts","purpose":"رصد مستمر لإشارات التوسع","cost":"مجاني","priority":2},{"id":"etimad","name":"اعتماد","url":"etimad.sa","purpose":"منافسات خدمات التدريب الحكومية","requires":"كيان مسجّل","priority":3},{"id":"business_center","name":"المركز السعودي للأعمال","purpose":"التحقق من السجل التجاري وحجم المنشأة","priority":2},{"id":"x_advanced","name":"X Advanced Search","purpose":"lang:ar + since/until — أدق من site:x.com","priority":2},{"id":"wayback","name":"Wayback Machine","purpose":"تتبّع تغيّر أسعار المنافسين تاريخياً","cost":"مجاني","priority":3},{"id":"answerthepublic","name":"AnswerThePublic / AlsoAsked","purpose":"استخراج أسئلة الجمهور لبناء خريطة محتوى","priority":3},{"id":"sales_navigator","name":"LinkedIn Sales Navigator","purpose":"فلترة دقيقة بالموقع والشركة والمسمى","cost":"مدفوع","priority":3},{"id":"seo_tools","name":"Ahrefs / SEMrush","purpose":"كلمات المنافسين ومصادر زياراتهم","cost":"مدفوع / tier مجاني","priority":4},{"id":"cert_registries","name":"سجلات NASM / ACE / ISSA / Active IQ / TVTC","purpose":"التحقق من الاعتمادات المُدّعاة","fillsGap":"يكشف ادعاءات غير موثقة ويبني تمايزاً","priority":2}],"knownLimitations":["فهرسة Google لـ Instagram و X و TikTok جزئية — النتائج عيّنة لا حصر.","after:/before: تعتمد تاريخاً يقدّره محرك البحث — موثوقة للأخبار، ضعيفة للسوشيال.","site:linkedin.com/in/ + اسم المدينة لا يضمن موقع الشخص الحالي.","محتوى مجموعات Facebook غالباً غير مفهرس.","نتائج Google متغيرة وغير قابلة لإعادة الإنتاج — سجّل التاريخ والرابط ولقطة الشاشة.","لا شيء في هذا الكتالوج يقيس حجم الطلب رقمياً — استخدم Keyword Planner و Trends."]};
+/**
+ * SearchQuery.gs — مُركِّب استعلامات كتالوج البحث (مصدر واحد: يُنسخ آلياً إلى الواجهة عبر scripts/build-seed.js).
+ * بلا اعتماد على خدمات Google: دوال نقية تعمل في الخادم والمتصفح.
+ *   fill      استبدال {PLACEHOLDERS} (+ DATE_MINUS_30/90 و TERM/TERM_A/TERM_B/TERMS)
+ *   check     قواعد التركيب: exclusive يمنع غيره، conflictsWith يمنع التعارض، multiSelect=false يسمح بواحد
+ *   build     يجمع الاستعلام بترتيب assemblyOrder ويحقن non_compete_block تلقائياً في فئات B2B
+ *   words     عدّ الكلمات (Google يُسقط ما بعد ٣٢ كلمة صامتاً)
+ *   nonCompete وسم كيان: blocked / allowed / review
+ */
+var SearchQuery = (function () {
+  var MAX_WORDS = 32;
+
+  function pad_(n) { return (n < 10 ? '0' : '') + n; }
+  function iso_(d) { return d.getFullYear() + '-' + pad_(d.getMonth() + 1) + '-' + pad_(d.getDate()); }
+
+  /** قيم المتغيرات: الافتراضي من الكتالوج ← ما حفظه المالك ← مصطلحات المُركِّب */
+  function values(catalog, saved, terms) {
+    var v = {}, ph = catalog.placeholders || {};
+    Object.keys(ph).forEach(function (k) { v[k] = ph[k]['default'] === undefined ? '' : String(ph[k]['default']); });
+    Object.keys(saved || {}).forEach(function (k) { if (saved[k] !== '' && saved[k] !== undefined && saved[k] !== null) v[k] = String(saved[k]); });
+    var now = new Date();
+    var m30 = new Date(now.getTime() - 30 * 864e5), m90 = new Date(now.getTime() - 90 * 864e5);
+    v.DATE_MINUS_30 = iso_(m30); v.DATE_MINUS_90 = iso_(m90);
+    terms = terms || {};
+    v.TERM = terms.TERM || v.SERVICE || '';
+    v.TERM_A = terms.TERM_A || v.FACILITY || '';
+    v.TERM_B = terms.TERM_B || v.CITY || '';
+    v.TERMS = terms.TERMS || ((v.SERVICE || '') + ' ' + (v.CITY || '')).trim();
+    return v;
+  }
+
+  function fill(str, v) {
+    return String(str || '').replace(/\{([A-Z_0-9]+)\}/g, function (m, k) { return v[k] !== undefined ? v[k] : m; });
+  }
+
+  /** متغيرات بلا قيمة بعد الاستبدال (مثل {COMPETITOR_DOMAIN} الفارغ) */
+  function missing(q) { var m = String(q).match(/\{[A-Z_0-9]+\}/g); return m ? m.filter(function (x, i, a) { return a.indexOf(x) === i; }) : []; }
+
+  function words(q) { return String(q || '').trim().split(/\s+/).filter(String).length; }
+
+  function modById_(catalog) {
+    var out = {}, layers = catalog.composer.layers;
+    Object.keys(layers).forEach(function (L) { layers[L].modifiers.forEach(function (m) { out[m.id] = { layer: L, m: m }; }); });
+    return out;
+  }
+
+  /** كل المُضيِّقات المختارة كقائمة معرّفات */
+  function selectedIds(sel) {
+    var ids = [];
+    ['scope', 'precision', 'exclusion'].forEach(function (L) { (sel[L] || []).forEach(function (id) { ids.push(id); }); });
+    if (sel.recency) ids.push(sel.recency);
+    if (sel.format) ids.push(sel.format);
+    return ids;
+  }
+
+  /**
+   * يعيد { blocked: {id: السبب} } — ما لا يجوز اختياره الآن بسبب الاختيارات الحالية.
+   * الواجهة تعطّل هذه الخيارات (منع، لا تحذير فقط).
+   */
+  function check(catalog, sel) {
+    var byId = modById_(catalog), ids = selectedIds(sel), blocked = {};
+    var exclusive = ids.filter(function (id) { return byId[id] && byId[id].m.exclusive; });
+    Object.keys(byId).forEach(function (id) {
+      var mm = byId[id].m;
+      if (ids.indexOf(id) > -1) return;
+      if (exclusive.length) { blocked[id] = '«' + byId[exclusive[0]].m.label + '» يُستخدم منفرداً'; return; }
+      if (mm.exclusive && ids.length) { blocked[id] = 'يُستخدم منفرداً — ألغِ المُضيِّقات الأخرى أولاً'; return; }
+      // تعارض في الاتجاهين
+      var clash = ids.filter(function (s) {
+        var sm = byId[s] && byId[s].m;
+        return (mm.conflictsWith || []).indexOf(s) > -1 || (sm && (sm.conflictsWith || []).indexOf(id) > -1);
+      });
+      if (clash.length) blocked[id] = 'يتعارض مع «' + byId[clash[0]].m.label + '»';
+    });
+    return { blocked: blocked, count: ids.length };
+  }
+
+  /**
+   * base + sel → الاستعلام النهائي.
+   * sel = { scope:[], precision:[], recency:'', format:'', exclusion:[], customExcludes:[] }
+   * opts = { categoryId, values }
+   */
+  function build(catalog, base, sel, opts) {
+    opts = opts || {};
+    var v = opts.values || values(catalog, {}, {});
+    var byId = modById_(catalog), order = catalog.composer.assemblyOrder, parts = [], notes = [], errors = [];
+    sel = sel || {};
+    // حقن تلقائي لقيد عدم المنافسة في فئات B2B
+    var excl = (sel.exclusion || []).slice(), autoAdded = [];
+    catalog.composer.layers.exclusion.modifiers.forEach(function (m) {
+      if (m.auto && (m.appliesTo || []).indexOf(opts.categoryId) > -1 && excl.indexOf(m.id) === -1) { excl.push(m.id); autoAdded.push(m.label); }
+    });
+    var s2 = { scope: sel.scope || [], precision: sel.precision || [], recency: sel.recency || '', format: sel.format || '', exclusion: excl };
+    var chk = check(catalog, s2);
+    selectedIds(s2).forEach(function (id) { if (chk.blocked[id]) errors.push(chk.blocked[id]); });
+    order.forEach(function (L) {
+      if (L === 'base') { if (base) parts.push(fill(base, v)); return; }
+      var ids = L === 'recency' ? (s2.recency ? [s2.recency] : []) : L === 'format' ? (s2.format ? [s2.format] : []) : (s2[L] || []);
+      ids.forEach(function (id) {
+        var x = byId[id]; if (!x) return;
+        if (id === 'custom_exclude') {
+          var list = (sel.customExcludes || []).filter(String);
+          if (!list.length) list = [v.EXCLUDE];
+          list.forEach(function (w) { parts.push('-' + String(w).trim().replace(/\s+/g, '')); });
+          return;
+        }
+        parts.push(fill(x.m.fragment, v));
+      });
+    });
+    var q = parts.join(catalog.composer.joinWith || ' ').replace(/\s+/g, ' ').trim();
+    var n = words(q), miss = missing(q);
+    if (n > MAX_WORDS) errors.push('الاستعلام ' + n + ' كلمة — Google يُسقط ما بعد ' + MAX_WORDS + ' صامتاً. احذف مُضيِّقاً.');
+    if (miss.length) errors.push('متغيرات بلا قيمة: ' + miss.join('، ') + ' — عبّئها من «المتغيرات»');
+    if (chk.count > 4) notes.push('أكثر من ٤ مُضيِّقات: النتائج تقترب من الصفر — يوصى بالتدرج.');
+    if (s2.recency) notes.push(catalog.composer.layers.recency.warning);
+    if (autoAdded.length) notes.push('أُضيف تلقائياً: ' + autoAdded.join('، '));
+    return { query: q, words: n, max: MAX_WORDS, errors: errors, notes: notes, blocked: chk.blocked };
+  }
+
+  /** وسم قيد عدم المنافسة لكيان في نتائج B2B */
+  function nonCompete(catalog, name) {
+    var nc = (catalog.compliance || {}).NON_COMPETE || {}, t = String(name || '').toLowerCase();
+    if (!t) return 'review';
+    var hit = function (list) { return (list || []).some(function (w) { return t.indexOf(String(w).toLowerCase()) > -1; }); };
+    if (hit(nc.blocklist)) return 'blocked';
+    if (hit(nc.allowlistConfirmed)) return 'allowed';
+    return 'review';
+  }
+
+  /** رابط بحث Google للاستعلام (تشغيل يدوي من المتصفح) */
+  function googleUrl(q, v) {
+    var hl = 'ar', gl = (v && v.TLD) || 'sa';
+    return 'https://www.google.com/search?q=' + encodeURIComponent(q) + '&hl=' + hl + '&gl=' + gl;
+  }
+
+  return { values: values, fill: fill, missing: missing, words: words, check: check, build: build, nonCompete: nonCompete,
+    googleUrl: googleUrl, selectedIds: selectedIds, MAX_WORDS: MAX_WORDS };
+})();
+
+</script>
+
+  <script>
+/* ═══════════ صفحة البحث: كتالوج استعلامات السوق + مُركِّب + تشغيل + نتائج ═══════════
+ * البيانات: SEARCH_CATALOG و SearchQuery (من SearchCatalog.html المولَّد). لا منطق تركيب هنا — كله في SearchQuery.
+ */
+var SRC = { data: null, compose: null };
+var SRC_TAG = 'Market Intelligence — Not Scientific Evidence';
+var FIELD_AR = { entityName: 'الجهة', website: 'الموقع', phone: 'هاتف الجهة', email: 'بريد الجهة', branchCount: 'الفروع', city: 'المدينة', nonCompeteStatus: 'قيد المنافسة',
+  signalType: 'نوع الإشارة', signalDate: 'تاريخ الإشارة', sourceUrl: 'المصدر', query: 'الاستعلام', topRankingPages: 'الصفحات المتصدّرة', competitorPresence: 'وجود المنافسين',
+  contentGap: 'فجوة المحتوى', provider: 'المزوّد', courseName: 'الدورة', hours: 'الساعات', priceSAR: 'السعر ر.س', accreditationClaimed: 'الاعتماد المُعلن',
+  accreditationVerified: 'الاعتماد المتحقق', capturedAt: 'تاريخ الرصد', positioning: 'التموضع', channels: 'القنوات', offerings: 'العروض', claims: 'الادعاءات',
+  authority: 'الجهة', documentTitle: 'الوثيقة', requirement: 'الاشتراط', issuedDate: 'تاريخ الإصدار', eventName: 'الفعالية', date: 'التاريخ', audience: 'الجمهور',
+  registrationUrl: 'رابط التسجيل', displayName: 'الاسم الظاهر', platform: 'المنصة', profileUrl: 'رابط الملف', certifications: 'الشهادات',
+  resultCount: 'عدد النتائج', sentimentThemes: 'موضوعات متكررة', commonPhrasing: 'صياغات شائعة' };
+var OUT_AR = { entity_list: 'قائمة جهات', keyword_map: 'خريطة كلمات', pricing_table: 'جدول أسعار', competitor_profile: 'ملف منافس', document_list: 'قائمة وثائق',
+  event_list: 'قائمة فعاليات', profile_list: 'قائمة ملفات مهنية', aggregate_only: 'إحصاء مجمّع فقط', raw_results: 'نتائج خام', template: 'قالب' };
+
+function srcVals_() { return SearchQuery.values(SEARCH_CATALOG, (SRC.data || {}).saved || {}, (SRC.compose || {}).terms || {}); }
+function srcCat_(id) { return SEARCH_CATALOG.categories.filter(function (c) { return c.id === id; })[0] || null; }
+function srcPdpl_(catId, sel) {
+  var c = srcCat_(catId);
+  return !!(c && (c.pdplRestricted || (c.compliance || []).indexOf('PDPL') > -1)) || ((sel && sel.scope) || []).indexOf('linkedin_people') > -1;
+}
+function srcNewCompose_(base, catId, presetId, layers) {
+  layers = layers || {};
+  return { base: base || '', categoryId: catId || '', presetId: presetId || '', terms: {}, customExcludes: [],
+    sel: { scope: (layers.scope || []).slice(), precision: (layers.precision || []).slice(), recency: layers.recency || '', format: layers.format || '', exclusion: (layers.exclusion || []).slice() } };
+}
+
+SCREENS.search = { render: function (d, args) {
+  SRC.data = d;
+  if (!SRC.compose) SRC.compose = srcNewCompose_('', '', '');
+  var tab = args.tab || 'catalog', V = srcVals_();
+  var html = north(d.north) + '<h1>البحث — كتالوج السوق</h1>' +
+    '<details class="card small" open><summary><b>⚠️ حدود معروفة لهذه البيانات</b></summary><ul style="margin:4px 0">' +
+    SEARCH_CATALOG.knownLimitations.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul><div class="muted">' + esc(SEARCH_CATALOG.meta.notes) + '</div></details>' +
+    '<div class="tabs">' + [['catalog', 'الكتالوج'], ['compose', 'المُركِّب'], ['results', 'النتائج'], ['vars', 'المتغيرات'], ['sources', 'مصادر خارجية']].map(function (t) {
+      return '<button class="btn sm ' + (t[0] === tab ? 'pri' : '') + '" data-go="search" data-args="' + attr({ tab: t[0] }) + '">' + t[1] + '</button>'; }).join('') + '</div>';
+
+  // ── presets كأزرار جاهزة (في كل التبويبات) ──
+  html += '<div class="chips" style="margin:6px 0">' + SEARCH_CATALOG.composer.presets.map(function (p) {
+    return '<button class="chip acc" style="cursor:pointer;border:0" data-act="srcPreset" data-id="' + esc(p.id) + '" title="' + esc(p.description) + '">⚡ ' + esc(p.label) + (p.schedule ? ' (أسبوعي تلقائياً)' : '') + '</button>'; }).join(' ') + '</div>';
+
+  if (tab === 'catalog') {
+    var f = { cat: args.cat || '', intent: args.intent || '', aud: args.aud || '' };
+    var cats = SEARCH_CATALOG.categories.slice().sort(function (a, b) { return a.order - b.order; });
+    html += '<div class="row" style="flex-wrap:wrap;gap:6px">' +
+      '<select id="sf_cat" class="grow" data-act="srcFilter"><option value="">كل الفئات (' + cats.length + ')</option>' + cats.map(function (c) { return '<option value="' + c.id + '"' + (f.cat === c.id ? ' selected' : '') + '>' + esc(c.label) + '</option>'; }).join('') + '</select>' +
+      '<select id="sf_int" class="grow" data-act="srcFilter"><option value="">كل النيّات</option>' + Object.keys(SEARCH_CATALOG.intentLevels).map(function (k) { var x = SEARCH_CATALOG.intentLevels[k]; return '<option value="' + k + '"' + (f.intent === k ? ' selected' : '') + '>' + esc(x.label) + ' (' + x.weight + ')</option>'; }).join('') + '</select>' +
+      '<select id="sf_aud" class="grow" data-act="srcFilter"><option value="">كل الجماهير</option>' + Object.keys(SEARCH_CATALOG.audiences).map(function (k) { return '<option value="' + k + '"' + (f.aud === k ? ' selected' : '') + '>' + esc(SEARCH_CATALOG.audiences[k]) + '</option>'; }).join('') + '</select></div>';
+    cats.filter(function (c) { return (!f.cat || c.id === f.cat) && (!f.intent || c.intent === f.intent) && (!f.aud || c.audience === f.aud); }).forEach(function (c) {
+      var it = SEARCH_CATALOG.intentLevels[c.intent] || {};
+      html += '<div class="card"><div class="row between"><b>' + esc(c.label) + '</b><span class="muted small">' + esc(c.labelEn) + '</span></div>' +
+        '<div class="chips">' + chip('النيّة: ' + it.label + ' · وزن ' + it.weight, it.weight >= 4 ? 'good' : '') + chip('الجمهور: ' + SEARCH_CATALOG.audiences[c.audience]) + chip('الأولوية ' + c.priority) +
+        chip('المخرج: ' + (OUT_AR[c.outputType] || c.outputType)) + (c.pdplRestricted ? chip('PDPL: مجمّع فقط', 'bad') : (c.compliance || []).indexOf('PDPL') > -1 ? chip('PDPL', 'warn') : '') +
+        ((c.compliance || []).indexOf('NON_COMPETE') > -1 ? chip('قيد عدم المنافسة يُحقن تلقائياً', 'warn') : '') + (c.requireSnapshot ? chip('لقطة شاشة إلزامية', 'warn') : '') +
+        (c.recommendedSchedule ? chip('يُنصح: ' + ({ weekly: 'أسبوعياً', monthly: 'شهرياً' }[c.recommendedSchedule] || c.recommendedSchedule)) : '') + '</div>' +
+        (c.timing ? '<div class="small">⏱ ' + esc(c.timing) + '</div>' : '') + (c.pdplNote || c.systemBehavior ? '<div class="small" style="color:var(--bad)">' + esc(c.pdplNote || c.systemBehavior) + '</div>' : '') +
+        '<div class="muted small">يُستخرج: ' + (c.extractFields || []).map(function (x) { return FIELD_AR[x] || x; }).join('، ') + '</div>' +
+        '<details><summary class="small">الاستعلامات (' + c.queries.length + ')</summary>' + c.queries.map(function (q, i) {
+          var filled = SearchQuery.fill(q, V), miss = SearchQuery.missing(filled);
+          return '<div class="row between" style="border-top:1px dashed var(--line);padding:4px 0;gap:6px"><code class="small grow" dir="ltr" style="text-align:left;overflow-wrap:anywhere">' + esc(filled) + '</code>' +
+            '<span style="white-space:nowrap"><button class="btn sm" data-act="srcUse" data-cat="' + c.id + '" data-i="' + i + '" ' + (miss.length ? 'title="عبّئ ' + esc(miss.join('، ')) + ' من المتغيرات"' : '') + '>للمُركِّب</button></span></div>';
+        }).join('') + '</details>' +
+        '<div class="btns"><button class="btn sm" data-act="srcBatchLinks" data-cat="' + c.id + '">روابط Google للفئة</button>' +
+        '<button class="btn sm pri" data-act="srcBatchClaude" data-cat="' + c.id + '"' + (d.claude_ready ? '' : ' disabled title="يحتاج رصيد Claude"') + '>تشغيل الفئة عبر Claude</button></div></div>';
+    });
+  }
+
+  if (tab === 'compose') {
+    var C = SRC.compose, b = SearchQuery.build(SEARCH_CATALOG, C.base, { scope: C.sel.scope, precision: C.sel.precision, recency: C.sel.recency, format: C.sel.format,
+      exclusion: C.sel.exclusion, customExcludes: C.customExcludes }, { categoryId: C.categoryId, values: V });
+    var cat = srcCat_(C.categoryId);
+    html += '<div class="card"><label class="f">الاستعلام الأساسي</label><textarea id="sc_base" data-act="srcBase" dir="ltr" style="text-align:left;min-height:60px">' + esc(C.base) + '</textarea>' +
+      '<label class="f">الفئة (تحدد الحقول المستخرجة والقيود)</label><select id="sc_cat" data-act="srcBase"><option value="">— بدون —</option>' +
+      SEARCH_CATALOG.categories.map(function (c) { return '<option value="' + c.id + '"' + (C.categoryId === c.id ? ' selected' : '') + '>' + esc(c.label) + '</option>'; }).join('') + '</select>' +
+      '<div class="row" style="gap:6px"><div class="grow"><label class="f">TERM (للعنوان)</label><input id="sc_t" data-act="srcBase" value="' + esc(C.terms.TERM || '') + '" placeholder="' + esc(V.TERM) + '"></div>' +
+      '<div class="grow"><label class="f">TERM_A / TERM_B (تقارب)</label><div class="row"><input id="sc_ta" data-act="srcBase" value="' + esc(C.terms.TERM_A || '') + '" placeholder="' + esc(V.TERM_A) + '"><input id="sc_tb" data-act="srcBase" value="' + esc(C.terms.TERM_B || '') + '" placeholder="' + esc(V.TERM_B) + '"></div></div></div></div>';
+    // الطبقات
+    var layers = SEARCH_CATALOG.composer.layers;
+    ['scope', 'precision', 'recency', 'format', 'exclusion'].forEach(function (L) {
+      var ly = layers[L], multi = ly.multiSelect;
+      html += '<div class="card"><b>' + esc(ly.label) + '</b> <span class="muted small">' + (multi ? 'اختيار متعدد — تضييق أكثر' : 'خيار واحد') + '</span>' +
+        (ly.warning ? '<div class="small" style="color:var(--warn)">' + esc(ly.warning) + '</div>' : '') + '<div class="chips" style="margin-top:4px">' +
+        (multi ? '' : '<label class="chip" style="cursor:pointer"><input type="radio" name="sl_' + L + '" data-act="srcLayer" data-l="' + L + '" value=""' + (!C.sel[L] ? ' checked' : '') + '> بدون</label>') +
+        ly.modifiers.map(function (m) {
+          var on = multi ? C.sel[L].indexOf(m.id) > -1 : C.sel[L] === m.id, why = !on && b.blocked[m.id];
+          var auto = m.auto && (m.appliesTo || []).indexOf(C.categoryId) > -1;
+          return '<label class="chip" style="cursor:' + (why || auto ? 'not-allowed' : 'pointer') + ';' + (why ? 'opacity:.45' : '') + '" title="' + esc(why || m.effect || m.warning || m.useFor || m.fragment) + '">' +
+            '<input type="' + (multi ? 'checkbox' : 'radio') + '" name="sl_' + L + '" data-act="srcLayer" data-l="' + L + '" value="' + m.id + '"' + (on || auto ? ' checked' : '') + (why || auto ? ' disabled' : '') + '> ' +
+            esc(m.label) + (auto ? ' (تلقائي)' : '') + ((m.compliance || []).indexOf('PDPL') > -1 ? ' ⚠️' : '') + (why ? ' — ' + esc(why) : '') + '</label>';
+        }).join(' ') + '</div>' +
+        (L === 'exclusion' && C.sel.exclusion.indexOf('custom_exclude') > -1 ? '<label class="f">كلمات مستبعدة (مفصولة بفاصلة)</label><input id="sc_ex" data-act="srcBase" value="' + esc(C.customExcludes.join('، ')) + '" placeholder="' + esc(V.EXCLUDE) + '">' : '') + '</div>';
+    });
+    // الناتج
+    var over = b.words > b.max;
+    html += '<div class="card" style="border-color:' + (b.errors.length ? 'var(--bad)' : 'var(--good)') + '"><div class="row between"><b>الاستعلام النهائي</b>' +
+      '<span class="chip ' + (over ? 'bad' : b.words > 26 ? 'warn' : 'good') + '">' + b.words + ' / ' + b.max + ' كلمة</span></div>' +
+      '<textarea readonly dir="ltr" style="text-align:left;min-height:70px">' + esc(b.query) + '</textarea>' +
+      b.errors.map(function (e) { return '<div class="small" style="color:var(--bad)">⛔ ' + esc(e) + '</div>'; }).join('') +
+      b.notes.map(function (e) { return '<div class="small" style="color:var(--warn)">• ' + esc(e) + '</div>'; }).join('') +
+      '<details class="small"><summary>قواعد التركيب</summary><ul>' + SEARCH_CATALOG.composer.rules.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul></details>' +
+      '<div class="btns"><button class="btn pri" data-act="srcOpenGoogle"' + (b.errors.length || !b.query ? ' disabled' : '') + '>🔎 افتح في Google وسجّل النتائج</button>' +
+      '<button class="btn" data-act="srcRunClaude"' + (b.errors.length || !b.query || !d.claude_ready ? ' disabled' : '') + ' title="' + (d.claude_ready ? '' : 'يحتاج رصيد Claude') + '">🤖 تشغيل عبر Claude</button>' +
+      '<button class="btn ghost" data-act="srcReset">مسح</button></div></div>';
+    SRC.built = b;
+    if (cat) html += '<div class="muted small">هذه الفئة تستخرج: ' + (cat.pdplRestricted ? 'إحصاءات مجمّعة فقط (PDPL)' : (cat.extractFields || []).map(function (x) { return FIELD_AR[x] || x; }).join('، ')) + '</div>';
+  }
+
+  if (tab === 'results') {
+    var groups = {};
+    d.results.forEach(function (r) { (groups[r.category_id || '—'] = groups[r.category_id || '—'] || []).push(r); });
+    if (!d.results.length) html += empty('لا نتائج بعد — شغّل استعلاماً من الكتالوج أو المُركِّب');
+    Object.keys(groups).forEach(function (k) {
+      var c = srcCat_(k) || { label: 'بدون فئة', extractFields: [] }, rows = groups[k], restricted = c.pdplRestricted;
+      var fields = restricted ? ['query', 'resultCount', 'sentimentThemes', 'commonPhrasing'] : (c.extractFields || []);
+      html += '<div class="card"><div class="row between"><b>' + esc(c.label) + ' ' + chip(rows.length) + '</b>' +
+        (restricted ? '<span class="chip bad">PDPL: التصدير معطّل</span>' : '<button class="btn sm" data-act="srcExport" data-cat="' + esc(k) + '">تصدير CSV</button>') + '</div>' +
+        '<div style="overflow-x:auto"><table class="small" style="width:100%;border-collapse:collapse"><tr>' + fields.map(function (x) { return '<th style="text-align:right;border-bottom:1px solid var(--line)">' + esc(FIELD_AR[x] || x) + '</th>'; }).join('') +
+        '<th>الوسم</th><th></th></tr>' + rows.map(function (r) {
+          return '<tr>' + fields.map(function (x) {
+            var v = r.fields[x] !== undefined ? r.fields[x] : (x === 'sourceUrl' ? r.url : '');
+            return '<td style="border-bottom:1px dashed var(--line);padding:3px">' + (/^https?:/.test(v) ? '<a target="_blank" rel="noopener" href="' + esc(v) + '">رابط</a>' : esc(v)) + '</td>';
+          }).join('') + '<td>' + (r.non_compete ? chip(r.non_compete, r.non_compete === 'blocked' ? 'bad' : r.non_compete === 'allowed' ? 'good' : 'warn') : '') + '</td>' +
+            '<td><a href="#" data-act="srcArchive" data-id="' + esc(r.res_id) + '">أرشفة</a></td></tr>';
+        }).join('') + '</table></div></div>';
+    });
+    if (d.runs.length) html += '<h2>آخر التشغيلات</h2>' + d.runs.slice(0, 15).map(function (r) {
+      return '<div class="card small"><div class="row between"><span>' + esc(r.mode) + ' · ' + fmtDate(r.run_at, true) + '</span>' + chip(r.result_count + ' نتيجة') + '</div><code dir="ltr" style="overflow-wrap:anywhere">' + esc(r.query) + '</code>' +
+        (r.snapshot_url ? '<div><a target="_blank" href="' + esc(extUrl(r.snapshot_url)) + '">لقطة الشاشة</a> · ' + fmtDate(r.snapshot_date) + '</div>' : '') + '</div>';
+    }).join('');
+  }
+
+  if (tab === 'vars') {
+    var ph = SEARCH_CATALOG.placeholders;
+    html += '<div class="card"><div class="small muted">تُستبدل في كل الاستعلامات ({CITY}، {FIELD}…). احفظ لتُستخدم أيضاً في رادار التوسّع الأسبوعي.</div>' +
+      Object.keys(ph).map(function (k) {
+        var p = ph[k], cur = (d.saved || {})[k] !== undefined ? d.saved[k] : p['default'];
+        return '<label class="f">' + esc(p.label) + ' <span class="muted">{' + k + '}</span></label>' + (p.options ?
+          '<select id="pv_' + k + '">' + p.options.map(function (o) { return '<option' + (String(o) === String(cur) ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select>' :
+          '<input id="pv_' + k + '" value="' + esc(cur) + '"' + (/DATE/.test(k) ? ' type="date"' : '') + '>');
+      }).join('') + '<div class="btns"><button class="btn good" data-act="srcVarsSave">حفظ المتغيرات</button></div></div>';
+  }
+
+  if (tab === 'sources') {
+    html += '<div class="card small">الكتالوج لا يقيس حجم الطلب رقمياً. المصادر ذات الأولوية ١ تحتاج دمجاً لاحقاً في النظام.</div>' +
+      SEARCH_CATALOG.externalSources.slice().sort(function (a, b) { return a.priority - b.priority; }).map(function (s) {
+        return '<div class="card"><div class="row between"><b>' + esc(s.name) + '</b>' + chip('أولوية ' + s.priority, s.priority === 1 ? 'warn' : '') + '</div>' +
+          '<div class="small">' + esc(s.purpose) + '</div>' + (s.fillsGap ? '<div class="small" style="color:var(--good)">يسدّ: ' + esc(s.fillsGap) + '</div>' : '') +
+          '<div class="chips">' + chip(s.cost) + chip(s.requires ? 'يتطلب: ' + s.requires : '') + (s.priority === 1 ? chip('دمج لاحق', 'warn') : '') + (s.url ? '<a class="chip acc" target="_blank" href="https://' + esc(s.url) + '">' + esc(s.url) + '</a>' : '') + '</div></div>';
+      }).join('') +
+      '<h2>قيود الامتثال</h2>' + Object.keys(SEARCH_CATALOG.compliance).map(function (k) {
+        var x = SEARCH_CATALOG.compliance[k];
+        return '<div class="card small"><b>' + esc(x.label) + '</b><div>' + esc(x.rule) + '</div><div class="muted">' + esc(x.systemBehavior) + '</div>' +
+          (x.blocklist ? '<div class="chips">' + x.blocklist.map(function (w) { return chip(w, 'bad'); }).join('') + (x.allowlistConfirmed || []).map(function (w) { return chip(w, 'good'); }).join('') + '</div>' : '') + '</div>';
+      }).join('');
+  }
+  return html;
+} };
+
+/* ── الأحداث ── */
+ACT.srcFilter = function () { go('search', { tab: 'catalog', cat: val('sf_cat'), intent: val('sf_int'), aud: val('sf_aud') }, true); };
+ACT.srcUse = function (el) {
+  var c = srcCat_(el.dataset.cat), q = c.queries[Number(el.dataset.i)];
+  SRC.compose = srcNewCompose_(q, c.id, '');
+  go('search', { tab: 'compose' });
+};
+ACT.srcPreset = function (el) {
+  var p = SEARCH_CATALOG.composer.presets.filter(function (x) { return x.id === el.dataset.id; })[0];
+  var catMap = { hot_b2b_lead: 'b2b_leads', ready_to_enroll: 'high_intent_students', competitor_pricing: 'pricing_comparison', regulatory_docs: 'regulatory', expansion_radar: 'buying_signals' };
+  SRC.compose = srcNewCompose_(p.base, catMap[p.id] || '', p.id, p.layers);
+  go('search', { tab: 'compose' });
+};
+ACT.srcBase = function () {
+  var C = SRC.compose;
+  C.base = val('sc_base'); C.categoryId = val('sc_cat');
+  C.terms = { TERM: val('sc_t'), TERM_A: val('sc_ta'), TERM_B: val('sc_tb') };
+  if ($('sc_ex')) C.customExcludes = val('sc_ex').split(/[,،]/).map(function (x) { return x.trim(); }).filter(String);
+  srcRedraw_();
+};
+ACT.srcLayer = function (el) {
+  var C = SRC.compose, L = el.dataset.l, multi = SEARCH_CATALOG.composer.layers[L].multiSelect;
+  if (multi) { var i = C.sel[L].indexOf(el.value); if (el.checked && i === -1) C.sel[L].push(el.value); if (!el.checked && i > -1) C.sel[L].splice(i, 1); }
+  else C.sel[L] = el.value;
+  srcRedraw_();
+};
+ACT.srcReset = function () { SRC.compose = srcNewCompose_('', '', ''); srcRedraw_(); };
+/** إعادة رسم فورية بلا طلب للخادم (المُركِّب محلي بالكامل) */
+function srcRedraw_() {
+  var y = window.scrollY, a = document.activeElement, id = a && a.id, pos = a && a.selectionStart;
+  $('main').innerHTML = pageHead_('search') + SCREENS.search.render(SRC.data, S.args);
+  window.scrollTo(0, y);
+  if (id && $(id)) { $(id).focus(); try { $(id).setSelectionRange(pos, pos); } catch (e) {} }
+}
+function srcConfirmPdpl_(catId, sel) {
+  if (!srcPdpl_(catId, sel)) return true;
+  return confirm('⚠️ نظام حماية البيانات الشخصية (PDPL)\n\n' + SEARCH_CATALOG.compliance.PDPL.rule + '\n\n' + SEARCH_CATALOG.compliance.PDPL.actionRequired +
+    '\n\nستُحفظ النتائج كإحصاءات مجمّعة فقط (أو بيانات مهنية منشورة) — لا قوائم تسويق للأفراد. متابعة؟');
+}
+ACT.srcOpenGoogle = function () {
+  var C = SRC.compose, b = SRC.built; if (!b || b.errors.length) return;
+  if (!srcConfirmPdpl_(C.categoryId, C.sel)) return;
+  window.open(SearchQuery.googleUrl(b.query, srcVals_()), '_blank', 'noopener');
+  srcCaptureForm_(b.query, C.categoryId, C.presetId);
+};
+ACT.srcRunClaude = function (el) {
+  var C = SRC.compose, b = SRC.built; if (!b || b.errors.length) return;
+  if (!srcConfirmPdpl_(C.categoryId, C.sel)) return;
+  el.disabled = true; toast('جارٍ البحث عبر Claude…');
+  api('action', 'searchRunClaude', { items: [{ query: b.query, category_id: C.categoryId, preset_id: C.presetId }] }).then(function (r) {
+    var x = r.runs[0] || {}; toast(x.error ? x.error : 'نتائج: ' + x.results, !!x.error); go('search', { tab: 'results' });
+  }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.srcBatchClaude = function (el) {
+  var c = srcCat_(el.dataset.cat), V = srcVals_();
+  if (!srcConfirmPdpl_(c.id, {})) return;
+  var items = c.queries.map(function (q) {
+    var b = SearchQuery.build(SEARCH_CATALOG, q, {}, { categoryId: c.id, values: V });
+    return b.errors.length ? null : { query: b.query, category_id: c.id };
+  }).filter(Boolean);
+  if (!items.length) return toast('عبّئ المتغيرات الناقصة أولاً', true);
+  if (!confirm('تشغيل ' + items.length + ' استعلاماً عبر Claude (حتى ١٢)؟')) return;
+  el.disabled = true; toast('جارٍ تشغيل الدفعة…');
+  api('action', 'searchRunClaude', { items: items }).then(function (r) {
+    var n = r.runs.reduce(function (a, x) { return a + (x.results || 0); }, 0); toast('نتائج: ' + n); go('search', { tab: 'results' });
+  }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.srcBatchLinks = function (el) {
+  var c = srcCat_(el.dataset.cat), V = srcVals_();
+  openSheet('<h1>' + esc(c.label) + '</h1><div class="muted small">افتح كل رابط، ثم سجّل النتائج المهمة من زر «سجّل النتائج».</div>' + c.queries.map(function (q) {
+    var b = SearchQuery.build(SEARCH_CATALOG, q, {}, { categoryId: c.id, values: V });
+    return '<div class="card small"><code dir="ltr" style="overflow-wrap:anywhere">' + esc(b.query) + '</code>' +
+      (b.errors.length ? '<div style="color:var(--bad)">' + esc(b.errors.join(' · ')) + '</div>' :
+        '<div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(SearchQuery.googleUrl(b.query, V)) + '">افتح في Google</a>' +
+        '<button class="btn sm" data-act="srcCapFor" data-q="' + esc(b.query) + '" data-cat="' + c.id + '">سجّل النتائج</button></div>') + '</div>';
+  }).join(''));
+};
+ACT.srcCapFor = function (el) { if (srcConfirmPdpl_(el.dataset.cat, {})) srcCaptureForm_(el.dataset.q, el.dataset.cat, ''); };
+
+/** نموذج تسجيل نتائج التشغيل اليدوي — الحقول حسب الفئة */
+function srcCaptureForm_(query, catId, presetId) {
+  var c = srcCat_(catId) || { extractFields: ['entityName', 'sourceUrl'] }, restricted = c.pdplRestricted;
+  var fields = restricted ? ['resultCount', 'sentimentThemes', 'commonPhrasing'] : (c.extractFields || []).filter(function (x) { return x !== 'nonCompeteStatus'; });
+  SRC.cap = { query: query, catId: catId, presetId: presetId, fields: fields, rows: 1 };
+  var row = function (i) {
+    return '<div class="card small" style="margin:6px 0"><b>' + (restricted ? 'إحصاء مجمّع' : 'نتيجة ' + (i + 1)) + '</b>' +
+      (restricted ? '' : '<input id="cp_t_' + i + '" placeholder="العنوان"><input id="cp_u_' + i + '" placeholder="الرابط" dir="ltr">') +
+      fields.map(function (f) { return '<input id="cp_' + f + '_' + i + '" placeholder="' + esc(FIELD_AR[f] || f) + '">'; }).join('') + '</div>';
+  };
+  openSheet('<h1>سجّل النتائج</h1><code class="small" dir="ltr" style="overflow-wrap:anywhere">' + esc(query) + '</code>' +
+    (restricted ? '<div class="small" style="color:var(--bad)">PDPL: سجّل أرقاماً وموضوعات عامة فقط — لا أسماء أفراد ولا حسابات ولا بيانات تواصل.</div>' : '') +
+    '<div id="cpRows">' + row(0) + '</div>' + (restricted ? '' : '<button class="btn sm" data-act="srcCapMore">＋ نتيجة أخرى</button>') +
+    (c.requireSnapshot ? '<div class="card small" style="border-color:var(--warn)"><b>لقطة الشاشة إلزامية لهذه الفئة</b><input id="cp_snap" placeholder="رابط لقطة الشاشة (Drive مثلاً)" dir="ltr"><input id="cp_snapd" type="date"></div>' :
+      '<details class="small"><summary>لقطة شاشة (اختياري)</summary><input id="cp_snap" placeholder="رابط لقطة الشاشة" dir="ltr"><input id="cp_snapd" type="date"></details>') +
+    '<textarea id="cp_notes" placeholder="ملاحظات"></textarea><div class="btns"><button class="btn good" data-act="srcCapSave">حفظ</button></div>');
+  SRC.capRow = row;
+}
+ACT.srcCapMore = function () { var i = SRC.cap.rows++; $('cpRows').insertAdjacentHTML('beforeend', SRC.capRow(i)); };
+ACT.srcCapSave = function (el) {
+  var cp = SRC.cap, results = [];
+  for (var i = 0; i < cp.rows; i++) {
+    var f = {}; cp.fields.forEach(function (k) { var v = val('cp_' + k + '_' + i); if (v) f[k] = v; });
+    var t = val('cp_t_' + i), u = val('cp_u_' + i);
+    if (t || u || Object.keys(f).length) results.push({ title: t, url: u, fields: f });
+  }
+  el.disabled = true;
+  api('action', 'searchManualSave', { query: cp.query, category_id: cp.catId, preset_id: cp.presetId, results: results, notes: val('cp_notes'),
+    snapshot_url: val('cp_snap'), snapshot_date: val('cp_snapd') }).then(function (r) { closeSheet(); toast('سُجّل: ' + r.results + ' نتيجة'); go('search', { tab: 'results' }); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.srcArchive = function (el) { act('searchResultArchive', { res_id: el.dataset.id }, 'أُرشفت'); };
+ACT.srcVarsSave = function () {
+  var v = {}; Object.keys(SEARCH_CATALOG.placeholders).forEach(function (k) { v[k] = val('pv_' + k); });
+  act('searchPlaceholdersSave', { values: v }, 'حُفظت المتغيرات');
+};
+/** تصدير CSV: موسوم، بلا المحظور (blocked)، ومعطّل لفئات PDPL */
+ACT.srcExport = function (el) {
+  var c = srcCat_(el.dataset.cat) || { extractFields: [], label: 'results' };
+  if (c.pdplRestricted) return toast('التصدير معطّل لهذه الفئة (PDPL)', true);
+  var fields = c.extractFields || [];
+  var rows = SRC.data.results.filter(function (r) { return (r.category_id || '—') === el.dataset.cat && r.non_compete !== 'blocked'; });
+  var cell = function (v) { return '"' + String(v === undefined || v === null ? '' : v).replace(/"/g, '""') + '"'; };
+  var csv = '﻿' + cell(SRC_TAG) + '\n' + fields.map(function (f) { return cell(FIELD_AR[f] || f); }).concat([cell('الوسم'), cell('تاريخ الرصد')]).join(',') + '\n' +
+    rows.map(function (r) { return fields.map(function (f) { return cell(r.fields[f] !== undefined ? r.fields[f] : (f === 'sourceUrl' ? r.url : '')); }).concat([cell(r.non_compete), cell(fmtDate(r.captured_at))]).join(','); }).join('\n');
+  var a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'market-intel-' + el.dataset.cat + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('صُدّر ' + rows.length + ' صفاً (المحظور مستبعد)');
+};
+</script>
+
+  <script>
+/* ═══════════ قواعد عملاء المصادر المساعدة ═══════════
+ * استيراد (لصق من إكسل أو رفع CSV/XLSX) ← ربط الأعمدة ← تحليل (قواعد أو Claude) ← رسالة مخصصة تُرسل يدوياً واحدة واحدة.
+ */
+var SRCDB = { data: null, parsed: null };
+var SRCDB_GUESS = { name: /اسم|name|الاسم/i, phone: /جوال|هاتف|موبايل|رقم|phone|mobile|whats/i, email: /بريد|ايميل|إيميل|email|mail/i,
+  city: /مدينة|المدينه|city|منطقة/i, notes: /ملاحظ|notes|اهتمام|تعليق|comment|هدف|interest/i };
+
+function srcdbParseText_(txt) {
+  var lines = String(txt || '').replace(/\r/g, '').split('\n').filter(function (l) { return l.trim(); });
+  if (!lines.length) return null;
+  var sep = lines[0].indexOf('\t') > -1 ? '\t' : (lines[0].split(';').length > lines[0].split(',').length ? ';' : ',');
+  var split = function (l) {
+    if (sep === '\t') return l.split('\t');
+    var out = [], cur = '', q = false;
+    for (var i = 0; i < l.length; i++) {
+      var ch = l[i];
+      if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; }
+      else if (ch === sep && !q) { out.push(cur); cur = ''; } else cur += ch;
+    }
+    out.push(cur); return out;
+  };
+  var rows = lines.map(split);
+  return { headers: rows[0].map(function (h) { return String(h).trim(); }), rows: rows.slice(1) };
+}
+function srcdbAutoMap_(headers) {
+  var m = {};
+  Object.keys(SRCDB_GUESS).forEach(function (k) { var i = headers.findIndex(function (h) { return SRCDB_GUESS[k].test(h); }); m[k] = i; });
+  return m;
+}
+
+SCREENS.sources = { render: function (d, args) {
+  SRCDB.data = d;
+  var f = { batch: args.batch || '', seg: args.seg || '', st: args.st || '' };
+  var rows = d.rows.filter(function (r) { return (!f.batch || r.batch_id === f.batch) && (!f.seg || r.segment === f.seg) && (!f.st || r.outreach_status === f.st); });
+  var html = north(d.north) + '<h1>قواعد عملاء المصادر ' + chip(d.rows.length) + '</h1>' +
+    '<div class="card small">استورد قوائم عملائك (إكسل/شيت) ← النظام يحلّلها ويقسّمها حسب الاحتياج ← يجهّز رسالة مخصصة لكل شخص تُرسلها أنت بضغطة (واتساب/إيميل). ' +
+    '<b>لا إرسال جماعي ولا آلي</b>، ومن يطلب عدم التواصل لا يُراسل أبداً.</div>';
+
+  // ── الاستيراد ──
+  html += '<details class="card"' + (d.rows.length ? '' : ' open') + '><summary><b>📥 استيراد قائمة جديدة</b></summary>' +
+    '<label class="f">اسم المصدر (مثلاً: معرض الرياض ٢٠٢٦، عملاء قدامى…) *</label><input id="sd_src">' +
+    '<label class="f">حالة الموافقة على التواصل لهذه القائمة</label><select id="sd_consent">' + opt(d.consent, 'غير معروف') + '</select>' +
+    '<label class="f">الصق الجدول من إكسل/شيت (مع صف العناوين)</label><textarea id="sd_paste" style="min-height:110px" placeholder="الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
+    '<div class="row" style="gap:6px"><button class="btn" data-act="srcdbParse">قراءة اللصق</button>' +
+    '<label class="btn">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="sd_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label></div><div id="sd_prev"></div></details>';
+
+  // ── الدفعات والتحليل ──
+  if (d.batches.length) html += '<h2>الدفعات</h2>' + d.batches.map(function (b) {
+    return '<div class="card small"><div class="row between"><b>' + esc(b.source_name) + '</b>' + chip(b.n + ' شخص') + '</div><div class="muted">' + fmtDate(b.imported_at, true) + '</div>' +
+      '<div class="btns"><button class="btn sm" data-act="srcdbRules" data-b="' + esc(b.batch_id) + '">حلّل بالقواعد (فوري)</button>' +
+      '<button class="btn sm pri" data-act="srcdbClaude" data-b="' + esc(b.batch_id) + '"' + (d.claude_ready ? '' : ' disabled title="يحتاج رصيد Claude"') + '>حلّل عبر Claude</button>' +
+      '<button class="btn sm" data-go="sources" data-args="' + attr({ batch: b.batch_id }) + '">اعرضها</button></div></div>';
+  }).join('');
+
+  // ── القائمة ──
+  html += '<h2>الأشخاص ' + chip(rows.length) + '</h2><div class="row" style="gap:6px;flex-wrap:wrap">' +
+    '<select id="sdf_b" class="grow" data-act="srcdbFilter"><option value="">كل الدفعات</option>' + d.batches.map(function (b) { return '<option value="' + esc(b.batch_id) + '"' + (f.batch === b.batch_id ? ' selected' : '') + '>' + esc(b.source_name) + '</option>'; }).join('') + '</select>' +
+    '<select id="sdf_s" class="grow" data-act="srcdbFilter"><option value="">كل الشرائح</option>' + opt(d.segments, f.seg) + '</select>' +
+    '<select id="sdf_o" class="grow" data-act="srcdbFilter"><option value="">كل الحالات</option>' + opt(d.outreach, f.st) + '</select></div>';
+  html += rows.length ? '<div class="grid2">' + rows.slice(0, 200).map(function (r) {
+    var stop = r.outreach_status === 'لا تراسل' || r.consent_status === 'رفض';
+    var wa = r.phone ? 'https://wa.me/' + String(r.phone).replace(/\D/g, '') + '?text=' + encodeURIComponent(r.draft_msg || '') : '';
+    var mail = r.email ? 'mailto:' + r.email + '?body=' + encodeURIComponent(r.draft_msg || '') : '';
+    var searchQ = 'https://www.google.com/search?q=' + encodeURIComponent('"' + (r.name || '') + '"' + (r.email ? ' "' + r.email + '"' : '') + (r.city ? ' ' + r.city : ''));
+    return '<div class="card" style="' + (stop ? 'opacity:.6' : '') + '"><div class="row between"><b>' + esc(r.name || '(بلا اسم)') + '</b>' +
+      chip(r.outreach_status, stop ? 'bad' : r.outreach_status === 'أُرسل' ? 'good' : r.outreach_status === 'جاهز للإرسال' ? 'acc' : '') + '</div>' +
+      '<div class="chips">' + chip(r.segment || 'لم يُحلَّل', r.segment ? 'acc' : '') + chip(r.course_interest) + chip(r.city) + chip(r.consent_status) + chip(r.analysis_by ? 'تحليل: ' + r.analysis_by : '') + '</div>' +
+      (r.need_summary ? '<div class="small"><b>الاحتياج:</b> ' + esc(r.need_summary) + '</div>' : '') +
+      '<div class="small muted">' + [r.phone, r.email].filter(String).map(esc).join(' · ') + ' · ' + esc(r.source_name) + '</div>' +
+      (r.handles ? '<div class="small">الحسابات: ' + esc(r.handles) + '</div>' : '') +
+      (stop ? '<div class="small" style="color:var(--bad)">طلب عدم التواصل — لا تُرسل له.</div>' :
+        '<textarea id="dm_' + esc(r.imp_id) + '" style="min-height:90px">' + esc(r.draft_msg || '') + '</textarea>' +
+        '<div class="btns">' + (wa ? '<a class="btn sm good" target="_blank" rel="noopener" href="' + esc(wa) + '" data-sent="' + esc(r.imp_id) + '" data-ch="واتساب">واتساب</a>' : '') +
+        (mail ? '<a class="btn sm" href="' + esc(mail) + '" data-sent="' + esc(r.imp_id) + '" data-ch="إيميل">إيميل</a>' : '') +
+        '<button class="btn sm" data-act="srcdbSave" data-id="' + esc(r.imp_id) + '">حفظ الرسالة</button>' +
+        '<button class="btn sm" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="أُرسل">أرسلت ✓</button></div>') +
+      '<details class="small"><summary>المزيد</summary><div class="btns">' +
+      '<button class="btn sm" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="ردّ">ردّ</button>' +
+      '<button class="btn sm pri" data-act="srcdbLead" data-id="' + esc(r.imp_id) + '">أضف كعميل</button>' +
+      '<button class="btn sm bad" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="لا تراسل">لا تراسل</button>' +
+      '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '">🔎 ابحث عنه</a></div>' +
+      '<label class="f">حساباته على السوشال (تضيفها أنت بعد البحث)</label><div class="row"><input id="hd_' + esc(r.imp_id) + '" value="' + esc(r.handles || '') + '" placeholder="@instagram · linkedin.com/in/…">' +
+      '<button class="btn sm" data-act="srcdbHandles" data-id="' + esc(r.imp_id) + '">حفظ</button></div>' +
+      '<label class="f">الشريحة</label><select data-act="srcdbSeg" data-id="' + esc(r.imp_id) + '">' + opt(d.segments, r.segment, true) + '</select></details></div>';
+  }).join('') + '</div>' + (rows.length > 200 ? '<div class="muted small">يُعرض أول ٢٠٠ — استخدم الفلاتر.</div>' : '') : empty('لا أشخاص بعد — استورد قائمة');
+  return html;
+} };
+
+/* ── قراءة اللصق / الملف ── */
+ACT.srcdbParse = function () { srcdbPreview_(srcdbParseText_(val('sd_paste'))); };
+document.addEventListener('change', function (e) {
+  if (!e.target || e.target.id !== 'sd_file') return;
+  var f = e.target.files && e.target.files[0]; if (!f) return;
+  if (/\.(xlsx|xls)$/i.test(f.name)) {
+    var go_ = function () {
+      var r = new FileReader();
+      r.onload = function () {
+        try {
+          var wb = XLSX.read(new Uint8Array(r.result), { type: 'array' }), ws = wb.Sheets[wb.SheetNames[0]];
+          var arr = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }).filter(function (x) { return x.some(function (c) { return String(c).trim(); }); });
+          srcdbPreview_({ headers: arr[0].map(String), rows: arr.slice(1).map(function (x) { return x.map(String); }) });
+        } catch (err) { toast('تعذّرت قراءة الملف: ' + err.message, true); }
+      };
+      r.readAsArrayBuffer(f);
+    };
+    if (window.XLSX) return go_();
+    var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'; s.onload = go_;
+    s.onerror = function () { toast('تعذّر تحميل قارئ إكسل — احفظ الملف CSV أو الصقه', true); }; document.head.appendChild(s);
+  } else {
+    var r2 = new FileReader(); r2.onload = function () { srcdbPreview_(srcdbParseText_(r2.result)); }; r2.readAsText(f, 'UTF-8');
+  }
+});
+function srcdbPreview_(p) {
+  if (!p || !p.rows.length) return toast('لم أجد صفوفاً — تأكد من وجود صف العناوين', true);
+  SRCDB.parsed = p; var m = srcdbAutoMap_(p.headers);
+  var sel = function (k, label) {
+    return '<div class="grow"><label class="f">' + label + '</label><select id="mp_' + k + '"><option value="-1">—</option>' +
+      p.headers.map(function (h, i) { return '<option value="' + i + '"' + (m[k] === i ? ' selected' : '') + '>' + esc(h) + '</option>'; }).join('') + '</select></div>';
+  };
+  $('sd_prev').innerHTML = '<div class="card small"><b>' + p.rows.length + ' صف</b> — اربط الأعمدة (خمّنها النظام):<div class="row" style="flex-wrap:wrap;gap:6px">' +
+    sel('name', 'الاسم') + sel('phone', 'الجوال') + sel('email', 'الإيميل') + sel('city', 'المدينة') + sel('notes', 'ملاحظات/اهتمام') + '</div>' +
+    '<div style="overflow-x:auto"><table class="small"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
+    p.rows.slice(0, 4).map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>' +
+    '<div class="btns"><button class="btn good" data-act="srcdbImport">استيراد ' + p.rows.length + ' صف</button></div></div>';
+}
+ACT.srcdbImport = function (el) {
+  var p = SRCDB.parsed; if (!p) return;
+  if (!val('sd_src').trim()) return toast('اكتب اسم المصدر', true);
+  var ix = {}; ['name', 'phone', 'email', 'city', 'notes'].forEach(function (k) { ix[k] = Number(val('mp_' + k)); });
+  var rows = p.rows.map(function (r) {
+    var raw = {}; p.headers.forEach(function (h, i) { if (r[i] !== undefined && String(r[i]).trim()) raw[h || ('عمود ' + (i + 1))] = String(r[i]).trim(); });
+    var g = function (k) { return ix[k] > -1 ? String(r[ix[k]] || '').trim() : ''; };
+    return { name: g('name'), phone: g('phone'), email: g('email'), city: g('city'), notes: g('notes'), raw: raw };
+  });
+  el.disabled = true;
+  api('action', 'sourcesImport', { rows: rows, source_name: val('sd_src'), consent_status: val('sd_consent') }).then(function (r) {
+    toast('استُورد ' + r.imported + (r.duplicates ? ' · تجاهل ' + r.duplicates + ' مكرراً' : '')); SRCDB.parsed = null;
+    go('sources', { batch: r.batch_id });
+  }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.srcdbFilter = function () { go('sources', { batch: val('sdf_b'), seg: val('sdf_s'), st: val('sdf_o') }, true); };
+ACT.srcdbRules = function (el) { el.disabled = true; act('sourcesAnalyzeRules', { batch_id: el.dataset.b }, function (r) { return 'حُلّل ' + r.analyzed + ' — الرسائل جاهزة'; }); };
+ACT.srcdbClaude = function (el) { el.disabled = true; toast('جارٍ التحليل عبر Claude…'); act('sourcesAnalyzeClaude', { batch_id: el.dataset.b }, function (r) { return 'حُلّل ' + r.analyzed + ' (حتى ٤٠ في المرة)'; }); };
+ACT.srcdbSave = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, draft_msg: val('dm_' + el.dataset.id) }, 'حُفظت', false); };
+ACT.srcdbHandles = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, handles: val('hd_' + el.dataset.id) }, 'حُفظ', false); };
+ACT.srcdbSeg = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, segment: el.value }, 'حُدّثت الشريحة', false); };
+ACT.srcdbMark = function (el) {
+  if (el.dataset.st === 'لا تراسل' && !confirm('لن يُراسل هذا الشخص مرة أخرى. متأكد؟')) return;
+  act('sourcesUpdate', { imp_id: el.dataset.id, outreach_status: el.dataset.st, channel: el.dataset.ch || '' }, 'حُدّث');
+};
+ACT.srcdbLead = function (el) { act('sourcesToLead', { imp_id: el.dataset.id }, 'أُضيف إلى العملاء'); };
+// بعد فتح واتساب/الإيميل: نسأل هل أُرسلت فعلاً ثم نسجّل
+document.addEventListener('click', function (e) {
+  var a = e.target.closest && e.target.closest('[data-sent]'); if (!a) return;
+  var id = a.dataset.sent, ch = a.dataset.ch;
+  api('action', 'sourcesUpdate', { imp_id: id, draft_msg: val('dm_' + id) }).catch(function () {});
+  setTimeout(function () { if (confirm('هل أرسلت الرسالة عبر ' + ch + '؟')) act('sourcesUpdate', { imp_id: id, outreach_status: 'أُرسل', channel: ch }, 'سُجّل الإرسال'); }, 1500);
+});
+</script>
+
   ﻿<script>
 /* ═══════════ دليل النظام: وصف كل صفحة وكل زر ووظيفته في التسويق والبيع ═══════════
  * مصدر واحد تستخدمه: (١) السطر التعريفي أعلى كل صفحة (٢) صفحة INFO كمخطط تفاعلي (٣) شرح الوحدات.
@@ -2356,6 +2951,20 @@ var PAGE_INFO = {
       ['حساباتهم على السوشال', 'روابط حسابات كل منافس (يدوي) تفتحها بضغطة.', 'متابعة سريعة لعروضهم المنشورة.'],
       ['＋ منافس / ＋ عرض دورة', 'إضافة منافس أو تسجيل عرض رأيته.', 'السوق يتحدّث فوراً حتى بلا Claude.'],
       ['الرادار اليومي', 'يفحص مواقع المنافسين يومياً ويسجّل العروض الجديدة (يحتاج Claude).', 'لا يفوتك عرض منافس.']] },
+  search: { t: 'البحث (كتالوج السوق)', what: 'كتالوج استعلامات بحث جاهزة للسوق (١١ فئة، ٦ نيّات، ٧ جماهير) مع مُركِّب طبقات لتضييق البحث أو توسيعه، وتشغيل في Google أو عبر Claude، وحفظ النتائج.', why: 'تجد عملاء B2B وإشارات التوسّع وأسعار المنافسين وأسئلة الطلاب بمنهجية ثابتة قابلة للتكرار — لا بحث عشوائي.',
+    btns: [['⚡ الجاهزة (Presets)', 'خمس وصفات جاهزة: عميل B2B ساخن، طالب جاهز، تسعير المنافسين، وثائق تنظيمية، رادار التوسّع.', 'نتيجة قوية بضغطة.'],
+      ['الكتالوج + الفلاتر', 'تصفّح حسب الفئة والنيّة والجمهور، و«للمُركِّب» لتعديل أي استعلام.', 'تبدأ من الاستعلام الأنسب لهدفك.'],
+      ['المُركِّب', 'تضيف طبقات: النطاق، الدقة، الحداثة، نوع الملف، الاستبعاد. يمنع التركيبات المتعارضة ويعدّ الكلمات حتى ٣٢.', 'تضيّق للحصول على نتائج أدق أو توسّع لاستكشاف أكثر.'],
+      ['افتح في Google', 'يفتح البحث في تبويب جديد ثم نموذج لتسجيل النتائج المهمة.', 'مجاني ويعمل الآن.'],
+      ['تشغيل عبر Claude', 'يبحث Claude ويستخرج الحقول تلقائياً (فردي أو فئة كاملة).', 'توفير وقت — يحتاج الرصيد.'],
+      ['النتائج + تصدير', 'جداول حسب الفئة، موسومة بقيد المنافسة، والتصدير يستبعد المحظور ويُعطَّل لفئات PDPL.', 'قوائم قابلة للاستخدام بأمان نظامي.']] },
+  sources: { t: 'قواعد عملاء المصادر', what: 'استيراد قوائم عملاء من شيت/إكسل، تحليلها وتقسيمها حسب الاحتياج، ورسالة مخصصة لكل شخص تُرسلها أنت بضغطة.', why: 'تحوّل قوائم خاملة (معارض، عملاء قدامى، مسجّلون) إلى محادثات بيع — كل رسالة مناسبة لاحتياج صاحبها.',
+    btns: [['📥 استيراد', 'لصق من إكسل أو رفع ملف CSV/Excel، مع ربط الأعمدة تلقائياً ومنع المكرر.', 'قائمتك داخل النظام في دقيقة.'],
+      ['حلّل بالقواعد / عبر Claude', 'تقسيم كل شخص لشريحة (ملزَم، طامح، محوِّل مسار…) وتحديد احتياجه والدورة المناسبة، ثم كتابة رسالة مخصصة.', 'الرسالة تخاطب دافع الشخص الحقيقي = ردود أعلى.'],
+      ['واتساب / إيميل', 'يفتح المحادثة والرسالة جاهزة — ترسلها أنت، ثم يسألك النظام هل أُرسلت.', 'تواصل شخصي آمن نظامياً بلا إرسال جماعي.'],
+      ['🔎 ابحث عنه', 'يفتح بحث Google باسمه وإيميله لتكمل حساباته بنفسك.', 'إحاطة أفضل بالعميل قبل التواصل.'],
+      ['أضف كعميل', 'ينقله إلى العملاء (Leads) لمتابعته حتى الدفع.', 'يدخل مسار البيع الكامل.'],
+      ['لا تراسل', 'يوقف التواصل معه نهائياً.', 'احترام الخصوصية وسمعة الأكاديمية.']] },
   radar: { t: 'الرادار', what: 'مراقبة المنافسين وعروضهم وأسعارهم أسبوعياً.', why: 'تعرف متى تنافس بالسعر ومتى بالقيمة، ولا تُفاجأ بعرض منافس.',
     btns: [['الموقع', 'موقع المنافس.', 'مراجعة سريعة.'], ['مكتبة إعلانات Meta', 'إعلانات المنافس الحالية (تفتحها يدوياً).', 'ترى رسائلهم التسويقية وتتفوق عليها.']] },
   discovery: { t: 'الاكتشافات', what: 'جهات جديدة (أندية/أكاديميات) لم تكن في قوائمك.', why: 'عملاء B2B جدد ومنافسون جدد قبل غيرك.',
@@ -2438,6 +3047,7 @@ var MODULE_INFO = {
   advisor: 'مستشار أسبوعي يقرأ أرقامك ويقترح ٣ قرارات (يحتاج Claude).',
   weekly_report: 'تقرير أسبوعي بالبريد: تسجيلات، عملاء، حملات، أخبار.',
   housekeeping: 'صيانة يومية: نسخة احتياطية، أرشفة القديم، تنظيف.',
+  search_expansion: 'يشغّل وصفة «رادار التوسّع» من صفحة البحث أسبوعياً ويرصد افتتاحات الأندية (يحتاج Claude).',
   exam_watch: 'يراقب مواعيد الاختبارات والرخص المهنية ويحدّث التواريخ.',
   org_map: 'يبني خريطة صنّاع القرار في الشركات المستهدفة (يحتاج Claude).',
   intel_synth: 'يركّب «فرصاً» من الأخبار والأشخاص والتوقيت ويقترح الوسيط الأنسب.',
@@ -2447,11 +3057,11 @@ var MODULE_INFO = {
 /** مراحل المخطط: الترتيب الذي يمر به العميل والمال */
 var INFO_STAGES = [
   { t: '١) جذب الانتباه', c: '#8d6cd8', pages: ['dailyPost', 'content', 'campaigns', 'keywords'], mods: ['daily_posts', 'content_calendar', 'campaigns', 'keywords', 'experiments', 'unified_publish'] },
-  { t: '٢) استقبال العميل', c: '#3a86ff', pages: ['reply'], mods: ['inbox_email', 'inbox_forms', 'whatsapp', 'instagram', 'ingest', 'opt_out'] },
+  { t: '٢) استقبال العميل', c: '#3a86ff', pages: ['reply', 'sources'], mods: ['inbox_email', 'inbox_forms', 'whatsapp', 'instagram', 'ingest', 'opt_out'] },
   { t: '٣) الفهم والرد', c: '#2a9d8f', pages: ['today'], mods: ['classify', 'lead_scoring', 'answer_bank', 'draft', 'decide', 'owner_approval', 'sla_monitor', 'dispatch'] },
   { t: '٤) الإغلاق والتسجيل', c: '#52b788', pages: ['courses', 'calendar', 'lead'], mods: ['closing', 'followup', 'payment_hooks'] },
   { t: '٥) بيع الشركات B2B', c: '#e76f51', pages: ['targets', 'people', 'opps', 'b2b', 'operator'], mods: ['b2b_pipeline', 'org_map', 'intel_synth'] },
-  { t: '٦) استخبارات السوق', c: '#e9a23b', pages: ['news', 'exams', 'competitors', 'radar', 'discovery'], mods: ['news_watch', 'exam_watch', 'radar_competitors', 'discovery_weekly'] },
+  { t: '٦) استخبارات السوق', c: '#e9a23b', pages: ['news', 'exams', 'competitors', 'search', 'radar', 'discovery'], mods: ['news_watch', 'exam_watch', 'radar_competitors', 'search_expansion', 'discovery_weekly'] },
   { t: '٧) ما بعد البيع', c: '#d6457a', pages: ['alumni'], mods: ['alumni_recert'] },
   { t: '٨) القياس والإدارة', c: '#8a817c', pages: ['kpis', 'flow', 'modules', 'settings', 'info'], mods: ['weekly_report', 'advisor', 'housekeeping', 'flow'] }
 ];
