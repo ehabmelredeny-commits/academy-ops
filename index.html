@@ -779,7 +779,9 @@ SCREENS.news = { render: function (d, args) {
       (n.notes ? '<div class="muted small">' + esc(n.notes) + '</div>' : '') +
       '<div class="btns">' + (n.seen !== 'نعم' ? '<button class="btn sm" data-act="newsSeen" data-id="' + esc(n.news_id) + '">قرأته</button>' : '') +
       '<button class="btn sm" data-act="newsContent" data-id="' + esc(n.news_id) + '">هذا يستحق محتوى</button>' +
-      (n.url ? '<a class="btn sm" target="_blank" href="' + esc(extUrl(n.url)) + '">المصدر</a>' : '') + '</div></div>';
+      '</div>' +
+      (extUrl(n.url) ? '<a class="btn" style="display:block;text-align:center;margin-top:8px" target="_blank" rel="noopener" href="' + esc(extUrl(n.url)) + '">🔗 اقرأ الخبر كاملاً — ' +
+        esc(extUrl(n.url).replace(/^https?:\/\/(www\.)?/, '').split('/')[0]) + '</a>' : '<div class="muted small">لا رابط لهذا الخبر</div>') + '</div>';
   }).join('') : empty('لا أخبار');
   html += '<h2>المصادر ' + chip(d.sources.length) + '</h2>' + d.sources.map(function (s) {
     return '<div class="card"><div class="row between"><b class="grow">' + esc(s.name) + '</b>' + switchHtml(s.enabled === 'مفعّل', 'srcToggle', s.src_id) + '</div>' +
