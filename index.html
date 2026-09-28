@@ -200,22 +200,31 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
     var r = { s: null, f: null };
     r.withSuccessHandler = function (x) { r.s = x; return r; };
     r.withFailureHandler = function (x) { r.f = x; return r; };
-    function done(p) {
-      p.then(function (res) { return res.json(); })
-        .then(function (j) { if (j && j.ok) r.s && r.s(j.data); else r.f && r.f(new Error((j && j.error) || 'خطأ')); })
-        .catch(function (e) { r.f && r.f(new Error('تعذّر الاتصال بالنظام — تحقق من الإنترنت')); });
+    // Google يعيد أحياناً صفحة خطأ عابرة بدل JSON: طلبات القراءة (GET) تُعاد تلقائياً حتى مرتين
+    function done(mk, retries) {
+      mk().then(function (res) { return res.text(); })
+        .then(function (t) {
+          var j; try { j = JSON.parse(t); } catch (x) { j = null; }
+          if (!j) { if (retries > 0) return setTimeout(function () { done(mk, retries - 1); }, 800); throw new Error('bad'); }
+          if (j.ok) r.s && r.s(j.data); else r.f && r.f(new Error(j.error || 'خطأ'));
+        })
+        .catch(function (e) {
+          if (retries > 0 && e.message !== 'bad') return setTimeout(function () { done(mk, retries - 1); }, 800);
+          r.f && r.f(new Error('تعذّر الاتصال بالنظام — أعد المحاولة بعد قليل'));
+        });
     }
     function viaGet(fn, name, args) {
       var a = Object.assign({}, args || {}); delete a.__k;
-      done(fetch(EXEC_URL + '?api=1&fn=' + fn + '&name=' + encodeURIComponent(name) + '&k=' + encodeURIComponent(opsKey_()) +
-        '&args=' + encodeURIComponent(JSON.stringify(a))));
+      var url = EXEC_URL + '?api=1&fn=' + fn + '&name=' + encodeURIComponent(name) + '&k=' + encodeURIComponent(opsKey_()) +
+        '&args=' + encodeURIComponent(JSON.stringify(a));
+      done(function () { return fetch(url); }, fn === 'screen' ? 2 : 0);
     }
     r.apiScreen = function (name, args) { viaGet('screen', name, args); };
     r.apiAction = function (name, args) {
       if (CLAUDE_GET.indexOf(name) > -1) return viaGet('action', name, args);
       var a = Object.assign({}, args || {}); delete a.__k;
-      done(fetch(EXEC_URL + '?api=1', { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ name: name, args: a, k: opsKey_() }) }));
+      var body = JSON.stringify({ name: name, args: a, k: opsKey_() });
+      done(function () { return fetch(EXEC_URL + '?api=1', { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body }); }, 0);
     };
     return r;
   } });
