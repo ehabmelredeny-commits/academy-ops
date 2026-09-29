@@ -292,7 +292,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -1320,9 +1320,19 @@ ACT.courseSave = function (el) {
 /* ─── الإعدادات ─── */
 SCREENS.settings = { render: function (d, args) {
   var tab = args.tab || 'accounts';
-  var html = north(d.north) + '<h1>الإعدادات</h1><div class="card row between small"><b>🌐 اللغة / Language</b>' + i18nToggleHtml_() + '</div>' + tipsToggleHtml_() + '<div class="tabs">' + [['accounts', 'الحسابات'], ['channels', 'القنوات والإرسال'], ['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
+  var html = north(d.north) + '<h1>الإعدادات</h1><div class="card row between small"><b>🌐 اللغة / Language</b>' + i18nToggleHtml_() + '</div>' + tipsToggleHtml_() + '<div class="tabs">' + [['accounts', 'الحسابات'], ['channels', 'القنوات والإرسال'], ['biz', 'بيانات المنشأة والتتبع'], ['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
     return '<button class="btn sm ' + (t[0] === tab ? 'pri' : '') + '" data-go="settings" data-args="' + attr({ tab: t[0] }) + '">' + t[1] + '</button>';
   }).join('') + '<button class="btn sm good" data-act="applyNow">تطبيق التغييرات الآن</button><button class="btn sm" data-act="reportPrev">معاينة التقرير الأسبوعي</button></div>';
+  if (tab === 'biz') {
+    var BIZ = /^(biz_|ga4_id|meta_pixel_id|tiktok_pixel_id|register_daily_max|academy_name)/;
+    html += '<div class="card small">بيانات المنشأة تظهر في نموذج التسجيل وسياسة الخصوصية وعروض الأسعار والفواتير. ما زال «قيد الإصدار»؟ اتركه — لا يظهر للعملاء حتى تكتبه.</div>' +
+      d.settings.filter(function (s) { return BIZ.test(s.key); }).map(function (s) {
+        var pend = /قيد الإصدار/.test(String(s.value));
+        return '<div class="card"><label class="f"><b>' + esc(String(s.description).replace(/^[^:]+:\s*/, '')) + '</b> ' + (pend ? chip('قيد الإصدار', 'warn') : '') + '</label><div class="row">' +
+          '<input type="text" class="grow" id="set_' + esc(s.key) + '" value="' + esc(pend ? '' : s.value) + '" placeholder="' + (pend ? 'قيد الإصدار' : '') + '">' +
+          '<button class="btn sm" data-act="setSave" data-id="' + esc(s.key) + '">حفظ</button></div></div>';
+      }).join('');
+  }
   if (tab === 'channels') {
     var st = d.channels || {}, outb = (d.settings.filter(function (x) { return x.key === 'outbound_enabled'; })[0] || {}).value;
     var key = function (k, label, ph, pw) { return '<div class="row" style="gap:6px;margin:4px 0"><label class="f grow">' + label + '<input id="sk_' + k + '" type="' + (pw ? 'password' : 'text') + '" placeholder="' + esc(ph || '') + '" autocomplete="off"></label>' +
@@ -3515,6 +3525,52 @@ ACT.askPaste = function (el) {
   api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl') }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
+</script>
+
+  <script>
+/* ═══════════ 🔗 نموذج التسجيل: روابط جاهزة لكل منصة (بمصدر UTM) + مشاركة واتساب + رمز QR ═══════════ */
+var REG_PLATFORMS = [['whatsapp', 'واتساب', '💬'], ['instagram', 'انستغرام', '📸'], ['tiktok', 'تيك توك', '🎵'], ['x', 'X', '𝕏'], ['snapchat', 'سناب شات', '👻'],
+  ['facebook', 'فيسبوك', '📘'], ['linkedin', 'لينكدإن', '💼'], ['email', 'البريد', '✉️'], ['qr', 'مطبوعات / QR', '🔳'], ['ads', 'إعلانات ممولة', '📣']];
+function regBase_() {
+  var sbx = S.sandbox ? 'sandbox/' : '';
+  return 'https://ehabmelredeny-commits.github.io/academy-ops/' + sbx + 'register/';
+}
+function regLink_(src, course, campaign) {
+  var p = ['utm_source=' + encodeURIComponent(src), 'utm_medium=' + (src === 'ads' ? 'paid' : src === 'qr' ? 'offline' : 'social')];
+  if (campaign) p.push('utm_campaign=' + encodeURIComponent(campaign));
+  if (course) p.push('course=' + encodeURIComponent(course));
+  return regBase_() + '?' + p.join('&');
+}
+SCREENS.register = { render: function (d, args) {
+  var course = args.course || '', camp = args.campaign || '';
+  var html = north(d.north) + '<h1>🔗 نموذج التسجيل</h1>' +
+    '<div class="card small">صفحة تسجيل عامة ترسلها للعملاء على أي منصة. كل طلب يصل «الرد» كرسالة جديدة ويدخل العملاء <b>مع موافقته على التواصل ومصدره</b> ' +
+    '(من أي منصة جاء) — فتعرف أي منصة تجلب التسجيلات. <a target="_blank" href="' + esc(regBase_()) + '">افتح النموذج</a> · <a target="_blank" href="' + esc(regBase_().replace('register/', 'privacy/')) + '">سياسة الخصوصية</a></div>';
+  html += '<div class="card"><div class="row" style="gap:8px;flex-wrap:wrap"><div class="grow"><label class="f">الدورة (تُختار مسبقاً في النموذج)</label><select id="rg_course" data-act="rgChange"><option value="">بدون</option>' +
+    d.courses.map(function (c) { return '<option' + (c === course ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="grow"><label class="f">اسم الحملة (اختياري)</label><input id="rg_camp" data-act="rgChange" value="' + esc(camp) + '" placeholder="مثل: دفعة أكتوبر"></div></div></div>';
+  var msg = 'السلام عليكم 👋 سجّل اهتمامك' + (course ? ' بـ «' + course + '»' : ' بدوراتنا') + ' ونرسل لك التفاصيل والمواعيد:\n';
+  html += '<div class="grid2">' + REG_PLATFORMS.map(function (p) {
+    var link = regLink_(p[0], course, camp);
+    return '<div class="card small"><div class="row between"><b>' + p[2] + ' ' + esc(p[1]) + '</b>' +
+      '<button class="btn sm" data-act="rgCopy" data-v="' + esc(link) + '">📋 انسخ الرابط</button></div>' +
+      '<div dir="ltr" class="no-tr muted" style="overflow-wrap:anywhere;font-size:11.5px">' + esc(link) + '</div>' +
+      (p[0] === 'whatsapp' ? '<div class="btns"><a class="btn sm good" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(msg + link) + '">شارك في واتساب</a>' +
+        '<button class="btn sm" data-act="rgCopy" data-v="' + esc(msg + link) + '">انسخ الرسالة كاملة</button></div>' : '') +
+      (p[0] === 'x' ? '<div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="https://x.com/intent/post?text=' + encodeURIComponent(msg + link) + '">انشر على X</a></div>' : '') +
+      (p[0] === 'facebook' ? '<div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link) + '">شارك في فيسبوك</a></div>' : '') +
+      (p[0] === 'linkedin' ? '<div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(link) + '">شارك في لينكدإن</a></div>' : '') +
+      (p[0] === 'qr' ? '<img alt="QR" style="width:150px;height:150px;display:block;margin:6px auto;background:#fff;padding:6px;border-radius:8px" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link) + '">' +
+        '<div class="muted" style="text-align:center">اضغط مطوّلاً ← حفظ الصورة، للمطبوعات والبوسترات</div>' : '') +
+      (p[0] === 'instagram' || p[0] === 'tiktok' || p[0] === 'snapchat' ? '<div class="muted">ضعه في «الرابط في البايو» أو الستوري (ملصق رابط).</div>' : '') + '</div>';
+  }).join('') + '</div>';
+  html += '<h2>من أين تأتي التسجيلات؟ (٣٠ يوماً)</h2>' + (Object.keys(d.by_source).length ? '<div class="chips">' + Object.keys(d.by_source).sort(function (a, b) { return d.by_source[b] - d.by_source[a]; })
+    .map(function (k) { var p = REG_PLATFORMS.filter(function (x) { return x[0] === k; })[0]; return chip((p ? p[2] + ' ' + p[1] : k) + ': ' + d.by_source[k], 'acc'); }).join('') + '</div>' : empty('لا طلبات من النموذج بعد'));
+  html += '<div class="card small muted">التتبع: أضف معرّفات Google Analytics و Meta Pixel و TikTok Pixel من الإعدادات ← بيانات المنشأة والتتبع — تُفعَّل في النموذج تلقائياً.</div>';
+  return html;
+} };
+ACT.rgChange = function () { go('register', { course: val('rg_course'), campaign: val('rg_camp') }, true); };
+ACT.rgCopy = function (el) { var v = el.dataset.v; try { navigator.clipboard.writeText(v); } catch (e) { var t = document.createElement('textarea'); t.value = v; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } toast('نُسخ'); };
 </script>
 
   ﻿<script>
