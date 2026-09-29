@@ -63,16 +63,16 @@ nav.side { display: none; }
 }
 
 /* ─── المؤشر الشمالي ─── */
-.north { background: var(--accent); color: var(--accent-ink); border-radius: var(--radius); padding: 12px 16px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.north .n { font-size: 34px; font-weight: 700; line-height: 1; }
+.north { background: var(--accent); color: var(--accent-ink); border-radius: var(--radius); padding: 8px 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+.north .n { font-size: 26px; font-weight: 700; line-height: 1; }
 .north .l { font-size: 13px; opacity: .92; }
 .north .side-stats { font-size: 12.5px; text-align: end; opacity: .92; }
 
-h1 { font-size: 20px; margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-h2 { font-size: 15.5px; margin: 18px 0 8px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
-.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
-  margin-bottom: 10px; box-shadow: var(--shadow); overflow-wrap: anywhere; }
+h1 { font-size: 19px; margin: 2px 0 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+h2 { font-size: 15px; margin: 12px 0 6px; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 9px 11px;
+  margin-bottom: 7px; box-shadow: var(--shadow); overflow-wrap: anywhere; }
 .card.click { cursor: pointer; }
 .card.click:active { transform: scale(.995); }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -80,7 +80,7 @@ h2 { font-size: 15.5px; margin: 18px 0 8px; color: var(--muted); font-weight: 60
 .muted { color: var(--muted); font-size: 13px; }
 .small { font-size: 12.5px; }
 .grow { flex: 1; min-width: 0; }
-.grid2 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.grid2 { display: grid; grid-template-columns: 1fr; gap: 7px; }
 @media (min-width: 700px) { .grid2 { grid-template-columns: 1fr 1fr; } }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; font-size: 12px;
@@ -90,28 +90,28 @@ h2 { font-size: 15.5px; margin: 18px 0 8px; color: var(--muted); font-weight: 60
 .chip.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
 .chip.acc { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
 .chip.owner { background: var(--owner-soft); color: var(--owner); border-color: transparent; }
-.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; flex: 1; min-width: 120px; }
-.stat .v { font-size: 22px; font-weight: 700; }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; flex: 1; min-width: 100px; }
+.stat .v { font-size: 18px; font-weight: 700; }
 .stat .k { font-size: 12px; color: var(--muted); }
 
-.btn { border: 1px solid var(--line); background: var(--card); padding: 9px 14px; border-radius: 11px; cursor: pointer;
-  font-weight: 500; min-height: 40px; }
+.btn { border: 1px solid var(--line); background: var(--card); padding: 6px 12px; border-radius: 10px; cursor: pointer;
+  font-weight: 500; min-height: 34px; }
 .btn.pri { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .btn.good { background: var(--good); color: #fff; border-color: var(--good); }
 .btn.bad { color: var(--bad); border-color: var(--bad); background: transparent; }
 .btn.ghost { background: transparent; }
-.btn.sm { padding: 5px 10px; min-height: 32px; font-size: 13px; }
+.btn.sm { padding: 4px 9px; min-height: 28px; font-size: 13px; }
 .btn:disabled { opacity: .5; cursor: default; }
-.btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
 .btns .btn { flex: 1 1 auto; }
 
 input[type=text], input[type=number], input[type=date], input[type=url], select, textarea {
-  width: 100%; border: 1px solid var(--line); background: var(--card); border-radius: 10px; padding: 9px 11px; }
-textarea { min-height: 150px; resize: vertical; line-height: 1.7; }
+  width: 100%; border: 1px solid var(--line); background: var(--card); border-radius: 9px; padding: 6px 9px; }
+textarea { min-height: 90px; resize: vertical; line-height: 1.7; }
 textarea.mono { font-family: ui-monospace, Consolas, monospace; font-size: 13px; direction: auto; }
-label.f { display: block; font-size: 12.5px; color: var(--muted); margin: 10px 0 4px; }
+label.f { display: block; font-size: 12.5px; color: var(--muted); margin: 6px 0 3px; }
 .quote { background: var(--soft); border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; }
-.empty { text-align: center; color: var(--muted); padding: 22px 10px; }
+.empty { text-align: center; color: var(--muted); padding: 12px 8px; }
 .toast { position: fixed; bottom: calc(var(--nav-h) + 14px); left: 16px; right: 16px; margin: auto; max-width: 480px;
   background: var(--ink); color: var(--bg); padding: 11px 14px; border-radius: 12px; z-index: 60; text-align: center;
   box-shadow: 0 6px 20px rgba(0,0,0,.25); }
@@ -3456,7 +3456,12 @@ ACT.sbxReset = function (el) {
 
   <script>
 /* ═══════════ من يسأل الآن (رادار الأسئلة) ═══════════ */
-var ASK = { data: null };
+var ASK = { data: null, q: '' };
+var ASK_PERSONAS = { 'مبتدئ': 'يريد البداية — طمأنة + خطوة أولى', 'مدرب يطوّر': 'يبحث عن ترقية — دخل وتميّز', 'يحتاج رخصة': 'حاجة رسمية — اعتماد ومتطلبات', 'يسأل السعر': 'جاهز للشراء — سعر + رابط مباشر', 'يقارن': 'متردد بين خيارات — ثقة ومقارنة' };
+function askPersonaSel_(id, cur, auto) {
+  return '<select id="' + id + '" title="الحالة النفسية التسويقية للسائل — تحدد نبرة الرد">' + (auto ? '<option value="">🧠 تُحدَّد تلقائياً</option>' : '') +
+    Object.keys(ASK_PERSONAS).map(function (k) { return '<option value="' + k + '"' + (k === cur ? ' selected' : '') + '>🧠 ' + k + ' — ' + ASK_PERSONAS[k] + '</option>'; }).join('') + '</select>';
+}
 SCREENS.ask = { render: function (d, args) {
   ASK.data = d;
   var st = d.stats, rate = st.total ? Math.round(st.replied / st.total * 100) : 0;
@@ -3470,13 +3475,17 @@ SCREENS.ask = { render: function (d, args) {
 
   // ── فرص الرد ──
   html += '<h2>فرص رد ' + chip(d.opps.length) + '</h2><div class="muted small">كل فرصة تُحذف تلقائياً بعد ' + d.ttl + ' يوماً (حماية البيانات). الرد تنشره أنت من حساب الأكاديمية — المنصات تمنع الردود الآلية على الغرباء.</div>';
-  html += d.opps.length ? '<div class="grid2">' + d.opps.map(function (o) {
+  if (d.opps.length) html += '<input type="text" id="ask_q" placeholder="🔍 ابحث في الفرص: كلمة، مدينة، منصة، حالة…" value="' + esc(ASK.q) + '" style="margin:6px 0">';
+  html += d.opps.length ? '<div class="grid2" id="ask_list">' + d.opps.map(function (o) {
     var done = o.status !== 'جديد', left = Math.max(0, Math.ceil(((Time_(o.expires_at) || 0) - Date.now()) / 864e5));
-    return '<div class="card" style="' + (done ? 'opacity:.6' : '') + '"><div class="row between"><span>' + chip(o.platform, 'acc') + chip(o.persona) + '</span>' +
+    var hay = [o.question, o.city, o.platform, o.persona, o.status, o.suggested_reply].join(' ');
+    return '<div class="card" data-hay="' + esc(hay) + '" style="' + (done ? 'opacity:.6' : '') + '"><div class="row between"><span>' + chip(o.platform, 'acc') + chip(o.persona) + '</span>' +
       '<span title="قوة النية">' + '★★★★★'.slice(0, Number(o.intent_score) || 1) + '<span class="muted">' + '★★★★★'.slice(0, 5 - (Number(o.intent_score) || 1)) + '</span></span></div>' +
       '<div style="margin:6px 0;white-space:pre-wrap">«' + esc(o.question) + '»</div>' +
       '<div class="muted small">' + (o.city ? '📍 ' + esc(o.city) + ' · ' : '') + fmtDate(o.found_at, true) + ' · ' + esc(o.source) + ' · يُحذف بعد ' + left + ' يوماً</div>' +
       (done ? '<div class="small">' + chip(o.status, o.status === 'تم الرد' ? 'good' : '') + '</div>' :
+        '<div class="row" style="gap:6px;margin-top:6px"><div class="grow">' + askPersonaSel_('apx_' + esc(o.ask_id), o.persona) + '</div>' +
+        '<button class="btn sm" data-act="askRegen" data-id="' + esc(o.ask_id) + '" title="اكتب الرد من جديد حسب الحالة المختارة (مع الرابط)">↻ رد جديد</button></div>' +
         '<label class="f">الرد المقترح (عدّله كما تحب)</label><textarea id="ar_' + esc(o.ask_id) + '" style="min-height:80px">' + esc(o.suggested_reply) + '</textarea>' +
         '<div class="btns">' + (extUrl(o.url) ? '<button class="btn sm good" data-act="askOpen" data-id="' + esc(o.ask_id) + '">📋 افتح وردّ</button>' :
           '<button class="btn sm good" data-act="askCopy" data-id="' + esc(o.ask_id) + '">📋 انسخ الرد</button>') +
@@ -3491,6 +3500,7 @@ SCREENS.ask = { render: function (d, args) {
     '<div class="grow"><label class="f">المدينة</label><select id="ap_city"><option value="">غير مذكورة</option>' +
       SEARCH_CATALOG.placeholders.CITY.options.concat(['مكة المكرمة', 'الطائف', 'أبها', 'تبوك', 'بريدة', 'حائل', 'نجران', 'جازان', 'الأحساء', 'الجبيل', 'ينبع']).filter(function (c, i, arr) { return arr.indexOf(c) === i; })
         .map(function (c) { return '<option' + (c === d.city ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div></div>' +
+    '<label class="f">الحالة النفسية التسويقية</label>' + askPersonaSel_('ap_ps', '', true) +
     '<label class="f">رابط المنشور</label><input id="ap_url" type="url" dir="ltr" placeholder="https://x.com/…" autocomplete="off">' +
     '<label class="f">نص السؤال</label><textarea id="ap_q" placeholder="مثال: أبي دورة مدرب شخصي بالرياض أحد يعرف مكان زين؟"></textarea>' +
 
@@ -3505,6 +3515,13 @@ SCREENS.ask = { render: function (d, args) {
   html += '<div class="card small muted">🔮 <b>فرصة مستقبلية:</b> اشتراك X API المدفوع (~٢٠٠$ شهرياً) يجعل رصد X لحظياً وتلقائياً بالكامل. حالياً: المسح اليومي عبر Claude + أزرار البحث المباشر المجانية.</div>';
   return html;
 } };
+ACT.askRegen = function (el) { act('askUpdate', { ask_id: el.dataset.id, persona: val('apx_' + el.dataset.id) }, 'كُتب رد جديد مع الرابط'); };
+document.addEventListener('input', function (e) {
+  if (!e.target || e.target.id !== 'ask_q') return;
+  ASK.q = e.target.value; var q = normAr_(ASK.q);
+  document.querySelectorAll('#ask_list > .card').forEach(function (c) { c.style.display = !q || normAr_(c.dataset.hay).indexOf(q) > -1 ? '' : 'none'; });
+});
+function normAr_(t) { return String(t || '').toLowerCase().replace(/[إأآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ً-ْ]/g, '').trim(); }
 function Time_(v) { var d = v ? new Date(v) : null; return d && !isNaN(d) ? d.getTime() : 0; }
 function askCopy_(id) {
   var t = val('ar_' + id);
@@ -3522,7 +3539,7 @@ ACT.askSet = function (el) { act('askUpdate', { ask_id: el.dataset.id, status: e
 ACT.askPaste = function (el) {
   if (!val('ap_q').trim()) return toast('الصق نص السؤال', true);
   el.disabled = true;
-  api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl') }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
+  api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl'), persona: val('ap_ps') }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 </script>
