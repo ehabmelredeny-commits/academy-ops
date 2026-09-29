@@ -292,7 +292,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -3571,6 +3571,60 @@ SCREENS.register = { render: function (d, args) {
 } };
 ACT.rgChange = function () { go('register', { course: val('rg_course'), campaign: val('rg_camp') }, true); };
 ACT.rgCopy = function (el) { var v = el.dataset.v; try { navigator.clipboard.writeText(v); } catch (e) { var t = document.createElement('textarea'); t.value = v; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); } toast('نُسخ'); };
+</script>
+
+  <script>
+/* ═══════════ 💰 المدفوعات ═══════════ */
+var PAY = { data: null };
+SCREENS.payments = { render: function (d) {
+  PAY.data = d;
+  var html = north(d.north) + '<h1>💰 المدفوعات</h1><div class="row" style="flex-wrap:wrap">' +
+    '<div class="stat"><div class="v">' + Number(d.month_total).toLocaleString('en') + '</div><div class="k">ر.س آخر ٣٠ يوماً</div></div>' +
+    '<div class="stat"><div class="v">' + d.month_count + '</div><div class="k">عملية دفع</div></div></div>';
+  // ١) روابط الدفع لكل دورة
+  html += '<div class="card"><b>١) رابط الدفع لكل دورة</b><div class="muted small">ضع رابط المنتج في متجرك (سلة) أو رابط البوابة. النظام يضعه تلقائياً في الردود المقترحة وعروض الأسعار عندما يسأل العميل عن التسجيل أو السعر.</div>' +
+    (d.courses.length ? d.courses.map(function (c) {
+      return '<div class="row" style="gap:6px;margin-top:6px;align-items:center"><span class="grow small"><b>' + esc(c.name_ar) + '</b>' + (c.active === 'لا' ? ' ' + chip('غير مفعّلة') : '') +
+        (c.price_sar !== '' && c.price_sar !== undefined ? ' · ' + Number(c.price_sar).toLocaleString('en') + ' ر.س' : '') + '</span>' +
+        '<input id="pl_' + esc(c.course_id) + '" dir="ltr" style="max-width:320px" placeholder="https://salla.sa/…" value="' + esc(c.payment_url || '') + '">' +
+        '<button class="btn sm" data-act="payLinkSave" data-id="' + esc(c.course_id) + '">حفظ</button></div>';
+    }).join('') : empty('أضف دوراتك أولاً من «الدورات»')) +
+    '<div class="muted small" style="margin-top:6px">رابط المتجر العام والتحويل البنكي: الإعدادات ← Settings (store_url · bank_transfer_info). المزوّد الحالي: <b>' + esc(d.provider) + '</b></div></div>';
+  // ٢) تأكيد الدفع التلقائي
+  html += '<div class="card"><b>٢) تأكيد الدفع تلقائياً (سلة / Tap / ميسر)</b><div class="muted small">عند الدفع يرسل المتجر إشعاراً للنظام ← يصبح العميل «سجّل» مع المبلغ والدورة، تُخصم المقاعد، ويصلك إيميل.</div>' +
+    (d.links.length && d.hooks_on ? d.links.map(function (l) {
+      var nm = { salla: 'سلة', tap: 'Tap', moyasar: 'ميسر', generic: 'أي بوابة أخرى' }[l[0]];
+      return '<div class="row" style="gap:6px;margin-top:6px;align-items:center"><b style="min-width:90px">' + nm + '</b><code class="grow no-tr" dir="ltr" style="font-size:11px;overflow-wrap:anywhere">' + esc(l[1]) + '</code>' +
+        '<button class="btn sm" data-act="payCopy" data-v="' + esc(l[1]) + '">📋 نسخ</button></div>';
+    }).join('') + '<details class="small" style="margin-top:8px"><summary>أين ألصق الرابط في سلة؟</summary><ol>' +
+      '<li>لوحة تحكم سلة ← «التطبيقات» ← «Webhooks» (أو الإعدادات ← الربط البرمجي).</li><li>أضف Webhook جديد، والصق رابط «سلة» أعلاه.</li>' +
+      '<li>اختر الأحداث: <span class="no-tr" dir="ltr">order.created</span> و <span class="no-tr" dir="ltr">order.status.updated</span>.</li><li>احفظ — أول طلب مدفوع يظهر هنا تلقائياً.</li></ol>' +
+      '<div class="muted">الرابط يحتوي كلمة سر — لا تشاركه إلا مع لوحة المتجر.</div></details>'
+      : '<div class="btns"><button class="btn pri" data-act="paySetup">جهّز روابط الربط</button></div>') + '</div>';
+  // ٣) تسجيل يدوي
+  html += '<details class="card"><summary><b>٣) سجّل دفعة يدوية (تحويل بنكي / نقداً)</b></summary>' +
+    '<div class="row" style="gap:6px;flex-wrap:wrap"><div class="grow"><label class="f">الاسم</label><input id="pm_n"></div><div class="grow"><label class="f">الجوال</label><input id="pm_p" dir="ltr"></div></div>' +
+    '<div class="row" style="gap:6px;flex-wrap:wrap"><div class="grow"><label class="f">الدورة</label><select id="pm_c"><option value="">—</option>' +
+    d.courses.map(function (c) { return '<option value="' + esc(c.course_id) + '">' + esc(c.name_ar) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="grow"><label class="f">المبلغ (ر.س)</label><input id="pm_a" type="number"></div><div class="grow"><label class="f">الطريقة</label><select id="pm_m"><option>تحويل بنكي</option><option>نقداً</option><option>أخرى</option></select></div></div>' +
+    '<label class="f">ملاحظة</label><input id="pm_note"><div class="btns"><button class="btn good" data-act="payManual">سجّل الدفعة</button></div></details>';
+  // ٤) السجل
+  html += '<h2>السجل ' + chip(d.rows.length) + '</h2>' + (d.rows.length ? '<div class="grid2">' + d.rows.map(function (p) {
+    return '<div class="card small"><div class="row between"><b>' + Number(p.amount).toLocaleString('en') + ' ' + esc(p.currency) + '</b>' + chip(p.provider, 'acc') + '</div>' +
+      '<div>' + esc(p.name || p.phone) + (p.items ? ' · ' + esc(p.items) : '') + '</div><div class="muted">' + fmtDate(p.at, true) + ' · ' + esc(p.method || '') + ' · طلب ' + esc(p.order_id) + '</div>' +
+      (p.lead_id ? '<a href="#" data-go="lead" data-args="' + attr({ lead_id: p.lead_id }) + '">ملف العميل</a>' : '') + '</div>';
+  }).join('') + '</div>' : empty('لا مدفوعات بعد'));
+  return html;
+} };
+ACT.payLinkSave = function (el) { act('coursePayLink', { course_id: el.dataset.id, payment_url: val('pl_' + el.dataset.id) }, 'حُفظ رابط الدفع', false); };
+ACT.paySetup = function (el) { el.disabled = true; act('paymentsSetup', {}, 'جُهّزت الروابط — انسخ رابط سلة'); };
+ACT.payCopy = function (el) { try { navigator.clipboard.writeText(el.dataset.v); } catch (e) {} toast('نُسخ'); };
+ACT.payManual = function (el) {
+  if (!val('pm_a')) return toast('اكتب المبلغ', true);
+  el.disabled = true;
+  api('action', 'paymentManual', { name: val('pm_n'), phone: val('pm_p'), course_id: val('pm_c'), amount: val('pm_a'), method: val('pm_m'), note: val('pm_note') })
+    .then(function () { toast('سُجّلت الدفعة — العميل أصبح «سجّل»'); go('payments', {}, true); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
 </script>
 
   ﻿<script>
