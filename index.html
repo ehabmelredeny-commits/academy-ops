@@ -150,6 +150,13 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .cal-c.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .cal-n { font-size: 11px; color: var(--muted); }
 .cal-b { color: #fff; font-size: 10.5px; border-radius: 4px; padding: 1px 4px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.cal3 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 1000px) { .cal3 { grid-template-columns: repeat(3, 1fr); } .cal3 .cal-c { min-height: 58px; } .cal3 .cal-b { font-size: 10.5px; } }
+.cal-m { font-weight: 700; text-align: center; margin: 4px 0 2px; }
+.cal3 .cal { margin: 0; }
+.cal-b[draggable] { cursor: grab; user-select: none; }
+.cal-b.act { outline: 2px solid var(--ink); outline-offset: -1px; }
+.cal-c.drop { background: var(--accent-soft); border-color: var(--accent); }
 .cal-b.ex { background: var(--warn); color: #111; cursor: default; }
 @media (min-width: 700px) { .cal-c { min-height: 88px; } .cal-b { font-size: 12px; } }
 
@@ -2198,10 +2205,25 @@ function calDay_(v) { var d = v ? new Date(v) : null; if (!d || isNaN(d)) return
 function calIso_(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
 function calColor_(courseId, courses) {
   var i = courses.map(function (c) { return String(c.course_id); }).indexOf(String(courseId));
-  return CAL_COLORS[(i < 0 ? 0 : i) % CAL_COLORS.length];
+  i = i < 0 ? 0 : i;
+  return i < CAL_COLORS.length ? CAL_COLORS[i] : 'hsl(' + Math.round((i * 137.5) % 360) + ',58%,44%)';
 }
 /** أيام الجلسات الفعلية للدفعة (حسب أيام الأسبوع المختارة، أو كل الأيام) */
+function calParse_(x) { var p = String(x).trim().split('-'); return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]) : null; }
+/** يولّد الأيام: من البداية، على أيام الأسبوع المختارة، حتى يكتمل العدد (أو حتى النهاية) */
+function calGen_(start, days, count, end) {
+  var s = calDay_(start), e = calDay_(end), out = [], n = Number(count) || 0;
+  if (!s || (!n && !e)) return out;
+  for (var d = new Date(s); out.length < 400; d.setDate(d.getDate() + 1)) {
+    if (n ? out.length >= n : d > e) break;
+    if (!days.length || days.indexOf(CAL_DAYS[d.getDay()][0]) > -1) out.push(calIso_(d));
+    if ((d - s) / 864e5 > 1500) break;
+  }
+  return out;
+}
 function calSessions_(c) {
+  var list = String(c.sessions || '').split(',').filter(String);
+  if (list.length) return list.map(calParse_).filter(Boolean);
   var s = calDay_(c.start_date), e = calDay_(c.end_date) || s, out = [];
   if (!s) return out;
   var want = String(c.days || '').split(',').filter(String);
@@ -2214,8 +2236,10 @@ function calSessions_(c) {
 SCREENS.calendar = { render: function (d, args) {
   var now = new Date(), ym = (args.month || calIso_(now).slice(0, 7)).split('-');
   var y = Number(ym[0]), m = Number(ym[1]) - 1;
-  var first = new Date(y, m, 1), last = new Date(y, m + 1, 0);
-  var prev = calIso_(new Date(y, m - 1, 1)).slice(0, 7), next = calIso_(new Date(y, m + 1, 1)).slice(0, 7);
+  var first = new Date(y, m, 1);
+  var prev = calIso_(new Date(y, m - 3, 1)).slice(0, 7), next = calIso_(new Date(y, m + 3, 1)).slice(0, 7);
+  CAL.data = d; CAL.month = args.month;
+  if (!CAL.active || !d.cohorts.some(function (c) { return c.cohort_id === CAL.active; })) CAL.active = (d.cohorts.filter(function (c) { return c.status !== 'ملغاة'; }).slice(-1)[0] || {}).cohort_id || '';
   var byDay = {};
   d.cohorts.forEach(function (c) {
     if (c.status === 'ملغاة') return;
@@ -2227,20 +2251,35 @@ SCREENS.calendar = { render: function (d, args) {
       var x = calDay_(e[f[0]]); if (x) (exDay[calIso_(x)] = exDay[calIso_(x)] || []).push(f[1] + ': ' + e.name);
     });
   });
+  var last3 = new Date(y, m + 3, 0);
   var html = north(d.north) + '<h1>تقويم الدورات</h1>' +
-    '<div class="row between"><button class="btn sm" data-go="calendar" data-args="' + attr({ month: next }) + '">‹ التالي</button>' +
-    '<b>' + first.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'long', year: 'numeric' }) + '</b>' +
+    '<div class="row between"><button class="btn sm" data-go="calendar" data-args="' + attr({ month: next }) + '">‹ التالي ٣ أشهر</button>' +
+    '<b>' + first.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'long' }) + ' ← ' + last3.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'long', year: 'numeric' }) + '</b>' +
     '<button class="btn sm" data-go="calendar" data-args="' + attr({ month: prev }) + '">السابق ›</button></div>';
-  html += '<div class="cal">' + CAL_DAYS.map(function (x) { return '<div class="cal-h">' + x[1] + '</div>'; }).join('');
-  for (var i = 0; i < first.getDay(); i++) html += '<div class="cal-c off"></div>';
-  for (var day = 1; day <= last.getDate(); day++) {
-    var k = calIso_(new Date(y, m, day)), list = byDay[k] || [], ex = exDay[k] || [];
-    html += '<div class="cal-c' + (k === calIso_(now) ? ' today' : '') + '"><div class="cal-n">' + day + '</div>' +
-      list.map(function (c) {
-        return '<div class="cal-b" style="background:' + calColor_(c.course_id, d.courses) + '" data-act="calOpen" data-id="' + esc(c.cohort_id) + '" title="' + esc(c.title) + '">' + esc(String(c.title).slice(0, 14)) + '</div>';
-      }).join('') + ex.map(function (t) { return '<div class="cal-b ex" title="' + esc(t) + '">📝 ' + esc(t.slice(0, 12)) + '</div>'; }).join('') + '</div>';
+  var live = d.cohorts.filter(function (c) { return c.status !== 'ملغاة'; });
+  if (live.length) html += '<div class="card small row" style="gap:6px"><span>✏️ الدفعة التي تعدّلها:</span><select id="cal_active" style="width:auto;max-width:280px">' +
+    live.map(function (c) { return '<option value="' + esc(c.cohort_id) + '"' + (c.cohort_id === CAL.active ? ' selected' : '') + '>● ' + esc(c.title) + ' (' + calSessions_(c).length + ' يوم)</option>'; }).join('') + '</select>' +
+    '<input type="date" id="cal_add" style="width:auto"><button class="btn sm" data-act="calAddDay">＋ أضف يوم</button>' +
+    '<span class="muted">اسحب أي يوم لنقله وحده · نقر مزدوج على يوم = حذفه · نقر مزدوج على خانة فارغة = إضافة يوم للدفعة المختارة</span></div>';
+  html += '<div class="cal3">';
+  for (var mi = 0; mi < 3; mi++) {
+    var f1 = new Date(y, m + mi, 1), l1 = new Date(y, m + mi + 1, 0);
+    html += '<div><div class="cal-m">' + f1.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'long', year: 'numeric' }) + '</div><div class="cal">' +
+      CAL_DAYS.map(function (x) { return '<div class="cal-h">' + x[1] + '</div>'; }).join('');
+    for (var i = 0; i < f1.getDay(); i++) html += '<div class="cal-c off"></div>';
+    for (var day = 1; day <= l1.getDate(); day++) {
+      var k = calIso_(new Date(f1.getFullYear(), f1.getMonth(), day)), list = byDay[k] || [], ex = exDay[k] || [];
+      html += '<div class="cal-c' + (k === calIso_(now) ? ' today' : '') + '" data-date="' + k + '"><div class="cal-n">' + day + '</div>' +
+        list.map(function (c) {
+          return '<div class="cal-b' + (c.cohort_id === CAL.active ? ' act' : '') + '" draggable="true" style="background:' + calColor_(c.course_id, d.courses) + '" data-act="calPick" data-id="' + esc(c.cohort_id) + '" data-date="' + k + '" title="' + esc(c.title) + ' — اسحب لنقل هذا اليوم · نقر مزدوج للحذف">' + esc(String(c.title).slice(0, 10)) + '</div>';
+        }).join('') + ex.map(function (t) { return '<div class="cal-b ex" title="' + esc(t) + '">📝 ' + esc(t.slice(0, 8)) + '</div>'; }).join('') + '</div>';
+    }
+    html += '</div></div>';
   }
   html += '</div>';
+  var usedCourses = d.courses.filter(function (co) { return d.cohorts.some(function (c) { return String(c.course_id) === String(co.course_id); }); });
+  if (usedCourses.length) html += '<div class="chips" style="margin-bottom:8px">' + usedCourses.map(function (co) {
+    return '<span class="chip"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + calColor_(co.course_id, d.courses) + '"></span> ' + esc(co.name_ar) + '</span>'; }).join('') + '</div>';
   if (!d.courses.length) html += '<div class="card small">لا دورات بعد — أضف دوراتك أولاً من <a href="#" data-go="courses">شاشة الدورات</a>، ثم أنشئ لكل دورة دفعاتها هنا.</div>';
 
   var ed = args.edit;
@@ -2254,8 +2293,10 @@ SCREENS.calendar = { render: function (d, args) {
       '<label class="f">الدورة *</label><select id="ch_course_id">' + d.courses.map(function (co) {
         return '<option value="' + esc(co.course_id) + '"' + (String(co.course_id) === String(c.course_id) ? ' selected' : '') + '>' + esc(co.name_ar) + '</option>'; }).join('') + '</select>' +
       f('title', 'اسم الدفعة (اختياري)') +
-      '<div class="row"><div class="grow">' + f('start_date', 'البداية *', 'date') + '</div><div class="grow">' + f('end_date', 'النهاية *', 'date') + '</div></div>' +
+      '<div class="row"><div class="grow">' + f('start_date', 'البداية *', 'date') + '</div><div class="grow">' + f('end_date', 'النهاية (أو اكتب عدد الأيام)', 'date') + '</div></div>' +
       '<label class="f">أيام الجلسات (اتركها فارغة = كل الأيام)</label><div class="chips">' + dayChecks + '</div>' +
+      '<label class="f">عدد أيام الدورة (تُوزَّع تلقائياً على الأيام المختارة من البداية، والنهاية تُحسب وحدها)</label><input id="ch_count" type="number" min="1" value="' + esc(c._count || '') + '">' +
+      (c.sessions ? '<label class="chip" style="cursor:pointer;margin-top:6px"><input type="checkbox" id="ch_keep" checked> احتفظ بتعديلاتي اليدوية على الأيام (ألغِ الاختيار لإعادة التوزيع)</label>' : '') +
       '<div class="row"><div class="grow">' + f('time', 'الوقت', 'text') + '</div><div class="grow">' + f('location', 'المكان') + '</div></div>' +
       f('trainer', 'المدرب') +
       '<div class="row"><div class="grow">' + f('seats_total', 'المقاعد', 'number') + '</div><div class="grow">' + f('seats_left', 'المتبقي', 'number') + '</div></div>' +
@@ -2273,12 +2314,13 @@ SCREENS.calendar = { render: function (d, args) {
       var s0 = calDay_(src.start_date), e0 = calDay_(src.end_date) || s0, len = Math.round((e0 - s0) / 864e5);
       var ns = new Date(e0); ns.setDate(ns.getDate() + 7); var ne = new Date(ns); ne.setDate(ne.getDate() + len);
       html += form({ course_id: src.course_id, title: src.title, start_date: calIso_(ns), end_date: calIso_(ne), days: src.days, time: src.time,
-        location: src.location, trainer: src.trainer, seats_total: src.seats_total, seats_left: src.seats_total, status: 'مخطط', _repeat: true });
+        _count: calSessions_(src).length, location: src.location, trainer: src.trainer, seats_total: src.seats_total, seats_left: src.seats_total, status: 'مخطط', _repeat: true });
     }
   }
   html += '<h2>الدفعات ' + chip(d.cohorts.length) + '</h2><div class="grid2">' + d.cohorts.map(function (c) {
     if (ed === c.cohort_id) {
       var cc = {}; Object.keys(c).forEach(function (k) { cc[k] = c[k]; });
+      cc._count = calSessions_(c).length;
       cc.start_date = calDay_(c.start_date) ? calIso_(calDay_(c.start_date)) : ''; cc.end_date = calDay_(c.end_date) ? calIso_(calDay_(c.end_date)) : '';
       return form(cc);
     }
@@ -2294,12 +2336,60 @@ SCREENS.calendar = { render: function (d, args) {
   return html;
 }, after: function () { var f = $('chForm'); if (f) f.scrollIntoView({ block: 'center' }); } };
 
+var CAL = { active: '', data: null, month: '' };
+function calSaveSes_(id, list, msg) {
+  api('action', 'cohortSessions', { cohort_id: id, sessions: list }).then(function () { toast(msg); go('calendar', { month: CAL.month }, true); }).catch(function (e) { toast(errMsg(e), true); });
+}
+function calCoh_(id) { return (CAL.data.cohorts.filter(function (c) { return c.cohort_id === id; })[0]) || null; }
+function calList_(c) { return calSessions_(c).map(calIso_); }
+function calAdd_(id, day) {
+  var c = calCoh_(id); if (!c) return toast('اختر الدفعة أولاً', true);
+  var l = calList_(c); if (l.indexOf(day) > -1) return toast('هذا اليوم موجود في الدفعة');
+  l.push(day); calSaveSes_(id, l, 'أُضيف يوم ' + day + ' إلى «' + c.title + '»');
+}
+function calMark_() { q('.cal-b[data-id]').forEach(function (b) { b.classList.toggle('act', b.dataset.id === CAL.active); }); }
+ACT.calPick = function (el) { CAL.active = el.dataset.id; if ($('cal_active')) $('cal_active').value = CAL.active; calMark_(); };
+ACT.calAddDay = function () { var dd = val('cal_add'); if (!dd) return toast('اختر التاريخ', true); calAdd_(val('cal_active'), dd); };
+document.addEventListener('change', function (e) { if (e.target && e.target.id === 'cal_active') { CAL.active = e.target.value; calMark_(); } });
+document.addEventListener('dblclick', function (e) {
+  if (!CAL.data || !e.target.closest || !e.target.closest('.cal3')) return;
+  var b = e.target.closest('.cal-b[data-id]'), cell = e.target.closest('.cal-c[data-date]');
+  if (b) {
+    var c = calCoh_(b.dataset.id); if (!c) return;
+    if (!confirm('حذف يوم ' + b.dataset.date + ' من «' + c.title + '»؟ (بقية الأيام لا تتغير)')) return;
+    calSaveSes_(c.cohort_id, calList_(c).filter(function (x) { return x !== b.dataset.date; }), 'حُذف اليوم');
+  } else if (cell) {
+    var a = calCoh_(CAL.active); if (!a) return toast('اختر الدفعة من القائمة أعلى التقويم', true);
+    if (confirm('إضافة يوم ' + cell.dataset.date + ' إلى «' + a.title + '»؟')) calAdd_(a.cohort_id, cell.dataset.date);
+  }
+});
+document.addEventListener('dragstart', function (e) {
+  var b = e.target.closest && e.target.closest('.cal-b[data-id]'); if (!b) return;
+  e.dataTransfer.setData('text/plain', b.dataset.id + '|' + b.dataset.date); e.dataTransfer.effectAllowed = 'move';
+});
+document.addEventListener('dragover', function (e) { var c = e.target.closest && e.target.closest('.cal-c[data-date]'); if (c) { e.preventDefault(); c.classList.add('drop'); } });
+document.addEventListener('dragleave', function (e) { var c = e.target.closest && e.target.closest('.cal-c[data-date]'); if (c) c.classList.remove('drop'); });
+document.addEventListener('drop', function (e) {
+  var cell = e.target.closest && e.target.closest('.cal-c[data-date]'); if (!cell || !CAL.data) return;
+  e.preventDefault(); cell.classList.remove('drop');
+  var p = String(e.dataTransfer.getData('text/plain') || '').split('|'), c = calCoh_(p[0]), to = cell.dataset.date;
+  if (!c || !p[1] || p[1] === to) return;
+  var l = calList_(c); if (l.indexOf(to) > -1) return toast('الدفعة لديها جلسة في هذا اليوم', true);
+  calSaveSes_(c.cohort_id, l.map(function (x) { return x === p[1] ? to : x; }), 'نُقل اليوم ' + p[1] + ' ← ' + to + ' (بقية الأيام كما هي)');
+});
 ACT.calOpen = function (el) { go('calendar', { month: (S.args || {}).month, edit: el.dataset.id }); };
 ACT.calSave = function (el) {
   var c = { cohort_id: el.dataset.id };
   ['course_id', 'title', 'start_date', 'end_date', 'time', 'location', 'trainer', 'seats_total', 'seats_left', 'status', 'notes'].forEach(function (k) { c[k] = val('ch_' + k); });
   c.days = q('.ch_day').filter(function (x) { return x.checked; }).map(function (x) { return x.value; }).join(',');
-  if (!c.start_date || !c.end_date) return toast('حدد البداية والنهاية', true);
+  var cnt = val('ch_count'), keep = $('ch_keep') && $('ch_keep').checked;
+  if (!c.start_date || (!c.end_date && !cnt)) return toast('حدد البداية، ثم النهاية أو عدد الأيام', true);
+  if (keep) { var old = (S.data.cohorts.filter(function (x) { return x.cohort_id === c.cohort_id; })[0] || {}); c.sessions = old.sessions; }
+  else {
+    var ses = calGen_(c.start_date, c.days ? c.days.split(',') : [], cnt, cnt ? '' : c.end_date);
+    if (!ses.length) return toast('لا توجد أيام ضمن الاختيار', true);
+    c.sessions = ses.join(','); c.end_date = ses[ses.length - 1];
+  }
   el.disabled = true;
   api('action', 'cohortSave', { cohort: c }).then(function () { toast('حُفظت الدفعة'); go('calendar', { month: c.start_date.slice(0, 7) }, true); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
