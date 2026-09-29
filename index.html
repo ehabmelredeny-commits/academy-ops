@@ -843,6 +843,8 @@ function i18nApply_(root) {
   list.forEach(function (node) {
     if (!I18N_AR.test(node.nodeValue)) return;
     var p = node.parentElement; if (!p || p.closest(I18N_SKIP)) return;
+    var host = p.closest('button,a,label,.chip,summary') || p;
+    if (!host.dataset.ar) host.dataset.ar = host.textContent; // النص العربي الأصلي (للشرح الأصفر)
     var v = tr(node.nodeValue); if (v !== node.nodeValue) node.nodeValue = v;
   });
   var els = root.querySelectorAll ? root.querySelectorAll('[placeholder],[title],option,input[type=button]') : [];
@@ -3725,11 +3727,11 @@ function tipFor_(el) {
   var tag = el.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') {
     var lab = el.closest('label'), prev = el.previousElementSibling;
-    var text = (lab && lab.textContent) || (prev && prev.tagName === 'LABEL' && prev.textContent) || el.placeholder || '';
+    var text = (lab && (lab.dataset.ar || lab.textContent)) || (prev && prev.tagName === 'LABEL' && (prev.dataset.ar || prev.textContent)) || el.placeholder || '';
     for (var i = 0; i < TIP_FIELDS.length; i++) if (TIP_FIELDS[i][0].test(text)) return TIP_FIELDS[i][1];
     return text ? 'خانة: ' + tipNorm_(text).slice(0, 60) : '';
   }
-  var t = tipNorm_(el.textContent), m = tipMap_();
+  var t = tipNorm_(el.dataset.ar || el.textContent), m = tipMap_();
   if (!t) return el.title || '';
   if (m[t]) return m[t];
   var keys = Object.keys(m);
