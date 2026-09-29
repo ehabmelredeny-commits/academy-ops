@@ -831,7 +831,7 @@ function i18nFetch_() {
     I18N.busy = false;
     var n = 0; Object.keys(r.map || {}).forEach(function (k) { I18N.dict[k] = r.map[k]; n++; });
     list.forEach(function (k) { if (!I18N.dict[k]) I18N.dict[k] = k; }); // لا ترجمة ← يبقى كما هو (لا يُطلب مجدداً)
-    i18nSave_(); if (n) i18nApply_(document.body);
+    i18nSave_(); if (n) { i18nApply_(document.body); if (typeof tipRefresh_ === 'function') tipRefresh_(); }
     if (Object.keys(I18N.pending).length) I18N.timer = setTimeout(i18nFetch_, 200);
   }).catch(function () { I18N.busy = false; });
 }
@@ -872,6 +872,7 @@ function i18nStart_() {
   I18N_OBS.observe(document.body, { childList: true, subtree: true, characterData: true });
   if (i18nOn_()) {
     i18nApply_(document.body);
+    setTimeout(function () { if (typeof tipsPrefetch_ === 'function') tipsPrefetch_(); }, 3000);
     api('action', 'i18nAll', {}).then(function (r) { Object.keys(r.map || {}).forEach(function (k) { if (!I18N_BASE[k]) I18N.dict[k] = r.map[k]; }); i18nSave_(); i18nApply_(document.body); }).catch(function () {});
   }
 }
@@ -3738,8 +3739,10 @@ function tipFor_(el) {
 var TIP = { el: null, timer: null };
 function tipShow_(target) {
   var txt = tipFor_(target); if (!txt) return;
+  var shown = typeof tr === 'function' ? tr(txt) : txt;
   var b = TIP.el || (TIP.el = document.createElement('div'));
-  b.className = 'tipbox'; b.textContent = txt; document.body.appendChild(b);
+  b.className = 'tipbox'; b.textContent = shown; b.dataset.src = txt; document.body.appendChild(b);
+  b.style.direction = (typeof i18nOn_ === 'function' && i18nOn_()) ? 'ltr' : 'rtl';
   var r = target.getBoundingClientRect(), bw = Math.min(300, window.innerWidth - 16);
   b.style.maxWidth = bw + 'px';
   var left = Math.max(8, Math.min(window.innerWidth - bw - 8, r.left + r.width / 2 - bw / 2));
@@ -3764,6 +3767,21 @@ document.addEventListener('touchstart', function (e) {
 }, { passive: true });
 document.addEventListener('touchend', function () { clearTimeout(TIP.timer); }, { passive: true });
 document.addEventListener('scroll', tipHide_, { passive: true });
+/** بالإنجليزية: تُترجم كل نصوص الشرح مسبقاً ليظهر أول وقوف مترجماً */
+function tipsPrefetch_() {
+  if (typeof i18nOn_ !== 'function' || !i18nOn_()) return;
+  var all = [];
+  Object.keys(TIP_EXTRA).forEach(function (k) { all.push(TIP_EXTRA[k]); });
+  TIP_FIELDS.forEach(function (f) { all.push(f[1]); });
+  Object.keys(PAGE_INFO).forEach(function (pg) {
+    var p = PAGE_INFO[pg]; all.push(p.what, p.why, p.t);
+    (p.btns || []).forEach(function (b) { all.push(b[0], b[1], b[2], b[1] + ' — ' + b[2]); });
+  });
+  Object.keys(MODULE_INFO).forEach(function (k) { all.push(MODULE_INFO[k]); });
+  all.forEach(function (t) { if (t && !I18N.dict[t.trim()]) i18nQueue_(t.trim()); });
+}
+/** وصول ترجمة جديدة أثناء ظهور الفقاعة ← تتحدّث فوراً */
+function tipRefresh_() { var b = TIP.el; if (b && b.style.display === 'block' && b.dataset.src) b.textContent = tr(b.dataset.src); }
 function tipsToggleHtml_() {
   return '<div class="card row between small"><span>💡 <b>شرح الأزرار والخانات عند الوقوف عليها</b> (فقاعة صفراء — على الجوال: ضغطة مطوّلة)</span>' + switchHtml(tipsOn_(), 'tipsToggle', 'x') + '</div>';
 }
