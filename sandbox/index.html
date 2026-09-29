@@ -204,6 +204,11 @@ body.is-sandbox { padding-top: 24px; }
 body.is-sandbox nav.side { top: 24px; }
 .sbx-fab { position: fixed; left: 14px; bottom: calc(var(--nav-h) + 14px); z-index: 60; background: #e9a23b; color: #111; border: 0; border-radius: 22px; padding: 10px 14px; font: inherit; font-weight: 700; box-shadow: 0 6px 16px rgba(0,0,0,.3); cursor: pointer; }
 @media (min-width: 900px) { .sbx-fab { bottom: 18px; } }
+/* ─── مبدّل اللغة ─── */
+.lang-sw { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin: 4px 10px 10px; }
+.lang-sw button { background: transparent; border: 0; color: var(--muted); padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.lang-sw button.on { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px; }
 </style>
 
 </head>
@@ -391,7 +396,7 @@ function renderNav() {
     var b = BADGES[n[0]] ? '<span class="dot">' + BADGES[n[0]] + '</span>' : '';
     return '<button class="' + (on ? 'on' : '') + '" data-go="' + n[0] + '">' + ICON[n[2]] + '<span>' + n[1] + '</span>' + b + '</button>';
   }).join('');
-  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + NAV_MAIN.filter(function (n) { return n[0] !== 'more'; })
+  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + NAV_MAIN.filter(function (n) { return n[0] !== 'more'; })
     .concat(NAV_MORE).map(function (n) {
       var b = BADGES[n[0]] ? '<span class="dot">' + BADGES[n[0]] + '</span>' : '';
       return '<button class="' + (n[0] === cur ? 'on' : '') + '" data-go="' + n[0] + '">' + n[1] + b + '</button>';
@@ -400,7 +405,7 @@ function renderNav() {
 
 function renderMore() {
   S.screen = 'more'; renderNav();
-  $('main').innerHTML = '<h1>المزيد</h1><div class="grid2">' + NAV_MORE.map(function (n) {
+  $('main').innerHTML = '<h1>المزيد</h1>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + '<div class="grid2">' + NAV_MORE.map(function (n) {
     return '<div class="card click" data-go="' + n[0] + '"><b>' + n[1] + '</b></div>';
   }).join('') + '</div>';
 }
@@ -747,11 +752,136 @@ ACT.opSave = function (el) {
 
 /* ═══════════ البدء ═══════════ */
 window.addEventListener('load', function () {
+  if (typeof i18nStart_ === 'function') i18nStart_();
   go(START_SCREEN || 'today');
   setTimeout(prefetch_, 6000); // بعد اكتمال الشاشة الأولى
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
 });
+</script>
+
+  <script>
+/* ═══════════ اللغة: العربية / English لكل النظام ═══════════
+ * بالإنجليزية: الصفحة من اليسار لليمين، وكل نص عربي ظاهر يُستبدل من القاموس:
+ *   ١) قاموس يدوي للقوائم والأزرار الشائعة (دقيق)  ٢) ذاكرة الترجمة من الخادم (Translations)  ٣) الناقص يُترجم مرة واحدة ويُحفظ.
+ * لا يُترجم: نص رسائل العملاء (.quote) وما تكتبه أنت (خانات الإدخال) والأكواد.
+ */
+var I18N_BASE = {
+  'اليوم': 'Today', 'الرد': 'Reply', 'منشور اليوم': "Today's Post", 'المخطط': 'System Map', 'المزيد': 'More',
+  '🎯 من يسأل الآن': '🎯 Who Is Asking Now', 'قواعد عملاء المصادر': 'Source Contacts', 'المدربون': 'Trainers', 'تقويم الدورات': 'Course Calendar',
+  'الأهداف': 'Targets', 'المنافسون': 'Competitors', 'البحث (كتالوج السوق)': 'Search (Market Catalog)', 'الرادار': 'Radar', 'الاكتشافات': 'Discoveries',
+  'الأخبار': 'News', 'الاختبارات': 'Exams', 'الفرص': 'Opportunities', 'صنّاع القرار': 'Decision Makers', 'الوحدات': 'Modules', 'الحملات': 'Campaigns',
+  'المحتوى': 'Content', 'الخرّيجون': 'Alumni', 'المؤشرات': 'KPIs', 'الكلمات': 'Keywords', 'الدورات': 'Courses', 'الإعدادات': 'Settings',
+  'INFO — دليل النظام': 'INFO — System Guide', '🧪 التجربة': '🧪 Sandbox', 'التسجيلات المدفوعة هذا الأسبوع': 'Paid enrollments this week',
+  'عملاء جدد:': 'New leads:', 'الإيراد:': 'Revenue:', 'ر.س': 'SAR', 'حفظ': 'Save', 'تعديل': 'Edit', 'حذف': 'Delete', 'إلغاء': 'Cancel',
+  'أرشفة': 'Archive', 'تصدير CSV': 'Export CSV', '→ رجوع': '← Back', 'رجوع': 'Back', 'قرأته': 'Read', 'المصدر': 'Source', 'الموقع': 'Website',
+  'جارٍ التحميل…': 'Loading…', 'يتحدّث…': 'Updating…', 'تعذّر التحميل': 'Failed to load', 'إعادة المحاولة': 'Retry', 'لا شيء يحتاج إجراءً الآن ✓': 'Nothing needs action now ✓',
+  'لماذا تهمك؟ وماذا يفعل كل زر؟': 'Why it matters, and what each button does', 'مخطط النظام كاملاً ←': 'Full system map →',
+  'اعتماد وإرسال': 'Approve & send', 'تعديل ثم إرسال': 'Edit then send', 'رفض': 'Reject', 'حفظ الرد اليدوي': 'Save manual reply', 'إغلاق بلا رد': 'Close without reply',
+  'تم الرد ✓': 'Replied ✓', 'ليست فرصة': 'Not an opportunity', '📋 افتح وردّ': '📋 Open & reply', '📋 انسخ الرد': '📋 Copy reply',
+  'واتساب': 'WhatsApp', 'إيميل': 'Email', 'انستغرام': 'Instagram', 'تيك توك': 'TikTok', 'سناب شات': 'Snapchat', 'لينكدإن': 'LinkedIn', 'فيسبوك': 'Facebook', 'يوتيوب': 'YouTube',
+  'أرسلت ✓': 'Sent ✓', 'ردّ': 'Replied', 'لا تراسل': 'Do not contact', 'أضف كعميل': 'Add as lead', '🔎 ابحث عنه': '🔎 Search for them',
+  'نعم': 'Yes', 'لا': 'No', 'جديد': 'New', 'مفعّل': 'Enabled', 'معطّل': 'Disabled', 'نشط': 'Active', 'موقوف': 'Paused',
+  'حضوري': 'In-person', 'أونلاين': 'Online', 'هجين': 'Hybrid', 'الرياض': 'Riyadh', 'جدة': 'Jeddah', 'الدمام': 'Dammam',
+  'متاح': 'Available', 'مستبعَد': 'Excluded', 'قيد التحقق': 'Under review', 'غير معروف': 'Unknown', 'عالي': 'High', 'متوسط': 'Medium', 'منخفض': 'Low',
+  'غير مقيّم': 'Unrated', 'رسمي': 'Official', 'غير رسمي': 'Unofficial', 'متحقق': 'Verified', 'غير متحقق': 'Unverified',
+  'مدرب': 'Male trainer', 'مدربة': 'Female trainer', 'نادي رجالي': "Men's club", 'نادي نسائي': "Women's club", 'مستقل': 'Independent',
+  'تشغيل الكل': 'Enable all', 'إلغاء الكل': 'Disable all', '＋ منافس': '＋ Competitor', '＋ عرض دورة': '＋ Course offer', '＋ إضافة جهة': '＋ Add entity',
+  '＋ دفعة جديدة': '＋ New cohort', '🔁 تكرار': '🔁 Repeat', '📄 ورقة الدورة': '📄 Course sheet', 'افتح الصفحة ←': 'Open page →',
+  'اللغة': 'Language', 'العربية': 'العربية', 'English': 'English'
+};
+var I18N = { lang: 'ar', dict: {}, pending: {}, timer: null, busy: false };
+(function () {
+  try { I18N.lang = localStorage.getItem('ops_lang') === 'en' ? 'en' : 'ar'; } catch (e) {}
+  try { I18N.dict = JSON.parse(localStorage.getItem('ops_i18n') || '{}') || {}; } catch (e) { I18N.dict = {}; }
+  Object.keys(I18N_BASE).forEach(function (k) { I18N.dict[k] = I18N_BASE[k]; });
+})();
+var I18N_AR = /[؀-ۿ]/;
+function i18nOn_() { return I18N.lang === 'en'; }
+function i18nSave_() { try { localStorage.setItem('ops_i18n', JSON.stringify(I18N.dict)); } catch (e) {} }
+
+/** ترجمة نص: كامل من القاموس، أو أجزاؤه المفصولة بـ · و — و : ، وإلا يُضاف للطلب */
+function tr(s) {
+  if (!i18nOn_() || !s || !I18N_AR.test(s)) return s;
+  var t = String(s), key = t.trim();
+  if (I18N.dict[key]) return t.replace(key, I18N.dict[key]);
+  var parts = key.split(/(\s*[·—|:،]\s*|\s+←\s+|\s+→\s+)/);
+  if (parts.length > 1) {
+    var ok = true, outp = parts.map(function (p) {
+      if (!I18N_AR.test(p)) return p;
+      var k = p.trim(); if (I18N.dict[k]) return p.replace(k, I18N.dict[k]);
+      ok = false; i18nQueue_(k); return p;
+    });
+    if (ok) return t.replace(key, outp.join(''));
+  }
+  i18nQueue_(key);
+  return s;
+}
+function i18nQueue_(k) {
+  if (!k || k.length > 600 || I18N.dict[k]) return;
+  I18N.pending[k] = 1;
+  clearTimeout(I18N.timer); I18N.timer = setTimeout(i18nFetch_, 250);
+}
+function i18nFetch_() {
+  if (I18N.busy) { I18N.timer = setTimeout(i18nFetch_, 400); return; }
+  var list = Object.keys(I18N.pending).slice(0, 120); if (!list.length) return;
+  list.forEach(function (k) { delete I18N.pending[k]; });
+  I18N.busy = true;
+  api('action', 'i18nTranslate', { texts: list }).then(function (r) {
+    I18N.busy = false;
+    var n = 0; Object.keys(r.map || {}).forEach(function (k) { I18N.dict[k] = r.map[k]; n++; });
+    list.forEach(function (k) { if (!I18N.dict[k]) I18N.dict[k] = k; }); // لا ترجمة ← يبقى كما هو (لا يُطلب مجدداً)
+    i18nSave_(); if (n) i18nApply_(document.body);
+    if (Object.keys(I18N.pending).length) I18N.timer = setTimeout(i18nFetch_, 200);
+  }).catch(function () { I18N.busy = false; });
+}
+var I18N_SKIP = 'script,style,textarea,code,pre,.quote,.no-tr,[contenteditable]';
+function i18nApply_(root) {
+  if (!i18nOn_() || !root) return;
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), n, list = [];
+  while ((n = w.nextNode())) list.push(n);
+  list.forEach(function (node) {
+    if (!I18N_AR.test(node.nodeValue)) return;
+    var p = node.parentElement; if (!p || p.closest(I18N_SKIP)) return;
+    var v = tr(node.nodeValue); if (v !== node.nodeValue) node.nodeValue = v;
+  });
+  var els = root.querySelectorAll ? root.querySelectorAll('[placeholder],[title],option,input[type=button]') : [];
+  Array.prototype.forEach.call(els, function (el) {
+    ['placeholder', 'title'].forEach(function (a) { var v = el.getAttribute(a); if (v && I18N_AR.test(v)) { var t = tr(v); if (t !== v) el.setAttribute(a, t); } });
+  });
+}
+/** كل تغيير في الصفحة يُترجم تلقائياً (شاشات، نوافذ، رسائل منبثقة) */
+var I18N_OBS = new MutationObserver(function (muts) {
+  if (!i18nOn_()) return;
+  muts.forEach(function (m) {
+    if (m.type === 'characterData') { var p = m.target.parentElement; if (p && !p.closest(I18N_SKIP) && I18N_AR.test(m.target.nodeValue)) { var v = tr(m.target.nodeValue); if (v !== m.target.nodeValue) m.target.nodeValue = v; } return; }
+    Array.prototype.forEach.call(m.addedNodes, function (nd) { if (nd.nodeType === 1) i18nApply_(nd); else if (nd.nodeType === 3 && nd.parentElement) i18nApply_(nd.parentElement); });
+  });
+});
+function i18nSetDir_() {
+  document.documentElement.setAttribute('lang', i18nOn_() ? 'en' : 'ar');
+  document.documentElement.setAttribute('dir', i18nOn_() ? 'ltr' : 'rtl');
+}
+(function () {
+  var _confirm = window.confirm, _prompt = window.prompt;
+  window.confirm = function (m) { return _confirm.call(window, tr(m)); };
+  window.prompt = function (m, d) { return _prompt.call(window, tr(m), d); };
+})();
+function i18nStart_() {
+  i18nSetDir_();
+  I18N_OBS.observe(document.body, { childList: true, subtree: true, characterData: true });
+  if (i18nOn_()) {
+    i18nApply_(document.body);
+    api('action', 'i18nAll', {}).then(function (r) { Object.keys(r.map || {}).forEach(function (k) { if (!I18N_BASE[k]) I18N.dict[k] = r.map[k]; }); i18nSave_(); i18nApply_(document.body); }).catch(function () {});
+  }
+}
+function i18nToggleHtml_() {
+  return '<div class="lang-sw"><button class="' + (i18nOn_() ? '' : 'on') + '" data-act="langSet" data-l="ar">العربية</button><button class="' + (i18nOn_() ? 'on' : '') + '" data-act="langSet" data-l="en">English</button></div>';
+}
+ACT.langSet = function (el) {
+  try { localStorage.setItem('ops_lang', el.dataset.l); } catch (e) {}
+  location.reload(); // إعادة رسم كاملة بالاتجاه الصحيح
+};
 </script>
 
   <script>
@@ -1181,7 +1311,7 @@ ACT.courseSave = function (el) {
 /* ─── الإعدادات ─── */
 SCREENS.settings = { render: function (d, args) {
   var tab = args.tab || 'accounts';
-  var html = north(d.north) + '<h1>الإعدادات</h1>' + tipsToggleHtml_() + '<div class="tabs">' + [['accounts', 'الحسابات'], ['channels', 'القنوات والإرسال'], ['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
+  var html = north(d.north) + '<h1>الإعدادات</h1><div class="card row between small"><b>🌐 اللغة / Language</b>' + i18nToggleHtml_() + '</div>' + tipsToggleHtml_() + '<div class="tabs">' + [['accounts', 'الحسابات'], ['channels', 'القنوات والإرسال'], ['settings', 'Settings'], ['rules', 'القواعد'], ['options', 'القوائم']].map(function (t) {
     return '<button class="btn sm ' + (t[0] === tab ? 'pri' : '') + '" data-go="settings" data-args="' + attr({ tab: t[0] }) + '">' + t[1] + '</button>';
   }).join('') + '<button class="btn sm good" data-act="applyNow">تطبيق التغييرات الآن</button><button class="btn sm" data-act="reportPrev">معاينة التقرير الأسبوعي</button></div>';
   if (tab === 'channels') {
