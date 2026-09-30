@@ -1148,7 +1148,7 @@ SCREENS.kpis = { render: function (d) {
     d.rows.map(function (k) {
       var cls = { 'خلف': 'bad', 'على المسار': 'good', 'متقدم': 'good' }[k.status] || '';
       return '<div class="card"><div class="row between"><b>' + esc(k.name_ar) + '</b>' + chip(k.status, cls) + '</div>' +
-        '<div class="row"><span style="font-size:20px;font-weight:700">' + esc(k.actual === '' ? '—' : k.actual) + '</span>' +
+        '<div class="row"><span style="font-size:16px;font-weight:700">' + esc(k.actual === '' ? '—' : k.actual) + '</span>' +
         (k.target !== '' ? '<span class="muted">الهدف ' + esc(k.target) + '</span>' : '') + (k.is_assumption === 'نعم' ? chip('افتراض', 'warn') : '') + '</div>' +
         '<div class="muted small">' + esc(k.formula_note) + '</div></div>';
     }).join('');
