@@ -50,6 +50,15 @@ nav.bottom svg { width: 22px; height: 22px; }
 .dot { position: absolute; top: 8px; inset-inline-end: calc(50% - 20px); min-width: 17px; height: 17px; border-radius: 9px;
   background: var(--bad); color: #fff; font-size: 10.5px; line-height: 17px; padding: 0 4px; text-align: center; }
 nav.side { display: none; }
+details.navg { margin: 2px 0; }
+details.navg > summary { list-style: none; font-weight: 700; color: var(--ink); padding: 6px 10px; border-radius: 8px; margin: 0; }
+details.navg > summary::-webkit-details-marker { display: none; }
+details.navg > summary::before { content: '◂'; display: inline-block; width: 14px; color: var(--muted); transition: transform .15s; }
+details.navg[open] > summary::before { transform: rotate(-90deg); }
+details.navg > summary:hover { background: var(--soft); }
+nav.side details.navg button { padding-inline-start: 26px !important; }
+main details.navg { margin-bottom: 8px; }
+main details.navg > summary { font-size: 15.5px; }
 @media (min-width: 900px) {
   nav.bottom { display: none; }
   nav.side { display: block; width: 220px; flex-shrink: 0; background: var(--card); border-inline-start: 1px solid var(--line);
@@ -320,6 +329,51 @@ var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['register', '🔗 نم�
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
+/** شجرة الأقسام: كل قسم وفروعه (الترتيب الرسمي للنظام) — NAV_MORE يبقى قائمة مسطّحة لمن يحتاجها */
+var NAV_TREE = [
+  ['day', '⚡ عملي اليوم', ['today', 'reply', 'dailyPost', 'ask']],
+  ['news', '📰 الأخبار', ['news', 'discovery']],
+  ['search', '🔎 البحث', ['manual', 'search', 'keywords']],
+  ['watch', '👁 المراقبة', ['radar', 'competitors', 'exams', 'targets', 'kpis']],
+  ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
+  ['mkt', '📣 التسويق', ['campaigns', 'content', 'register']],
+  ['sales', '💰 المبيعات والدورات', ['courses', 'calendar', 'payments']],
+  ['sys', '⚙️ النظام', ['settings', 'modules', 'flow', 'info', 'sandbox']]
+];
+NAV_MORE.unshift(['manual', '🔍 البحث اليدوي']);
+NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
+function navLabel_(k) {
+  var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
+  return f ? f[1] : '';
+}
+function navOpen_(g, v) {
+  var o = {}; try { o = JSON.parse(localStorage.getItem('ops_nav') || '{}'); } catch (e) {}
+  if (v === undefined) return o[g];
+  o[g] = v; try { localStorage.setItem('ops_nav', JSON.stringify(o)); } catch (e) {}
+}
+function navTreeHtml_(cur, cards) {
+  return NAV_TREE.map(function (g) {
+    var kids = g[2].filter(function (k) { return navLabel_(k); });
+    if (!kids.length) return '';
+    var here = kids.indexOf(cur) > -1, saved = navOpen_(g[0]), open = here || saved === true || (saved === undefined && g[0] === 'day');
+    return '<details class="navg" data-g="' + g[0] + '"' + (open ? ' open' : '') + '><summary>' + g[1] + ' <span class="muted">' + kids.length + '</span></summary>' +
+      (cards ? '<div class="grid2">' : '') + kids.map(function (k) {
+        var b = BADGES[k] ? '<span class="dot">' + BADGES[k] + '</span>' : '';
+        return cards ? '<div class="card click" data-go="' + k + '"><b>' + navLabel_(k) + '</b>' + b + '</div>'
+          : '<button class="' + (k === cur ? 'on' : '') + '" data-go="' + k + '">' + navLabel_(k) + b + '</button>';
+      }).join('') + (cards ? '</div>' : '') + '</details>';
+  }).join('');
+}
+document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.classList && d.classList.contains('navg')) navOpen_(d.dataset.g, d.open); }, true);
+
+/** زر «↺ إلغاء كل الخيارات» في كل شاشة بحث/تصفية — يعيد الشاشة لحالتها الأولى */
+var CLEARABLE = ['search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
+function clearBtn_(screen) {
+  if (CLEARABLE.indexOf(screen) < 0) return;
+  var h = document.querySelector('#main h1'); if (!h || h.querySelector('.clr')) return;
+  h.insertAdjacentHTML('beforeend', '<button class="btn sm ghost clr" data-act="clearAll" title="إلغاء كل الاختيارات والتصفية والبحث في هذه الشاشة" style="margin-inline-start:auto;font-weight:400">↺ إلغاء كل الخيارات</button>');
+}
+
 function esc(s) {
   return String(s === null || s === undefined ? '' : s).replace(/[&<>"']/g, function (c) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -378,6 +432,7 @@ function go(screen, args, keepScroll) {
     var sc = SCREENS[screen], sy = window.scrollY;
     $('main').innerHTML = pageHead_(screen) + sc.render(data, S.args) + (stale ? '<div class="muted small" id="staleNote" style="text-align:center">يتحدّث…</div>' : '');
     if (sc.after) sc.after(data, S.args);
+    clearBtn_(screen);
     if (stale || !S.shownStale) window.scrollTo(0, keepScroll ? y : 0); else window.scrollTo(0, sy);
     if (data && data.poll) S.sig = data.poll.sig;
   };
@@ -426,18 +481,12 @@ function renderNav() {
     var b = BADGES[n[0]] ? '<span class="dot">' + BADGES[n[0]] + '</span>' : '';
     return '<button class="' + (on ? 'on' : '') + '" data-go="' + n[0] + '">' + ICON[n[2]] + '<span>' + n[1] + '</span>' + b + '</button>';
   }).join('');
-  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + NAV_MAIN.filter(function (n) { return n[0] !== 'more'; })
-    .concat(NAV_MORE).map(function (n) {
-      var b = BADGES[n[0]] ? '<span class="dot">' + BADGES[n[0]] + '</span>' : '';
-      return '<button class="' + (n[0] === cur ? 'on' : '') + '" data-go="' + n[0] + '">' + n[1] + b + '</button>';
-    }).join('');
+  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + navTreeHtml_(cur, false);
 }
 
 function renderMore() {
   S.screen = 'more'; renderNav();
-  $('main').innerHTML = '<h1>المزيد</h1>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + '<div class="grid2">' + NAV_MORE.map(function (n) {
-    return '<div class="card click" data-go="' + n[0] + '"><b>' + n[1] + '</b></div>';
-  }).join('') + '</div>';
+  $('main').innerHTML = '<h1>المزيد</h1>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + navTreeHtml_('', true);
 }
 
 /* ─── أدوات العرض ─── */
@@ -1172,7 +1221,8 @@ SCREENS.kpis = { render: function (d) {
 SCREENS.dailyPost = { render: function (d) {
   var html = north(d.north) + '<h1>منشور اليوم</h1>';
   var manual = '<details class="card"' + (d.today.length ? '' : ' open') + '><summary><b>✍️ اكتب منشوراً بنفسك</b> <span class="muted small">(يعمل بدون Claude)</span></summary>' +
-    '<textarea id="pm_body" placeholder="نص المنشور…" style="min-height:120px"></textarea>' +
+    '<div class="row" style="gap:6px;margin-bottom:4px"><button class="btn sm" data-act="postSuggest">✨ اقترح لي نصاً (بدون Claude)</button><span class="muted small">من بيانات دوراتك الحقيقية + خطّاف نفسي حسب الركيزة — عدّله كما تحب</span></div>' +
+    '<textarea id="pm_body" placeholder="نص المنشور… (أو اضغط «اقترح لي نصاً»)" style="min-height:120px"></textarea>' +
     '<div class="chips" style="margin:6px 0">' + (d.platforms || []).map(function (p) {
       return '<label class="chip" style="cursor:pointer"><input type="checkbox" class="pm_pl" value="' + esc(p) + '" checked> ' + esc(p) + '</label>';
     }).join(' ') + '</div>' +
@@ -1239,6 +1289,20 @@ ACT.postApproveOn = function () {
   if (!ids.length) return toast('لا منصات مشغّلة بانتظار الموافقة', true);
   ids.reduce(function (pr, id) { return pr.then(function () { return api('action', 'postEdit', { post_id: id, body: val('pb_' + id) }); }).then(function () { return api('action', 'postApprove', { post_id: id }); }); }, Promise.resolve())
     .then(function () { toast('اعتُمدت ' + ids.length + ' منصة — انسخ وانشر'); go('dailyPost'); }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.clearAll = function () {
+  q('#main input[type=text], #main input[type=search], #main input[type=date], #main input[type=number], #main textarea').forEach(function (x) { if (!x.readOnly) x.value = ''; });
+  q('#main select').forEach(function (x) { x.selectedIndex = 0; });
+  if (typeof SRC !== 'undefined') { SRC.quick = { goal: 'high_intent_students', qi: 0, vals: {}, sel: { scope: [], precision: [], recency: '', format: '', exclusion: [] } }; SRC.compose = null; SRC.qbBuilt = null; }
+  if (typeof ASK !== 'undefined') ASK.q = '';
+  if (typeof MS !== 'undefined') { MS.q = ''; MS.city = ''; MS.on = null; }
+  var keep = S.screen === 'calendar' && S.args && S.args.month ? { month: S.args.month } : {};
+  go(S.screen, keep, true); toast('أُلغيت كل الخيارات');
+};
+ACT.postSuggest = function (el) {
+  el.disabled = true;
+  api('action', 'postSuggest', { pillar: val('pm_pillar') }).then(function (r) { el.disabled = false; $('pm_body').value = r.body; toast(r.course ? 'اقتراح عن «' + r.course + '» — اضغط مرة أخرى لاقتراح آخر' : 'أضف دوراتك ليصبح الاقتراح أدق'); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 ACT.postManual = function (el) {
   var pls = Array.prototype.slice.call(document.querySelectorAll('.pm_pl')).filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
@@ -1784,7 +1848,6 @@ function roundRect(g, x, y, w, h, r) {
 </style>
 <script>
 /* ═══════════ طبقة الاستخبارات: الاختبارات · المشغّل · صنّاع القرار · الفرص ═══════════ */
-NAV_MORE.splice(4, 0, ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 var STATUS_COLOR = { 'متحقق': 'var(--good)', 'غير متحقق': '#e0b100', 'غادر الجهة؟': 'var(--bad)' };
 var CAT_COLORS = ['#0b6e7f', '#6d28d9', '#b45309', '#15803d', '#c62828', '#2563eb', '#d9580f', '#667085'];
 
@@ -3227,7 +3290,8 @@ SCREENS.sources = { render: function (d, args) {
 
   // ── الاستيراد ──
   html += '<details class="card"' + (d.rows.length ? '' : ' open') + '><summary><b>📥 استيراد قائمة جديدة</b></summary>' +
-    '<label class="f">اسم المصدر (مثلاً: معرض الرياض ٢٠٢٦، عملاء قدامى…) *</label><input id="sd_src">' +
+    '<label class="f">اسم المصدر * — اختر مصدراً سابقاً أو اكتب اسماً جديداً فيُضاف للقائمة</label><input id="sd_src" list="sd_src_list" autocomplete="off" placeholder="مثلاً: معرض الرياض ٢٠٢٦، عملاء قدامى…">' +
+    '<datalist id="sd_src_list">' + d.batches.map(function (b) { return b.source_name; }).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; }).map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>' +
     '<label class="f">حالة الموافقة على التواصل لهذه القائمة</label><select id="sd_consent">' + opt(d.consent, 'غير معروف') + '</select>' +
     '<label class="f">الصق الجدول من إكسل/شيت (مع صف العناوين)</label><textarea id="sd_paste" style="min-height:110px" placeholder="الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
     '<div class="row" style="gap:6px"><button class="btn" data-act="srcdbParse">قراءة اللصق</button>' +
@@ -3609,12 +3673,15 @@ SCREENS.ask = { render: function (d, args) {
         .map(function (c) { return '<option' + (c === d.city ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div></div>' +
     '<label class="f">الحالة النفسية التسويقية</label>' + askPersonaSel_('ap_ps', '', true) +
     '<label class="f">رابط المنشور</label><input id="ap_url" type="url" dir="ltr" placeholder="https://x.com/…" autocomplete="off">' +
-    '<label class="f">نص السؤال</label><textarea id="ap_q" placeholder="مثال: أبي دورة مدرب شخصي بالرياض أحد يعرف مكان زين؟"></textarea>' +
+    '<label class="f">نص السؤال (اختياري إذا وضعت الرابط)</label><textarea id="ap_q" placeholder="مثال: أبي دورة مدرب شخصي بالرياض أحد يعرف مكان زين؟"></textarea>' +
 
     '<div class="btns"><button class="btn pri" data-act="askPaste">أضف واقترح رداً</button></div></details>';
 
   // ── البحث المباشر ──
-  html += '<h2>🔎 ابحث بنفسك الآن (مجاني — نتائج اللحظة داخل كل منصة)</h2><div class="muted small">اضغط أي منصة فتفتح أحدث من كتب هذه العبارة. عدّل العبارات من الإعدادات ← ask_phrases.</div>';
+  html += '<h2>🔎 ابحث بنفسك الآن (مجاني — نتائج اللحظة داخل كل منصة)</h2>' +
+    '<div class="card row" style="gap:6px"><input type="text" id="ask_sq" class="grow" placeholder="اكتب أي عبارة: دورة مدرب، رخصة مدرب، تغذية رياضية…">' +
+    '<button class="btn pri" data-act="askSearch">🔍 ابحث</button><button class="btn ghost" data-act="askSearchClear">↺ إلغاء</button><div id="ask_sout" class="chips" style="width:100%"></div></div>' +
+    '<div class="muted small">أو اضغط منصة تحت أي عبارة جاهزة (' + d.phrases.length + ' عبارة — عدّلها من الإعدادات ← ask_phrases). كل أدوات البحث في <a href="#" data-go="manual">🔍 البحث اليدوي</a>.</div>';
   html += d.phrases.map(function (p) {
     return '<div class="card small"><b>«' + esc(p.phrase) + '»</b><div class="chips" style="margin-top:4px">' +
       p.links.map(function (l) { return '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(l[1]) + '">' + esc(l[0]) + '</a>'; }).join(' ') + '</div></div>';
@@ -3622,6 +3689,12 @@ SCREENS.ask = { render: function (d, args) {
   html += '<div class="card small muted">🔮 <b>فرصة مستقبلية:</b> اشتراك X API المدفوع (~٢٠٠$ شهرياً) يجعل رصد X لحظياً وتلقائياً بالكامل. حالياً: المسح اليومي عبر Claude + أزرار البحث المباشر المجانية.</div>';
   return html;
 } };
+ACT.askSearch = function () {
+  var t = val('ask_sq').trim(); if (!t) return toast('اكتب عبارة البحث', true);
+  $('ask_sout').innerHTML = typeof msLinks_ === 'function' ? msLinks_(t, ASK.data.city, ['X (الأحدث)', 'تيك توك', 'انستغرام', 'يوتيوب (الأحدث)', 'فيسبوك', 'سناب شات', 'ريديت', 'Google آخر ٢٤ ساعة']) : '';
+};
+ACT.askSearchClear = function () { $('ask_sq').value = ''; $('ask_sout').innerHTML = ''; if ($('ask_q')) { $('ask_q').value = ''; ASK.q = ''; q('#ask_list > .card').forEach(function (c) { c.style.display = ''; }); } };
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'ask_sq') ACT.askSearch(); });
 ACT.askRegen = function (el) { act('askUpdate', { ask_id: el.dataset.id, persona: val('apx_' + el.dataset.id) }, 'كُتب رد جديد مع الرابط'); };
 document.addEventListener('input', function (e) {
   if (!e.target || e.target.id !== 'ask_q') return;
@@ -3644,7 +3717,7 @@ ACT.askOpen = function (el) {
 ACT.askCopy = function (el) { askCopy_(el.dataset.id); toast('نُسخ الرد'); };
 ACT.askSet = function (el) { act('askUpdate', { ask_id: el.dataset.id, status: el.dataset.st }, el.dataset.st === 'تم الرد' ? 'أحسنت 👏 سُجّل الرد' : 'حُدّث'); };
 ACT.askPaste = function (el) {
-  if (!val('ap_q').trim()) return toast('الصق نص السؤال', true);
+  if (!val('ap_q').trim() && !val('ap_url').trim()) return toast('الصق الرابط أو نص السؤال (واحد منهما يكفي)', true);
   el.disabled = true;
   api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl'), persona: val('ap_ps') }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
@@ -3749,6 +3822,77 @@ ACT.payManual = function (el) {
   api('action', 'paymentManual', { name: val('pm_n'), phone: val('pm_p'), course_id: val('pm_c'), amount: val('pm_a'), method: val('pm_m'), note: val('pm_note') })
     .then(function () { toast('سُجّلت الدفعة — العميل أصبح «سجّل»'); go('payments', {}, true); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
+</script>
+
+  <script>
+/* ═══════════ 🔍 البحث اليدوي — كل أدوات البحث اليدوي في صفحة واحدة ═══════════ */
+var MS_CITIES = ['الرياض', 'جدة', 'الدمام', 'الخبر', 'مكة المكرمة', 'المدينة المنورة', 'الطائف', 'أبها', 'تبوك', 'بريدة', 'حائل', 'نجران', 'جازان', 'الأحساء', 'الجبيل', 'ينبع'];
+var MS_PLATFORMS = [
+  ['X (الأحدث)', function (q) { return 'https://x.com/search?q=' + q + '&f=live'; }],
+  ['تيك توك', function (q) { return 'https://www.tiktok.com/search?q=' + q; }],
+  ['انستغرام', function (q) { return 'https://www.instagram.com/explore/search/keyword/?q=' + q; }],
+  ['يوتيوب (الأحدث)', function (q) { return 'https://www.youtube.com/results?search_query=' + q + '&sp=CAI%253D'; }],
+  ['فيسبوك', function (q) { return 'https://www.facebook.com/search/posts/?q=' + q; }],
+  ['سناب شات', function (q) { return 'https://www.snapchat.com/search?q=' + q; }],
+  ['ريديت', function (q) { return 'https://www.reddit.com/search/?q=' + q + '&sort=new'; }],
+  ['لينكدإن (منشورات)', function (q) { return 'https://www.linkedin.com/search/results/content/?keywords=' + q + '&sortBy=%22date_posted%22'; }],
+  ['لينكدإن (أشخاص)', function (q) { return 'https://www.linkedin.com/search/results/people/?keywords=' + q; }],
+  ['Google آخر ٢٤ ساعة', function (q) { return 'https://www.google.com/search?q=' + q + '&tbs=qdr:d'; }],
+  ['Google آخر أسبوع', function (q) { return 'https://www.google.com/search?q=' + q + '&tbs=qdr:w'; }],
+  ['خرائط Google', function (q) { return 'https://www.google.com/maps/search/' + q; }]
+];
+var MS = { q: '', city: '', on: null };
+function msLinks_(phrase, city, only) {
+  var q = encodeURIComponent(phrase + (city ? ' ' + city : ''));
+  return MS_PLATFORMS.filter(function (p) { return !only || only.indexOf(p[0]) > -1; })
+    .map(function (p) { return '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(p[1](q)) + '">' + esc(p[0]) + '</a>'; }).join(' ');
+}
+SCREENS.manual = { render: function (d) {
+  if (MS.on === null) MS.on = MS_PLATFORMS.map(function (p) { return p[0]; });
+  if (!MS.city && d.city) MS.city = d.city;
+  var cities = MS_CITIES.indexOf(d.city) > -1 || !d.city ? MS_CITIES : [d.city].concat(MS_CITIES);
+  var html = north(d.north) + '<h1>🔍 البحث اليدوي</h1><div class="muted small">كل أدوات البحث اليدوي في مكان واحد — كل زر يفتح المنصة على نتائج اللحظة. مجاني ولا يحتاج Claude.</div>';
+  // ١) بحث حر
+  html += '<div class="card"><b>١) ابحث عن أي شيء</b><div class="row" style="margin-top:6px">' +
+    '<input type="text" id="ms_q" class="grow" placeholder="مثال: دورة مدرب شخصي، نادي جديد، وظيفة مدرب…" value="' + esc(MS.q) + '">' +
+    '<select id="ms_city"><option value="">كل المدن</option>' + cities.map(function (c) { return '<option' + (c === MS.city ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select>' +
+    '<button class="btn pri" data-act="msGo">🔍 ابحث</button><button class="btn ghost" data-act="msClear" title="إلغاء كل الخيارات">↺ إلغاء كل الخيارات</button></div>' +
+    '<details class="small"><summary>المنصات (' + MS.on.length + '/' + MS_PLATFORMS.length + ')</summary><div class="chips">' + MS_PLATFORMS.map(function (p) {
+      return '<label class="chip" style="cursor:pointer"><input type="checkbox" class="ms_pl" value="' + esc(p[0]) + '"' + (MS.on.indexOf(p[0]) > -1 ? ' checked' : '') + '> ' + esc(p[0]) + '</label>'; }).join('') + '</div></details>' +
+    '<div id="ms_out" class="chips" style="margin-top:6px">' + (MS.q ? msLinks_(MS.q, MS.city, MS.on) : '<span class="muted small">اكتب عبارة واضغط «ابحث» — تظهر هنا أزرار كل منصة</span>') + '</div></div>';
+  // ٢) من يسأل الآن
+  html += '<details class="card" open><summary><b>٢) عبارات يكتبها من يبحث عن دورة</b> ' + chip(d.phrases.length) + '</summary>' +
+    '<div class="muted small">عدّلها من الإعدادات ← ask_phrases. وجدت سؤالاً؟ الصقه في <a href="#" data-go="ask">🎯 من يسأل الآن</a> ليقترح لك الرد.</div>' +
+    d.phrases.map(function (p) { return '<div class="small" style="margin-top:6px"><b>«' + esc(p) + '»</b><div class="chips">' + msLinks_(p, MS.city, MS.on) + '</div></div>'; }).join('') + '</details>';
+  // ٣) المنافسون
+  html += '<details class="card"><summary><b>٣) ماذا يفعل المنافسون</b> ' + chip(d.competitors.length) + '</summary>' +
+    (d.competitors.length ? d.competitors.map(function (c) {
+      var extra = (extUrl(c.website) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.website)) + '">🌐 موقعهم</a> ' : '') +
+        (extUrl(c.ad_library_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.ad_library_url)) + '">📢 إعلاناتهم</a> ' : '<a class="chip" target="_blank" rel="noopener" href="https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=SA&q=' + encodeURIComponent(c.name) + '">📢 مكتبة الإعلانات</a> ') +
+        (extUrl(c.maps_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.maps_url)) + '">📍 الخريطة</a> ' : '');
+      return '<div class="small" style="margin-top:6px"><b>' + esc(c.name) + '</b>' + (c.city ? ' · ' + esc(c.city) : '') + '<div class="chips">' + extra +
+        msLinks_(c.name, '', ['X (الأحدث)', 'تيك توك', 'انستغرام', 'يوتيوب (الأحدث)', 'Google آخر أسبوع']) + '</div></div>';
+    }).join('') : empty('أضف المنافسين من شاشة المنافسين')) + '</details>';
+  // ٤) الأسعار والدورات
+  html += '<details class="card"><summary><b>٤) أسعار الدورات في السوق</b></summary>' +
+    (d.courses.length ? d.courses : ['دورة مدرب شخصي']).map(function (n) {
+      return '<div class="small" style="margin-top:6px"><b>«سعر ' + esc(n) + '»</b><div class="chips">' + msLinks_('سعر ' + n, MS.city, ['Google آخر أسبوع', 'انستغرام', 'تيك توك', 'X (الأحدث)']) + '</div></div>'; }).join('') + '</details>';
+  // ٥) المدربون والأشخاص
+  html += '<details class="card"><summary><b>٥) المدربون وصنّاع القرار</b></summary>' +
+    [['مدرب شخصي', ['انستغرام', 'تيك توك', 'لينكدإن (أشخاص)', 'خرائط Google']], ['مدير نادي رياضي', ['لينكدإن (أشخاص)', 'Google آخر أسبوع']], ['افتتاح نادي رياضي جديد', ['Google آخر أسبوع', 'X (الأحدث)', 'انستغرام']], ['مطلوب مدرب لياقة', ['لينكدإن (منشورات)', 'X (الأحدث)', 'Google آخر ٢٤ ساعة']]].map(function (x) {
+      return '<div class="small" style="margin-top:6px"><b>«' + x[0] + '»</b><div class="chips">' + msLinks_(x[0], MS.city, x[1]) + '</div></div>'; }).join('') +
+    '<div class="muted small" style="margin-top:6px">وجدت شخصاً مناسباً؟ أضفه في <a href="#" data-go="trainers">المدربون</a> أو <a href="#" data-go="people">صنّاع القرار</a>.</div></details>';
+  html += '<div class="card small">🧭 للبحث المتقدم بالطبقات والقوالب الجاهزة: <a href="#" data-go="search">البحث (كتالوج السوق)</a></div>';
+  return html;
+} };
+function msRead_() { MS.q = val('ms_q').trim(); MS.city = val('ms_city'); MS.on = q('.ms_pl').filter(function (x) { return x.checked; }).map(function (x) { return x.value; }); }
+ACT.msGo = function () {
+  msRead_();
+  if (!MS.q) return toast('اكتب عبارة البحث', true);
+  $('ms_out').innerHTML = msLinks_(MS.q, MS.city, MS.on) || '<span class="muted small">اختر منصة واحدة على الأقل</span>';
+};
+ACT.msClear = function () { MS.q = ''; MS.city = ''; MS.on = null; go('manual', {}, true); };
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'ms_q') ACT.msGo(); });
 </script>
 
   ﻿<script>
