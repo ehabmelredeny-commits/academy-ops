@@ -245,7 +245,7 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
-    if (m) { try { localStorage.setItem("ops_k_sbx", decodeURIComponent(m[1]).trim()); } catch (e) {} history.replaceState(null, '', location.pathname + location.search); }
+    if (m) { opsPut_(decodeURIComponent(m[1]).trim()); history.replaceState(null, '', location.pathname + location.search); }
   })();
   /** إدخال/تغيير المفتاح يدوياً — يقبل المفتاح نفسه أو الرابط الكامل (#k=...) ويحذف المسافات */
   function opsAskKey_(bad) {
@@ -259,10 +259,15 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
     var v = String(document.getElementById('ops_key_in').value || '').trim(), m = /[#&?]k=([^&\s]+)/.exec(v);
     v = (m ? decodeURIComponent(m[1]) : v).replace(/\s+/g, '');
     if (!v) return;
-    try { localStorage.setItem("ops_k_sbx", v); } catch (e) {}
+    opsPut_(v);
     location.reload();
   }
-  function opsKey_() { try { return localStorage.getItem("ops_k_sbx") || ''; } catch (e) { return ''; } }
+  function opsKey_() { var v = ""; try { v = localStorage.getItem("ops_k_sbx") || ""; } catch (e) {} if (!v) { var m2 = new RegExp("(?:^|; )" + "ops_k_sbx" + "=([^;]*)").exec(document.cookie); v = m2 ? decodeURIComponent(m2[1]) : ""; } return v; }
+  /** يحفظ المفتاح في المتصفح + كوكي احتياطي (بعض متصفحات الجوال تمنع التخزين المحلي) */
+  function opsPut_(v) {
+    try { localStorage.setItem("ops_k_sbx", v); } catch (e) {}
+    try { document.cookie = "ops_k_sbx" + '=' + encodeURIComponent(v) + '; max-age=31536000; path=/; SameSite=Lax; Secure'; } catch (e) {}
+  }
   var google = { script: {} };
   Object.defineProperty(google.script, 'run', { get: function () {
     var r = { s: null, f: null };
@@ -3656,11 +3661,12 @@ SCREENS.ask = { render: function (d, args) {
   if (d.opps.length) html += '<input type="text" id="ask_q" placeholder="🔍 ابحث في الفرص: كلمة، مدينة، منصة، حالة…" value="' + esc(ASK.q) + '" style="margin:6px 0">';
   html += d.opps.length ? '<div class="grid2" id="ask_list">' + d.opps.map(function (o) {
     var done = o.status !== 'جديد', left = Math.max(0, Math.ceil(((Time_(o.expires_at) || 0) - Date.now()) / 864e5));
-    var hay = [o.question, o.city, o.platform, o.persona, o.status, o.suggested_reply].join(' ');
+    var hay = [o.question, o.city, o.platform, o.persona, o.status, o.suggested_reply, o.asker_name, o.asker_handle].join(' ');
     return '<div class="card" data-hay="' + esc(hay) + '" style="' + (done ? 'opacity:.6' : '') + '"><div class="row between"><span>' + chip(o.platform, 'acc') + chip(o.persona) + '</span>' +
       '<span title="قوة النية">' + '★★★★★'.slice(0, Number(o.intent_score) || 1) + '<span class="muted">' + '★★★★★'.slice(0, 5 - (Number(o.intent_score) || 1)) + '</span></span></div>' +
+      askAskerHtml_(o) +
       '<div style="margin:6px 0;white-space:pre-wrap">«' + esc(o.question) + '»</div>' +
-      '<div class="muted small">' + (o.city ? '📍 ' + esc(o.city) + ' · ' : '') + fmtDate(o.found_at, true) + ' · ' + esc(o.source) + ' · يُحذف بعد ' + left + ' يوماً</div>' +
+      '<div class="muted small">' + (o.city ? '📍 ' + esc(o.city) + ' · ' : '') + '🕒 سأل: ' + (o.asked_at ? fmtDate(o.asked_at, true) : 'غير محدد') + ' · رُصد: ' + fmtDate(o.found_at, true) + ' · ' + esc(o.source) + ' · يُحذف بعد ' + left + ' يوماً</div>' +
       (done ? '<div class="small">' + chip(o.status, o.status === 'تم الرد' ? 'good' : '') + '</div>' :
         '<div class="row" style="gap:6px;margin-top:6px"><div class="grow">' + askPersonaSel_('apx_' + esc(o.ask_id), o.persona) + '</div>' +
         '<button class="btn sm" data-act="askRegen" data-id="' + esc(o.ask_id) + '" title="اكتب الرد من جديد حسب الحالة المختارة (مع الرابط)">↻ رد جديد</button></div>' +
@@ -3679,6 +3685,9 @@ SCREENS.ask = { render: function (d, args) {
       SEARCH_CATALOG.placeholders.CITY.options.concat(['مكة المكرمة', 'الطائف', 'أبها', 'تبوك', 'بريدة', 'حائل', 'نجران', 'جازان', 'الأحساء', 'الجبيل', 'ينبع']).filter(function (c, i, arr) { return arr.indexOf(c) === i; })
         .map(function (c) { return '<option' + (c === d.city ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select></div></div>' +
     '<label class="f">الحالة النفسية التسويقية</label>' + askPersonaSel_('ap_ps', '', true) +
+    '<div class="row" style="gap:6px"><div class="grow"><label class="f">👤 اسم السائل</label><input type="text" id="ap_an" placeholder="كما يظهر في حسابه"></div>' +
+    '<div class="grow"><label class="f">المعرّف (@)</label><input type="text" id="ap_ah" dir="ltr" placeholder="@username — يُستخرج من الرابط تلقائياً إن أمكن"></div>' +
+    '<div class="grow"><label class="f">🕒 موعد السؤال</label><input type="datetime-local" id="ap_at"></div></div>' +
     '<label class="f">رابط المنشور</label><input id="ap_url" type="url" dir="ltr" placeholder="https://x.com/…" autocomplete="off">' +
     '<label class="f">نص السؤال (اختياري إذا وضعت الرابط)</label><textarea id="ap_q" placeholder="مثال: أبي دورة مدرب شخصي بالرياض أحد يعرف مكان زين؟"></textarea>' +
 
@@ -3709,6 +3718,33 @@ document.addEventListener('input', function (e) {
   document.querySelectorAll('#ask_list > .card').forEach(function (c) { c.style.display = !q || normAr_(c.dataset.hay).indexOf(q) > -1 ? '' : 'none'; });
 });
 function normAr_(t) { return String(t || '').toLowerCase().replace(/[إأآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ً-ْ]/g, '').trim(); }
+function askAskerHtml_(o) {
+  var who = o.asker_name || o.asker_handle;
+  var prof = extUrl(o.asker_url);
+  return '<div class="row" style="gap:6px;margin-top:6px;background:var(--soft);border-radius:8px;padding:5px 8px">' +
+    '<span>👤 <b>' + esc(who || 'السائل غير محدد') + '</b>' + (o.asker_name && o.asker_handle ? ' <span class="muted no-tr" dir="ltr">' + esc(o.asker_handle) + '</span>' : '') + '</span>' +
+    (prof ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(prof) + '">ملفه الشخصي ↗</a>' : '') +
+    (o.lead_id ? '<a class="chip good" href="#" data-go="lead" data-args="' + attr({ lead_id: o.lead_id }) + '">✓ في مراحل العملاء</a>' :
+      '<button class="btn sm" data-act="askToLead" data-id="' + esc(o.ask_id) + '" title="ردّ عليك أو تفاعل؟ أضفه لمراحل العملاء مع نمطه النفسي">➕ أضفه كعميل</button>') +
+    '<button class="btn sm ghost" data-act="askAskerEdit" data-id="' + esc(o.ask_id) + '">✏️ بيانات السائل</button></div>' +
+    '<div id="aw_' + esc(o.ask_id) + '"></div>';
+}
+ACT.askToLead = function (el) {
+  el.disabled = true;
+  api('action', 'askToLead', { ask_id: el.dataset.id }).then(function (r) { toast('أُضيف لمراحل العملاء'); go('lead', { lead_id: r.lead_id }); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.askAskerEdit = function (el) {
+  var o = ASK.data.opps.filter(function (x) { return x.ask_id === el.dataset.id; })[0]; if (!o) return;
+  var box = $('aw_' + o.ask_id); if (box.innerHTML) { box.innerHTML = ''; return; }
+  var dt = o.asked_at ? new Date(o.asked_at) : null; if (dt && !isNaN(dt)) dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
+  box.innerHTML = '<div class="row" style="gap:6px;margin-top:6px"><input type="text" id="ae_n" placeholder="الاسم" value="' + esc(o.asker_name || '') + '">' +
+    '<input type="text" id="ae_h" dir="ltr" placeholder="@المعرّف" value="' + esc(o.asker_handle || '') + '"><input type="text" id="ae_u" dir="ltr" placeholder="رابط ملفه" value="' + esc(o.asker_url || '') + '">' +
+    '<input type="datetime-local" id="ae_t" value="' + (dt && !isNaN(dt) ? dt.toISOString().slice(0, 16) : '') + '"><button class="btn sm pri" data-act="askAskerSave" data-id="' + esc(o.ask_id) + '">حفظ</button></div>';
+};
+ACT.askAskerSave = function (el) {
+  act('askAsker', { ask_id: el.dataset.id, asker_name: val('ae_n'), asker_handle: val('ae_h'), asker_url: val('ae_u'), asked_at: val('ae_t') ? new Date(val('ae_t')).toISOString() : '' }, 'حُفظت بيانات السائل');
+};
 function Time_(v) { var d = v ? new Date(v) : null; return d && !isNaN(d) ? d.getTime() : 0; }
 function askCopy_(id) {
   var t = val('ar_' + id);
@@ -3726,7 +3762,7 @@ ACT.askSet = function (el) { act('askUpdate', { ask_id: el.dataset.id, status: e
 ACT.askPaste = function (el) {
   if (!val('ap_q').trim() && !val('ap_url').trim()) return toast('الصق الرابط أو نص السؤال (واحد منهما يكفي)', true);
   el.disabled = true;
-  api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl'), persona: val('ap_ps') }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
+  api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl'), persona: val('ap_ps'), asker_name: val('ap_an'), asker_handle: val('ap_ah'), asked_at: val('ap_at') ? new Date(val('ap_at')).toISOString() : '' }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 </script>
