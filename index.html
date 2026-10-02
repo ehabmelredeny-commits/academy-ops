@@ -2492,7 +2492,6 @@ document.addEventListener('drop', function (e) {
   var l = calList_(c); if (l.indexOf(to) > -1) return toast('الدفعة لديها جلسة في هذا اليوم', true);
   calSaveSes_(c.cohort_id, l.map(function (x) { return x === p[1] ? to : x; }), 'نُقل اليوم ' + p[1] + ' ← ' + to + ' (بقية الأيام كما هي)');
 });
-ACT.calOpen = function (el) { go('calendar', { month: (S.args || {}).month, edit: el.dataset.id }); };
 ACT.calSave = function (el) {
   var c = { cohort_id: el.dataset.id };
   ['course_id', 'title', 'start_date', 'end_date', 'time', 'location', 'trainer', 'seats_total', 'seats_left', 'status', 'notes'].forEach(function (k) { c[k] = val('ch_' + k); });
@@ -3511,7 +3510,6 @@ ACT.srcdbFoundSave = function (el) {
     .then(function (x) { closeSheet(); toast(x ? 'حُفظ ونُقل إلى العملاء' : 'حُفظ'); go('sources', S.args, true); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
-ACT.srcdbHandles = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, handles: val('hd_' + el.dataset.id) }, 'حُفظ', false); };
 ACT.srcdbSeg = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, segment: el.value }, 'حُدّثت الشريحة', false); };
 ACT.srcdbMark = function (el) {
   if (el.dataset.st === 'لا تراسل' && !confirm('لن يُراسل هذا الشخص مرة أخرى. متأكد؟')) return;
