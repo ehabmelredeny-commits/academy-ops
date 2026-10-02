@@ -149,9 +149,25 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .kanban { display: grid; grid-template-columns: 1fr; gap: 10px; }
 @media (min-width: 900px) { .kanban { grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); overflow-x: auto; } }
 .kcol { background: var(--soft); border-radius: 12px; padding: 8px; min-height: 60px; }
+.ib { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 900px) { .ib { grid-template-columns: 300px 1fr; } }
+.ib-list { max-height: 70vh; overflow-y: auto; }
+.ib-thread { max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px; }
+.ib-on { border-color: var(--accent) !important; background: var(--accent-soft); }
+.ib-in, .ib-out { max-width: 82%; padding: 7px 10px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+.ib-in { align-self: flex-start; background: var(--card); border: 1px solid var(--line); }
+.ib-out { align-self: flex-end; background: var(--accent-soft); }
 .kcol.drop { outline: 2px dashed var(--accent); }
 .kcard[draggable] { cursor: grab; }
 .kcol h3 { font-size: 13px; margin: 2px 4px 8px; display: flex; justify-content: space-between; }
+.ib { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 900px) { .ib { grid-template-columns: 300px 1fr; } }
+.ib-list { max-height: 70vh; overflow-y: auto; }
+.ib-thread { max-height: 70vh; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px; }
+.ib-on { border-color: var(--accent) !important; background: var(--accent-soft); }
+.ib-in, .ib-out { max-width: 82%; padding: 7px 10px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+.ib-in { align-self: flex-start; background: var(--card); border: 1px solid var(--line); }
+.ib-out { align-self: flex-end; background: var(--accent-soft); }
 .kcol.drop { outline: 2px dashed var(--accent); }
 /* ─── تقويم الدورات ─── */
 .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin: 10px 0 14px; }
@@ -338,16 +354,16 @@ var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['register', '🔗 نم�
 
 /** شجرة الأقسام: كل قسم وفروعه (الترتيب الرسمي للنظام) — NAV_MORE يبقى قائمة مسطّحة لمن يحتاجها */
 var NAV_TREE = [
-  ['day', '⚡ عملي اليوم', ['today', 'reply', 'dailyPost', 'ask']],
+  ['day', '⚡ عملي اليوم', ['today', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
   ['search', '🔎 البحث', ['manual', 'search', 'keywords']],
-  ['watch', '👁 المراقبة', ['radar', 'competitors', 'exams', 'targets', 'kpis']],
+  ['watch', '👁 المراقبة', ['compwatch', 'radar', 'competitors', 'exams', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['campaigns', 'content', 'register']],
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء']);
+NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
@@ -374,7 +390,7 @@ function navTreeHtml_(cur, cards) {
 document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.classList && d.classList.contains('navg')) navOpen_(d.dataset.g, d.open); }, true);
 
 /** زر «↺ إلغاء كل الخيارات» في كل شاشة بحث/تصفية — يعيد الشاشة لحالتها الأولى */
-var CLEARABLE = ['search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
+var CLEARABLE = ['inbox', 'pipeline', 'compwatch', 'manual', 'search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
 function clearBtn_(screen) {
   if (CLEARABLE.indexOf(screen) < 0) return;
   var h = document.querySelector('#main h1'); if (!h || h.querySelector('.clr')) return;
@@ -573,6 +589,8 @@ function poll() {
     BADGES.reply = (p.awaiting + p.escalated) || '';
     BADGES.today = p.failed || '';
     BADGES.ask = p.ask_hot || '';
+    BADGES.compwatch = p.comp_new || '';
+    BADGES.inbox = (p.awaiting + p.escalated) || '';
     if (p.ask_hot > (S.askHot || 0) && S.askHot !== undefined) toast('🔥 فرصة جديدة: ' + p.ask_hot + ' شخص يسأل الآن بنية عالية — افتح «من يسأل الآن»');
     S.askHot = p.ask_hot || 0;
     renderNav();
@@ -627,6 +645,7 @@ SCREENS.today = {
       return '<div class="card click" data-go="news"><div class="row">' + chip('عالي', 'bad') + chip(n.category) + '</div><b>' + esc(n.title) + '</b>' +
         '<div class="muted small">' + esc(n.impact_why_ar) + '</div></div>';
     });
+    if (d.comp_new) html += '<div class="card click" data-go="compwatch" style="border-color:var(--warn)"><b>📡 ' + d.comp_new + ' تغيير جديد عند المنافسين</b> <span class="muted small">أسعار وعروض — اضغط للملخص</span></div>';
     if (d.ask_top && d.ask_top.length) html += '<div class="card" style="border-color:var(--bad)"><b>🔥 فرص رد عالية النية — رد الآن</b>' + d.ask_top.map(function (o) {
       return '<div class="click small" data-go="ask" style="margin-top:5px">' + chip(o.platform, 'acc') + (o.asker ? ' <b>' + esc(o.asker) + '</b>' : '') + ' «' + esc(o.question) + '» ' + chip(o.psych_type ? '🧠 ' + o.psych_type : '') + '</div>'; }).join('') + '</div>';
     if (d.ask_new) html += '<div class="card click" data-go="ask" style="border-color:var(--good)"><b>🎯 ' + d.ask_new + ' شخص يسأل عن دورة الآن</b> <span class="muted small">— رد عليهم قبل غيرك</span></div>';
@@ -3299,14 +3318,15 @@ function srcdbAutoMap_(headers) {
 
 SCREENS.sources = { render: function (d, args) {
   SRCDB.data = d;
-  var f = { batch: args.batch || '', seg: args.seg || '', st: args.st || '' };
-  var rows = d.rows.filter(function (r) { return (!f.batch || r.batch_id === f.batch) && (!f.seg || r.segment === f.seg) && (!f.st || r.outreach_status === f.st); });
-  var html = north(d.north) + '<h1>قواعد عملاء المصادر ' + chip(d.rows.length) + '</h1>' +
+  var f = { batch: args.batch || '', seg: args.seg || '', st: args.st || '', city: args.city || '', gender: args.gender || '', consent: args.consent || '', q: args.q || '' };
+  SRCDB.f = f;
+  var rows = d.rows;
+  var html = north(d.north) + '<h1>قواعد عملاء المصادر ' + chip(d.total) + '</h1>' +
     '<div class="card small">استورد قوائم عملائك (إكسل/شيت) ← النظام يحلّلها ويقسّمها حسب الاحتياج ← يجهّز رسالة مخصصة لكل شخص تُرسلها أنت بضغطة (واتساب/إيميل). ' +
     '<b>لا إرسال جماعي ولا آلي</b>، ومن يطلب عدم التواصل لا يُراسل أبداً.</div>';
 
   // ── الاستيراد ──
-  html += '<details class="card"' + (d.rows.length ? '' : ' open') + '><summary><b>📥 استيراد قائمة جديدة</b></summary>' +
+  html += '<details class="card"' + (d.total ? '' : ' open') + '><summary><b>📥 استيراد قائمة جديدة</b></summary>' +
     '<label class="f">اسم المصدر * — اختر مصدراً سابقاً أو اكتب اسماً جديداً فيُضاف للقائمة</label><input id="sd_src" list="sd_src_list" autocomplete="off" placeholder="مثلاً: معرض الرياض ٢٠٢٦، عملاء قدامى…">' +
     '<datalist id="sd_src_list">' + d.batches.map(function (b) { return b.source_name; }).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; }).map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>' +
     '<label class="f">حالة الموافقة على التواصل لهذه القائمة</label><select id="sd_consent">' + opt(d.consent, 'غير معروف') + '</select>' +
@@ -3323,7 +3343,12 @@ SCREENS.sources = { render: function (d, args) {
   }).join('');
 
   // ── القائمة ──
-  html += '<h2>الأشخاص ' + chip(rows.length) + '</h2><div class="row" style="gap:6px;flex-wrap:wrap">' +
+  html += '<h2>الأشخاص ' + chip(d.matched + (d.matched !== d.total ? ' من ' + d.total : '')) + '</h2>' +
+    '<div class="row" style="gap:6px;margin-bottom:6px"><input type="text" id="sdf_q" class="grow" placeholder="🔍 ابحث بالاسم، الجوال، الإيميل، الاحتياج…" value="' + esc(f.q) + '"><button class="btn sm pri" data-act="srcdbFilter">بحث</button></div>' +
+    '<div class="row" style="gap:6px;flex-wrap:wrap">' +
+    '<select id="sdf_c" class="grow" data-act="srcdbFilter"><option value="">كل المدن</option>' + d.cities.map(function (c) { return '<option' + (c === f.city ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    '<select id="sdf_g" class="grow" data-act="srcdbFilter"><option value="">الجنس: الكل</option>' + [['ذكر', d.genders['ذكر']], ['أنثى', d.genders['أنثى']], ['غير محدد', d.genders['']]].map(function (g) { return '<option value="' + g[0] + '"' + (g[0] === f.gender ? ' selected' : '') + '>' + g[0] + ' (' + (g[1] || 0) + ')</option>'; }).join('') + '</select>' +
+    '<select id="sdf_k" class="grow" data-act="srcdbFilter"><option value="">كل حالات الموافقة</option>' + opt(d.consent, f.consent) + '</select>' +
     '<select id="sdf_b" class="grow" data-act="srcdbFilter"><option value="">كل الدفعات</option>' + d.batches.map(function (b) { return '<option value="' + esc(b.batch_id) + '"' + (f.batch === b.batch_id ? ' selected' : '') + '>' + esc(b.source_name) + '</option>'; }).join('') + '</select>' +
     '<select id="sdf_s" class="grow" data-act="srcdbFilter"><option value="">كل الشرائح</option>' + opt(d.segments, f.seg) + '</select>' +
     '<select id="sdf_o" class="grow" data-act="srcdbFilter"><option value="">كل الحالات</option>' + opt(d.outreach, f.st) + '</select></div>';
@@ -3336,14 +3361,19 @@ SCREENS.sources = { render: function (d, args) {
     '<select id="sd_ch"><option>واتساب</option><option>X</option></select>' +
     '<label class="btn sm">🖼️ صورة للرسالة<input type="file" id="sd_media" accept="image/*" hidden></label><span id="sd_media_n" class="muted"></span>' +
     '<button class="btn sm pri" data-act="srcdbSchedule">⏱ جدول الإرسال الآلي للمحدَّدين</button><button class="btn sm" data-act="srcdbUnschedule">إلغاء الجدولة</button></div>';
-  html += rows.length ? '<div class="grid2">' + rows.slice(0, 200).map(function (r) {
+  var pager = d.pages > 1 ? '<div class="row" style="justify-content:center;gap:8px;margin:8px 0">' +
+    (d.page > 1 ? '<button class="btn sm" data-act="srcdbPage" data-p="' + (d.page - 1) + '">‹ السابق</button>' : '') + '<span class="muted small">صفحة ' + d.page + ' من ' + d.pages + ' (٥٠ في الصفحة)</span>' +
+    (d.page < d.pages ? '<button class="btn sm" data-act="srcdbPage" data-p="' + (d.page + 1) + '">التالي ›</button>' : '') + '</div>' : '';
+  if (d.genders[''] && d.total) html += '<div class="muted small">' + d.genders[''] + ' شخصاً بلا جنس محدد — <a href="#" data-act="srcdbGenderAll">قدّره من الأسماء</a></div>';
+  html += pager;
+  html += rows.length ? '<div class="grid2">' + rows.map(function (r) {
     var stop = r.outreach_status === 'لا تراسل' || r.consent_status === 'رفض';
     var wa = r.phone ? 'https://wa.me/' + String(r.phone).replace(/\D/g, '') + '?text=' + encodeURIComponent(r.draft_msg || '') : '';
     var mail = r.email ? 'mailto:' + r.email + '?body=' + encodeURIComponent(r.draft_msg || '') : '';
     var searchQ = 'https://www.google.com/search?q=' + encodeURIComponent('"' + (r.name || '') + '"' + (r.email ? ' "' + r.email + '"' : '') + (r.city ? ' ' + r.city : ''));
     return '<div class="card" style="' + (stop ? 'opacity:.6' : '') + '"><div class="row between"><label style="cursor:pointer"><input type="checkbox" class="sd_pick" value="' + esc(r.imp_id) + '"' + (stop ? ' disabled' : '') + '> <b>' + esc(r.name || '(بلا اسم)') + '</b></label>' +
       chip(r.outreach_status, stop ? 'bad' : r.outreach_status === 'أُرسل' ? 'good' : r.outreach_status === 'جاهز للإرسال' ? 'acc' : '') + '</div>' +
-      '<div class="chips">' + chip(r.segment || 'لم يُحلَّل', r.segment ? 'acc' : '') + chip(r.course_interest) + chip(r.city) + chip(r.consent_status) + chip(r.analysis_by ? 'تحليل: ' + r.analysis_by : '') + '</div>' +
+      '<div class="chips">' + chip(r.segment || 'لم يُحلَّل', r.segment ? 'acc' : '') + chip(r.course_interest) + chip(r.city) + chip(r.gender ? (r.gender === 'أنثى' ? '♀ ' : '♂ ') + r.gender : '') + chip(r.consent_status) + chip(r.analysis_by ? 'تحليل: ' + r.analysis_by : '') + '</div>' +
       (r.need_summary ? '<div class="small"><b>الاحتياج:</b> ' + esc(r.need_summary) + '</div>' : '') +
       (r.outreach_status === 'مجدول للإرسال' ? '<div class="small" style="color:var(--accent)">⏱ مجدول عبر ' + esc(r.send_channel) + (r.send_media ? ' + صورة' : '') + '</div>' : '') +
       (r.send_error ? '<div class="small" style="color:var(--bad)">' + esc(r.send_error) + '</div>' : '') +
@@ -3362,8 +3392,9 @@ SCREENS.sources = { render: function (d, args) {
       '<button class="btn sm pri" data-act="srcdbLead" data-id="' + esc(r.imp_id) + '">أضف كعميل</button>' +
       '<button class="btn sm bad" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="لا تراسل">لا تراسل</button>' +
       '</div>' +
+      '<label class="f">الجنس</label><select data-act="srcdbGenderOne" data-id="' + esc(r.imp_id) + '"><option value="">غير محدد</option><option' + (r.gender === 'ذكر' ? ' selected' : '') + '>ذكر</option><option' + (r.gender === 'أنثى' ? ' selected' : '') + '>أنثى</option></select>' +
       '<label class="f">الشريحة</label><select data-act="srcdbSeg" data-id="' + esc(r.imp_id) + '">' + opt(d.segments, r.segment, true) + '</select></details></div>';
-  }).join('') + '</div>' + (rows.length > 200 ? '<div class="muted small">يُعرض أول ٢٠٠ — استخدم الفلاتر.</div>' : '') : empty('لا أشخاص بعد — استورد قائمة');
+  }).join('') + '</div>' + pager : empty(d.total ? 'لا نتائج لهذه التصفية' : 'لا أشخاص بعد — استورد قائمة');
   return html;
 } };
 
@@ -3448,7 +3479,12 @@ ACT.srcdbUnschedule = function () {
   if (!ids.length) return toast('حدّد أشخاصاً أولاً', true);
   act('sourcesUnschedule', { ids: ids }, 'أُلغيت الجدولة');
 };
-ACT.srcdbFilter = function () { go('sources', { batch: val('sdf_b'), seg: val('sdf_s'), st: val('sdf_o') }, true); };
+function srcdbArgs_() { return { batch: val('sdf_b'), seg: val('sdf_s'), st: val('sdf_o'), city: val('sdf_c'), gender: val('sdf_g'), consent: val('sdf_k'), q: val('sdf_q').trim() }; }
+ACT.srcdbFilter = function () { go('sources', srcdbArgs_(), true); };
+ACT.srcdbPage = function (el) { var a = srcdbArgs_(); a.page = Number(el.dataset.p); go('sources', a, true); };
+ACT.srcdbGenderOne = function (el) { api('action', 'srcdbGender', { imp_id: el.dataset.id, gender: el.value }).then(function () { toast('حُفظ'); }).catch(function (e) { toast(errMsg(e), true); }); };
+ACT.srcdbGenderAll = function () { act('srcdbGender', {}, function (r) { return 'قُدّر الجنس لـ ' + r.updated + ' شخصاً (عدّل الخطأ يدوياً)'; }); };
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'sdf_q') ACT.srcdbFilter(); });
 ACT.srcdbRules = function (el) { el.disabled = true; act('sourcesAnalyzeRules', { batch_id: el.dataset.b }, function (r) { return 'حُلّل ' + r.analyzed + ' — الرسائل جاهزة'; }); };
 ACT.srcdbClaude = function (el) { el.disabled = true; toast('جارٍ التحليل عبر Claude…'); act('sourcesAnalyzeClaude', { batch_id: el.dataset.b }, function (r) { return 'حُلّل ' + r.analyzed + ' (حتى ٤٠ في المرة)'; }); };
 ACT.srcdbSave = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, draft_msg: val('dm_' + el.dataset.id) }, 'حُفظت', false); };
@@ -4049,6 +4085,74 @@ ACT.lpRemind = function (el) {
     .then(function () { toast('⏰ سيظهر في «اليوم» في موعده'); leadPsychLoad_(el.dataset.id); }).catch(function (e) { toast(errMsg(e), true); });
 };
 ACT.lpRemindClear = function (el) { api('action', 'leadPsychSave', { lead_id: el.dataset.id, next_action_date: '', next_action: '' }).then(function () { toast('أُلغي التذكير'); leadPsychLoad_(el.dataset.id); }).catch(function (e) { toast(errMsg(e), true); }); };
+</script>
+
+  <script>
+/* ═══════════ 📡 ماذا تغيّر عند المنافسين ═══════════ */
+SCREENS.compwatch = { render: function (d, args) {
+  var c = d.counts, total = c.offers + c.changes + c.cheaper + c.news;
+  var html = north(d.north) + '<h1>📡 ماذا تغيّر عند المنافسين ' + chip(total ? total + ' تغيير' : 'لا تغييرات', total ? 'warn' : '') + '</h1>';
+  html += '<div class="tabs">' + [[7, 'آخر أسبوع'], [30, 'آخر شهر'], [90, 'آخر ٣ أشهر']].map(function (t) {
+    return '<button class="btn sm' + (d.days === t[0] ? ' pri' : '') + '" data-go="compwatch" data-args="' + attr({ days: t[0] }) + '">' + t[1] + '</button>'; }).join('') + '</div>';
+  html += '<div class="row">' + [[c.changes, 'تغيير سعر'], [c.offers, 'عرض جديد'], [c.cheaper, 'أرخص منا'], [c.news, 'خبر عنهم'], [c.accounts, 'حساب لم تراجعه']].map(function (x) {
+    return '<div class="stat"><div class="v">' + x[0] + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') + '</div>';
+  html += '<div class="muted small">المصدر: ' + (d.radar_on ? 'الرادار الآلي (أسبوعياً من مواقعهم) + ' : 'الرادار الآلي متوقف حتى شحن Claude · ') + 'ما تسجّله يدوياً في <a href="#" data-go="competitors">المنافسون</a> و<a href="#" data-go="manual">البحث اليدوي</a>.</div>';
+  var link = function (u) { return extUrl(u) ? ' <a target="_blank" rel="noopener" href="' + esc(extUrl(u)) + '">↗</a>' : ''; };
+  html += section('💲 تغييرات الأسعار', d.price_changes, function (x) {
+    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + '<div>' + chip(x.delta < 0 ? '🔻 خفّض ' + Math.abs(x.delta) : '🔺 رفع ' + x.delta, x.delta < 0 ? 'bad' : 'good') +
+      ' ' + x.old_price + ' ← <b>' + x.price + '</b> ر.س <span class="muted">' + fmtDate(x.at) + '</span></div>' +
+      (x.delta < 0 ? '<div class="muted">🧠 خفض السعر عند المنافس = لا تخفض سعرك فوراً؛ أبرز قيمتك (الاعتماد، الساعات العملية، الدعم) في ردودك هذا الأسبوع.</div>' : '') + '</div>'; }, 'لا تغييرات أسعار في هذه الفترة');
+  html += section('🆕 عروض ودورات جديدة', d.offers_new, function (x) {
+    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + '<div class="chips">' + (x.price ? chip(x.price + ' ر.س', 'acc') : '') + chip(x.platform) + chip(x.type) + chip(x.delivery) +
+      (x.end_date ? chip('ينتهي ' + fmtDate(x.end_date), 'warn') : '') + ' <span class="muted">' + fmtDate(x.at) + '</span></div></div>'; }, 'لا عروض جديدة في هذه الفترة');
+  html += section('⚠️ أرخص منا', d.cheaper_than_us, function (x) {
+    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '» بـ <b>' + x.price + '</b> مقابل دورتنا «' + esc(x.our_course) + '» بـ ' + x.ours + ' ر.س' + link(x.url) +
+      '<div class="muted">🧠 استخدم في الرد: «قارن على الاعتماد والساعات العملية والدعم بعد الدورة» — من دليل علم النفس للتقفيل.</div></div>'; }, 'لا يوجد منافس مسجّل أرخص منا');
+  html += section('📰 أخبار تذكرهم', d.news, function (x) {
+    return '<div class="card small">' + (x.impact === 'عالي' ? chip('عالي', 'bad') : '') + ' ' + esc(x.title) + link(x.url) + ' <span class="muted">' + fmtDate(x.at) + '</span></div>'; }, 'لا أخبار عنهم');
+  html += section('👁 حسابات لم تراجعها منذ أسبوع', d.accounts_due, function (x) {
+    return '<div class="card small row between"><span><b>' + esc(x.entity) + '</b> · ' + esc(x.platform) + ' ' + esc(x.handle || '') + '</span>' +
+      (extUrl(x.url) ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">افتح ↗</a>' : '') + '</div>'; }, 'كل الحسابات المراقَبة روجعت');
+  return html;
+} };
+</script>
+
+  <script>
+/* ═══════════ 💬 صندوق الرسائل الموحّد ═══════════ */
+var STATUS_SHORT = { received: 'وصلت', classified: 'مصنّفة', drafted: 'مسودة', awaiting_approval: 'بانتظارك', escalated: 'مصعّدة', owner_handles: 'تتولاها', approved: 'معتمدة', edited: 'معدّلة', sent: 'أُرسلت', failed: 'فشلت', closed: 'مغلقة' };
+SCREENS.inbox = { render: function (d, args) {
+  var html = north(d.north) + '<h1>💬 صندوق الرسائل ' + chip(d.total) + (d.unread ? chip(d.unread + ' تنتظر ردك', 'bad') : '') + '</h1>';
+  html += '<div class="row" style="gap:6px;margin-bottom:6px"><input type="text" id="ib_q" class="grow" placeholder="🔍 ابحث بالاسم أو الرقم أو نص الرسالة" value="' + esc(args.q || '') + '">' +
+    '<select id="ib_ch" data-act="ibFilter"><option value="">كل القنوات</option>' + opt(d.channels, args.ch || '') + '</select>' +
+    '<label class="chip" style="cursor:pointer"><input type="checkbox" id="ib_p" data-act="ibFilter"' + (args.pending ? ' checked' : '') + '> تنتظر ردي فقط</label></div>';
+  var list = '<div class="ib-list">' + (d.list.length ? d.list.map(function (c) {
+    return '<div class="card click small' + (c.key === d.sel ? ' ib-on' : '') + '" data-act="ibOpen" data-k="' + esc(c.key) + '"><div class="row between"><b>' + esc(c.name || c.contact || 'عميل') + '</b>' +
+      (c.pending ? chip(c.pending, 'bad') : '<span class="muted">' + fmtDate(c.last_at) + '</span>') + '</div><div class="muted">' + esc(c.last) + '</div>' +
+      '<div class="chips">' + c.channels.map(function (x) { return chip(x, 'acc'); }).join('') + '</div></div>';
+  }).join('') : empty('لا محادثات')) + '</div>';
+  var th = '<div class="ib-thread">';
+  if (d.lead) {
+    var l = d.lead;
+    th += '<div class="card small row between"><span><b>' + esc(l.name || 'عميل') + '</b> ' + chip(l.status) + chip(l.psych_type ? '🧠 ' + l.psych_type : '', 'acc') + chip(l.objection ? '✋ ' + l.objection : '', 'warn') +
+      (l.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + (l.next_action_date ? chip('⏰ ' + fmtDate(l.next_action_date, true), 'warn') : '') + '</span>' +
+      '<span class="row" style="gap:4px">' + (l.phone && l.opt_out !== 'نعم' ? '<a class="btn sm good" target="_blank" rel="noopener" href="https://wa.me/' + esc(String(l.phone).replace(/\D/g, '')) + '">🟢 واتساب</a>' : '') +
+      '<button class="btn sm pri" data-go="lead" data-args="' + attr({ lead_id: l.lead_id }) + '">🧠 ملفه وعلم النفس</button></span></div>';
+  }
+  th += d.thread.length ? d.thread.map(function (m) {
+    return '<div class="ib-in"><div class="muted small">' + chip(m.source, 'acc') + ' ' + fmtDate(m.at, true) + ' · ' + esc(STATUS_SHORT[m.status] || m.status) + (m.intent ? ' · ' + esc(m.intent) : '') + '</div>' +
+      (m.subject ? '<b class="small">' + esc(m.subject) + '</b><br>' : '') + esc(m.body) +
+      (m.pending ? '<div class="btns"><button class="btn sm pri" data-go="reply" data-args="' + attr({ msg_id: m.msg_id }) + '">✍️ رد عليها</button></div>' : '') + '</div>' +
+      (m.reply ? '<div class="ib-out"><div class="muted small">ردّنا' + (m.sent_at ? ' · ' + fmtDate(m.sent_at, true) : ' · لم يُرسل بعد') + '</div>' + esc(m.reply) + '</div>' : '');
+  }).join('') : (d.sel ? empty('لا رسائل') : '');
+  th += '</div>';
+  html += '<div class="ib">' + list + th + '</div>';
+  html += '<div class="muted small" style="margin-top:6px">تصل هنا تلقائياً: البريد، ونموذج التسجيل، وواتساب/انستغرام/فيسبوك بعد ربط حساب Meta (الإعدادات ← القنوات). الرد يمر بالموافقة كالمعتاد.</div>';
+  return html;
+}, after: function () { var t = document.querySelector('.ib-thread'); if (t) t.scrollTop = t.scrollHeight; } };
+function ibArgs_() { return { q: val('ib_q').trim(), ch: val('ib_ch'), pending: $('ib_p') && $('ib_p').checked ? 1 : '' }; }
+ACT.ibFilter = function () { go('inbox', ibArgs_(), true); };
+ACT.ibOpen = function (el) { var a = ibArgs_(); a.key = el.dataset.k; go('inbox', a, true); };
+document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'ib_q') ACT.ibFilter(); });
 </script>
 
   ﻿<script>
