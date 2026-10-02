@@ -233,9 +233,24 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
-    var m = /[#&]k=([\w-]+)/.exec(location.hash);
-    if (m) { try { localStorage.setItem("ops_k", m[1]); } catch (e) {} history.replaceState(null, '', location.pathname + location.search); }
+    var m = /[#&]k=([^&]+)/.exec(location.hash);
+    if (m) { try { localStorage.setItem("ops_k", decodeURIComponent(m[1]).trim()); } catch (e) {} history.replaceState(null, '', location.pathname + location.search); }
   })();
+  /** إدخال/تغيير المفتاح يدوياً — يقبل المفتاح نفسه أو الرابط الكامل (#k=...) ويحذف المسافات */
+  function opsAskKey_(bad) {
+    var box = document.getElementById('main'); if (!box) return;
+    box.innerHTML = '<div class="card" style="margin:30px auto;max-width:480px"><b>' + (bad ? '🔑 المفتاح المحفوظ في هذا الجهاز غير صحيح' : '🔑 أدخل مفتاح الدخول') + '</b>' +
+      '<div class="muted small" style="margin:6px 0">الصق المفتاح أو رابطك الخاص كاملاً (الذي ينتهي بـ #k=...). يُحفظ في هذا الجهاز فقط.</div>' +
+      '<input id="ops_key_in" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" dir="ltr" style="width:100%">' +
+      '<div class="btns"><button class="btn pri" onclick="opsSaveKey_()">دخول</button></div></div>';
+  }
+  function opsSaveKey_() {
+    var v = String(document.getElementById('ops_key_in').value || '').trim(), m = /[#&?]k=([^&\s]+)/.exec(v);
+    v = (m ? decodeURIComponent(m[1]) : v).replace(/\s+/g, '');
+    if (!v) return;
+    try { localStorage.setItem("ops_k", v); } catch (e) {}
+    location.reload();
+  }
   function opsKey_() { try { return localStorage.getItem("ops_k") || ''; } catch (e) { return ''; } }
   var google = { script: {} };
   Object.defineProperty(google.script, 'run', { get: function () {
@@ -248,7 +263,7 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
         .then(function (t) {
           var j; try { j = JSON.parse(t); } catch (x) { j = null; }
           if (!j) { if (retries > 0) return setTimeout(function () { done(mk, retries - 1); }, 800); throw new Error('bad'); }
-          if (j.ok) r.s && r.s(j.data); else r.f && r.f(new Error(j.error || 'خطأ'));
+          if (j.ok) r.s && r.s(j.data); else if (/unauthorized|غير مصر/i.test(j.error || '')) opsAskKey_(true); else r.f && r.f(new Error(j.error || 'خطأ'));
         })
         .catch(function (e) {
           if (retries > 0 && e.message !== 'bad') return setTimeout(function () { done(mk, retries - 1); }, 800);
@@ -273,8 +288,7 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
 </script>
 <script>
   if (!opsKey_()) document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('main').innerHTML = '<div class="card" style="margin:40px auto;max-width:480px"><b>افتح رابطك الخاص مرة واحدة</b>' +
-      '<div class="muted small">الرابط الذي وصلك بالبريد (ينتهي بـ #k=...). بعدها يتذكّرك هذا المتصفح.</div></div>';
+    opsAskKey_(false);
   });
 </script>
   <div class="wrap">
