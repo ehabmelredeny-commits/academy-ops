@@ -149,6 +149,8 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .kanban { display: grid; grid-template-columns: 1fr; gap: 10px; }
 @media (min-width: 900px) { .kanban { grid-auto-flow: column; grid-auto-columns: minmax(200px, 1fr); overflow-x: auto; } }
 .kcol { background: var(--soft); border-radius: 12px; padding: 8px; min-height: 60px; }
+.kcol.drop { outline: 2px dashed var(--accent); }
+.kcard[draggable] { cursor: grab; }
 .kcol h3 { font-size: 13px; margin: 2px 4px 8px; display: flex; justify-content: space-between; }
 .kcol.drop { outline: 2px dashed var(--accent); }
 /* ─── تقويم الدورات ─── */
@@ -337,10 +339,10 @@ var NAV_TREE = [
   ['watch', '👁 المراقبة', ['radar', 'competitors', 'exams', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['campaigns', 'content', 'register']],
-  ['sales', '💰 المبيعات والدورات', ['courses', 'calendar', 'payments']],
+  ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['manual', '🔍 البحث اليدوي']);
+NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
@@ -592,6 +594,11 @@ SCREENS.today = {
       '<div class="stat click" data-go="reply"><div class="v">' + d.counts.to_send + '</div><div class="k">معتمدة لم تُرسل</div></div>' +
       '<div class="stat"><div class="v">' + d.counts.followups_due + '</div><div class="k">متابعات مستحقة</div></div>' +
       '<div class="stat click" data-go="dailyPost"><div class="v">' + d.counts.posts_pending + '</div><div class="k">منشور بانتظارك</div></div></div>';
+    if (d.due && d.due.length) html += section('⏰ متابعات العملاء اليوم', d.due, function (l) {
+      return '<div class="card click" data-go="lead" data-args="' + attr({ lead_id: l.lead_id }) + '"><div class="row between"><b>' + esc(l.name) + '</b>' +
+        chip(l.late ? 'متأخرة' : fmtDate(l.due, true), l.late ? 'bad' : 'warn') + '</div><div class="small">➡️ ' + esc(l.next_action || 'متابعة') + '</div>' +
+        '<div class="chips">' + chip(l.status) + chip(l.psych_type ? '🧠 ' + l.psych_type : '', 'acc') + chip(l.objection ? '✋ ' + l.objection : '', 'warn') + '</div></div>';
+    });
     html += section('١) رسائل تجاوزت ٣٠ دقيقة بلا رد', d.overdue, function (m) { return msgCard(m, chip(ago(m.age_min), m.age_min >= 60 ? 'bad' : 'warn')); });
     html += section('٢) شكاوى وتصعيدات', d.escalations, function (m) { return msgCard(m, chip(m.status === 'owner_handles' ? 'تتولاها' : 'مصعّدة', 'bad')); });
     html += section('٣) عملاء بنقاط عالية', d.hot_leads, function (l) {
@@ -3893,6 +3900,113 @@ ACT.msGo = function () {
 };
 ACT.msClear = function () { MS.q = ''; MS.city = ''; MS.on = null; go('manual', {}, true); };
 document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'ms_q') ACT.msGo(); });
+</script>
+
+  <script>
+/* ═══════════ 🧲 مراحل العملاء + علم النفس للتقفيل ═══════════ */
+var PIPE = { data: null, tab: 'board', f: '' };
+var PIPE_COLORS = { 'جديد': '#3a86ff', 'تواصلنا': '#8d6cd8', 'رد': '#e9a23b', 'عرض مُرسل': '#e76f51', 'سجّل': '#2a9d8f', 'مفقود': '#8a817c' };
+SCREENS.pipeline = { render: function (d) {
+  PIPE.data = d;
+  var due = d.rows.filter(function (r) { return r.overdue; }).length;
+  var html = north(d.north) + '<h1>🧲 مراحل العملاء ' + chip(d.rows.length) + (due ? chip(due + ' متابعة مستحقة', 'bad') : '') + '</h1>';
+  html += '<div class="tabs">' + [['board', 'لوحة المراحل'], ['psych', '🧠 دليل علم النفس للتقفيل']].map(function (t) {
+    return '<button class="btn sm' + (PIPE.tab === t[0] ? ' pri' : '') + '" data-act="pipeTab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
+  if (PIPE.tab === 'psych') return html + pipePsychGuide_(d);
+  html += '<div class="row" style="margin-bottom:6px"><input type="text" id="pipe_q" class="grow" placeholder="🔍 ابحث بالاسم، الجوال، النمط، الاعتراض، الدورة…" value="' + esc(PIPE.f) + '">' +
+    '<span class="muted small">اسحب البطاقة بين الأعمدة لتغيير المرحلة · اضغطها لفتح ملف العميل وعلم النفس</span></div>';
+  html += '<div class="kanban">' + d.stages.map(function (s) {
+    var list = d.rows.filter(function (r) { return r.status === s; });
+    return '<div class="kcol" data-stage="' + esc(s) + '"><h3><span><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:' + (PIPE_COLORS[s] || '#888') + '"></span> ' + esc(s) + '</span>' + chip(list.length) + '</h3>' +
+      list.map(function (r) {
+        var hay = [r.name, r.phone, r.psych_type, r.objection, r.course, r.source, r.step].join(' ');
+        return '<div class="card click kcard" draggable="true" data-id="' + esc(r.lead_id) + '" data-hay="' + esc(hay) + '" data-go="lead" data-args="' + attr({ lead_id: r.lead_id }) + '" style="border-inline-start:4px solid ' + (PIPE_COLORS[s] || '#888') + '">' +
+          '<div class="row between"><b>' + esc(r.name) + '</b>' + (r.overdue ? chip('⏰ مستحقة', 'bad') : '') + '</div>' +
+          '<div class="chips">' + chip('🧠 ' + r.psych_type, 'acc') + (r.objection ? chip('✋ ' + r.objection, 'warn') : '') + (r.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + '</div>' +
+          (r.course ? '<div class="muted small">' + esc(r.course) + '</div>' : '') +
+          '<div class="small">➡️ ' + esc(r.step) + (r.due ? ' <span class="muted">· ' + fmtDate(r.due, true) + '</span>' : '') + '</div></div>';
+      }).join('') + '</div>';
+  }).join('') + '</div>';
+  return html;
+}, after: function () { pipeFilter_(); } };
+
+function pipePsychGuide_(d) {
+  return '<div class="card small">المبدأ: <b>الإقناع = صدق + توقيت + السؤال الصحيح</b>. لا ندرة مزيفة ولا أسعار أو وعود غير موجودة — كل رسالة تُبنى من بيانات دوراتك الحقيقية فقط.</div>' +
+    '<h2>أنماط العملاء النفسية</h2><div class="grid2">' + d.types.map(function (t) {
+      return '<div class="card"><b>🧠 ' + esc(t.key) + '</b> ' + chip(t.principle, 'acc') + '<div class="small" style="margin-top:4px">' + esc(t.tip) + '</div></div>'; }).join('') + '</div>' +
+    '<h2>مكتبة الاعتراضات وكيف ترد</h2>' + d.objections.map(function (o) {
+      return '<details class="card"><summary><b>✋ «' + esc(o.key) + '»</b> ' + chip(o.principle, 'acc') + '</summary><div class="small">' + esc(o.why) + '</div>' +
+        '<div class="quote small" style="margin-top:6px">' + esc(o.sample) + '</div></details>'; }).join('') +
+    '<h2>توقيت المتابعة</h2><div class="card small">جديد ← رد خلال ٥ دقائق · تواصلنا بلا رد ← سؤال مفتوح بعد ٢٤ ساعة ← رسالة قيمة بعد ٣ أيام · عرض مُرسل ← اكشف الاعتراض بعد ٢٤ ساعة · بدأ الدفع ولم يكمل ← ساعده خلال ساعتين · سجّل ← اطلب ترشيح صديق بعد أسبوع · مفقود ← أعد المحاولة بعد شهر بخبر حقيقي.</div>';
+}
+function pipeFilter_() {
+  var q0 = typeof normAr_ === 'function' ? normAr_(PIPE.f) : PIPE.f;
+  q('.kcard').forEach(function (c) { c.style.display = !q0 || (typeof normAr_ === 'function' ? normAr_(c.dataset.hay) : c.dataset.hay).indexOf(q0) > -1 ? '' : 'none'; });
+}
+ACT.pipeTab = function (el) { PIPE.tab = el.dataset.t; go('pipeline', {}, true); };
+document.addEventListener('input', function (e) { if (e.target && e.target.id === 'pipe_q') { PIPE.f = e.target.value; pipeFilter_(); } });
+document.addEventListener('dragstart', function (e) { var c = e.target.closest && e.target.closest('.kcard'); if (c) { e.dataTransfer.setData('text/plain', 'lead|' + c.dataset.id); } });
+document.addEventListener('dragover', function (e) { var k = e.target.closest && e.target.closest('.kcol[data-stage]'); if (k) { e.preventDefault(); k.classList.add('drop'); } });
+document.addEventListener('dragleave', function (e) { var k = e.target.closest && e.target.closest('.kcol[data-stage]'); if (k) k.classList.remove('drop'); });
+document.addEventListener('drop', function (e) {
+  var k = e.target.closest && e.target.closest('.kcol[data-stage]'); if (!k) return;
+  e.preventDefault(); k.classList.remove('drop');
+  var p = String(e.dataTransfer.getData('text/plain') || '').split('|'); if (p[0] !== 'lead') return;
+  var r = PIPE.data.rows.filter(function (x) { return x.lead_id === p[1]; })[0]; if (!r || r.status === k.dataset.stage) return;
+  api('action', 'leadStage', { lead_id: p[1], status: k.dataset.stage }).then(function () { toast('«' + r.name + '» ← ' + k.dataset.stage); go('pipeline', {}, true); })
+    .catch(function (e2) { toast(errMsg(e2), true); });
+});
+
+/* ── لوحة علم النفس داخل ملف العميل ── */
+var LPS = { lead: null, d: null };
+function leadPsychLoad_(leadId, key) {
+  var box = $('lead_psych'); if (!box) return;
+  api('action', 'leadPsych', { lead_id: leadId, key: key || '' }).then(function (d) { LPS.d = d; box.innerHTML = leadPsychHtml_(leadId, d); })
+    .catch(function (e) { box.innerHTML = '<div class="muted small">' + esc(errMsg(e)) + '</div>'; });
+}
+function leadPsychHtml_(id, d) {
+  var l = LPS.lead || {}, st = d.step || {};
+  var wa = l.phone && d.message ? 'https://wa.me/' + String(l.phone).replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(d.message) : '';
+  var keys = d.types.map(function (t) { return t.key; }).concat(d.objections.map(function (o) { return o.key; }));
+  return '<b>🧠 علم النفس للتقفيل</b>' +
+    '<div class="card small" style="margin:6px 0;background:var(--accent-soft)">➡️ <b>الخطوة التالية:</b> ' + esc(st.title || '') + (st.principle ? ' ' + chip(st.principle, 'acc') : '') +
+      (st.why ? '<div class="muted">' + esc(st.why) + '</div>' : '') + '</div>' +
+    '<div class="row" style="gap:6px"><div class="grow"><label class="f">نمط العميل' + (d.saved_type ? '' : ' (مقترح من كلامه)') + '</label><select id="lp_type">' +
+      d.types.map(function (t) { return '<option value="' + esc(t.key) + '"' + (t.key === d.psych_type ? ' selected' : '') + '>' + esc(t.key) + ' — ' + esc(t.principle) + '</option>'; }).join('') + '</select></div>' +
+    '<div class="grow"><label class="f">اعتراضه' + (d.detected && !d.objection ? ' (اكتشفنا: «' + esc(d.detected) + '»)' : '') + '</label><select id="lp_obj"><option value="">لا يوجد</option>' +
+      d.objections.map(function (o) { return '<option value="' + esc(o.key) + '"' + (o.key === (d.objection || d.detected) ? ' selected' : '') + '>' + esc(o.key) + '</option>'; }).join('') + '</select></div></div>' +
+    '<label class="f">الرسالة المقترحة — حسب: <select id="lp_key" style="min-width:0">' + keys.map(function (k) { return '<option' + (k === d.key ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
+    (d.message ? '<textarea id="lp_msg" style="min-height:110px">' + esc(d.message) + '</textarea>' : '<div class="muted small">لا رسالة — العميل طلب عدم التواصل.</div>') +
+    '<div class="btns">' + (d.message ? '<button class="btn sm good" data-act="lpCopy">📋 انسخ</button>' + (wa ? '<a class="btn sm" id="lp_wa" target="_blank" rel="noopener" href="' + esc(wa) + '">🟢 افتح في واتساب</a>' : '') : '') +
+      '<button class="btn sm" data-act="lpSave" data-id="' + esc(id) + '">💾 احفظ النمط والاعتراض</button></div>' +
+    '<label class="f">⏰ تذكير المتابعة لهذا العميل</label><div class="row" style="gap:6px"><input type="datetime-local" id="lp_date" value="' + esc(lpLocal_(d.next_action_date)) + '">' +
+      '<input type="text" id="lp_next" class="grow" placeholder="ماذا ستفعل؟ مثال: أرسل له جدول الدفعة" value="' + esc(d.next_action || st.title || '') + '">' +
+      '<button class="btn sm pri" data-act="lpRemind" data-id="' + esc(id) + '">ذكّرني</button>' + (d.next_action_date ? '<button class="btn sm ghost" data-act="lpRemindClear" data-id="' + esc(id) + '">إلغاء التذكير</button>' : '') + '</div>';
+}
+function lpLocal_(v) { var d = v ? new Date(v) : null; if (!d || isNaN(d)) return ''; d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); }
+SCREENS.lead.after = function (d) {
+  LPS.lead = d.lead;
+  var h = document.querySelector('#main h1'); if (!h) return;
+  h.insertAdjacentHTML('afterend', '<div class="card" id="lead_psych" style="border-color:var(--accent)"><span class="muted small">🧠 يحلّل العميل…</span></div>');
+  leadPsychLoad_(d.lead.lead_id);
+};
+document.addEventListener('change', function (e) {
+  if (!e.target || !LPS.lead) return;
+  if (e.target.id === 'lp_key') leadPsychLoad_(LPS.lead.lead_id, e.target.value);
+  if (e.target.id === 'lp_obj' && e.target.value) leadPsychLoad_(LPS.lead.lead_id, e.target.value);
+  if (e.target.id === 'lp_type') leadPsychLoad_(LPS.lead.lead_id, e.target.value);
+});
+document.addEventListener('input', function (e) {
+  if (e.target && e.target.id === 'lp_msg' && $('lp_wa') && LPS.lead) $('lp_wa').href = 'https://wa.me/' + String(LPS.lead.phone).replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(e.target.value);
+});
+ACT.lpCopy = function () { copyText(val('lp_msg')); };
+ACT.lpSave = function (el) { act('leadPsychSave', { lead_id: el.dataset.id, psych_type: val('lp_type'), objection: val('lp_obj') }, 'حُفظ', false); };
+ACT.lpRemind = function (el) {
+  if (!val('lp_date')) return toast('اختر موعد التذكير', true);
+  api('action', 'leadPsychSave', { lead_id: el.dataset.id, next_action_date: new Date(val('lp_date')).toISOString(), next_action: val('lp_next') })
+    .then(function () { toast('⏰ سيظهر في «اليوم» في موعده'); leadPsychLoad_(el.dataset.id); }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.lpRemindClear = function (el) { api('action', 'leadPsychSave', { lead_id: el.dataset.id, next_action_date: '', next_action: '' }).then(function () { toast('أُلغي التذكير'); leadPsychLoad_(el.dataset.id); }).catch(function (e) { toast(errMsg(e), true); }); };
 </script>
 
   ﻿<script>
