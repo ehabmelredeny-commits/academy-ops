@@ -505,12 +505,29 @@ function renderNav() {
     var b = BADGES[n[0]] ? '<span class="dot">' + BADGES[n[0]] + '</span>' : '';
     return '<button class="' + (on ? 'on' : '') + '" data-go="' + n[0] + '">' + ICON[n[2]] + '<span>' + n[1] + '</span>' + b + '</button>';
   }).join('');
-  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + navTreeHtml_(cur, false);
+  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + navTreeHtml_(cur, false) +
+    (loginLink_() ? '<button data-go="more" style="margin-top:8px;color:var(--accent)">📱 رابط الدخول للجوال / للمشاركة</button>' : '');
 }
 
+/** رابط دخول كامل (بالمفتاح المحفوظ في هذا الجهاز) — لفتح النظام على الجوال أو إرساله لشخص موثوق */
+function loginLink_() {
+  var k = typeof opsKey_ === 'function' ? opsKey_() : (typeof UI_KEY !== 'undefined' ? UI_KEY : '');
+  if (!k) return '';
+  return location.origin + location.pathname + '#k=' + encodeURIComponent(k);
+}
+function shareCardHtml_() {
+  var u = loginLink_(); if (!u) return '';
+  var sbx = document.body.classList.contains('is-sandbox');
+  return '<div class="card" style="border-color:var(--accent)"><b>📱 افتح النظام على جوالك أو أرسله لشخص</b>' +
+    '<div class="muted small">هذا الرابط يحتوي مفتاح الدخول — من يفتحه يدخل مباشرة بلا كتابة أي شيء.' + (sbx ? ' (نسخة تجريبية: بيانات وهمية، آمن للمشاركة)' : ' <b style="color:var(--bad)">النظام الأساسي: فيه بيانات عملائك — لا ترسله إلا لمن تثق به.</b>') + '</div>' +
+    '<div class="btns"><button class="btn sm pri" data-act="shareCopy">📋 انسخ رابط الدخول</button>' +
+    '<a class="btn sm good" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent((sbx ? 'رابط النظام التجريبي (يفتح مباشرة):\n' : 'رابط Academy OPS (يفتح مباشرة — لا تشاركه مع غيرك):\n') + u) + '">🟢 أرسله عبر واتساب</a></div>' +
+    '<div class="muted small">إذا فُتح الرابط وطلب المفتاح: الصق الرابط نفسه كاملاً في الخانة واضغط «دخول».</div></div>';
+}
+ACT.shareCopy = function () { copyText(loginLink_()); };
 function renderMore() {
   S.screen = 'more'; renderNav();
-  $('main').innerHTML = '<h1>المزيد</h1>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + navTreeHtml_('', true);
+  $('main').innerHTML = '<h1>المزيد</h1>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + shareCardHtml_() + navTreeHtml_('', true);
 }
 
 /* ─── أدوات العرض ─── */
