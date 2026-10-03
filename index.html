@@ -3442,7 +3442,7 @@ ACT.srcExport = function (el) {
  * استيراد (لصق من إكسل أو رفع CSV/XLSX) ← ربط الأعمدة ← تحليل (قواعد أو Claude) ← رسالة مخصصة تُرسل يدوياً واحدة واحدة.
  */
 var SRCDB = { data: null, parsed: null };
-var SRCDB_GUESS = { name: /اسم|name|الاسم/i, phone: /جوال|هاتف|موبايل|رقم|phone|mobile|whats/i, email: /بريد|ايميل|إيميل|email|mail/i,
+var SRCDB_GUESS = { gender: /جنس|النوع|gender|sex/i, name: /اسم|name|الاسم/i, phone: /جوال|هاتف|موبايل|رقم|phone|mobile|whats/i, email: /بريد|ايميل|إيميل|email|mail/i,
   city: /مدينة|المدينه|city|منطقة/i, notes: /ملاحظ|notes|اهتمام|تعليق|comment|هدف|interest/i };
 
 function srcdbParseText_(txt) {
@@ -3482,7 +3482,7 @@ SCREENS.sources = { render: function (d, args) {
     '<label class="f">اسم المصدر * — اختر مصدراً سابقاً أو اكتب اسماً جديداً فيُضاف للقائمة</label><input id="sd_src" list="sd_src_list" autocomplete="off" placeholder="مثلاً: معرض الرياض ٢٠٢٦، عملاء قدامى…">' +
     '<datalist id="sd_src_list">' + d.batches.map(function (b) { return b.source_name; }).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; }).map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>' +
     '<label class="f">حالة الموافقة على التواصل لهذه القائمة</label><select id="sd_consent">' + opt(d.consent, 'غير معروف') + '</select>' +
-    '<label class="f">الصق الجدول من إكسل/شيت (مع صف العناوين)</label><textarea id="sd_paste" dir="ltr" class="ltr-table" style="min-height:110px" placeholder="الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
+    '<label class="f">الصق الجدول من إكسل/شيت (مع صف العناوين)</label><textarea id="sd_paste" dir="ltr" class="ltr-table" style="min-height:110px" placeholder="الجنس	الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
     '<div class="row" style="gap:6px"><button class="btn" data-act="srcdbParse">قراءة اللصق</button>' +
     '<label class="btn">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="sd_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label></div><div id="sd_prev"></div></details>';
 
@@ -3584,7 +3584,7 @@ function srcdbPreview_(p) {
   var tbl = '<div style="overflow-x:auto;margin:6px 0"><table class="ltr-table" dir="ltr"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
     p.rows.slice(0, 5).map(function (r) { return '<tr>' + p.headers.map(function (h, i) { return '<td>' + esc(r[i]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
   $('sd_prev').innerHTML = '<div class="card small"><b>' + p.rows.length + ' صف</b> — أول ٥ صفوف كما في ملفك (من اليسار):' + tbl + 'اربط الأعمدة (خمّنها النظام):<div class="row" style="flex-wrap:wrap;gap:6px">' +
-    sel('name', 'الاسم') + sel('phone', 'الجوال') + sel('email', 'الإيميل') + sel('city', 'المدينة') + sel('notes', 'ملاحظات/اهتمام') + '</div>' +
+    sel('gender', 'الجنس') + sel('name', 'الاسم') + sel('phone', 'الجوال') + sel('email', 'الإيميل') + sel('city', 'المدينة') + sel('notes', 'ملاحظات/اهتمام') + '</div>' +
     '<div style="overflow-x:auto"><table class="small"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
     p.rows.slice(0, 4).map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>' +
     '<div class="btns"><button class="btn good" data-act="srcdbImport">استيراد ' + p.rows.length + ' صف</button></div></div>';
@@ -3592,11 +3592,11 @@ function srcdbPreview_(p) {
 ACT.srcdbImport = function (el) {
   var p = SRCDB.parsed; if (!p) return;
   if (!val('sd_src').trim()) return toast('اكتب اسم المصدر', true);
-  var ix = {}; ['name', 'phone', 'email', 'city', 'notes'].forEach(function (k) { ix[k] = Number(val('mp_' + k)); });
+  var ix = {}; ['gender', 'name', 'phone', 'email', 'city', 'notes'].forEach(function (k) { ix[k] = Number(val('mp_' + k)); });
   var rows = p.rows.map(function (r) {
     var raw = {}; p.headers.forEach(function (h, i) { if (r[i] !== undefined && String(r[i]).trim()) raw[h || ('عمود ' + (i + 1))] = String(r[i]).trim(); });
     var g = function (k) { return ix[k] > -1 ? String(r[ix[k]] || '').trim() : ''; };
-    return { name: g('name'), phone: g('phone'), email: g('email'), city: g('city'), notes: g('notes'), raw: raw };
+    return { gender: g('gender'), name: g('name'), phone: g('phone'), email: g('email'), city: g('city'), notes: g('notes'), raw: raw };
   });
   el.disabled = true;
   api('action', 'sourcesImport', { rows: rows, source_name: val('sd_src'), consent_status: val('sd_consent') }).then(function (r) {
