@@ -1,6 +1,8 @@
 {
-  "name": "Academy OPS",
-  "short_name": "Academy OPS",
+  "id": "academy-ops-sandbox",
+  "scope": "./",
+  "name": "Academy OPS 🧪 تجريبي",
+  "short_name": "OPS تجريبي",
   "start_url": "./",
   "display": "standalone",
   "dir": "rtl",

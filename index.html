@@ -169,6 +169,8 @@ nav.side .navg-kids button.navi:hover { background: var(--soft); color: var(--in
 nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
 .navi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ltr-table { direction: ltr; text-align: left; }
+.envtag { font-size: 11.5px; font-weight: 700; border-radius: 6px; padding: 2px 8px; margin: -8px 10px 8px; display: inline-block; }
+.envtag.main { background: rgba(42,157,143,.15); color: #2a9d8f; } .envtag.sbx { background: rgba(214,69,69,.15); color: #d64545; }
 .pcount { display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--line); border-radius: 999px; padding: 0 2px 0 8px; font-size: 12px; }
 .pc-n { border: 0; border-radius: 999px; min-width: 22px; height: 20px; font-weight: 700; background: var(--soft); color: var(--muted); cursor: pointer; }
 .pc-n.on { background: var(--accent); color: var(--accent-ink); }
@@ -594,7 +596,8 @@ function renderNav() {
     var b = BADGES[n[0]] ? '<span class="dot">' + BADGES[n[0]] + '</span>' : '';
     return '<button class="' + (on ? 'on' : '') + '" data-go="' + n[0] + '">' + ICON[n[2]] + '<span>' + n[1] + '</span>' + b + '</button>';
   }).join('');
-  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + navTreeHtml_(cur, false) +
+  var envTag = location.pathname.indexOf('/sandbox/') > -1 ? '<div class="envtag sbx">🧪 النظام التجريبي</div>' : '<div class="envtag main">✅ النظام الأساسي</div>';
+  $('side').innerHTML = '<div class="brand">Academy OPS</div>' + envTag + (typeof i18nToggleHtml_ === 'function' ? i18nToggleHtml_() : '') + navTreeHtml_(cur, false) +
     (loginLink_() ? '<button data-go="more" style="margin-top:8px;color:var(--accent)">📱 رابط الدخول للجوال / للمشاركة</button>' : '');
 }
 

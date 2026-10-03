@@ -1,5 +1,7 @@
 {
-  "name": "Academy OPS",
+  "id": "academy-ops-main",
+  "scope": "./",
+  "name": "Academy OPS — الأساسي",
   "short_name": "Academy OPS",
   "start_url": "./",
   "display": "standalone",
