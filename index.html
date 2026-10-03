@@ -517,7 +517,7 @@ function loginLink_() {
 }
 function shareCardHtml_() {
   var u = loginLink_(); if (!u) return '';
-  var sbx = document.body.classList.contains('is-sandbox');
+  var sbx = document.body.classList.contains('is-sandbox') || location.pathname.indexOf('/sandbox/') > -1;
   return '<div class="card" style="border-color:var(--accent)"><b>📱 افتح النظام على جوالك أو أرسله لشخص</b>' +
     '<div class="muted small">هذا الرابط يحتوي مفتاح الدخول — من يفتحه يدخل مباشرة بلا كتابة أي شيء.' + (sbx ? ' (نسخة تجريبية: بيانات وهمية، آمن للمشاركة)' : ' <b style="color:var(--bad)">النظام الأساسي: فيه بيانات عملائك — لا ترسله إلا لمن تثق به.</b>') + '</div>' +
     '<div class="btns"><button class="btn sm pri" data-act="shareCopy">📋 انسخ رابط الدخول</button>' +
