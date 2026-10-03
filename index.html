@@ -357,13 +357,14 @@ var NAV_TREE = [
   ['day', '⚡ عملي اليوم', ['today', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
   ['search', '🔎 البحث', ['manual', 'search', 'keywords']],
-  ['watch', '👁 المراقبة', ['compwatch', 'radar', 'competitors', 'exams', 'targets', 'kpis']],
+  ['watch', '👁 المراقبة', ['compwatch', 'radar', 'competitors', 'exams']],
+  ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['campaigns', 'content', 'register']],
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل']);
+NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
@@ -390,7 +391,7 @@ function navTreeHtml_(cur, cards) {
 document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.classList && d.classList.contains('navg')) navOpen_(d.dataset.g, d.open); }, true);
 
 /** زر «↺ إلغاء كل الخيارات» في كل شاشة بحث/تصفية — يعيد الشاشة لحالتها الأولى */
-var CLEARABLE = ['inbox', 'pipeline', 'compwatch', 'manual', 'search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
+var CLEARABLE = ['reports', 'inbox', 'pipeline', 'compwatch', 'manual', 'search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
 function clearBtn_(screen) {
   if (CLEARABLE.indexOf(screen) < 0) return;
   var h = document.querySelector('#main h1'); if (!h || h.querySelector('.clr')) return;
@@ -896,7 +897,8 @@ ACT.opSave = function (el) {
 /* ═══════════ البدء ═══════════ */
 window.addEventListener('load', function () {
   if (typeof i18nStart_ === 'function') i18nStart_();
-  go(START_SCREEN || 'today');
+  var startArgs = {}; try { var qa = new URLSearchParams(location.search).get('a'); if (qa) startArgs = JSON.parse(qa) || {}; } catch (e) { startArgs = {}; }
+  go(START_SCREEN || 'today', startArgs);
   setTimeout(prefetch_, 6000); // بعد اكتمال الشاشة الأولى
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
@@ -4179,6 +4181,52 @@ function ibArgs_() { return { q: val('ib_q').trim(), ch: val('ib_ch'), pending: 
 ACT.ibFilter = function () { go('inbox', ibArgs_(), true); };
 ACT.ibOpen = function (el) { var a = ibArgs_(); a.key = el.dataset.k; go('inbox', a, true); };
 document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'ib_q') ACT.ibFilter(); });
+</script>
+
+  <script>
+/* ═══════════ 📊 التقارير: مباشر · يومي · أسبوعي · شهري ═══════════ */
+var RPT = { period: 'live' };
+SCREENS.reports = { render: function (d, args) {
+  RPT.period = d.period;
+  var n = d.numbers, p = d.prev;
+  var delta = function (k) {
+    if (!p) return '';
+    var a = n[k], b = p[k]; if (!b && !a) return '';
+    if (!b) return ' <span class="small" style="color:var(--good)">↑ جديد</span>';
+    var pc = Math.round((a - b) / b * 100); if (!pc) return ' <span class="muted small">=</span>';
+    return ' <span class="small" style="color:' + (pc > 0 ? 'var(--good)' : 'var(--bad)') + '">' + (pc > 0 ? '↑' : '↓') + Math.abs(pc) + '%</span>';
+  };
+  var html = north(d.north) + '<h1>📊 التقارير</h1>';
+  html += '<div class="tabs">' + [['live', '⏱ مباشر (منذ ' + d.day_start + ' ص)'], ['day', 'يومي ٢٤ س'], ['week', 'أسبوعي'], ['month', 'شهري']].map(function (t) {
+    return '<button class="btn sm' + (d.period === t[0] ? ' pri' : '') + '" data-go="reports" data-args="' + attr({ period: t[0] }) + '">' + t[1] + '</button>'; }).join('') +
+    (d.period === 'month' || d.period === 'week' ? '<button class="btn sm ghost" onclick="print()">🖨 طباعة / PDF</button>' : '') + '</div>';
+  html += '<div class="muted small">' + esc(d.label) + ' · ' + fmtDate(d.from, true) + ' ← ' + fmtDate(d.to, true) + (p ? ' · المقارنة مع الفترة السابقة' : '') + '</div>';
+  html += '<div class="row" style="margin:6px 0">' + [['msgs_in', 'رسالة وصلت'], ['replied', 'رُدّ عليها'], ['leads_new', 'عميل جديد'], ['enrolled', 'تسجيل'], ['revenue', 'ر.س إيراد'], ['asks_found', 'سائل رُصد'], ['posts_pub', 'منشور']].map(function (x) {
+    return '<div class="stat"><div class="v">' + (x[0] === 'revenue' ? Number(n[x[0]]).toLocaleString('en') : n[x[0]]) + delta(x[0]) + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') +
+    (n.avg_response_min !== null ? '<div class="stat"><div class="v" style="color:' + (n.avg_response_min > 30 ? 'var(--bad)' : 'var(--good)') + '">' + n.avg_response_min + ' د</div><div class="k">متوسط أول رد</div></div>' : '') + '</div>';
+  var urgent = d.pending.filter(function (x) { return x.urgent; }).length;
+  html += '<div class="grid2">';
+  html += '<div><h2>⏳ معلّق بلا قرار ' + chip(d.pending.length, d.pending.length ? 'warn' : '') + (urgent ? chip(urgent + ' عاجل', 'bad') : '') + '</h2>' +
+    (d.pending.length ? d.pending.map(function (x) {
+      return '<div class="card click small" data-go="' + esc(x.go) + '" data-args="' + attr(x.args || {}) + '" style="' + (x.urgent ? 'border-inline-start:4px solid var(--bad)' : '') + '"><div class="row between"><span>' + esc(x.t) + '</span>' + chip(x.kind) + '</div></div>';
+    }).join('') : empty('لا شيء معلّق ✓')) + '</div>';
+  html += '<div><h2>✅ ما تم ' + chip(d.done.length) + '</h2>' +
+    (d.done.length ? d.done.map(function (x) { return '<div class="card click small" data-go="' + esc(x.go) + '" data-args="' + attr(x.args || {}) + '">' + esc(x.t) + '</div>'; }).join('') : empty('لم يحدث شيء بعد')) +
+    '<h2>💡 المقترح</h2>' + d.suggest.map(function (s) { return '<div class="card small" style="background:var(--accent-soft)">' + esc(s) + '</div>'; }).join('') + '</div>';
+  html += '</div>';
+  html += '<details class="card small"><summary>✉️ التقرير اليومي بالبريد (اختياري) · ⏰ بداية يومك</summary>' +
+    '<div class="row" style="gap:6px;margin-top:6px"><input type="email" id="rp_email" dir="ltr" placeholder="ضع الإيميل هنا ليصلك التقرير كل صباح" value="' + esc(d.email || '') + '">' +
+    '<label class="f" style="margin:0">بداية اليوم</label><select id="rp_h">' + Array.apply(null, Array(24)).map(function (_, i) { return '<option value="' + i + '"' + (i === d.day_start ? ' selected' : '') + '>' + i + ':00</option>'; }).join('') + '</select>' +
+    '<button class="btn sm pri" data-act="rpSave">حفظ</button><button class="btn sm" data-act="rpPreview">معاينة البريد</button></div>' +
+    '<div class="muted">فارغ = لا يُرسل شيء. عند التعبئة يصلك تقرير «آخر ٢٤ ساعة» مرة يومياً بعد ساعة بداية اليوم، وفيه روابط تفتح كل عنصر معلّق داخل النظام.</div><div id="rp_prev"></div></details>';
+  return html;
+} };
+ACT.rpSave = function () { act('reportsSettings', { email: val('rp_email'), day_start: val('rp_h') }, 'حُفظ'); };
+ACT.rpPreview = function (el) {
+  el.disabled = true;
+  api('action', 'reportsEmailPreview', {}).then(function (r) { el.disabled = false; var w = window.open('', '_blank'); if (!w) return toast('اسمح بالنوافذ المنبثقة', true); w.document.write(r.html); w.document.close(); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
 </script>
 
   ﻿<script>
