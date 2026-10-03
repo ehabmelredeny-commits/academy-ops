@@ -609,7 +609,7 @@ SCREENS.today = {
     var msgCard = function (m, extra) {
       return '<div class="card click" data-go="reply" data-args="' + attr({ msg_id: m.msg_id }) + '">' +
         '<div class="row between"><b>' + esc(m.name || m.contact || 'عميل') + '</b><span class="muted">' + ago(m.age_min) + '</span></div>' +
-        '<div class="muted small">' + esc(m.body) + '</div><div class="chips" style="margin-top:6px">' + chip(m.intent, m.intent === 'شكوى' ? 'bad' : 'acc') +
+        '<div class="muted small">' + esc(m.body) + '</div><div class="chips" style="margin-top:6px">' + chip(m.intent, m.intent === 'شكوى' ? 'bad' : 'acc') + chip(m.to_account ? '📥 ' + m.to_account : '') + chip(m.msg_kind, m.msg_kind === 'تعليق علني' ? 'warn' : '') + chip(m.assignee && m.assignee !== 'المالك' ? '👤 ' + m.assignee : '', 'owner') +
         chip(m.segment) + (m.b2b_badge === 'نعم' ? chip('قناة B2B', 'owner') : '') + (extra || '') + '</div></div>';
     };
     var html = north(d.north) + '<h1>اليوم</h1>';
@@ -666,6 +666,33 @@ ACT.retry = function (el) { act('retry', { msg_id: el.dataset.id }, 'أُعيد�
 var STATUS_AR = { awaiting_approval: 'بانتظار موافقتك', escalated: 'مصعّدة', rejected: 'مرفوضة — تحتاج رداً يدوياً', owner_handles: 'تتولاها',
   approved: 'معتمدة — أرسلها', edited: 'معدّلة — أرسلها', manual_reply: 'رد يدوي — أرسله', sent: 'أُرسلت', closed: 'مغلقة', failed: 'فشلت — اكتب ردك يدوياً', received: 'بانتظار التحليل', normalized: 'بانتظار التحليل', classified: 'بانتظار المسودة', drafted: 'بانتظار المسودة' };
 
+/** «موجّهة إلى»: الحساب المستقبِل + نوع الرسالة + من يتولاها + عبر أي إعلان — تُعرض كسطر، وتُعدَّل بنقرة */
+function msgCtxHtml_(m, det) {
+  var kindCls = { 'تعليق علني': 'warn', 'رد على إعلان': 'good', 'رد على رسالتنا': 'acc' };
+  var line = '<div class="row" style="gap:6px;margin:4px 0;background:var(--soft);border-radius:8px;padding:4px 8px" id="mctx_' + esc(m.msg_id) + '">' +
+    '<span class="small">📥 <b>موجّهة إلى:</b> ' + (m.to_account ? esc(m.to_account) : '<span class="muted">غير محدد</span>') + '</span>' +
+    (m.msg_kind ? chip(m.msg_kind, kindCls[m.msg_kind] || '') : chip('نوع الرسالة؟', 'warn')) +
+    (m.via ? chip('عبر: ' + m.via, 'acc') : '') +
+    '<span class="small">👤 <b>يتولى الرد:</b> ' + esc(m.assignee || 'المالك') + '</span>' +
+    '<button class="btn sm ghost" data-act="msgCtxEdit" data-id="' + esc(m.msg_id) + '">✏️</button></div>' +
+    '<div id="mctxf_' + esc(m.msg_id) + '"></div>';
+  if (m.msg_kind === 'تعليق علني') line += '<div class="muted small">⚠️ تعليق علني: الرد يراه الجميع — بلا أسعار تفصيلية ولا بيانات شخصية؛ ادعُه للخاص.</div>';
+  return line;
+}
+ACT.msgCtxEdit = function (el) {
+  var id = el.dataset.id, box = $('mctxf_' + id), det = S.data && S.data.detail; if (!box || !det) return;
+  if (box.innerHTML) { box.innerHTML = ''; return; }
+  var m = det.msg, accs = det.accounts || [];
+  box.innerHTML = '<div class="row" style="gap:6px;margin-bottom:6px">' +
+    '<input type="text" id="mc_to" list="mc_accs" placeholder="الحساب الذي استقبلها (اختر أو اكتب)" value="' + esc(m.to_account || '') + '"><datalist id="mc_accs">' + accs.map(function (a) { return '<option value="' + esc(a) + '">'; }).join('') + '</datalist>' +
+    '<select id="mc_kind"><option value="">نوع الرسالة</option>' + opt(det.kinds || [], m.msg_kind || '') + '</select>' +
+    '<input type="text" id="mc_as" list="mc_asl" placeholder="يتولى الرد (اسم)" value="' + esc(m.assignee || '') + '"><datalist id="mc_asl">' + (det.assignees || []).map(function (a) { return '<option value="' + esc(a) + '">'; }).join('') + '</datalist>' +
+    '<input type="text" id="mc_via" placeholder="عبر أي إعلان/حملة/منشور" value="' + esc(m.via || '') + '">' +
+    '<button class="btn sm pri" data-act="msgCtxSave" data-id="' + esc(id) + '">حفظ</button></div>' +
+    '<div class="muted small">الأسماء التي تكتبها في «يتولى الرد» تُضاف للقائمة من الإعدادات ← القوائم ← assignee.</div>';
+};
+ACT.msgCtxSave = function (el) { act('msgContext', { msg_id: el.dataset.id, to_account: val('mc_to'), msg_kind: val('mc_kind'), assignee: val('mc_as'), via: val('mc_via') }, 'حُفظ سياق الرسالة'); };
+
 SCREENS.reply = {
   render: function (d) {
     var html = north(d.north) + '<h1>الرد ' + chip(d.list.length) + '</h1>';
@@ -673,7 +700,7 @@ SCREENS.reply = {
     var cur = d.detail && d.detail.msg;
     html += '<div class="tabs">' + d.list.map(function (m) {
       return '<button class="btn sm ' + (cur && cur.msg_id === m.msg_id ? 'pri' : '') + '" data-go="reply" data-args="' + attr({ msg_id: m.msg_id }) + '">' +
-        esc((m.name || m.contact || 'عميل').slice(0, 16)) + ' · ' + ago(m.age_min) + '</button>';
+        esc((m.name || m.contact || 'عميل').slice(0, 16)) + ' · ' + ago(m.age_min) + (m.assignee && m.assignee !== 'المالك' ? ' · 👤' + esc(m.assignee) : '') + '</button>';
     }).join('') + '</div>';
     if (!d.detail) return html;
     var m = d.detail.msg, l = d.detail.lead || {};
@@ -682,6 +709,7 @@ SCREENS.reply = {
       '<div class="chips" style="margin:6px 0">' + chip(m.intent, m.intent === 'شكوى' ? 'bad' : 'acc') + chip(m.segment) +
       (m.confidence !== '' ? chip('ثقة ' + Math.round(m.confidence * 100) + '%') : '') + (l.lead_score !== '' ? chip(l.lead_score + ' نقطة', 'good') : '') +
       (l.current_employer ? chip('يعمل لدى: ' + l.current_employer) : '') + (l.b2b_badge === 'نعم' ? chip('قناة B2B', 'owner') : '') + '</div>' +
+      msgCtxHtml_(m, d.detail) +
       (m.subject ? '<div class="muted small">الموضوع: ' + esc(m.subject) + '</div>' : '') +
       '<div class="quote">' + esc(m.body) + '</div>' +
       (m.reasoning_ar ? '<div class="muted small" style="margin-top:6px">' + esc(m.reasoning_ar) + '</div>' : '') + '</div>';
@@ -4137,7 +4165,7 @@ SCREENS.inbox = { render: function (d, args) {
       '<button class="btn sm pri" data-go="lead" data-args="' + attr({ lead_id: l.lead_id }) + '">🧠 ملفه وعلم النفس</button></span></div>';
   }
   th += d.thread.length ? d.thread.map(function (m) {
-    return '<div class="ib-in"><div class="muted small">' + chip(m.source, 'acc') + ' ' + fmtDate(m.at, true) + ' · ' + esc(STATUS_SHORT[m.status] || m.status) + (m.intent ? ' · ' + esc(m.intent) : '') + '</div>' +
+    return '<div class="ib-in"><div class="muted small">' + chip(m.source, 'acc') + (m.to_account ? ' ← ' + esc(m.to_account) : '') + (m.msg_kind ? ' ' + chip(m.msg_kind, m.msg_kind === 'تعليق علني' ? 'warn' : '') : '') + (m.via ? ' ' + chip('عبر ' + m.via) : '') + ' ' + fmtDate(m.at, true) + ' · ' + esc(STATUS_SHORT[m.status] || m.status) + (m.intent ? ' · ' + esc(m.intent) : '') + (m.assignee ? ' · 👤 ' + esc(m.assignee) : '') + '</div>' +
       (m.subject ? '<b class="small">' + esc(m.subject) + '</b><br>' : '') + esc(m.body) +
       (m.pending ? '<div class="btns"><button class="btn sm pri" data-go="reply" data-args="' + attr({ msg_id: m.msg_id }) + '">✍️ رد عليها</button></div>' : '') + '</div>' +
       (m.reply ? '<div class="ib-out"><div class="muted small">ردّنا' + (m.sent_at ? ' · ' + fmtDate(m.sent_at, true) : ' · لم يُرسل بعد') + '</div>' + esc(m.reply) + '</div>' : '');
