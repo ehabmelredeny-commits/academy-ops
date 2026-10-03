@@ -3482,7 +3482,8 @@ SCREENS.sources = { render: function (d, args) {
     '<label class="f">اسم المصدر * — اختر مصدراً سابقاً أو اكتب اسماً جديداً فيُضاف للقائمة</label><input id="sd_src" list="sd_src_list" autocomplete="off" placeholder="مثلاً: معرض الرياض ٢٠٢٦، عملاء قدامى…">' +
     '<datalist id="sd_src_list">' + d.batches.map(function (b) { return b.source_name; }).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; }).map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>' +
     '<label class="f">حالة الموافقة على التواصل لهذه القائمة</label><select id="sd_consent">' + opt(d.consent, 'غير معروف') + '</select>' +
-    '<label class="f">الصق الجدول من إكسل/شيت (مع صف العناوين)</label><textarea id="sd_paste" dir="ltr" class="ltr-table" style="min-height:110px" placeholder="الجنس	الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
+    '<label class="f">الصق الجدول من إكسل/شيت (بعناوين أو بدونها)</label><textarea id="sd_paste" dir="ltr" class="ltr-table" style="min-height:110px" placeholder="الجنس	الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
+    '<label class="chip" style="cursor:pointer;margin:4px 0"><input type="checkbox" id="sd_nohdr"> الملف بلا عناوين (الصف الأول بيانات) — يُكتشف تلقائياً أيضاً</label>' +
     '<div class="row" style="gap:6px"><button class="btn" data-act="srcdbParse">قراءة اللصق</button>' +
     '<label class="btn">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="sd_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label></div><div id="sd_prev"></div></details>';
 
@@ -3574,16 +3575,43 @@ document.addEventListener('change', function (e) {
     var r2 = new FileReader(); r2.onload = function () { srcdbPreview_(srcdbParseText_(r2.result)); }; r2.readAsText(f, 'UTF-8');
   }
 });
+/* ملف بلا عناوين: الصف الأول بيانات. يُكتشف تلقائياً (فيه جوال/إيميل/جنس) أو باختيارك */
+var SRCDB_GENDER = /^(ذكر|انثى|أنثى|male|female|m|f|رجل|امرأة|امراه)$/i;
+function srcdbLooksData_(row) {
+  return (row || []).some(function (c) { c = String(c || '').trim(); return /^\+?\d[\d\s-]{6,}$/.test(c) || /@/.test(c) || SRCDB_GENDER.test(c); });
+}
+/** ربط الأعمدة من المحتوى نفسه (للملفات بلا عناوين) */
+function srcdbMapByContent_(rows) {
+  var n = Math.max.apply(null, rows.map(function (r) { return r.length; })), m = { gender: -1, name: -1, phone: -1, email: -1, city: -1, notes: -1 };
+  var CITIES = /^(الرياض|جدة|جده|الدمام|الخبر|مكة|مكه|المدينة|المدينه|الطائف|أبها|ابها|تبوك|بريدة|بريده|حائل|الأحساء|الاحساء|الجبيل|ينبع|جازان|نجران|القصيم|الظهران)/;
+  var score = function (i, re) { var k = 0, t = 0; rows.slice(0, 30).forEach(function (r) { var c = String(r[i] || '').trim(); if (c) { t++; if (re.test(c)) k++; } }); return t ? k / t : 0; };
+  for (var i = 0; i < n; i++) {
+    if (m.phone < 0 && score(i, /^\+?\d[\d\s-]{6,}$/) > .6) { m.phone = i; continue; }
+    if (m.email < 0 && score(i, /@/) > .6) { m.email = i; continue; }
+    if (m.gender < 0 && score(i, SRCDB_GENDER) > .6) { m.gender = i; continue; }
+    if (m.city < 0 && score(i, CITIES) > .5) { m.city = i; continue; }
+  }
+  for (var j = 0; j < n; j++) { if ([m.phone, m.email, m.gender, m.city].indexOf(j) < 0 && score(j, /[؀-ۿa-z]{2,}/i) > .6) { if (m.name < 0) m.name = j; else if (m.notes < 0) m.notes = j; } }
+  return m;
+}
 function srcdbPreview_(p) {
-  if (!p || !p.rows.length) return toast('لم أجد صفوفاً — تأكد من وجود صف العناوين', true);
-  SRCDB.parsed = p; var m = srcdbAutoMap_(p.headers);
+  if (!p || (!p.rows.length && !(p.headers || []).length)) return toast('لم أجد صفوفاً', true);
+  var forced = $('sd_nohdr') && $('sd_nohdr').checked, auto = !forced && srcdbLooksData_(p.headers);
+  if (forced || auto) { // الصف الأول بيانات وليس عناوين
+    p = { rows: [p.headers].concat(p.rows), noHeader: true };
+    var n = Math.max.apply(null, p.rows.map(function (r) { return r.length; }));
+    p.headers = []; for (var c = 0; c < n; c++) p.headers.push('عمود ' + (c + 1));
+    if (auto && $('sd_nohdr')) $('sd_nohdr').checked = true;
+  }
+  if (!p.rows.length) return toast('لم أجد صفوفاً', true);
+  SRCDB.parsed = p; var m = p.noHeader ? srcdbMapByContent_(p.rows) : srcdbAutoMap_(p.headers);
   var sel = function (k, label) {
     return '<div class="grow"><label class="f">' + label + '</label><select id="mp_' + k + '"><option value="-1">—</option>' +
       p.headers.map(function (h, i) { return '<option value="' + i + '"' + (m[k] === i ? ' selected' : '') + '>' + esc(h) + '</option>'; }).join('') + '</select></div>';
   };
   var tbl = '<div style="overflow-x:auto;margin:6px 0"><table class="ltr-table" dir="ltr"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
     p.rows.slice(0, 5).map(function (r) { return '<tr>' + p.headers.map(function (h, i) { return '<td>' + esc(r[i]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
-  $('sd_prev').innerHTML = '<div class="card small"><b>' + p.rows.length + ' صف</b> — أول ٥ صفوف كما في ملفك (من اليسار):' + tbl + 'اربط الأعمدة (خمّنها النظام):<div class="row" style="flex-wrap:wrap;gap:6px">' +
+  $('sd_prev').innerHTML = '<div class="card small"><b>' + p.rows.length + ' صف</b>' + (p.noHeader ? ' ' + chip('ملف بلا عناوين — الأعمدة خُمّنت من محتواها', 'acc') : '') + ' — أول ٥ صفوف كما في ملفك (من اليسار):' + tbl + 'اربط الأعمدة (خمّنها النظام — راجعها):<div class="row" style="flex-wrap:wrap;gap:6px">' +
     sel('gender', 'الجنس') + sel('name', 'الاسم') + sel('phone', 'الجوال') + sel('email', 'الإيميل') + sel('city', 'المدينة') + sel('notes', 'ملاحظات/اهتمام') + '</div>' +
     '<div style="overflow-x:auto"><table class="small"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
     p.rows.slice(0, 4).map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>' +
