@@ -3649,10 +3649,23 @@ ACT.srcdbImport = function (el) {
     return { gender: g('gender'), name: g('name'), phone: g('phone'), email: g('email'), city: g('city'), notes: g('notes'), raw: raw };
   });
   el.disabled = true;
-  api('action', 'sourcesImport', { rows: rows, source_name: val('sd_src'), consent_status: val('sd_consent') }).then(function (r) {
-    toast('استُورد ' + r.imported + (r.duplicates ? ' · تجاهل ' + r.duplicates + ' مكرراً' : '')); SRCDB.parsed = null;
-    go('sources', { batch: r.batch_id });
-  }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+  // الملفات الكبيرة تُرسل أجزاءً (٢٥٠٠ صف) في نفس الدفعة — لا حدّ للعدد الكلي
+  var PART = 2500, parts = Math.ceil(rows.length / PART), done = 0, imported = 0, dups = 0, batchId = '';
+  var label = el.textContent;
+  (function next(i) {
+    if (i >= parts) {
+      toast('استُورد ' + imported.toLocaleString('en') + (dups ? ' · تجاهل ' + dups.toLocaleString('en') + ' مكرراً' : ''));
+      SRCDB.parsed = null; go('sources', { batch: batchId }); return;
+    }
+    el.textContent = '⏳ جاري الاستيراد: الجزء ' + (i + 1) + ' من ' + parts + ' (' + Math.min((i + 1) * PART, rows.length).toLocaleString('en') + ' / ' + rows.length.toLocaleString('en') + ')';
+    api('action', 'sourcesImport', { rows: rows.slice(i * PART, (i + 1) * PART), source_name: val('sd_src'), consent_status: val('sd_consent'), batch_id: batchId }).then(function (r) {
+      batchId = r.batch_id; imported += r.imported; dups += r.duplicates || 0; done++; next(i + 1);
+    }).catch(function (e) {
+      el.disabled = false; el.textContent = label;
+      toast('توقف عند الجزء ' + (i + 1) + ' من ' + parts + ' — استُورد ' + imported.toLocaleString('en') + ' قبله. ' + errMsg(e) + ' (أعد المحاولة: المكرر يُتجاهل تلقائياً)', true);
+      if (batchId) go('sources', { batch: batchId });
+    });
+  })(0);
 };
 /** نافذة الحذف: كلمة المرور ثم تأكيدها */
 function srcdbDelAsk_(what, payload) {
