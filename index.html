@@ -157,7 +157,34 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .ib-in, .ib-out { max-width: 82%; padding: 7px 10px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
 .ib-in { align-self: flex-start; background: var(--card); border: 1px solid var(--line); }
 .ib-out { align-self: flex-end; background: var(--accent-soft); }
-.ttags { margin-inline-start: auto; font-size: 11px; opacity: .75; letter-spacing: -1px; }
+.ttags { margin-inline-start: auto; font-size: 10px; opacity: .7; letter-spacing: -1px; white-space: nowrap; flex-shrink: 0; }
+/* الشريط الجانبي: عنوان القائمة مميّز، والعناصر تحته أصغر ومُزاحة بخط عمودي */
+nav.side details.navg > summary { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; padding: 7px 8px; }
+nav.side details.navg.here > summary { color: var(--accent); }
+.navg-t { flex: 1; } .navg-n { font-size: 10.5px; font-weight: 400; color: var(--muted); background: var(--soft); border-radius: 999px; padding: 0 6px; }
+nav.side .navg-kids { margin: 2px 0 6px; margin-inline-start: 14px; border-inline-start: 2px solid var(--line); padding-inline-start: 4px; }
+nav.side details.navg.here .navg-kids { border-color: var(--accent); }
+nav.side .navg-kids button.navi { font-size: 12.5px; font-weight: 400; padding: 5px 8px !important; color: var(--muted); border-radius: 7px; }
+nav.side .navg-kids button.navi:hover { background: var(--soft); color: var(--ink); }
+nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.navi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ltr-table { direction: ltr; text-align: left; }
+.pcount { display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--line); border-radius: 999px; padding: 0 2px 0 8px; font-size: 12px; }
+.pc-n { border: 0; border-radius: 999px; min-width: 22px; height: 20px; font-weight: 700; background: var(--soft); color: var(--muted); cursor: pointer; }
+.pc-n.on { background: var(--accent); color: var(--accent-ink); }
+.ctl { border: 1px solid var(--line); border-radius: 10px; padding: 6px; background: var(--card); overflow-x: auto; }
+.ctl-row { display: flex; align-items: center; min-height: 24px; border-bottom: 1px dashed var(--line); min-width: 640px; }
+.ctl-row.ours { background: rgba(42,157,143,.08); }
+.ctl-head { border-bottom: 1px solid var(--line); min-height: 20px; }
+.ctl-lbl { width: 190px; flex-shrink: 0; font-size: 11.5px; line-height: 1.25; overflow: hidden; padding-inline-end: 6px; }
+.ctl-lbl b, .ctl-lbl span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctl-lbl span { color: var(--muted); }
+.ctl-track { position: relative; flex: 1; height: 20px; }
+.ctl-head .ctl-track span { position: absolute; top: 2px; font-size: 10px; color: var(--muted); }
+.ctl-bar { position: absolute; top: 3px; height: 14px; border-radius: 4px; color: #fff; font-size: 9.5px; line-height: 14px; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer; min-width: 6px; }
+.ctl-bar.est { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.25) 0 4px, transparent 4px 8px); }
+.ctl-now { position: absolute; top: 0; bottom: 0; width: 2px; background: #d64545; opacity: .7; }
+table.ltr-table { border-collapse: collapse; font-size: 12px; } table.ltr-table th, table.ltr-table td { border: 1px solid var(--line); padding: 2px 6px; white-space: nowrap; }
 .ttag-p { background: #efe7ff; color: #6d28d9; border-color: transparent; }
 .ttag-a { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
 .ttag-m { background: var(--soft); }
@@ -183,7 +210,34 @@ details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .ib-in, .ib-out { max-width: 82%; padding: 7px 10px; border-radius: 12px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
 .ib-in { align-self: flex-start; background: var(--card); border: 1px solid var(--line); }
 .ib-out { align-self: flex-end; background: var(--accent-soft); }
-.ttags { margin-inline-start: auto; font-size: 11px; opacity: .75; letter-spacing: -1px; }
+.ttags { margin-inline-start: auto; font-size: 10px; opacity: .7; letter-spacing: -1px; white-space: nowrap; flex-shrink: 0; }
+/* الشريط الجانبي: عنوان القائمة مميّز، والعناصر تحته أصغر ومُزاحة بخط عمودي */
+nav.side details.navg > summary { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; padding: 7px 8px; }
+nav.side details.navg.here > summary { color: var(--accent); }
+.navg-t { flex: 1; } .navg-n { font-size: 10.5px; font-weight: 400; color: var(--muted); background: var(--soft); border-radius: 999px; padding: 0 6px; }
+nav.side .navg-kids { margin: 2px 0 6px; margin-inline-start: 14px; border-inline-start: 2px solid var(--line); padding-inline-start: 4px; }
+nav.side details.navg.here .navg-kids { border-color: var(--accent); }
+nav.side .navg-kids button.navi { font-size: 12.5px; font-weight: 400; padding: 5px 8px !important; color: var(--muted); border-radius: 7px; }
+nav.side .navg-kids button.navi:hover { background: var(--soft); color: var(--ink); }
+nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.navi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ltr-table { direction: ltr; text-align: left; }
+.pcount { display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--line); border-radius: 999px; padding: 0 2px 0 8px; font-size: 12px; }
+.pc-n { border: 0; border-radius: 999px; min-width: 22px; height: 20px; font-weight: 700; background: var(--soft); color: var(--muted); cursor: pointer; }
+.pc-n.on { background: var(--accent); color: var(--accent-ink); }
+.ctl { border: 1px solid var(--line); border-radius: 10px; padding: 6px; background: var(--card); overflow-x: auto; }
+.ctl-row { display: flex; align-items: center; min-height: 24px; border-bottom: 1px dashed var(--line); min-width: 640px; }
+.ctl-row.ours { background: rgba(42,157,143,.08); }
+.ctl-head { border-bottom: 1px solid var(--line); min-height: 20px; }
+.ctl-lbl { width: 190px; flex-shrink: 0; font-size: 11.5px; line-height: 1.25; overflow: hidden; padding-inline-end: 6px; }
+.ctl-lbl b, .ctl-lbl span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctl-lbl span { color: var(--muted); }
+.ctl-track { position: relative; flex: 1; height: 20px; }
+.ctl-head .ctl-track span { position: absolute; top: 2px; font-size: 10px; color: var(--muted); }
+.ctl-bar { position: absolute; top: 3px; height: 14px; border-radius: 4px; color: #fff; font-size: 9.5px; line-height: 14px; text-align: center; overflow: hidden; white-space: nowrap; cursor: pointer; min-width: 6px; }
+.ctl-bar.est { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.25) 0 4px, transparent 4px 8px); }
+.ctl-now { position: absolute; top: 0; bottom: 0; width: 2px; background: #d64545; opacity: .7; }
+table.ltr-table { border-collapse: collapse; font-size: 12px; } table.ltr-table th, table.ltr-table td { border: 1px solid var(--line); padding: 2px 6px; white-space: nowrap; }
 .ttag-p { background: #efe7ff; color: #6d28d9; border-color: transparent; }
 .ttag-a { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
 .ttag-m { background: var(--soft); }
@@ -378,7 +432,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار'], ['modules', 'الوحدات'],
+var NAV_MORE = [['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'الأهداف'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -387,14 +441,14 @@ var NAV_TREE = [
   ['day', '⚡ عملي اليوم', ['today', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
   ['search', '🔎 البحث', ['manual', 'search', 'keywords']],
-  ['watch', '👁 المراقبة', ['compwatch', 'radar', 'competitors', 'exams']],
+  ['watch', '👁 المراقبة', ['compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
-  ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
+  ['db', '🗂 قاعدة البيانات', ['sources', 'clubs', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['campaigns', 'content', 'register']],
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)']);
+NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['clubs', '🏟 خريطة الأندية'], ['homeapps', '📱 تطبيقات المدرب بالمنزل']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
@@ -409,19 +463,24 @@ function navTreeHtml_(cur, cards) {
   return NAV_TREE.map(function (g) {
     var kids = g[2].filter(function (k) { return navLabel_(k); });
     if (!kids.length) return '';
-    var here = kids.indexOf(cur) > -1, saved = navOpen_(g[0]), open = here || saved === true || (saved === undefined && g[0] === 'day');
-    return '<details class="navg" data-g="' + g[0] + '"' + (open ? ' open' : '') + '><summary>' + g[1] + ' <span class="muted">' + kids.length + '</span></summary>' +
+    var here = kids.indexOf(cur) > -1, open = cards ? (here || navOpen_(g[0]) === true || (navOpen_(g[0]) === undefined && g[0] === 'day')) : (here || (!cur && g[0] === 'day'));
+    return '<details class="navg' + (here ? ' here' : '') + '" data-g="' + g[0] + '"' + (open ? ' open' : '') + '><summary><span class="navg-t">' + g[1] + '</span><span class="navg-n">' + kids.length + '</span></summary>' +
+      (cards ? '' : '<div class="navg-kids">') +
       (cards ? '<div class="grid2">' : '') + kids.map(function (k) {
         var b = BADGES[k] ? '<span class="dot">' + BADGES[k] + '</span>' : '';
         return cards ? '<div class="card click" data-go="' + k + '"><b>' + navLabel_(k) + '</b> ' + (typeof tagIcons_ === 'function' ? tagIcons_(k) : '') + b + '</div>'
-          : '<button class="' + (k === cur ? 'on' : '') + '" data-go="' + k + '">' + navLabel_(k) + (typeof tagIcons_ === 'function' ? '<span class="ttags">' + tagIcons_(k) + '</span>' : '') + b + '</button>';
-      }).join('') + (cards ? '</div>' : '') + '</details>';
+          : '<button class="navi' + (k === cur ? ' on' : '') + '" data-go="' + k + '"><span class="navi-t">' + navLabel_(k) + '</span>' + b + (typeof tagIcons_ === 'function' ? '<span class="ttags">' + tagIcons_(k) + '</span>' : '') + '</button>';
+      }).join('') + (cards ? '</div>' : '</div>') + '</details>';
   }).join('');
 }
-document.addEventListener('toggle', function (e) { var d = e.target; if (d && d.classList && d.classList.contains('navg')) navOpen_(d.dataset.g, d.open); }, true);
+document.addEventListener('toggle', function (e) {
+  var d = e.target; if (!d || !d.classList || !d.classList.contains('navg')) return;
+  if (d.closest('nav.side')) { if (d.open) Array.prototype.forEach.call(document.querySelectorAll('nav.side details.navg[open]'), function (x) { if (x !== d) x.open = false; }); }
+  else navOpen_(d.dataset.g, d.open);
+}, true);
 
 /** زر «↺ إلغاء كل الخيارات» في كل شاشة بحث/تصفية — يعيد الشاشة لحالتها الأولى */
-var CLEARABLE = ['reports', 'inbox', 'pipeline', 'compwatch', 'manual', 'search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
+var CLEARABLE = ['clubs', 'homeapps', 'comptimeline', 'reports', 'inbox', 'pipeline', 'compwatch', 'manual', 'search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
 function clearBtn_(screen) {
   if (CLEARABLE.indexOf(screen) < 0) return;
   var h = document.querySelector('#main h1'); if (!h || h.querySelector('.clr')) return;
@@ -899,7 +958,7 @@ ACT.optout = function (el) { if (confirm('إيقاف كل تواصل مع هذا
 SCREENS.targets = {
   render: function (d) {
     var t = d.totals;
-    var html = north(d.north) + '<h1>الأهداف — المشغّلون</h1><div class="row">' +
+    var html = north(d.north) + '<h1>صناع القرار بالشركات</h1><div class="row">' +
       '<div class="stat"><div class="v">' + t.total + '</div><div class="k">فروع متحققة</div></div>' +
       '<div class="stat"><div class="v" style="color:var(--good)">' + t.available + '</div><div class="k">متاح مؤكد</div></div>' +
       '<div class="stat"><div class="v" style="color:var(--warn)">' + t.pending + '</div><div class="k">قيد التحقق</div></div>' +
@@ -957,8 +1016,10 @@ ACT.opSave = function (el) {
 /* ═══════════ البدء ═══════════ */
 window.addEventListener('load', function () {
   if (typeof i18nStart_ === 'function') i18nStart_();
-  var startArgs = {}; try { var qa = new URLSearchParams(location.search).get('a'); if (qa) startArgs = JSON.parse(qa) || {}; } catch (e) { startArgs = {}; }
-  go(START_SCREEN || 'today', startArgs);
+  var startArgs = {}, startScreen = START_SCREEN || 'today';
+  try { var qa = new URLSearchParams(location.search).get('a'); if (qa) startArgs = JSON.parse(qa) || {}; } catch (e) { startArgs = {}; }
+  try { var rs = JSON.parse(sessionStorage.getItem('ops_resume') || 'null'); sessionStorage.removeItem('ops_resume'); if (rs && rs.s && SCREENS[rs.s]) { startScreen = rs.s; startArgs = rs.a || {}; } } catch (e) {}
+  go(startScreen, startArgs);
   setTimeout(prefetch_, 6000); // بعد اكتمال الشاشة الأولى
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
@@ -975,7 +1036,7 @@ var I18N_BASE = {
   'اليوم': 'Today', 'الرد': 'Reply', 'منشور اليوم': "Today's Post", 'المخطط': 'System Map', 'المزيد': 'More',
   '🎯 من يسأل الآن': '🎯 Who Is Asking Now', 'قواعد عملاء المصادر': 'Source Contacts', 'المدربون': 'Trainers', 'تقويم الدورات': 'Course Calendar',
   'الأهداف': 'Targets', 'المنافسون': 'Competitors', 'البحث (كتالوج السوق)': 'Search (Market Catalog)', 'الرادار': 'Radar', 'الاكتشافات': 'Discoveries',
-  'الأخبار': 'News', 'الاختبارات': 'Exams', 'الفرص': 'Opportunities', 'صنّاع القرار': 'Decision Makers', 'الوحدات': 'Modules', 'الحملات': 'Campaigns',
+  'الأخبار': 'News', 'الأخبار الرسمية': 'Official News', 'صناع القرار بالشركات': 'Corporate Decision Makers', 'إضافة دورة لمنافس (يدوي)': 'Add competitor course (manual)', 'الصق الجدول من إكسل/شيت (مع صف العناوين)': 'Paste the table from Excel/Sheets (include the header row)', 'خط زمني دورات المنافسين': 'Competitor Courses Timeline', 'الاختبارات': 'Exams', 'الفرص': 'Opportunities', 'صنّاع القرار': 'Decision Makers', 'الوحدات': 'Modules', 'الحملات': 'Campaigns',
   'المحتوى': 'Content', 'الخرّيجون': 'Alumni', 'المؤشرات': 'KPIs', 'الكلمات': 'Keywords', 'الدورات': 'Courses', 'الإعدادات': 'Settings',
   'INFO — دليل النظام': 'INFO — System Guide', '🧪 التجربة': '🧪 Sandbox', 'التسجيلات المدفوعة هذا الأسبوع': 'Paid enrollments this week',
   'عملاء جدد:': 'New leads:', 'الإيراد:': 'Revenue:', 'ر.س': 'SAR', 'حفظ': 'Save', 'تعديل': 'Edit', 'حذف': 'Delete', 'إلغاء': 'Cancel',
@@ -1088,6 +1149,7 @@ function i18nToggleHtml_() {
 }
 ACT.langSet = function (el) {
   try { localStorage.setItem('ops_lang', el.dataset.l); } catch (e) {}
+  try { if (S.screen && S.screen !== 'more') sessionStorage.setItem('ops_resume', JSON.stringify({ s: S.screen, a: S.args || {} })); } catch (e) {} // يبقى في نفس الشاشة
   location.reload(); // إعادة رسم كاملة بالاتجاه الصحيح
 };
 </script>
@@ -1144,7 +1206,7 @@ ACT.discAdd = function () {
 
 /* ─── الأخبار ─── */
 SCREENS.news = { render: function (d, args) {
-  var html = north(d.north) + '<h1>الأخبار</h1><div class="row">' +
+  var html = north(d.north) + '<h1>الأخبار الرسمية</h1><div class="row">' +
     '<select id="nc" class="grow" data-act="newsFilter">' + opt(d.categories, args.category, 'كل التصنيفات') + '</select>' +
     '<select id="ni" style="width:auto" data-act="newsFilter">' + opt(['عالي', 'متوسط', 'منخفض'], args.impact, 'كل الأثر') + '</select></div>';
   html += d.rows.length ? d.rows.map(function (n) {
@@ -2664,7 +2726,7 @@ SCREENS.competitors = { render: function (d, args) {
   var html = north(d.north) + '<h1>المنافسون ' + chip(d.competitors.length) + '</h1>' +
     '<div class="tabs">' + [['courses', 'مقارنة الدورات'], ['profiles', 'ملفات المنافسين'], ['accounts', 'حساباتهم على السوشال']].map(function (t) {
       return '<button class="btn sm ' + (t[0] === tab ? 'pri' : '') + '" data-go="competitors" data-args="' + attr({ tab: t[0] }) + '">' + t[1] + '</button>'; }).join('') +
-    '<button class="btn sm" data-act="compNew">＋ منافس</button><button class="btn sm good" data-act="compOfferNew">＋ عرض دورة</button></div>';
+    '<button class="btn sm" data-act="compNew">＋ منافس</button><button class="btn sm good" data-act="compOfferNew">＋ إضافة دورة لمنافس (يدوي)</button></div>';
 
   if (tab === 'courses') {
     // المخطط: الدورة (أو مجموعة دورات) رأس، وتحتها الجهات التي تقدّمها
@@ -2677,7 +2739,7 @@ SCREENS.competitors = { render: function (d, args) {
         return '<button class="chip ' + (on ? 'acc' : '') + '" style="cursor:pointer;border:1px solid var(--line)" data-act="compTopic" data-t="' + esc(t) + '">' + (on ? '✓ ' : '') + esc(t) + (n ? ' (' + n + ')' : '') + '</button>';
       }).join(' ') + '</div>';
     if (!sel.length) sel = withOffers.slice(0, 1);
-    if (!sel.length) html += empty('لا عروض مصنّفة بعد — أضف عرضاً بزر «＋ عرض دورة» (حدد نوع الدورة)، أو انتظر الرادار اليومي');
+    if (!sel.length) html += empty('لا عروض مصنّفة بعد — أضف دورة بزر «＋ إضافة دورة لمنافس (يدوي)» (حدد نوع الدورة)، أو انتظر الرادار اليومي');
     sel.forEach(function (t) {
       var list = compLatest_(d.offers.filter(function (o) { return o.course_key === t; }), function (o) { return o.ac_id; });
       var prices = list.map(function (o) { return Number(o.discount_price !== '' ? o.discount_price : o.base_price); }).filter(function (x) { return x > 0; });
@@ -2766,11 +2828,12 @@ ACT.compSave = function (el) {
   api('action', 'competitorSave', { competitor: c }).then(function () { closeSheet(); toast('حُفظ'); go('competitors', S.args, true); }).catch(function (e) { toast(errMsg(e), true); });
 };
 
+SCREENS.competitors.after = function (d, args) { if (args && args.add) setTimeout(function () { ACT.compOfferNew({ dataset: {} }); }, 50); };
 ACT.compOfferNew = function (el) { compOfferForm_({ ac_id: el.dataset.ac || '', course_key: ((S.args || {}).topics || '').split('|')[0] || '' }); };
 ACT.compOfferEdit = function (el) { compOfferForm_(COMP.data.offers.filter(function (o) { return o.offer_id === el.dataset.id; })[0] || {}); };
 function compOfferForm_(o) {
   var d = COMP.data;
-  openSheet('<h1>' + (o.offer_id ? 'تعديل عرض' : 'عرض دورة لمنافس') + '</h1>' +
+  openSheet('<h1>' + (o.offer_id ? 'تعديل دورة المنافس' : 'إضافة دورة لمنافس (يدوي)') + '</h1>' +
     '<label class="f">المنافس *</label><select id="of_ac">' + d.competitors.map(function (c) { return '<option value="' + esc(c.ac_id) + '"' + (String(c.ac_id) === String(o.ac_id) ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select>' +
     '<label class="f">نوع الدورة (للمقارنة)</label><select id="of_key"><option value="">—</option>' + opt(d.topics, o.course_key) + '</select>' +
     compField_('of_name', 'اسم الدورة كما يعلنها *', o.course_name) +
@@ -3419,7 +3482,7 @@ SCREENS.sources = { render: function (d, args) {
     '<label class="f">اسم المصدر * — اختر مصدراً سابقاً أو اكتب اسماً جديداً فيُضاف للقائمة</label><input id="sd_src" list="sd_src_list" autocomplete="off" placeholder="مثلاً: معرض الرياض ٢٠٢٦، عملاء قدامى…">' +
     '<datalist id="sd_src_list">' + d.batches.map(function (b) { return b.source_name; }).filter(function (x, i, arr) { return x && arr.indexOf(x) === i; }).map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>' +
     '<label class="f">حالة الموافقة على التواصل لهذه القائمة</label><select id="sd_consent">' + opt(d.consent, 'غير معروف') + '</select>' +
-    '<label class="f">الصق الجدول من إكسل/شيت (مع صف العناوين)</label><textarea id="sd_paste" style="min-height:110px" placeholder="الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
+    '<label class="f">الصق الجدول من إكسل/شيت (مع صف العناوين)</label><textarea id="sd_paste" dir="ltr" class="ltr-table" style="min-height:110px" placeholder="الاسم	الجوال	الإيميل	المدينة	ملاحظات"></textarea>' +
     '<div class="row" style="gap:6px"><button class="btn" data-act="srcdbParse">قراءة اللصق</button>' +
     '<label class="btn">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="sd_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label></div><div id="sd_prev"></div></details>';
 
@@ -3518,7 +3581,9 @@ function srcdbPreview_(p) {
     return '<div class="grow"><label class="f">' + label + '</label><select id="mp_' + k + '"><option value="-1">—</option>' +
       p.headers.map(function (h, i) { return '<option value="' + i + '"' + (m[k] === i ? ' selected' : '') + '>' + esc(h) + '</option>'; }).join('') + '</select></div>';
   };
-  $('sd_prev').innerHTML = '<div class="card small"><b>' + p.rows.length + ' صف</b> — اربط الأعمدة (خمّنها النظام):<div class="row" style="flex-wrap:wrap;gap:6px">' +
+  var tbl = '<div style="overflow-x:auto;margin:6px 0"><table class="ltr-table" dir="ltr"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
+    p.rows.slice(0, 5).map(function (r) { return '<tr>' + p.headers.map(function (h, i) { return '<td>' + esc(r[i]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
+  $('sd_prev').innerHTML = '<div class="card small"><b>' + p.rows.length + ' صف</b> — أول ٥ صفوف كما في ملفك (من اليسار):' + tbl + 'اربط الأعمدة (خمّنها النظام):<div class="row" style="flex-wrap:wrap;gap:6px">' +
     sel('name', 'الاسم') + sel('phone', 'الجوال') + sel('email', 'الإيميل') + sel('city', 'المدينة') + sel('notes', 'ملاحظات/اهتمام') + '</div>' +
     '<div style="overflow-x:auto"><table class="small"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' +
     p.rows.slice(0, 4).map(function (r) { return '<tr>' + r.map(function (c) { return '<td>' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>' +
@@ -3788,7 +3853,10 @@ SCREENS.ask = { render: function (d, args) {
   // ── فرص الرد ──
   html += '<h2>فرص رد ' + chip(d.opps.length) + '</h2><div class="muted small">كل فرصة تُحذف تلقائياً بعد ' + d.ttl + ' يوماً (حماية البيانات). الرد تنشره أنت من حساب الأكاديمية — المنصات تمنع الردود الآلية على الغرباء.</div>';
   if (d.opps.length) html += '<input type="text" id="ask_q" placeholder="🔍 ابحث في الفرص: كلمة، مدينة، منصة، حالة…" value="' + esc(ASK.q) + '" style="margin:6px 0">';
-  html += d.opps.length ? '<div class="grid2" id="ask_list">' + d.opps.map(function (o) {
+  var minS = d.min_stars || 3, low = d.opps.filter(function (o) { return o.status === 'جديد' && Number(o.intent_score) < minS; }).length;
+  if (low) html += '<div class="small muted" style="margin:4px 0">🧹 فلتر الجودة: أُخفيت <b>' + low + '</b> فرصة أقل من ' + '⭐'.repeat(minS) + ' (وظائف، إعلانات، أسئلة عامة) <a href="#" data-act="askShowLow">' + (ASK.showLow ? 'أخفِها' : 'أظهِرها') + '</a></div>';
+  var shown = d.opps.filter(function (o) { return ASK.showLow || o.status !== 'جديد' || Number(o.intent_score) >= minS; });
+  html += shown.length ? '<div class="grid2" id="ask_list">' + shown.map(function (o) {
     var done = o.status !== 'جديد', left = Math.max(0, Math.ceil(((Time_(o.expires_at) || 0) - Date.now()) / 864e5));
     var hay = [o.question, o.city, o.platform, o.persona, o.status, o.suggested_reply, o.asker_name, o.asker_handle].join(' ');
     return '<div class="card" data-hay="' + esc(hay) + '" style="' + (done ? 'opacity:.6' : '') + '"><div class="row between"><span>' + chip(o.platform, 'acc') + chip(o.persona) + '</span>' +
@@ -3806,6 +3874,14 @@ SCREENS.ask = { render: function (d, args) {
         '<button class="btn sm" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="تم الرد">تم الرد ✓</button>' +
         '<button class="btn sm ghost" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="ليست فرصة">ليست فرصة</button></div>') + '</div>';
   }).join('') + '</div>' : empty(d.claude_ready ? 'لا فرص الآن — المسح اليومي يعمل ٨ صباحاً، أو ابحث بنفسك بالأسفل' : 'لا فرص بعد — ابحث بنفسك بالأزرار بالأسفل، والصق أي سؤال تجده (المسح التلقائي يعمل مع رصيد Claude)');
+
+  // ── 💬 تعليقات تحت منشورات المنافسين: هنا يسأل الجمهور فعلاً ──
+  html += '<details class="card"' + ((d.comp_posts || []).length ? ' open' : '') + '><summary><b>💬 اقرأ التعليقات تحت منشورات المنافسين</b> ' + chip((d.comp_posts || []).length) + ' <span class="muted small">— أعلى مصدر لأسئلة حقيقية</span></summary>' +
+    ((d.comp_posts || []).length ? d.comp_posts.map(function (p) {
+      return '<div class="row between small" style="margin-top:5px"><span><b>' + esc(p.name) + '</b> · ' + esc(p.platform) + ' · ' + fmtDate(p.at) + (p.note ? ' · ' + esc(p.note) : '') + '</span><span class="row" style="gap:4px">' +
+        (extUrl(p.url) ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(p.url)) + '">👀 افتح التعليقات</a>' : '') +
+        '<button class="btn sm pri" data-act="askFromComment" data-u="' + esc(p.url || '') + '" data-w="' + esc('تعليق تحت منشور منافس: ' + p.name) + '">📥 الصق سؤالاً منها</button></span></div>';
+    }).join('') : '<div class="muted small">لا منشورات منافسين مسجّلة بعد — من «اليوم ← حسابات منافسين للمراجعة» الصق رابط ما نشروه، فيظهر هنا لتقرأ تعليقات جمهوره.</div>') + '</details>';
 
   // ── لصق سريع ──
   html += '<details class="card"' + (d.opps.length ? '' : ' open') + '><summary><b>➕ وجدت شخصاً يسأل؟ الصقه هنا</b></summary>' +
@@ -3827,11 +3903,8 @@ SCREENS.ask = { render: function (d, args) {
   html += '<h2>🔎 ابحث بنفسك الآن (مجاني — نتائج اللحظة داخل كل منصة)</h2>' +
     '<div class="card row" style="gap:6px"><input type="text" id="ask_sq" class="grow" placeholder="اكتب أي عبارة: دورة مدرب، رخصة مدرب، تغذية رياضية…">' +
     '<button class="btn pri" data-act="askSearch">🔍 ابحث</button><button class="btn ghost" data-act="askSearchClear">↺ إلغاء</button><div id="ask_sout" class="chips" style="width:100%"></div></div>' +
-    '<div class="muted small">أو اضغط منصة تحت أي عبارة جاهزة (' + d.phrases.length + ' عبارة — عدّلها من الإعدادات ← ask_phrases). كل أدوات البحث في <a href="#" data-go="manual">🔍 البحث اليدوي</a>.</div>';
-  html += d.phrases.map(function (p) {
-    return '<div class="card small"><b>«' + esc(p.phrase) + '»</b><div class="chips" style="margin-top:4px">' +
-      p.links.map(function (l) { return '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(l[1]) + '">' + esc(l[0]) + '</a>'; }).join(' ') + '</div></div>';
-  }).join('');
+    '<div class="muted small">العبارات بالأسفل <b>حيّة</b>: تُركَّب من دوراتك ونية الشراء والمدن باللهجة السعودية، وترتَّب بعدد الأسئلة الحقيقية التي تطابقها (🔥 = بنية عالية). 📌 تثبّت العبارة الجيدة. كل أدوات البحث في <a href="#" data-go="manual">🔍 البحث اليدوي</a>.</div>' + askPhrasesHtml_(d);
+
   html += '<div class="card small muted">🔮 <b>فرصة مستقبلية:</b> اشتراك X API المدفوع (~٢٠٠$ شهرياً) يجعل رصد X لحظياً وتلقائياً بالكامل. حالياً: المسح اليومي عبر Claude + أزرار البحث المباشر المجانية.</div>';
   return html;
 } };
@@ -3841,6 +3914,14 @@ ACT.askSearch = function () {
 };
 ACT.askSearchClear = function () { $('ask_sq').value = ''; $('ask_sout').innerHTML = ''; if ($('ask_q')) { $('ask_q').value = ''; ASK.q = ''; q('#ask_list > .card').forEach(function (c) { c.style.display = ''; }); } };
 document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'ask_sq') ACT.askSearch(); });
+ACT.askShowLow = function () { ASK.showLow = !ASK.showLow; go('ask', {}, true); };
+ACT.askFromComment = function (el) {
+  ASK.where = el.dataset.w;
+  var det = q('#main details').filter(function (x) { return x.querySelector('#ap_q'); })[0]; if (det) det.open = true;
+  if ($('ap_url')) $('ap_url').value = el.dataset.u || '';
+  if ($('ap_q')) { $('ap_q').focus(); $('ap_q').scrollIntoView({ block: 'center' }); }
+  toast('الصق نص التعليق/السؤال واسم صاحبه — يُحفظ أنه «' + ASK.where + '»');
+};
 ACT.askRegen = function (el) { act('askUpdate', { ask_id: el.dataset.id, persona: val('apx_' + el.dataset.id) }, 'كُتب رد جديد مع الرابط'); };
 document.addEventListener('input', function (e) {
   if (!e.target || e.target.id !== 'ask_q') return;
@@ -3879,6 +3960,16 @@ ACT.askAskerEdit = function (el) {
 ACT.askAskerSave = function (el) {
   act('askAsker', { ask_id: el.dataset.id, asker_name: val('ae_n'), asker_handle: val('ae_h'), asker_url: val('ae_u'), asked_at: val('ae_t') ? new Date(val('ae_t')).toISOString() : '', asked_where: val('ae_w') }, 'حُفظت بيانات السائل');
 };
+function askPhrasesHtml_(d) {
+  var list = d.phrases_ranked || [], nw = d.phrases_new || [];
+  return list.map(function (p) {
+    return '<div class="card small"><div class="row between"><b>«' + esc(p.phrase) + '»</b><span>' + (p.hot ? chip('🔥 ' + p.hot, 'bad') : '') + (p.hits ? chip(p.hits + ' سؤال طابقها', 'acc') : chip('جديدة', '')) + chip(p.kind) +
+      '<button class="btn sm ghost" data-act="askPin" data-p="' + esc(p.phrase) + '"' + (p.pinned ? ' data-rm="1" title="إلغاء التثبيت">📌✓' : ' title="ثبّتها">📌') + '</button></span></div><div class="chips" style="margin-top:4px">' +
+      (typeof msLinks_ === 'function' ? msLinks_(p.phrase, '', ['X (الأحدث)', 'تيك توك', 'انستغرام', 'يوتيوب (الأحدث)', 'فيسبوك', 'سناب شات', 'Google آخر ٢٤ ساعة']) : '') + '</div></div>';
+  }).join('') + (nw.length ? '<div class="card small"><b>💡 عبارات جديدة من أسئلة الناس الحقيقية</b><div class="chips" style="margin-top:4px">' +
+    nw.map(function (x) { return '<button class="chip acc" data-act="askPin" data-p="' + esc(x.phrase) + '" title="تكررت ' + x.seen + ' مرات — اضغط لتثبيتها">＋ ' + esc(x.phrase) + ' (' + x.seen + ')</button>'; }).join('') + '</div></div>' : '');
+}
+ACT.askPin = function (el) { act('askPhrasePin', { phrase: el.dataset.p, remove: el.dataset.rm ? 1 : '' }, el.dataset.rm ? 'أُلغي التثبيت' : 'ثُبّتت العبارة 📌'); };
 function Time_(v) { var d = v ? new Date(v) : null; return d && !isNaN(d) ? d.getTime() : 0; }
 function askCopy_(id) {
   var t = val('ar_' + id);
@@ -3896,7 +3987,7 @@ ACT.askSet = function (el) { act('askUpdate', { ask_id: el.dataset.id, status: e
 ACT.askPaste = function (el) {
   if (!val('ap_q').trim() && !val('ap_url').trim()) return toast('الصق الرابط أو نص السؤال (واحد منهما يكفي)', true);
   el.disabled = true;
-  api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl'), persona: val('ap_ps'), asker_name: val('ap_an'), asker_handle: val('ap_ah'), asked_at: val('ap_at') ? new Date(val('ap_at')).toISOString() : '' }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
+  api('action', 'askPaste', { url: val('ap_url'), question: val('ap_q'), city: val('ap_city'), platform: val('ap_pl'), persona: val('ap_ps'), asked_where: ASK.where || '', asker_name: val('ap_an'), asker_handle: val('ap_ah'), asked_at: val('ap_at') ? new Date(val('ap_at')).toISOString() : '' }).then(function () { toast('أُضيفت مع رد مقترح'); go('ask', {}, true); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 </script>
@@ -4039,24 +4130,36 @@ SCREENS.manual = { render: function (d) {
       return '<label class="chip" style="cursor:pointer"><input type="checkbox" class="ms_pl" value="' + esc(p[0]) + '"' + (MS.on.indexOf(p[0]) > -1 ? ' checked' : '') + '> ' + esc(p[0]) + '</label>'; }).join('') + '</div></details>' +
     '<div id="ms_out" class="chips" style="margin-top:6px">' + (MS.q ? msLinks_(MS.q, MS.city, MS.on) : '<span class="muted small">اكتب عبارة واضغط «ابحث» — تظهر هنا أزرار كل منصة</span>') + '</div></div>';
   // ٢) من يسأل الآن
-  html += '<details class="card" open><summary><b>٢) عبارات يكتبها من يبحث عن دورة</b> ' + chip(d.phrases.length) + '</summary>' +
-    '<div class="muted small">عدّلها من الإعدادات ← ask_phrases. وجدت سؤالاً؟ الصقه في <a href="#" data-go="ask">🎯 من يسأل الآن</a> ليقترح لك الرد.</div>' +
-    d.phrases.map(function (p) { return '<div class="small" style="margin-top:6px"><b>«' + esc(p) + '»</b><div class="chips">' + msLinks_(p, MS.city, MS.on) + '</div></div>'; }).join('') + '</details>';
+  html += '<details class="card" open><summary><b>٢) عبارات حيّة يكتبها من يبحث عن دورة</b> ' + chip((d.phrases_ranked || []).length) + '</summary>' +
+    '<div class="muted small">تُركَّب من دوراتك × نية الشراء × المدن باللهجة السعودية، وتترتّب بعدد الأسئلة الحقيقية المطابقة. 📌 لتثبيت الجيدة. وجدت سؤالاً؟ الصقه في <a href="#" data-go="ask">🎯 من يسأل الآن</a>.</div>' + (typeof askPhrasesHtml_ === 'function' ? askPhrasesHtml_(d) : '') + '</details>';
   // ٣) المنافسون
   html += '<details class="card"><summary><b>٣) ماذا يفعل المنافسون</b> ' + chip(d.competitors.length) + '</summary>' +
     (d.competitors.length ? d.competitors.map(function (c) {
       var extra = (extUrl(c.website) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.website)) + '">🌐 موقعهم</a> ' : '') +
         (extUrl(c.ad_library_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.ad_library_url)) + '">📢 إعلاناتهم</a> ' : '<a class="chip" target="_blank" rel="noopener" href="https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=SA&q=' + encodeURIComponent(c.name) + '">📢 مكتبة الإعلانات</a> ') +
         (extUrl(c.maps_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.maps_url)) + '">📍 الخريطة</a> ' : '');
-      return '<div class="small" style="margin-top:6px"><b>' + esc(c.name) + '</b>' + (c.city ? ' · ' + esc(c.city) : '') + '<div class="chips">' + extra +
+      var plats = {}; (c.accounts || []).forEach(function (a) { plats[a.platform] = plats[a.platform] || a; }); Object.keys(c.posts || {}).forEach(function (p) { plats[p] = plats[p] || { platform: p }; });
+      var cnt = Object.keys(plats).length ? '<div class="row" style="gap:4px;margin:3px 0">' + Object.keys(plats).map(function (p) {
+        var n = (c.posts[p] || []).length, a = plats[p];
+        return '<span class="pcount"><a ' + (extUrl(a.url) ? 'target="_blank" rel="noopener" href="' + esc(extUrl(a.url)) + '"' : '') + '>' + esc(p) + '</a><button class="pc-n' + (n ? ' on' : '') + '" data-act="msOpenPosts" data-ac="' + esc(c.ac_id || '') + '" data-p="' + esc(p) + '" title="' + (n ? 'افتح ' + n + ' منشوراً (آخر ٧ أيام)' : 'لا منشورات مسجّلة هذا الأسبوع') + '">' + n + '</button></span>';
+      }).join('') + '</div>' : '';
+      return '<div class="small" style="margin-top:6px"><b>' + esc(c.name) + '</b>' + (c.city ? ' · ' + esc(c.city) : '') + cnt + '<div class="chips">' + extra +
         msLinks_(c.name, '', ['X (الأحدث)', 'تيك توك', 'انستغرام', 'يوتيوب (الأحدث)', 'Google آخر أسبوع']) + '</div></div>';
     }).join('') : empty('أضف المنافسين من شاشة المنافسين')) + '</details>';
-  // ٤) الأسعار والدورات
-  html += '<details class="card"><summary><b>٤) أسعار الدورات في السوق</b></summary>' +
-    (d.courses.length ? d.courses : ['دورة مدرب شخصي']).map(function (n) {
-      return '<div class="small" style="margin-top:6px"><b>«سعر ' + esc(n) + '»</b><div class="chips">' + msLinks_('سعر ' + n, MS.city, ['Google آخر أسبوع', 'انستغرام', 'تيك توك', 'X (الأحدث)']) + '</div></div>'; }).join('') + '</details>';
+  // ٤) أسعار السوق لكل دورة من دوراتنا: سعرنا ← أسعار المنافسين لنفس الدورة ← بحث عند كل منافس بالاسم وعلى كل منصة
+  html += '<details class="card"><summary><b>٤) أسعار السوق لدوراتنا</b> ' + chip((d.market || []).length) + '</summary>' +
+    ((d.market || []).length ? d.market.map(function (c) {
+      var cmp = c.ours && c.avg ? (c.ours > c.avg ? chip('أغلى من المتوسط بـ ' + (c.ours - c.avg).toLocaleString('en'), 'warn') : chip('أرخص من المتوسط بـ ' + (c.avg - c.ours).toLocaleString('en'), 'good')) : '';
+      return '<div class="small" style="margin-top:8px;border-top:1px dashed var(--line);padding-top:6px"><b>«' + esc(c.name) + '»</b> ' + chip('سعرنا: ' + (c.ours ? c.ours.toLocaleString('en') + ' ر.س' : 'غير محدد'), 'acc') +
+        (c.offers.length ? chip('السوق: ' + c.min.toLocaleString('en') + ' – ' + c.max.toLocaleString('en') + ' (متوسط ' + c.avg.toLocaleString('en') + ')') + cmp : chip('لا أسعار منافسين مسجّلة بعد', 'warn')) +
+        (c.offers.length ? '<div class="chips" style="margin-top:4px">' + c.offers.map(function (o) { return (extUrl(o.url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(o.url)) + '">' : '<span class="chip">') + esc(o.who) + ': ' + o.price.toLocaleString('en') + (extUrl(o.url) ? ' ↗</a>' : '</span>'); }).join('') + '</div>' : '') +
+        '<div class="muted" style="margin-top:4px">ابحث عن سعرها على المنصات:</div><div class="chips">' + msLinks_('سعر ' + c.name, MS.city, ['Google آخر أسبوع', 'انستغرام', 'تيك توك', 'X (الأحدث)', 'سناب شات']) + '</div>' +
+        (d.competitors.length ? '<div class="muted">عند كل منافس بالاسم:</div><div class="chips">' + d.competitors.slice(0, 12).map(function (k) {
+          return '<a class="chip" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent('"' + k.name + '" سعر ' + c.name) + '">' + esc(k.name) + '</a>'; }).join('') + '</div>' : '') + '</div>';
+    }).join('') + '<div class="muted small" style="margin-top:6px">وجدت سعراً؟ سجّله من <a href="#" data-go="competitors" data-args="' + attr({ add: 1 }) + '">＋ إضافة دورة لمنافس (يدوي)</a> فيظهر هنا وفي <a href="#" data-go="comptimeline">الخط الزمني</a>.</div>' : empty('أضف دوراتك أولاً من «الدورات»')) + '</details>';
   // ٥) المدربون والأشخاص
   html += '<details class="card"><summary><b>٥) المدربون وصنّاع القرار</b></summary>' +
+    '<div class="card small" style="background:var(--accent-soft)">🏟 الطريقة الأفعل: <a href="#" data-go="clubs">خريطة الأندية</a> — كل نادٍ = مديره (صانع قرار) + مدربوه (عملاء)، وتُضاف بضغطة. البحث بالأسفل للبحث الحر.</div>' +
     [['مدرب شخصي', ['انستغرام', 'تيك توك', 'لينكدإن (أشخاص)', 'خرائط Google']], ['مدير نادي رياضي', ['لينكدإن (أشخاص)', 'Google آخر أسبوع']], ['افتتاح نادي رياضي جديد', ['Google آخر أسبوع', 'X (الأحدث)', 'انستغرام']], ['مطلوب مدرب لياقة', ['لينكدإن (منشورات)', 'X (الأحدث)', 'Google آخر ٢٤ ساعة']]].map(function (x) {
       return '<div class="small" style="margin-top:6px"><b>«' + x[0] + '»</b><div class="chips">' + msLinks_(x[0], MS.city, x[1]) + '</div></div>'; }).join('') +
     '<div class="muted small" style="margin-top:6px">وجدت شخصاً مناسباً؟ أضفه في <a href="#" data-go="trainers">المدربون</a> أو <a href="#" data-go="people">صنّاع القرار</a>.</div></details>';
@@ -4068,6 +4171,13 @@ ACT.msGo = function () {
   msRead_();
   if (!MS.q) return toast('اكتب عبارة البحث', true);
   $('ms_out').innerHTML = msLinks_(MS.q, MS.city, MS.on) || '<span class="muted small">اختر منصة واحدة على الأقل</span>';
+};
+ACT.msOpenPosts = function (el) {
+  var c = (S.data.competitors || []).filter(function (x) { return String(x.ac_id) === el.dataset.ac; })[0];
+  var list = c && c.posts ? (c.posts[el.dataset.p] || []) : [];
+  if (!list.length) return toast('لا منشورات مسجّلة لهذه المنصة هذا الأسبوع — الصقها من «اليوم ← حسابات منافسين للمراجعة»', true);
+  var blocked = 0; list.forEach(function (p) { if (extUrl(p.url) && window.open(extUrl(p.url), '_blank', 'noopener') === null) blocked++; });
+  toast(blocked ? 'المتصفح منع ' + blocked + ' نافذة — اسمح بالنوافذ المنبثقة ثم اضغط مرة أخرى' : 'فُتحت ' + list.length + ' نافذة', !!blocked);
 };
 ACT.msOpenAll = function () {
   msRead_();
@@ -4319,7 +4429,7 @@ var TOOL_TAGS = {
   today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'mp', ask: 'amp', news: 'ap', discovery: 'ap', manual: 'm', search: 'mp', keywords: 'amp',
   compwatch: 'am', radar: 'ap', competitors: 'm', exams: 'ap', reports: 'a', targets: 'am', kpis: 'a', sources: 'amp', trainers: 'm',
   people: 'amp', opps: 'ap', b2b: 'am', alumni: 'am', campaigns: 'm', content: 'ap', register: 'm', pipeline: 'am', courses: 'm',
-  calendar: 'm', payments: 'am', settings: 'm', modules: 'a', automap: 'a'
+  calendar: 'm', payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'amp', clubs: 'm', homeapps: 'm'
 };
 var TAG_INFO = { p: ['💳', 'يحتاج رصيد Claude (مدفوع)'], a: ['⚙️', 'يعمل آلياً'], m: ['✋', 'يدوي — تعمله أنت'] };
 function tagIcons_(k) { return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span title="' + TAG_INFO[c][1] + '" class="ttag">' + TAG_INFO[c][0] + '</span>' : ''; }).join(''); }
@@ -4370,6 +4480,144 @@ function dot_(k) { var l = LIGHT[k] || LIGHT.off; return '<span class="adot" sty
     return '<div class="dp-split"><div>' + main + ours + '</div><div class="dp-comp">' + comp + '</div></div>';
   };
 })();
+</script>
+
+  <script>
+/* ═══════════ 📈 خط زمني دورات المنافسين ═══════════ */
+var CTL = { sel: null, data: null };
+var CTL_COLORS = ['#3a86ff', '#e76f51', '#8d6cd8', '#e9a23b', '#d6457a', '#52b788', '#8a817c', '#0b6e7f', '#b45309', '#2563eb'];
+SCREENS.comptimeline = { render: function (d, args) {
+  CTL.data = d;
+  var st = d.stats, y = d.year;
+  var html = north(d.north) + '<h1>📈 خط زمني دورات المنافسين</h1>';
+  html += '<div class="row" style="gap:6px;margin-bottom:6px">' +
+    '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y - 1, topic: d.topic, sort: d.sort }) + '">‹ ' + (y - 1) + '</button><b>' + y + '</b>' +
+    '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y + 1, topic: d.topic, sort: d.sort }) + '">' + (y + 1) + ' ›</button>' +
+    '<select id="ctl_topic" data-act="ctlFilter"><option value="">كل الدورات</option>' + opt(d.topics, d.topic) + '</select>' +
+    '<select id="ctl_sort" data-act="ctlFilter">' + [['date', 'ترتيب: التاريخ'], ['price', 'ترتيب: السعر'], ['who', 'ترتيب: المنافس']].map(function (o) { return '<option value="' + o[0] + '"' + (d.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
+    '<button class="btn sm good" data-act="compOfferNewTl">＋ إضافة دورة لمنافس (يدوي)</button></div>';
+  html += '<div class="row">' + [[st.count, 'دورة منافس'], [st.competitors, 'منافس'], [st.min ? st.min.toLocaleString('en') : '—', 'أقل سعر'], [st.avg ? st.avg.toLocaleString('en') : '—', 'متوسط السعر'], [st.max ? st.max.toLocaleString('en') : '—', 'أعلى سعر']].map(function (x) {
+    return '<div class="stat"><div class="v">' + x[0] + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') + '</div>';
+  if (!d.bars.length) return html + empty('لا دورات في ' + y + ' — أضف دورة منافس يدوياً، أو انتظر الرادار الآلي (عند شحن Claude)');
+  var from = new Date(y, 0, 1).getTime(), span = new Date(y + 1, 0, 1).getTime() - from;
+  var pct = function (t) { return Math.max(0, Math.min(100, (new Date(t).getTime() - from) / span * 100)); };
+  var whoColor = {}, ci = 0;
+  var months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  var now = Date.now(), nowP = now >= from && now < from + span ? pct(now) : -1;
+  html += '<div class="ctl"><div class="ctl-row ctl-head"><div class="ctl-lbl"></div><div class="ctl-track">' + months.map(function (m, i) {
+    return '<span style="inset-inline-start:' + (i / 12 * 100) + '%">' + m + '</span>'; }).join('') + '</div></div>';
+  html += d.bars.map(function (b) {
+    var col = b.ours ? '#2a9d8f' : (whoColor[b.who] = whoColor[b.who] || CTL_COLORS[ci++ % CTL_COLORS.length]);
+    var l = pct(b.start), r = pct(b.end), w = Math.max(1.2, r - l);
+    var tip = b.who + ' — ' + b.course + '\n' + fmtDate(b.start) + ' ← ' + fmtDate(b.end) + (b.end_estimated ? ' (نهاية تقديرية ' + d.default_days + ' يوماً)' : '') + (b.price ? '\n' + b.price.toLocaleString('en') + ' ر.س' : '');
+    return '<div class="ctl-row' + (b.ours ? ' ours' : '') + '"><div class="ctl-lbl" title="' + esc(b.who + ' — ' + b.course) + '"><b>' + esc(b.who) + '</b><span>' + esc(b.course) + '</span></div><div class="ctl-track">' +
+      (nowP >= 0 ? '<i class="ctl-now" style="inset-inline-start:' + nowP + '%"></i>' : '') +
+      '<div class="ctl-bar' + (b.end_estimated ? ' est' : '') + '" data-act="ctlPick" data-id="' + esc(b.id) + '" title="' + esc(tip) + '" style="inset-inline-start:' + l + '%;width:' + w + '%;background:' + col + '">' +
+      (b.price ? b.price.toLocaleString('en') : '') + '</div></div></div>';
+  }).join('') + '</div>';
+  html += '<div class="muted small">كل صف = دورة واحدة (المنافس قد يكون له أكثر من دورة في نفس الوقت). الشريط المخطّط = نهاية تقديرية ' + d.default_days + ' يوماً — اضغطه لتعديل التاريخ. الأخضر = دوراتنا. الخط الأحمر = اليوم.</div>';
+  html += '<div id="ctl_box"></div>';
+  return html;
+}, after: function () { if (CTL.sel) ctlShow_(CTL.sel); } };
+function ctlShow_(id) {
+  var b = (CTL.data.bars || []).filter(function (x) { return x.id === id; })[0], box = $('ctl_box'); if (!b || !box) return;
+  var iso = function (t) { var x = new Date(t); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 10); };
+  box.innerHTML = '<div class="card"><div class="row between"><b>' + esc(b.who) + ' — ' + esc(b.course) + '</b>' + (b.price ? chip(b.price.toLocaleString('en') + ' ر.س', 'acc') : '') + '</div>' +
+    (b.ours ? '<div class="muted small">دورتنا — عدّلها من <a href="#" data-go="calendar">تقويم الدورات</a></div>' :
+      '<div class="row" style="gap:6px;margin-top:6px"><label class="f" style="margin:0">البداية</label><input type="date" id="ctl_s" value="' + iso(b.start) + '"><label class="f" style="margin:0">النهاية</label><input type="date" id="ctl_e" value="' + (b.end_estimated ? '' : iso(b.end)) + '" placeholder="فارغ = ٣ أشهر">' +
+      '<button class="btn sm pri" data-act="ctlSave" data-id="' + esc(b.id) + '">حفظ التواريخ</button>' + (extUrl(b.url) ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(b.url)) + '">المصدر ↗</a>' : '') + '</div>') + '</div>';
+}
+ACT.ctlPick = function (el) { CTL.sel = el.dataset.id; ctlShow_(CTL.sel); $('ctl_box').scrollIntoView({ block: 'nearest' }); };
+ACT.ctlSave = function (el) { act('compOfferDates', { offer_id: el.dataset.id, start_date: val('ctl_s'), end_date: val('ctl_e') }, 'حُفظت التواريخ'); };
+ACT.ctlFilter = function () { go('comptimeline', { year: CTL.data.year, topic: val('ctl_topic'), sort: val('ctl_sort') }, true); };
+ACT.compOfferNewTl = function () { go('competitors', { tab: 'courses', add: 1 }); };
+</script>
+
+  <script>
+/* ═══════════ 🏟 خريطة الأندية (للمدربين وصنّاع القرار) ═══════════ */
+var CLB = { data: null };
+var CLB_CITIES = ['الرياض', 'جدة', 'الدمام', 'الخبر', 'مكة المكرمة', 'المدينة المنورة', 'الطائف', 'أبها', 'تبوك', 'بريدة', 'حائل', 'الأحساء', 'الجبيل', 'ينبع', 'جازان', 'نجران'];
+SCREENS.clubs = { render: function (d, args) {
+  CLB.data = d;
+  var city = args.city || d.city, gq = function (t) { return encodeURIComponent(t); };
+  var html = north(d.north) + '<h1>🏟 خريطة الأندية ' + chip(d.total) + '</h1>';
+  html += '<div class="card small">الفكرة: كل نادٍ/صالة = <b>مدير</b> (صانع قرار B2B) + <b>مدربون</b> (عملاء لدوراتنا). تفتح الخريطة، تضيف النادي بضغطة، ثم من بطاقته تصل لمديره ومدربيه. <b>«يوظّف مدربين»</b> = فرصة B2B ساخنة.</div>';
+  // ١) اكتشف من الخريطة
+  html += '<div class="card"><b>١) اكتشف الأندية في مدينة</b><div class="row" style="gap:6px;margin-top:6px"><select id="cl_city">' + CLB_CITIES.concat(d.cities.filter(function (c) { return CLB_CITIES.indexOf(c) < 0; })).map(function (c) { return '<option' + (c === city ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    d.types.map(function (t) { return '<a class="btn sm" target="_blank" rel="noopener" data-act="clMaps" data-t="' + esc(t) + '" href="https://www.google.com/maps/search/' + gq(t + ' ' + city) + '">🗺 ' + esc(t) + '</a>'; }).join('') +
+    '<a class="btn sm" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + gq('"مطلوب مدرب" ' + city) + '&tbs=qdr:m">📢 من يوظّف مدربين؟</a></div>' +
+    '<details class="small" style="margin-top:6px"' + (d.total ? '' : ' open') + '><summary>➕ أضف نادياً وجدته</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px">' +
+    '<input type="text" id="cl_name" placeholder="اسم النادي *"><select id="cl_type">' + opt(d.types, '') + '</select>' +
+    '<input type="text" id="cl_maps" dir="ltr" placeholder="رابط خرائط Google"><input type="text" id="cl_phone" dir="ltr" placeholder="الهاتف"><input type="text" id="cl_ig" dir="ltr" placeholder="انستغرام @">' +
+    '<label class="chip"><input type="checkbox" id="cl_hire"> يوظّف مدربين</label><button class="btn sm pri" data-act="clAdd">حفظ</button></div></details></div>';
+  // ٢) القائمة
+  html += '<div class="row" style="gap:6px;margin:6px 0"><select id="clf_city" data-act="clFilter"><option value="">كل المدن</option>' + opt(d.cities, args.city || '') + '</select>' +
+    '<select id="clf_type" data-act="clFilter"><option value="">كل الأنواع</option>' + opt(d.types, args.type || '') + '</select>' +
+    '<select id="clf_st" data-act="clFilter"><option value="">كل الحالات</option>' + opt(d.statuses, args.status || '') + '</select></div>';
+  html += d.rows.length ? '<div class="grid2">' + d.rows.map(function (c) {
+    var n = c.name + ' ' + (c.city || '');
+    return '<div class="card small" style="' + (c.hiring === 'نعم' ? 'border-inline-start:4px solid var(--bad)' : '') + '"><div class="row between"><b>' + esc(c.name) + '</b><span>' + chip(c.type) + chip(c.city) + (c.hiring === 'نعم' ? chip('🔥 يوظّف مدربين — فرصة B2B', 'bad') : '') + '</span></div>' +
+      '<div class="chips" style="margin-top:4px">' + (extUrl(c.maps_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.maps_url)) + '">🗺 الخريطة</a>' : '') +
+      (c.phone ? '<a class="chip" href="tel:' + esc(c.phone) + '">📞 ' + esc(c.phone) + '</a>' : '') +
+      (c.instagram ? '<a class="chip" target="_blank" rel="noopener" href="https://www.instagram.com/' + esc(String(c.instagram).replace(/^@/, '')) + '">📷 ' + esc(c.instagram) + '</a>' : '') + '</div>' +
+      '<div class="muted" style="margin-top:4px">👔 المدير (صانع القرار):</div><div class="chips">' +
+      (c.manager_name ? '<span class="chip acc">' + esc(c.manager_name) + '</span>' + (extUrl(c.manager_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.manager_url)) + '">لينكدإن ↗</a>' : '') : '') +
+      '<a class="chip" target="_blank" rel="noopener" href="https://www.linkedin.com/search/results/people/?keywords=' + gq('مدير ' + c.name) + '">🔎 ابحث عن المدير في لينكدإن</a>' +
+      '<a class="chip" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + gq('"' + c.name + '" مدير OR "general manager" site:linkedin.com') + '">🔎 Google</a></div>' +
+      '<div class="muted">🏋️ مدربوه (عملاء لدوراتنا):</div><div class="chips">' +
+      '<a class="chip" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + gq('site:instagram.com "' + c.name + '" مدرب') + '">انستغرام</a>' +
+      '<a class="chip" target="_blank" rel="noopener" href="https://www.tiktok.com/search?q=' + gq('مدرب ' + n) + '">تيك توك</a>' +
+      '<a class="chip" target="_blank" rel="noopener" href="https://www.linkedin.com/search/results/people/?keywords=' + gq('personal trainer ' + c.name) + '">لينكدإن</a>' +
+      '<a class="chip" href="#" data-go="trainers">＋ أضف مدرباً</a></div>' +
+      '<div class="row" style="gap:6px;margin-top:6px"><select data-act="clStatus" data-id="' + esc(c.club_id) + '">' + opt(d.statuses, c.status) + '</select>' +
+      '<input type="text" id="clm_' + esc(c.club_id) + '" placeholder="اسم المدير" value="' + esc(c.manager_name || '') + '"><input type="text" id="clu_' + esc(c.club_id) + '" dir="ltr" placeholder="رابط لينكدإن المدير" value="' + esc(c.manager_url || '') + '">' +
+      '<label class="chip"><input type="checkbox" id="clh_' + esc(c.club_id) + '"' + (c.hiring === 'نعم' ? ' checked' : '') + '> يوظّف</label><button class="btn sm" data-act="clSaveMgr" data-id="' + esc(c.club_id) + '">حفظ</button></div></div>';
+  }).join('') + '</div>' : empty(d.total ? 'لا نتائج لهذه التصفية' : 'لا أندية بعد — افتح الخريطة بالأعلى وأضف ما تجده');
+  return html;
+} };
+function clRow_(id) { return (CLB.data.rows || []).filter(function (x) { return x.club_id === id; })[0] || {}; }
+ACT.clMaps = function (el) { var c = val('cl_city'); window.open('https://www.google.com/maps/search/' + encodeURIComponent(el.dataset.t + ' ' + c), '_blank', 'noopener'); };
+ACT.clAdd = function () {
+  if (!val('cl_name').trim()) return toast('اكتب اسم النادي', true);
+  act('clubSave', { club: { name: val('cl_name'), city: val('cl_city'), type: val('cl_type'), maps_url: val('cl_maps'), phone: val('cl_phone'), instagram: val('cl_ig'), hiring: $('cl_hire').checked ? 'نعم' : 'لا' } }, 'أُضيف النادي');
+};
+ACT.clFilter = function () { go('clubs', { city: val('clf_city'), type: val('clf_type'), status: val('clf_st') }, true); };
+ACT.clStatus = function (el) { var c = clRow_(el.dataset.id); c.status = el.value; act('clubSave', { club: c }, 'حُدّثت الحالة', false); };
+ACT.clSaveMgr = function (el) { var id = el.dataset.id, c = clRow_(id); c.manager_name = val('clm_' + id); c.manager_url = val('clu_' + id); c.hiring = $('clh_' + id).checked ? 'نعم' : 'لا'; act('clubSave', { club: c }, 'حُفظ'); };
+
+/* ═══════════ 📱 تطبيقات المدرب بالمنزل / إلى مكانك ═══════════ */
+SCREENS.homeapps = { render: function (d) {
+  var html = north(d.north) + '<h1>📱 تطبيقات المدرب بالمنزل ' + chip(d.rows.length) + '</h1>';
+  html += '<div class="card small">تطبيقات تُرسل مدرباً شخصياً للبيت أو المكان. لكل تطبيق: الاسم، الإدارة والتواصل، والتقييم. كل معلومة بمصدرها، وما لم يُتحقق منه مكتوب «غير مؤكد». <b>لماذا تهمك؟</b> هذه التطبيقات تحتاج مدربين معتمدين = قناة توظيف لخرّيجينا وشراكة محتملة.</div>';
+  html += d.rows.length ? '<div class="grid2">' + d.rows.map(function (a) {
+    var rate = [a.rating_ios ? '⭐ iOS ' + a.rating_ios : '', a.rating_android ? '⭐ Android ' + a.rating_android : ''].filter(String).join(' · ');
+    return '<div class="card small"><div class="row between"><b style="font-size:14px">' + esc(a.name) + '</b>' + chip(a.verified === 'نعم' ? '✓ متحقق' : 'غير مؤكد', a.verified === 'نعم' ? 'good' : 'warn') + '</div>' +
+      (a.company ? '<div>🏢 ' + esc(a.company) + '</div>' : '') + (a.management ? '<div>👔 الإدارة: ' + esc(a.management) + '</div>' : '') +
+      '<div class="chips" style="margin-top:4px">' + (extUrl(a.website) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(a.website)) + '">🌐 الموقع</a>' : '') +
+      (a.email ? '<a class="chip" href="mailto:' + esc(a.email) + '">✉️ ' + esc(a.email) + '</a>' : '') + (a.phone ? '<a class="chip" href="tel:' + esc(a.phone) + '">📞 ' + esc(a.phone) + '</a>' : '') +
+      (a.social ? '<span class="chip">' + esc(a.social) + '</span>' : '') + '</div>' +
+      '<div style="margin-top:4px">' + (rate ? '<b>' + esc(rate) + '</b>' : '<span class="muted">التقييم غير متوفر</span>') + (a.rating_note ? ' <span class="muted">— ' + esc(a.rating_note) + '</span>' : '') + '</div>' +
+      (a.notes ? '<div class="muted">' + esc(a.notes) + '</div>' : '') +
+      '<div class="muted" style="margin-top:4px">' + (extUrl(a.source_url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(a.source_url)) + '">المصدر ↗</a> · ' : '') + 'حُدّث ' + fmtDate(a.updated_at) +
+      ' · <a href="#" data-act="haEdit" data-id="' + esc(a.app_id) + '">تعديل</a></div></div>';
+  }).join('') + '</div>' : empty('لا تطبيقات بعد');
+  html += '<details class="card small" id="ha_form_box"><summary>➕ أضف / عدّل تطبيقاً</summary><input type="hidden" id="ha_id"><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">' +
+    [['name', 'اسم التطبيق *'], ['company', 'الشركة المالكة'], ['management', 'الإدارة (المؤسس/المدير)'], ['website', 'الموقع'], ['email', 'البريد'], ['phone', 'الهاتف'], ['social', 'حسابات التواصل'], ['rating_ios', 'تقييم App Store'], ['rating_android', 'تقييم Google Play'], ['rating_note', 'ملاحظة التقييم (عدد المقيّمين…)'], ['source_url', 'رابط المصدر'], ['notes', 'ملاحظات']]
+      .map(function (f) { return '<input type="text" id="ha_' + f[0] + '" placeholder="' + f[1] + '">'; }).join('') +
+    '<select id="ha_verified"><option value="غير مؤكد">غير مؤكد</option><option value="نعم">متحقق</option></select><button class="btn sm pri" data-act="haSave">حفظ</button></div></details>';
+  return html;
+} };
+var HA_FIELDS = ['name', 'company', 'management', 'website', 'email', 'phone', 'social', 'rating_ios', 'rating_android', 'rating_note', 'source_url', 'notes', 'verified'];
+ACT.haEdit = function (el) {
+  var a = (S.data.rows || []).filter(function (x) { return x.app_id === el.dataset.id; })[0]; if (!a) return;
+  $('ha_form_box').open = true; $('ha_id').value = a.app_id; HA_FIELDS.forEach(function (f) { if ($('ha_' + f)) $('ha_' + f).value = a[f] || ''; });
+  $('ha_form_box').scrollIntoView({ block: 'center' });
+};
+ACT.haSave = function () {
+  if (!val('ha_name').trim()) return toast('اكتب اسم التطبيق', true);
+  var x = { app_id: val('ha_id') }; HA_FIELDS.forEach(function (f) { x[f] = val('ha_' + f); });
+  act('homeAppSave', { app: x }, 'حُفظ');
+};
 </script>
 
   ﻿<script>
@@ -4447,7 +4695,7 @@ var PAGE_INFO = {
     btns: [['تأكيد / رفض', 'تحكم هل الاكتشاف حقيقي.', 'قائمة نظيفة.'], ['دمج في المشغّلين', 'ينقله لقائمة الأهداف.', 'يصبح هدف بيع.'],
       ['دمج في الأكاديميات', 'ينقله لقائمة المنافسين.', 'يدخل الرادار.'], ['إدخال يدوي', 'تضيف جهة سمعت عنها.', 'مثل افتتاح عرفته من مورّد.'],
       ['الدليل', 'المصدر أو الملاحظة التي بُني عليها الاكتشاف.', 'تتحقق بنفسك.']] },
-  news: { t: 'الأخبار', what: 'أخبار الجهات الرسمية والسوق (وزارة الرياضة، هيئة التقويم...) مع الرابط وملخص.', why: 'قرار تنظيمي جديد = سبب قوي للتسجيل الآن («الرخصة أصبحت إلزامية»).',
+  news: { t: 'الأخبار الرسمية', what: 'أخبار الجهات الرسمية والسوق (وزارة الرياضة، هيئة التقويم...) مع الرابط وملخص.', why: 'قرار تنظيمي جديد = سبب قوي للتسجيل الآن («الرخصة أصبحت إلزامية»).',
     btns: [['قرأته', 'يعلّم الخبر كمقروء.', 'تبقى القائمة مركّزة على الجديد.'],
       ['هذا يستحق محتوى', 'يحوّل الخبر إلى فكرة منشور في تقويم المحتوى.', 'محتوى في وقته = انتشار وسلطة.'],
       ['المصدر', 'يفتح الخبر الأصلي.', 'تقرأ التفاصيل كاملة.'],
