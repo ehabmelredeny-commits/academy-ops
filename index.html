@@ -3478,6 +3478,9 @@ function srcdbAutoMap_(headers) {
 }
 
 SCREENS.sources = { render: function (d, args) {
+  // تحمّل نسخة مخزَّنة قديمة من البيانات (قبل إضافة الجنس/الأعداد) حتى لا تتعطل الشاشة
+  d.rows = d.rows || []; d.batches = d.batches || []; d.cities = d.cities || []; d.genders = d.genders || { 'ذكر': 0, 'أنثى': 0, '': 0 }; d.counts = d.counts || { st: {}, consent: {}, seg: {} };
+  if (d.total === undefined) d.total = d.rows.length; if (d.matched === undefined) d.matched = d.rows.length; d.page = d.page || 1; d.pages = d.pages || 1; d.segments = d.segments || []; d.consent = d.consent || []; d.outreach = d.outreach || [];
   SRCDB.data = d;
   var f = { batch: args.batch || '', seg: args.seg || '', st: args.st || '', city: args.city || '', gender: args.gender || '', consent: args.consent || '', q: args.q || '' };
   SRCDB.f = f;
