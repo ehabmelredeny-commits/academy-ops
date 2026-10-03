@@ -3348,7 +3348,7 @@ SCREENS.sources = { render: function (d, args) {
   var f = { batch: args.batch || '', seg: args.seg || '', st: args.st || '', city: args.city || '', gender: args.gender || '', consent: args.consent || '', q: args.q || '' };
   SRCDB.f = f;
   var rows = d.rows;
-  var html = north(d.north) + '<h1>قواعد عملاء المصادر ' + chip(d.total) + '</h1>' +
+  var html = north(d.north) + '<h1>قواعد عملاء المصادر ' + chip(d.total) + (d.db_url ? ' <a class="chip" target="_blank" rel="noopener" href="' + esc(d.db_url) + '" title="هذه الأسماء محفوظة في ملف Google Sheets منفصل عن الملف الرئيسي حتى لا تبطئ النظام">📄 ملف قاعدة العملاء ↗</a>' : '') + '</h1>' +
     '<div class="card small">استورد قوائم عملائك (إكسل/شيت) ← النظام يحلّلها ويقسّمها حسب الاحتياج ← يجهّز رسالة مخصصة لكل شخص تُرسلها أنت بضغطة (واتساب/إيميل). ' +
     '<b>لا إرسال جماعي ولا آلي</b>، ومن يطلب عدم التواصل لا يُراسل أبداً.</div>';
 
