@@ -4138,12 +4138,18 @@ SCREENS.ask = { render: function (d, args) {
   // ── البحث المباشر ──
   html += '<h2>🔎 ابحث بنفسك الآن (مجاني — نتائج اللحظة داخل كل منصة)</h2>' +
     '<div class="card row" style="gap:6px"><input type="text" id="ask_sq" class="grow" placeholder="اكتب أي عبارة: دورة مدرب، رخصة مدرب، تغذية رياضية…">' +
-    '<button class="btn pri" data-act="askSearch">🔍 ابحث</button><button class="btn ghost" data-act="askSearchClear">↺ إلغاء</button><div id="ask_sout" class="chips" style="width:100%"></div></div>' +
+    '<button class="btn pri" data-act="askSearch">🔍 ابحث</button><button class="btn" data-act="askOpenAll" title="يفتح العبارة على كل المنصات، كل منصة في تبويب مستقل — أي منصة لا تفتح تُتخطى">🚀 افتح على كل المنصات</button><button class="btn ghost" data-act="askSearchClear">↺ إلغاء</button><div id="ask_sout" class="chips" style="width:100%"></div></div>' +
     '<div class="muted small">العبارات بالأسفل <b>حيّة</b>: تُركَّب من دوراتك ونية الشراء والمدن باللهجة السعودية، وترتَّب بعدد الأسئلة الحقيقية التي تطابقها (🔥 = بنية عالية). 📌 تثبّت العبارة الجيدة. كل أدوات البحث في <a href="#" data-go="manual">🔍 البحث اليدوي</a>.</div>' + askPhrasesHtml_(d);
 
   html += '<div class="card small muted">🔮 <b>فرصة مستقبلية:</b> اشتراك X API المدفوع (~٢٠٠$ شهرياً) يجعل رصد X لحظياً وتلقائياً بالكامل. حالياً: المسح اليومي عبر Claude + أزرار البحث المباشر المجانية.</div>';
   return html;
 } };
+ACT.askOpenAll = function () {
+  var t = val('ask_sq').trim(); if (!t) return toast('اكتب عبارة البحث', true);
+  if (typeof openAllPlatforms_ === 'function') openAllPlatforms_(t, (ASK.data && ASK.data.city) || '');
+  if ($('ask_sout')) ACT.askSearch();
+};
+ACT.askPhraseAll = function (el) { if (typeof openAllPlatforms_ === 'function') openAllPlatforms_(el.dataset.p, (ASK.data && ASK.data.city) || ''); };
 ACT.askSearch = function () {
   var t = val('ask_sq').trim(); if (!t) return toast('اكتب عبارة البحث', true);
   $('ask_sout').innerHTML = typeof msLinks_ === 'function' ? msLinks_(t, ASK.data.city, ['X (الأحدث)', 'تيك توك', 'انستغرام', 'يوتيوب (الأحدث)', 'فيسبوك', 'سناب شات', 'ريديت', 'Google آخر ٢٤ ساعة']) : '';
@@ -4200,6 +4206,7 @@ function askPhrasesHtml_(d) {
   var list = d.phrases_ranked || [], nw = d.phrases_new || [];
   return list.map(function (p) {
     return '<div class="card small"><div class="row between"><b>«' + esc(p.phrase) + '»</b><span>' + (p.hot ? chip('🔥 ' + p.hot, 'bad') : '') + (p.hits ? chip(p.hits + ' سؤال طابقها', 'acc') : chip('جديدة', '')) + chip(p.kind) +
+      '<button class="btn sm" data-act="askPhraseAll" data-p="' + esc(p.phrase) + '" title="افتح هذه العبارة على كل المنصات (كل منصة في تبويب)">🚀 الكل</button>' +
       '<button class="btn sm ghost" data-act="askPin" data-p="' + esc(p.phrase) + '"' + (p.pinned ? ' data-rm="1" title="إلغاء التثبيت">📌✓' : ' title="ثبّتها">📌') + '</button></span></div><div class="chips" style="margin-top:4px">' +
       (typeof msLinks_ === 'function' ? msLinks_(p.phrase, '', ['X (الأحدث)', 'تيك توك', 'انستغرام', 'يوتيوب (الأحدث)', 'فيسبوك', 'سناب شات', 'Google آخر ٢٤ ساعة']) : '') + '</div></div>';
   }).join('') + (nw.length ? '<div class="card small"><b>💡 عبارات جديدة من أسئلة الناس الحقيقية</b><div class="chips" style="margin-top:4px">' +
@@ -4415,6 +4422,17 @@ ACT.msOpenPosts = function (el) {
   var blocked = 0; list.forEach(function (p) { if (extUrl(p.url) && window.open(extUrl(p.url), '_blank', 'noopener') === null) blocked++; });
   toast(blocked ? 'المتصفح منع ' + blocked + ' نافذة — اسمح بالنوافذ المنبثقة ثم اضغط مرة أخرى' : 'فُتحت ' + list.length + ' نافذة', !!blocked);
 };
+/** يفتح عبارة على كل المنصات (أو قائمة محددة) — كل واحدة في تبويب مستقل؛ أي منصة تفشل تُتخطى ولا توقف البقية */
+function openAllPlatforms_(phrase, city, only) {
+  var q0 = encodeURIComponent(phrase + (city ? ' ' + city : '')), opened = 0, blocked = 0, failed = [];
+  MS_PLATFORMS.filter(function (p) { return !only || only.indexOf(p[0]) > -1; }).forEach(function (p) {
+    try { var w = window.open(p[1](q0), '_blank', 'noopener'); if (w === null) blocked++; else opened++; } catch (e) { failed.push(p[0]); }
+  });
+  var msg = 'فُتحت ' + opened + ' منصة' + (failed.length ? ' · تعذّر: ' + failed.join('، ') : '');
+  if (blocked) msg = 'المتصفح منع ' + blocked + ' نافذة' + (opened ? ' (فُتحت ' + opened + ')' : '') + ' — اسمح بالنوافذ المنبثقة لهذا الموقع (أيقونة في شريط العنوان) ثم اضغط مرة أخرى';
+  toast(msg, !!blocked);
+  return { opened: opened, blocked: blocked, failed: failed };
+}
 ACT.msOpenAll = function () {
   msRead_();
   if (!MS.q) return toast('اكتب عبارة البحث', true);
