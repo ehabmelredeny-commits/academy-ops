@@ -213,7 +213,7 @@ table.ltr-table { border-collapse: collapse; font-size: 12px; } table.ltr-table 
 .amap-node { border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; margin: 4px 0; background: var(--bg); }
 .amap-arrow { text-align: center; color: var(--accent); font-size: 18px; line-height: 1.1; }
 .dp-split { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 1000px) { .dp-split { grid-template-columns: 1.3fr 1fr; } .dp-comp { border-inline-start: 1px dashed var(--line); padding-inline-start: 12px; } }
+@media (min-width: 1000px) { .dp-split { grid-template-columns: 1fr 2fr; } .dp-comp { border-inline-start: 1px dashed var(--line); padding-inline-start: 12px; } }
 .tl { border-inline-start: 2px solid var(--accent); padding-inline-start: 10px; }
 .tl-item { position: relative; margin: 6px 0; }
 .tl-item::before { content: ''; position: absolute; inset-inline-start: -16px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
@@ -278,7 +278,7 @@ table.ltr-table { border-collapse: collapse; font-size: 12px; } table.ltr-table 
 .amap-node { border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; margin: 4px 0; background: var(--bg); }
 .amap-arrow { text-align: center; color: var(--accent); font-size: 18px; line-height: 1.1; }
 .dp-split { display: grid; grid-template-columns: 1fr; gap: 12px; }
-@media (min-width: 1000px) { .dp-split { grid-template-columns: 1.3fr 1fr; } .dp-comp { border-inline-start: 1px dashed var(--line); padding-inline-start: 12px; } }
+@media (min-width: 1000px) { .dp-split { grid-template-columns: 1fr 2fr; } .dp-comp { border-inline-start: 1px dashed var(--line); padding-inline-start: 12px; } }
 .tl { border-inline-start: 2px solid var(--accent); padding-inline-start: 10px; }
 .tl-item { position: relative; margin: 6px 0; }
 .tl-item::before { content: ''; position: absolute; inset-inline-start: -16px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
@@ -384,6 +384,30 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
 .mon-ticker-in{display:inline-block;padding-inline-start:100%;animation:montk 60s linear infinite}
 @keyframes montk{to{transform:translateX(100%)}}
 @media (max-width:820px){.mon-grid{grid-template-columns:1fr}.mon-now{order:-1;position:static}.mon-col{max-height:none}}
+.focus-hl{outline:3px solid #f1c21b;outline-offset:2px;transition:outline .3s}
+.mon-strip.click{cursor:pointer}.mon-strip.click:hover{transform:translateX(-3px);box-shadow:0 2px 8px rgba(0,0,0,.18)}.mon-now.click{cursor:pointer}
+.gt{border:1px solid var(--line);border-radius:10px;background:var(--card);overflow-x:auto;padding:4px 0}
+.gt-row{display:flex;align-items:stretch;min-width:760px;border-bottom:1px solid rgba(127,127,127,.12)}
+.gt-row.click{cursor:pointer}.gt-row.click:hover{background:rgba(58,134,255,.06)}
+.gt-row.ours{background:rgba(42,157,143,.07)}.gt-row.gt-first{border-top:1px solid var(--line)}
+.gt-head{position:sticky;top:0;background:var(--card);z-index:2;border-bottom:1px solid var(--line)}
+.gt-lbl{width:270px;flex-shrink:0;padding:5px 10px;font-size:12px;line-height:1.35;border-inline-end:1px solid var(--line)}
+.gt-lbl b{font-weight:700}.gt-meta{display:block;font-size:10.5px;color:var(--muted)}
+.gt-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:5px;vertical-align:middle}
+.gt-track{position:relative;flex:1;min-height:34px}
+.gt-head .gt-track span{position:absolute;top:8px;font-size:10.5px;color:var(--muted);padding-inline-start:3px}
+.gt-today{position:absolute;top:-1px;font-size:9.5px;color:#d64545}
+.gt-grid{position:absolute;top:0;bottom:0;width:0;border-inline-start:1px solid rgba(127,127,127,.13)}
+.gt-now{position:absolute;top:0;bottom:0;width:0;border-inline-start:1px solid #d64545}
+.gt-bar{position:absolute;top:21px;height:2px;background:var(--c);border-radius:2px}
+.gt-bar.est{background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 9px)}
+.gt-s,.gt-e{position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--c)}
+.gt-s{inset-inline-start:-4px}.gt-e{inset-inline-end:-4px;background:var(--card);border:2px solid var(--c);width:4px;height:4px}
+.gt-tag{position:absolute;bottom:5px;inset-inline-start:0;font-size:10.5px;white-space:nowrap}
+.gt-sheet-course{font-size:15px;margin-bottom:8px}
+.gt-tbl{width:100%;border-collapse:collapse;font-size:13px}.gt-tbl th{text-align:start;color:var(--muted);font-weight:500;width:120px;padding:5px 0;border-bottom:1px solid var(--line)}.gt-tbl td{padding:5px 0;border-bottom:1px solid var(--line)}
+.gt-hist{font-size:12.5px;line-height:1.9}
+.rad-bad{border-inline-start:4px solid #c62828}.rad-good{border-inline-start:4px solid #2a9d8f}.rad-warn{border-inline-start:4px solid #e9a23b}.rad-sig{padding:5px 0;border-bottom:1px dashed var(--line)}
 </style>
 
 </head>
@@ -481,8 +505,8 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'المنافسون'], ['search', 'البحث (كتالوج السوق)'], ['radar', 'الرادار'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
-  ['campaigns', 'الحملات'], ['content', 'المحتوى'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
+var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', 'البحث (كتالوج السوق)'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
+  ['campaigns', 'الحملات'], ['content', 'بنك الأفكار والمنشورات'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
 /** شجرة الأقسام: كل قسم وفروعه (الترتيب الرسمي للنظام) — NAV_MORE يبقى قائمة مسطّحة لمن يحتاجها */
@@ -493,11 +517,11 @@ var NAV_TREE = [
   ['watch', '👁 المراقبة', ['compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'clubs', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
-  ['mkt', '📣 التسويق', ['campaigns', 'content', 'register']],
+  ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['clubs', '🏟 خريطة الأندية'], ['homeapps', '📱 تطبيقات المدرب بالمنزل']);
+NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['clubs', '🏟 خريطة الأندية'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
@@ -576,6 +600,15 @@ function act(name, args, okMsg, reload) {
   }).catch(function (e) { toast(errMsg(e), true); throw e; });
 }
 
+/** إبراز عنصر بعينه بعد الانتقال (من زر في شاشة أخرى أو من شريط المراقبة) */
+function focusItem_(id) {
+  var el = document.querySelector('#main [data-id="' + String(id).replace(/"/g, '') + '"]');
+  if (!el) return;
+  var card = el.closest('.card, details, tr') || el;
+  if (card.tagName === 'DETAILS') card.open = true;
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  card.classList.add('focus-hl'); setTimeout(function () { card.classList.remove('focus-hl'); }, 4000);
+}
 function go(screen, args, keepScroll) {
   if (screen === 'more') { renderMore(); return; }
   // سجل التنقل لزر «رجوع» (لا يُسجَّل تحديث نفس الشاشة ولا الرجوع نفسه)
@@ -597,6 +630,7 @@ function go(screen, args, keepScroll) {
     clearBtn_(screen);
     if (stale || !S.shownStale) window.scrollTo(0, keepScroll ? y : 0); else window.scrollTo(0, sy);
     if (data && data.poll) S.sig = data.poll.sig;
+    if (!stale && S.args && S.args.focus) focusItem_(S.args.focus);
   };
   // عرض فوري من آخر نسخة محفوظة، ثم التحديث من النظام (ثوانٍ في Google)
   var cached = keepScroll ? null : cacheGet_(ck); // بعد إجراء: لا نعرض نسخة قديمة قبل التغيير
@@ -1106,7 +1140,7 @@ window.addEventListener('load', function () {
 var I18N_BASE = {
   'اليوم': 'Today', 'الرد': 'Reply', 'منشور اليوم': "Today's Post", 'المخطط': 'System Map', 'المزيد': 'More',
   '🎯 من يسأل الآن': '🎯 Who Is Asking Now', 'قواعد عملاء المصادر': 'Source Contacts', 'المدربون': 'Trainers', 'تقويم الدورات': 'Course Calendar',
-  'مشغّلو الأندية': 'Club Operators', 'المنافسون': 'Competitors', 'البحث (كتالوج السوق)': 'Search (Market Catalog)', 'الرادار': 'Radar', 'الاكتشافات': 'Discoveries',
+  'مشغّلو الأندية': 'Club Operators', 'ملفات المنافسين': 'Competitor Profiles', 'بنك الأفكار والمنشورات': 'Ideas & Posts Bank', 'البحث (كتالوج السوق)': 'Search (Market Catalog)', 'الرادار': 'Radar', 'الاكتشافات': 'Discoveries',
   'الأخبار': 'News', 'الأخبار الرسمية': 'Official News', 'صناع القرار بالشركات': 'Corporate Decision Makers', 'إضافة دورة لمنافس (يدوي)': 'Add competitor course (manual)', 'الصق الجدول من إكسل/شيت (مع صف العناوين)': 'Paste the table from Excel/Sheets (include the header row)', 'خط زمني دورات المنافسين': 'Competitor Courses Timeline', 'الاختبارات': 'Exams', 'الفرص': 'Opportunities', 'صنّاع القرار': 'Decision Makers', 'الوحدات': 'Modules', 'الحملات': 'Campaigns',
   'المحتوى': 'Content', 'الخرّيجون': 'Alumni', 'المؤشرات': 'KPIs', 'الكلمات': 'Keywords', 'الدورات': 'Courses', 'الإعدادات': 'Settings',
   'INFO — دليل النظام': 'INFO — System Guide', '🧪 التجربة': '🧪 Sandbox', 'التسجيلات المدفوعة هذا الأسبوع': 'Paid enrollments this week',
@@ -1394,7 +1428,7 @@ ACT.expStop = function (el) { act('expStop', { exp_id: el.dataset.id, decision: 
 
 /* ─── المحتوى ─── */
 SCREENS.content = { render: function (d) {
-  return north(d.north) + '<h1>المحتوى</h1><div class="card"><b>التوزيع: المستهدف مقابل الفعلي (آخر ٤ أسابيع · ' + d.published_4w + ' منشور)</b>' +
+  return north(d.north) + '<h1>💡 بنك الأفكار والمنشورات</h1><div class="card"><b>التوزيع: المستهدف مقابل الفعلي (آخر ٤ أسابيع · ' + d.published_4w + ' منشور)</b>' +
     d.mix.map(function (m) {
       return '<div class="row between small" style="margin-top:6px"><span>' + esc(m.pillar) + '</span><span>' + m.actual + '% / ' + m.target + '%</span></div>' +
         '<div class="bar ' + (Math.abs(m.actual - m.target) > 15 ? 'warn' : '') + '"><i style="width:' + Math.min(100, m.actual) + '%"></i></div>';
@@ -1518,6 +1552,10 @@ SCREENS.dailyPost = { render: function (d) {
         '<button class="btn bad" data-act="postReject" data-id="' + esc(p.post_id) + '">رفض مع السبب</button></div>' : '') +
       (st === 'معتمد' ? '<div class="btns"><button class="btn" data-act="copyVal" data-text="' + esc([p.body, p.cta].filter(String).join('\n\n')) + '">نسخ النص</button></div>' +
         '<div class="row"><input type="text" class="grow" id="pu_' + esc(p.post_id) + '" placeholder="رابط المنشور بعد نشره"><button class="btn sm good" data-act="postPub" data-id="' + esc(p.post_id) + '">نشرته ✓</button></div>' : '') +
+      (st !== 'منشور' && st !== 'مرفوض' ? '<div class="row small" style="gap:6px;margin-top:4px"><b>⏰ وقت النشر:</b>' +
+        '<select id="pw_' + esc(p.post_id) + '" data-pt="pt_' + esc(p.post_id) + '" class="post-when"><option value="now"' + (p.scheduled_at ? '' : ' selected') + '>الآن</option><option value="at"' + (p.scheduled_at ? ' selected' : '') + '>وقت محدد</option></select>' +
+        '<input type="datetime-local" id="pt_' + esc(p.post_id) + '" value="' + (p.scheduled_at ? esc(dtLocal_(p.scheduled_at)) : '') + '" style="' + (p.scheduled_at ? '' : 'display:none') + '">' +
+        '<button class="btn sm" data-act="postSched" data-id="' + esc(p.post_id) + '">حفظ الوقت</button>' + (p.scheduled_at ? chip('مجدول ' + fmtDate(p.scheduled_at, true), 'acc') : '') + '</div>' : '') +
       (p.rejection_reason ? '<div class="small" style="color:var(--bad)">سبب الرفض: ' + esc(p.rejection_reason) + '</div>' : '') + '</div>';
   }).join('');
   return html;
@@ -1581,6 +1619,16 @@ ACT.postApprove = function (el) {
 };
 ACT.postEdit = function (el) { act('postEdit', { post_id: el.dataset.id, body: val('pb_' + el.dataset.id) }, 'حُفظ'); };
 ACT.postReject = function (el) { var r = prompt('سبب الرفض (يتعلّم منه النظام):'); if (r) act('postReject', { post_id: el.dataset.id, reason: r }, 'رُفض — سيتجنّبه غداً'); };
+function dtLocal_(iso) { var d = new Date(iso); if (isNaN(d)) return ''; d = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return d.toISOString().slice(0, 16); }
+document.addEventListener('change', function (e) {
+  var s = e.target; if (!s.classList || !s.classList.contains('post-when')) return;
+  var t = document.getElementById(s.dataset.pt); if (t) t.style.display = s.value === 'at' ? '' : 'none';
+});
+ACT.postSched = function (el) {
+  var id = el.dataset.id, mode = val('pw_' + id), at = mode === 'at' ? val('pt_' + id) : '';
+  if (mode === 'at' && !at) return toast('اختر التاريخ والساعة', true);
+  act('postSchedule', { post_id: id, at: at ? new Date(at).toISOString() : '' }, at ? 'جُدول — يصلك تذكير في وقته' : 'النشر الآن');
+};
 ACT.postPub = function (el) { act('postPublished', { post_id: el.dataset.id, ref: val('pu_' + el.dataset.id) }, 'سُجّل النشر'); };
 
 ACT.secretSave = function (el) {
@@ -2209,8 +2257,8 @@ SCREENS.exams = { render: function (d, args) {
   }).join('');
   return html;
 } };
-ACT.exCamp = function (el) { act('examCampaign', { event_id: el.dataset.id }, 'أُنشئت مسودة حملة — لا تُطلق بلا موافقتك'); };
-ACT.exPost = function (el) { act('examPost', { event_id: el.dataset.id }, 'أُضيفت فكرة منشور'); };
+ACT.exCamp = function (el) { act('examCampaign', { event_id: el.dataset.id }, 'أُنشئت مسودة حملة — أكملها هنا (لا تُطلق بلا موافقتك)', false).then(function (r) { go('campaigns', { focus: r && r.campaign_id }); }); };
+ACT.exPost = function (el) { act('examPost', { event_id: el.dataset.id }, 'أُضيفت فكرة منشور — أكملها هنا', false).then(function (r) { go('content', { focus: r && r.content_id }); }); };
 ACT.exAtt = function (el) {
   var leads = S.data.leads;
   openSheet('<h1>متدرب في الاختبار</h1><label class="f">المتدرب</label><select id="xal">' + leads.map(function (l) { return '<option value="' + esc(l.lead_id) + '">' + esc(l.name) + '</option>'; }).join('') +
@@ -2585,15 +2633,22 @@ SCREENS.calendar = { render: function (d, args) {
   });
   var exDay = {};
   d.exams.forEach(function (e) {
-    [['exam_date', 'اختبار'], ['registration_close', 'إغلاق تسجيل']].forEach(function (f) {
+    [['exam_date', 'اختبار'], ['registration_open', 'فتح تسجيل'], ['registration_close', 'إغلاق تسجيل']].forEach(function (f) {
       var x = calDay_(e[f[0]]); if (x) (exDay[calIso_(x)] = exDay[calIso_(x)] || []).push(f[1] + ': ' + e.name);
     });
   });
+  (d.posts || []).forEach(function (x) { var t = calDay_(x.at); if (t) (exDay[calIso_(t)] = exDay[calIso_(t)] || []).push('📣 منشور ' + (x.platform || '') + ' ' + new Date(x.at).toLocaleTimeString('ar-SA-u-nu-latn', { hour: '2-digit', minute: '2-digit' })); });
   var last3 = new Date(y, m + 3, 0);
   var html = north(d.north) + '<h1>تقويم الدورات</h1>' +
     '<div class="row between"><button class="btn sm" data-go="calendar" data-args="' + attr({ month: next }) + '">‹ التالي ٣ أشهر</button>' +
     '<b>' + first.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'long' }) + ' ← ' + last3.toLocaleDateString('ar-SA-u-ca-gregory', { month: 'long', year: 'numeric' }) + '</b>' +
     '<button class="btn sm" data-go="calendar" data-args="' + attr({ month: prev }) + '">السابق ›</button></div>';
+  // كل مواعيد الاختبارات ظاهرة دائماً (حتى لو خارج الأشهر المعروضة) — والضغط ينقل لشهرها
+  if ((d.exams || []).length) html += '<div class="card small" style="border-color:#e9a23b"><b>📝 مواعيد الاختبارات:</b> ' + d.exams.map(function (e) {
+    var x = calDay_(e.exam_date || e.registration_close); if (!x) return '';
+    var mo = x.getFullYear() + '-' + ('0' + (x.getMonth() + 1)).slice(-2), past = x < new Date();
+    return '<button class="btn sm' + (past ? '' : ' pri') + '" data-go="calendar" data-args="' + attr({ month: mo }) + '">' + esc(e.name) + ' · ' + calIso_(x) + (e.confidence ? ' (' + esc(e.confidence) + ')' : '') + (past ? ' · مضى' : '') + '</button>';
+  }).join(' ') + '</div>';
   var live = d.cohorts.filter(function (c) { return c.status !== 'ملغاة'; });
   if (live.length) html += '<div class="card small row" style="gap:6px"><span>✏️ الدفعة التي تعدّلها:</span><select id="cal_active" style="width:auto;max-width:280px">' +
     live.map(function (c) { return '<option value="' + esc(c.cohort_id) + '"' + (c.cohort_id === CAL.active ? ' selected' : '') + '>● ' + esc(c.title) + ' (' + calSessions_(c).length + ' يوم)</option>'; }).join('') + '</select>' +
@@ -4493,6 +4548,9 @@ SCREENS.pipeline = { render: function (d) {
   if (PIPE.tab === 'psych') return html + pipePsychGuide_(d);
   html += '<div class="row" style="margin-bottom:6px"><input type="text" id="pipe_q" class="grow" placeholder="🔍 ابحث بالاسم، الجوال، النمط، الاعتراض، الدورة…" value="' + esc(PIPE.f) + '">' +
     '<span class="muted small">اسحب البطاقة بين الأعمدة لتغيير المرحلة · اضغطها لفتح ملف العميل وعلم النفس</span></div>';
+  html += '<div class="card small" style="border-color:#2a9d8f;background:#eef9f6">⚙️ <b>آلي — كود الخصم الشخصي:</b> يصدر وحده لمن يسأل عن السعر (واتساب: يُرسل فوراً · المنصات العامة: جاهز بضغطة)، ' +
+    'يذكّر العميل حين يبقى ١٢ ساعة ثم قبل الانتهاء بساعة، وينتهي بعد ٢٤ ساعة. أكواد نشطة الآن: <b>' + (d.codes_active || 0) + '</b>' +
+    ' · <a href="#" data-act="codeCheck">🔎 تحقق من كود عند التسجيل</a></div>';
   html += '<div class="kanban">' + d.stages.map(function (s) {
     var list = d.rows.filter(function (r) { return r.status === s; });
     return '<div class="kcol" data-stage="' + esc(s) + '"><h3><span><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:' + (PIPE_COLORS[s] || '#888') + '"></span> ' + esc(s) + '</span>' + chip(list.length) + '</h3>' +
@@ -4500,7 +4558,7 @@ SCREENS.pipeline = { render: function (d) {
         var hay = [r.name, r.phone, r.psych_type, r.objection, r.course, r.source, r.step].join(' ');
         return '<div class="card click kcard" draggable="true" data-id="' + esc(r.lead_id) + '" data-hay="' + esc(hay) + '" data-go="lead" data-args="' + attr({ lead_id: r.lead_id }) + '" style="border-inline-start:4px solid ' + (PIPE_COLORS[s] || '#888') + '">' +
           '<div class="row between"><b>' + esc(r.name) + '</b>' + (r.overdue ? chip('⏰ مستحقة', 'bad') : '') + '</div>' +
-          '<div class="chips">' + chip('🧠 ' + r.psych_type, 'acc') + (r.objection ? chip('✋ ' + r.objection, 'warn') : '') + (r.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + '</div>' +
+          '<div class="chips">' + chip('🧠 ' + r.psych_type, 'acc') + (r.objection ? chip('✋ ' + r.objection, 'warn') : '') + (r.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + (r.code ? chip('⚙️ 🎟 ' + r.code + ' · ' + r.code_price + ' ر.س · باقي ' + r.code_left_h + ' س', r.code_left_h <= 1 ? 'bad' : 'warn') : '') + '</div>' +
           (r.course ? '<div class="muted small">' + esc(r.course) + '</div>' : '') +
           (r.post_url || r.profile_url ? '<div class="chips">' + (r.post_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(r.post_url) + '" onclick="event.stopPropagation()">📝 منشوره ↗</a>' : '') + (r.profile_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(r.profile_url) + '" onclick="event.stopPropagation()">👤 ' + esc(r.handle || 'ملفه') + ' ↗</a>' : '') + '</div>' : '') +
           (r.dormant_hint ? '<div class="small" style="background:var(--warn-soft);border-radius:6px;padding:2px 6px">⚠️ بلا رد منذ ' + r.dormant_hint + ' يوماً — <a href="#" data-act="leadDormant" data-id="' + esc(r.lead_id) + '">⏸ اجعله خاملاً</a></div>' : '') +
@@ -4509,6 +4567,18 @@ SCREENS.pipeline = { render: function (d) {
   }).join('') + '</div>';
   return html;
 }, after: function () { pipeFilter_(); } };
+ACT.codeCheck = function () {
+  openSheet('<h1>🔎 تحقق من كود خصم</h1><input type="text" id="cc_code" placeholder="AO-XXXX" style="direction:ltr"><div class="btns"><button class="btn pri" data-act="codeCheckGo">تحقق</button></div><div id="cc_out"></div>');
+};
+ACT.codeCheckGo = function () {
+  var c = val('cc_code').trim().toUpperCase(); if (!c) return;
+  api('action', 'discountCheck', { code: c }).then(function (r) {
+    $('cc_out').innerHTML = !r.ok ? empty(r.error) : '<div class="card"><b>' + esc(r.code) + '</b> ' + chip(r.status, r.valid ? 'good' : 'bad') + '<div>' + esc(r.name || r.contact || '') + '</div><div>' + esc(r.course) +
+      ' · <b>' + esc(r.price) + ' ر.س</b> بدل ' + esc(r.our_price) + '</div><div class="muted small">ينتهي ' + fmtDate(r.expires_at, true) + '</div>' +
+      (r.valid ? '<div class="btns"><button class="btn good" data-act="codeRedeem" data-id="' + esc(r.code) + '">✅ سجّل استخدامه (تم الدفع)</button></div>' : '') + '</div>';
+  }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.codeRedeem = function (el) { act('discountRedeem', { code: el.dataset.id }, 'سُجّل استخدام الكود').then(closeSheet); };
 
 function pipePsychGuide_(d) {
   return '<div class="card small">المبدأ: <b>الإقناع = صدق + توقيت + السؤال الصحيح</b>. لا ندرة مزيفة ولا أسعار أو وعود غير موجودة — كل رسالة تُبنى من بيانات دوراتك الحقيقية فقط.</div>' +
@@ -4601,17 +4671,21 @@ SCREENS.compwatch = { render: function (d, args) {
     return '<button class="btn sm' + (d.days === t[0] ? ' pri' : '') + '" data-go="compwatch" data-args="' + attr({ days: t[0] }) + '">' + t[1] + '</button>'; }).join('') + '</div>';
   html += '<div class="row">' + [[c.changes, 'تغيير سعر'], [c.offers, 'عرض جديد'], [c.cheaper, 'أرخص منا'], [c.news, 'خبر عنهم'], [c.accounts, 'حساب لم تراجعه']].map(function (x) {
     return '<div class="stat"><div class="v">' + x[0] + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') + '</div>';
-  html += '<div class="muted small">المصدر: ' + (d.radar_on ? 'الرادار الآلي (أسبوعياً من مواقعهم) + ' : 'الرادار الآلي متوقف حتى شحن Claude · ') + 'ما تسجّله يدوياً في <a href="#" data-go="competitors">المنافسون</a> و<a href="#" data-go="manual">البحث اليدوي</a>.</div>';
+  html += '<div class="muted small">المصدر: ' + '⚙️ الرادار الآلي (يومياً من مواقعهم، مجاناً) + أخبارهم من Bing + ' + 'ما تسجّله يدوياً في <a href="#" data-go="competitors">ملفات المنافسين</a> و<a href="#" data-go="manual">البحث اليدوي</a>.</div>';
+  // ربط بالخط الزمني: كل عرض يفتح صفّه هناك مباشرة (التفاصيل + الساعات + النوع + تغيّر السعر)
+  var tl = function (x) { if (!x.offer_id) return ''; var y = new Date(x.start || x.at).getFullYear() || new Date().getFullYear();
+    return ' <a href="#" class="chip acc" data-go="comptimeline" data-args="' + attr({ year: y, focus: x.offer_id }) + '">📈 على الخط الزمني</a>'; };
+  var meta = function (x) { return (x.hours ? chip('⏱ ' + x.hours + ' ساعة') : '') + (x.course_type ? chip(x.course_type) : ''); };
   var link = function (u) { return extUrl(u) ? ' <a target="_blank" rel="noopener" href="' + esc(extUrl(u)) + '">↗</a>' : ''; };
   html += section('💲 تغييرات الأسعار', d.price_changes, function (x) {
-    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + '<div>' + chip(x.delta < 0 ? '🔻 خفّض ' + Math.abs(x.delta) : '🔺 رفع ' + x.delta, x.delta < 0 ? 'bad' : 'good') +
+    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + tl(x) + meta(x) + '<div>' + chip(x.delta < 0 ? '🔻 خفّض ' + Math.abs(x.delta) : '🔺 رفع ' + x.delta, x.delta < 0 ? 'bad' : 'good') +
       ' ' + x.old_price + ' ← <b>' + x.price + '</b> ر.س <span class="muted">' + fmtDate(x.at) + '</span></div>' +
       (x.delta < 0 ? '<div class="muted">🧠 خفض السعر عند المنافس = لا تخفض سعرك فوراً؛ أبرز قيمتك (الاعتماد، الساعات العملية، الدعم) في ردودك هذا الأسبوع.</div>' : '') + '</div>'; }, 'لا تغييرات أسعار في هذه الفترة');
   html += section('🆕 عروض ودورات جديدة', d.offers_new, function (x) {
-    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + '<div class="chips">' + (x.price ? chip(x.price + ' ر.س', 'acc') : '') + chip(x.platform) + chip(x.type) + chip(x.delivery) +
+    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + tl(x) + '<div class="chips">' + meta(x) + (x.price ? chip(x.price + ' ر.س', 'acc') : '') + chip(x.platform) + chip(x.type) + (x.course_type ? '' : chip(x.delivery)) +
       (x.end_date ? chip('ينتهي ' + fmtDate(x.end_date), 'warn') : '') + ' <span class="muted">' + fmtDate(x.at) + '</span></div></div>'; }, 'لا عروض جديدة في هذه الفترة');
   html += section('⚠️ أرخص منا', d.cheaper_than_us, function (x) {
-    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '» بـ <b>' + x.price + '</b> مقابل دورتنا «' + esc(x.our_course) + '» بـ ' + x.ours + ' ر.س' + link(x.url) +
+    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '» بـ <b>' + x.price + '</b> مقابل دورتنا «' + esc(x.our_course) + '» بـ ' + x.ours + ' ر.س' + link(x.url) + tl(x) + meta(x) +
       '<div class="muted">🧠 استخدم في الرد: «قارن على الاعتماد والساعات العملية والدعم بعد الدورة» — من دليل علم النفس للتقفيل.</div></div>'; }, 'لا يوجد منافس مسجّل أرخص منا');
   html += section('📰 أخبار تذكرهم', d.news, function (x) {
     return '<div class="card small">' + (x.impact === 'عالي' ? chip('عالي', 'bad') : '') + ' ' + esc(x.title) + link(x.url) + ' <span class="muted">' + fmtDate(x.at) + '</span></div>'; }, 'لا أخبار عنهم');
@@ -4715,10 +4789,10 @@ ACT.rpPreview = function (el) {
   <script>
 /* ═══════════ شارات الأدوات: 💳 مدفوع (رصيد Claude) · ⚙️ آلي · ✋ يدوي ═══════════ */
 var TOOL_TAGS = {
-  today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'mp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'm', search: 'mp', keywords: 'amp',
+  today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'amp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'm', search: 'mp', keywords: 'amp',
   compwatch: 'am', radar: 'a', competitors: 'm', exams: 'ap', reports: 'a', targets: 'am', kpis: 'a', sources: 'amp', trainers: 'm',
   people: 'amp', opps: 'ap', b2b: 'am', alumni: 'am', campaigns: 'm', content: 'ap', register: 'm', pipeline: 'am', courses: 'm',
-  calendar: 'm', payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'amp', clubs: 'm', homeapps: 'm'
+  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am'
 };
 var TAG_INFO = { p: ['💳', 'يحتاج رصيد Claude (مدفوع)'], a: ['⚙️', 'يعمل آلياً'], m: ['✋', 'يدوي — تعمله أنت'] };
 function tagIcons_(k) { return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span title="' + TAG_INFO[c][1] + '" class="ttag">' + TAG_INFO[c][0] + '</span>' : ''; }).join(''); }
@@ -4760,9 +4834,9 @@ function dot_(k) { var l = LIGHT[k] || LIGHT.off; return '<span class="adot" sty
         (p.comments ? chip('💬 ' + p.comments) : '') + (p.leads ? chip('🧲 ' + p.leads + ' عميل', 'good') : '') + '</div><div class="small">' + esc(p.body) + '</div></div>';
     }).join('') + '</div>' : empty('لا منشورات بعد'));
     var comp = '<h2>👁 آخر ما نشره المنافسون ' + chip((d.comp_posts || []).length) + '</h2>' +
-      '<div class="muted small">تلصق رابط آخر منشور من «اليوم ← حسابات منافسين للمراجعة» (المنصات تمنع السحب الآلي).' + (d.comp_watch ? ' ' + d.comp_watch + ' حساباً مراقَباً بلا رابط بعد.' : '') + '</div>' +
+      '<div class="muted small">⚙️ آلي: أخبار المنافسين وعروض مواقعهم تُجلب يومياً مجاناً · ✋ منشورات انستغرام/تيك توك/X: الصق الرابط من «اليوم ← حسابات منافسين للمراجعة» (المنصات تمنع السحب الآلي).' + (d.comp_watch ? ' ' + d.comp_watch + ' حساباً مراقَباً بلا رابط بعد.' : '') + '</div>' +
       ((d.comp_posts || []).length ? d.comp_posts.map(function (x) {
-        return '<div class="card small"><div class="row between"><b>' + esc(x.name) + '</b><span class="muted">' + esc(x.platform) + ' ' + esc(x.handle || '') + ' · ' + fmtDate(x.at) + '</span></div>' +
+        return '<div class="card small"><div class="row between"><b>' + (x.auto ? '⚙️ ' : '') + esc(x.name) + '</b><span class="muted">' + esc(x.platform) + ' ' + esc(x.handle || '') + ' · ' + fmtDate(x.at) + '</span></div>' +
           (x.note ? '<div>' + esc(x.note) + '</div>' : '') + '<div class="chips">' + chip(x.kind, 'acc') + (extUrl(x.url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">افتح المنشور ↗</a>' : '') + '</div>' +
           '<div class="muted">🧠 ' + esc(x.meaning) + '</div></div>';
       }).join('') : empty('لا روابط منشورات للمنافسين بعد'));
@@ -4787,37 +4861,56 @@ SCREENS.comptimeline = { render: function (d, args) {
     '<button class="btn sm good" data-act="compOfferNewTl">＋ إضافة دورة لمنافس (يدوي)</button></div>';
   html += '<div class="row">' + [[st.count, 'دورة منافس'], [st.competitors, 'منافس'], [st.min ? st.min.toLocaleString('en') : '—', 'أقل سعر'], [st.avg ? st.avg.toLocaleString('en') : '—', 'متوسط السعر'], [st.max ? st.max.toLocaleString('en') : '—', 'أعلى سعر']].map(function (x) {
     return '<div class="stat"><div class="v">' + x[0] + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') + '</div>';
-  if (!d.bars.length) return html + empty('لا دورات في ' + y + ' — أضف دورة منافس يدوياً، أو انتظر الرادار الآلي (عند شحن Claude)');
+  if (!d.bars.length) return html + empty('لا دورات في ' + y + ' — أضف دورة منافس يدوياً، أو انتظر الرادار الآلي (يومياً، مجاناً)');
   var from = new Date(y, 0, 1).getTime(), span = new Date(y + 1, 0, 1).getTime() - from;
   var pct = function (t) { return Math.max(0, Math.min(100, (new Date(t).getTime() - from) / span * 100)); };
   var whoColor = {}, ci = 0;
-  var months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  var months = ['ينا', 'فبر', 'مار', 'أبر', 'ماي', 'يون', 'يول', 'أغس', 'سبت', 'أكت', 'نوف', 'ديس'];
   var now = Date.now(), nowP = now >= from && now < from + span ? pct(now) : -1;
-  html += '<div class="ctl"><div class="ctl-row ctl-head"><div class="ctl-lbl"></div><div class="ctl-track">' + months.map(function (m, i) {
-    return '<span style="inset-inline-start:' + (i / 12 * 100) + '%">' + m + '</span>'; }).join('') + '</div></div>';
+  var grid = months.map(function (m, i) { return '<i class="gt-grid" style="inset-inline-start:' + (i / 12 * 100) + '%"></i>'; }).join('') +
+    (nowP >= 0 ? '<i class="gt-now" style="inset-inline-start:' + nowP + '%"></i>' : '');
+  html += '<div class="gt"><div class="gt-row gt-head"><div class="gt-lbl muted small">المنافس · الدورة · الساعات · النوع</div><div class="gt-track">' + months.map(function (m, i) {
+    return '<span style="inset-inline-start:' + (i / 12 * 100) + '%">' + m + '</span>'; }).join('') + (nowP >= 0 ? '<b class="gt-today" style="inset-inline-start:' + nowP + '%">اليوم</b>' : '') + '</div></div>';
+  var lastWho = null;
   html += d.bars.map(function (b) {
     var col = b.ours ? '#2a9d8f' : (whoColor[b.who] = whoColor[b.who] || CTL_COLORS[ci++ % CTL_COLORS.length]);
-    var l = pct(b.start), r = pct(b.end), w = Math.max(1.2, r - l);
-    var tip = b.who + ' — ' + b.course + '\n' + fmtDate(b.start) + ' ← ' + fmtDate(b.end) + (b.end_estimated ? ' (نهاية تقديرية ' + d.default_days + ' يوماً)' : '') + (b.price ? '\n' + b.price.toLocaleString('en') + ' ر.س' : '');
-    return '<div class="ctl-row' + (b.ours ? ' ours' : '') + '"><div class="ctl-lbl" title="' + esc(b.who + ' — ' + b.course) + '"><b>' + esc(b.who) + '</b><span>' + esc(b.course) + '</span></div><div class="ctl-track">' +
-      (nowP >= 0 ? '<i class="ctl-now" style="inset-inline-start:' + nowP + '%"></i>' : '') +
-      '<div class="ctl-bar' + (b.end_estimated ? ' est' : '') + '" data-act="ctlPick" data-id="' + esc(b.id) + '" title="' + esc(tip) + '" style="inset-inline-start:' + l + '%;width:' + w + '%;background:' + col + '">' +
-      (b.price ? b.price.toLocaleString('en') : '') + '</div></div></div>';
+    var l = pct(b.start), r = pct(b.end), w = Math.max(0.6, r - l);
+    var meta = [b.hours ? b.hours + ' ساعة' : '', b.course_type || '', b.price ? b.price.toLocaleString('en') + ' ر.س' : ''].filter(String).join(' · ');
+    var first = b.who !== lastWho; lastWho = b.who;
+    return '<div class="gt-row click' + (b.ours ? ' ours' : '') + (first && d.sort === 'who' ? ' gt-first' : '') + '" data-act="ctlPick" data-id="' + esc(b.id) + '">' +
+      '<div class="gt-lbl"><span class="gt-dot" style="background:' + col + '"></span><b>' + esc(b.who) + '</b> <span class="gt-course">' + esc(b.course) + '</span>' +
+      (meta ? '<span class="gt-meta">' + esc(meta) + '</span>' : '') + '</div>' +
+      '<div class="gt-track">' + grid +
+      '<div class="gt-bar' + (b.end_estimated ? ' est' : '') + '" style="inset-inline-start:' + l + '%;width:' + w + '%;--c:' + col + '"><i class="gt-s"></i><i class="gt-e"></i>' +
+      '<span class="gt-tag">' + esc(Text_short_(b.course, 26)) + (b.price ? ' · ' + b.price.toLocaleString('en') : '') + '</span></div></div></div>';
   }).join('') + '</div>';
-  html += '<div class="muted small">كل صف = دورة واحدة (المنافس قد يكون له أكثر من دورة في نفس الوقت). الشريط المخطّط = نهاية تقديرية ' + d.default_days + ' يوماً — اضغطه لتعديل التاريخ. الأخضر = دوراتنا. الخط الأحمر = اليوم.</div>';
-  html += '<div id="ctl_box"></div>';
+  html += '<div class="muted small">كل صف دورة واحدة · الخط الرفيع = مدة الدورة (المتقطع = نهاية تقديرية ' + d.default_days + ' يوماً) · الأخضر = دوراتنا · الخط الأحمر = اليوم · <b>اضغط أي صف للتفاصيل والتعديل</b></div>';
+  if (d.focus) setTimeout(function () { ctlShow_(d.focus); }, 0);
   return html;
-}, after: function () { if (CTL.sel) ctlShow_(CTL.sel); } };
+}, after: function () {} };
+function Text_short_(t, n) { t = String(t || ''); return t.length > n ? t.slice(0, n - 1) + '…' : t; }
 function ctlShow_(id) {
-  var b = (CTL.data.bars || []).filter(function (x) { return x.id === id; })[0], box = $('ctl_box'); if (!b || !box) return;
+  var b = (CTL.data.bars || []).filter(function (x) { return x.id === id; })[0]; if (!b) return;
   var iso = function (t) { var x = new Date(t); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 10); };
-  box.innerHTML = '<div class="card"><div class="row between"><b>' + esc(b.who) + ' — ' + esc(b.course) + '</b>' + (b.price ? chip(b.price.toLocaleString('en') + ' ر.س', 'acc') : '') + '</div>' +
-    (b.ours ? '<div class="muted small">دورتنا — عدّلها من <a href="#" data-go="calendar">تقويم الدورات</a></div>' :
-      '<div class="row" style="gap:6px;margin-top:6px"><label class="f" style="margin:0">البداية</label><input type="date" id="ctl_s" value="' + iso(b.start) + '"><label class="f" style="margin:0">النهاية</label><input type="date" id="ctl_e" value="' + (b.end_estimated ? '' : iso(b.end)) + '" placeholder="فارغ = ٣ أشهر">' +
-      '<button class="btn sm pri" data-act="ctlSave" data-id="' + esc(b.id) + '">حفظ التواريخ</button>' + (extUrl(b.url) ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(b.url)) + '">المصدر ↗</a>' : '') + '</div>') + '</div>';
+  var row = function (k, v) { return v === '' || v === undefined || v === null ? '' : '<tr><th>' + k + '</th><td>' + v + '</td></tr>'; };
+  var hist = (b.history || []).filter(function (h) { return h.price; });
+  var na = '<span class="muted">غير منشور</span>';
+  openSheet('<h1>' + esc(b.who) + '</h1><div class="gt-sheet-course">' + esc(b.course) + '</div>' +
+    '<table class="gt-tbl">' + row('السعر', b.price ? '<b>' + b.price.toLocaleString('en') + ' ر.س</b>' + (b.base && b.disc && b.base !== b.disc ? ' <s class="muted">' + b.base.toLocaleString('en') + '</s> (بعد الخصم)' : '') : na) +
+    row('عدد الساعات', b.hours ? b.hours + ' ساعة' : na) + row('نوع الدورة', b.course_type ? esc(b.course_type) : na) +
+    row('المدة المعلنة', esc(b.duration || '')) + row('البداية', fmtDate(b.start) + (b.start_known ? '' : ' <span class="muted">(تاريخ الرصد)</span>')) +
+    row('النهاية', fmtDate(b.end) + (b.end_estimated ? ' <span class="muted">(تقديرية)</span>' : '')) + row('المصدر', esc(b.source || b.platform || '')) + '</table>' +
+    (hist.length > 1 ? '<h3>📡 تغيّر السعر</h3><div class="gt-hist">' + hist.map(function (h) { return '<span>' + fmtDate(h.at) + ': <b>' + h.price.toLocaleString('en') + '</b></span>'; }).join(' ← ') + '</div>' : '') +
+    (b.ours ? '<div class="muted small">دورتنا — عدّلها من تقويم الدورات</div><div class="btns"><button class="btn" data-act="ctlToCal">📅 تقويم الدورات</button></div>' :
+      '<label class="f">البداية</label><input type="date" id="ctl_s" value="' + iso(b.start) + '"><label class="f">النهاية (فارغ = ٣ أشهر)</label><input type="date" id="ctl_e" value="' + (b.end_estimated ? '' : iso(b.end)) + '">' +
+      '<div class="btns"><button class="btn pri" data-act="ctlSave" data-id="' + esc(b.id) + '">حفظ التواريخ</button>' +
+      (extUrl(b.url) ? '<a class="btn" target="_blank" rel="noopener" href="' + esc(extUrl(b.url)) + '">المصدر ↗</a>' : '') +
+      '<button class="btn" data-act="ctlToWatch">📡 ماذا تغيّر عندهم</button></div>'));
 }
-ACT.ctlPick = function (el) { CTL.sel = el.dataset.id; ctlShow_(CTL.sel); $('ctl_box').scrollIntoView({ block: 'nearest' }); };
-ACT.ctlSave = function (el) { act('compOfferDates', { offer_id: el.dataset.id, start_date: val('ctl_s'), end_date: val('ctl_e') }, 'حُفظت التواريخ'); };
+ACT.ctlToWatch = function () { closeSheet(); go('compwatch', { days: 90 }); };
+ACT.ctlToCal = function () { closeSheet(); go('calendar'); };
+ACT.ctlPick = function (el) { ctlShow_(el.dataset.id); };
+ACT.ctlSave = function (el) { act('compOfferDates', { offer_id: el.dataset.id, start_date: val('ctl_s'), end_date: val('ctl_e') }, 'حُفظت التواريخ').then(closeSheet); };
 ACT.ctlFilter = function () { go('comptimeline', { year: CTL.data.year, topic: val('ctl_topic'), sort: val('ctl_sort') }, true); };
 ACT.compOfferNewTl = function () { go('competitors', { tab: 'courses', add: 1 }); };
 </script>
@@ -4874,10 +4967,10 @@ ACT.clFilter = function () { go('clubs', { city: val('clf_city'), type: val('clf
 ACT.clStatus = function (el) { var c = clRow_(el.dataset.id); c.status = el.value; act('clubSave', { club: c }, 'حُدّثت الحالة', false); };
 ACT.clSaveMgr = function (el) { var id = el.dataset.id, c = clRow_(id); c.manager_name = val('clm_' + id); c.manager_url = val('clu_' + id); c.hiring = $('clh_' + id).checked ? 'نعم' : 'لا'; act('clubSave', { club: c }, 'حُفظ'); };
 
-/* ═══════════ 📱 تطبيقات المدرب بالمنزل / إلى مكانك ═══════════ */
+/* ═══════════ 📱 تطبيقات المدرب أونلاين / إلى مكانك ═══════════ */
 SCREENS.homeapps = { render: function (d) {
-  var html = north(d.north) + '<h1>📱 تطبيقات المدرب بالمنزل ' + chip(d.rows.length) + '</h1>';
-  html += '<div class="card small">تطبيقات تُرسل مدرباً شخصياً للبيت أو المكان. لكل تطبيق: الاسم، الإدارة والتواصل، والتقييم. كل معلومة بمصدرها، وما لم يُتحقق منه مكتوب «غير مؤكد». <b>لماذا تهمك؟</b> هذه التطبيقات تحتاج مدربين معتمدين = قناة توظيف لخرّيجينا وشراكة محتملة.</div>';
+  var html = north(d.north) + '<h1>📱 تطبيقات المدرب أونلاين ' + chip(d.rows.length) + '</h1>';
+  html += '<div class="card small">تطبيقات المدربين أونلاين وإلى مكانك. ⚙️ <b>بحث آلي أسبوعي</b> في متجر Apple السعودي يضيف الجديد «غير مؤكد» لتراجعه. لكل تطبيق: الاسم، الإدارة والتواصل، والتقييم. كل معلومة بمصدرها، وما لم يُتحقق منه مكتوب «غير مؤكد». <b>لماذا تهمك؟</b> هذه التطبيقات تحتاج مدربين معتمدين = قناة توظيف لخرّيجينا وشراكة محتملة.</div>';
   html += d.rows.length ? '<div class="grid2">' + d.rows.map(function (a) {
     var rate = [a.rating_ios ? '⭐ iOS ' + a.rating_ios : '', a.rating_android ? '⭐ Android ' + a.rating_android : ''].filter(String).join(' · ');
     return '<div class="card small"><div class="row between"><b style="font-size:14px">' + esc(a.name) + '</b>' + chip(a.verified === 'نعم' ? '✓ متحقق' : 'غير مؤكد', a.verified === 'نعم' ? 'good' : 'warn') + '</div>' +
@@ -4946,7 +5039,7 @@ var PAGE_INFO = {
     btns: [['＋ إضافة جهة', 'تضيف نادياً أو سلسلة جديدة.', 'توسّع السوق المستهدف.'],
       ['تعديل', 'تحدّث الفروع، الحالة، المرحلة، الخطوة التالية.', 'الأولوية تُحسب تلقائياً من الفروع × الإتاحة.'],
       ['متاح / مستبعَد / قيد التحقق', 'هل يمكن بيعه تدريباً الآن أم مرتبط بمنافس.', 'لا تضيّع وقتك على جهة مغلقة.']] },
-  competitors: { t: 'المنافسون', what: 'من يقدّم نفس دوراتك، بأي سعر وخصم ومتى تبدأ دوراتهم وكيف (حضوري/أونلاين)، مع حساباتهم على السوشال — في مخطط مقارنة.', why: 'تسعّر وتوقّت دفعاتك بذكاء: تعرف متى تنافس بالسعر ومتى بالقيمة، وتسبق خصوماتهم.',
+  competitors: { t: 'ملفات المنافسين', what: 'من يقدّم نفس دوراتك، بأي سعر وخصم ومتى تبدأ دوراتهم وكيف (حضوري/أونلاين)، مع حساباتهم على السوشال — في مخطط مقارنة.', why: 'تسعّر وتوقّت دفعاتك بذكاء: تعرف متى تنافس بالسعر ومتى بالقيمة، وتسبق خصوماتهم.',
     btns: [['مقارنة الدورات', 'اختر دورة أو أكثر ← تصبح رأس المخطط وتحتها كل منافس يقدّمها بآخر عرض (السعر، الخصم، البداية، الحضور).', 'ترى السوق كله لدورة واحدة في شاشة: الأقل والأعلى والمتوسط.'],
       ['ملفات المنافسين', 'كل منافس رأس، وتحته دوراته: البداية والنهاية، طريقة الحضور، المكان، المقدّم، الاعتماد.', 'تفهم استراتيجية كل منافس وتجد الفجوة التي تدخل منها.'],
       ['حساباتهم على السوشال', 'روابط حسابات كل منافس (يدوي) تفتحها بضغطة.', 'متابعة سريعة لعروضهم المنشورة.'],
@@ -4978,8 +5071,8 @@ var PAGE_INFO = {
       ['الصق هنا', 'وجدت سؤالاً بنفسك؟ الصق رابطه ونصه فيُقترح الرد فوراً.', 'يعمل الآن بلا Claude.'],
       ['ابحث بنفسك الآن', 'أزرار تفتح أحدث المنشورات لكل عبارة داخل كل منصة.', 'مجاني ولحظي.'],
       ['المسح اليومي', 'Claude يبحث كل صباح ويجمع الأسئلة الجديدة (مع الرصيد).', 'فرص جاهزة كل يوم بلا بحث.']] },
-  radar: { t: 'الرادار', what: 'مراقبة المنافسين وعروضهم وأسعارهم أسبوعياً.', why: 'تعرف متى تنافس بالسعر ومتى بالقيمة، ولا تُفاجأ بعرض منافس.',
-    btns: [['الموقع', 'موقع المنافس.', 'مراجعة سريعة.'], ['مكتبة إعلانات Meta', 'إعلانات المنافس الحالية (تفتحها يدوياً).', 'ترى رسائلهم التسويقية وتتفوق عليها.']] },
+  radar: { t: 'رادار الفرص والتهديدات', what: 'كل دورة لنا مقابل دورات المنافسين المماثلة: من أرخص، من يبدأ قبلنا، من خفّض، وأين لا يوجد منافس — مع ما نفعله الآن. وفجوات السوق.', why: 'قرار لا قائمة: تعرف أين تهاجم وأين تدافع هذا الأسبوع.',
+    btns: [['📈', 'يفتح دورة المنافس على الخط الزمني بتفاصيلها.', 'ترى السعر والساعات والنوع وتغيّر السعر.']] },
   discovery: { t: 'الاكتشافات', what: 'جهات جديدة (أندية/أكاديميات) لم تكن في قوائمك.', why: 'عملاء B2B جدد ومنافسون جدد قبل غيرك.',
     btns: [['تأكيد / رفض', 'تحكم هل الاكتشاف حقيقي.', 'قائمة نظيفة.'], ['دمج في المشغّلين', 'ينقله لقائمة مشغّلي الأندية.', 'يصبح هدف بيع.'],
       ['دمج في الأكاديميات', 'ينقله لقائمة المنافسين.', 'يدخل الرادار.'], ['إدخال يدوي', 'تضيف جهة سمعت عنها.', 'مثل افتتاح عرفته من مورّد.'],
@@ -5009,7 +5102,7 @@ var PAGE_INFO = {
       ['مولّد الروابط (UTM)', 'رابط خاص لكل إعلان/منشور.', 'تعرف مصدر كل عميل بدقة.'],
       ['تجربة جديدة', 'تختبر نسختين من رسالة أو عرض.', 'تقرر بالأرقام لا بالتخمين.'],
       ['تنبيه الخسارة', 'حملة تخسر أسابيع متتالية تُعلَّم.', 'توقف النزيف مبكراً.']] },
-  content: { t: 'المحتوى', what: 'تقويم أفكار المحتوى: ماذا تنشر ومتى ولمن، من أسئلة العملاء والأخبار والشركاء.', why: 'محتوى مخطط يبني «سلطة» الأكاديمية ويرد على الاعتراضات قبل أن تُطرح.',
+  content: { t: 'بنك الأفكار والمنشورات', what: 'تقويم أفكار المحتوى: ماذا تنشر ومتى ولمن، من أسئلة العملاء والأخبار والشركاء.', why: 'محتوى مخطط يبني «سلطة» الأكاديمية ويرد على الاعتراضات قبل أن تُطرح.',
     btns: [['تغيير الحالة', 'فكرة ← مسودة ← منشور.', 'تتابع التنفيذ.'], ['الركيزة', 'نوع المحتوى (سلطة، دليل، عرض...).', 'توازن بين التثقيف والبيع.']] },
   b2b: { t: 'B2B', what: 'خط بيع الشركات مرحلة بمرحلة (بحث ← صانع قرار ← تواصل ← اجتماع ← عرض ← تفاوض ← فوز).', why: 'ترى قيمة الصفقات المتوقعة وأين تتعطل.', btns: [] },
   alumni: { t: 'الخرّيجون', what: 'خريجوك ومواعيد تجديد شهاداتهم وشهاداتهم (التوصيات).', why: 'الخريج الراضي = عميل تجديد + مصدر توصيات + قصة نجاح للتسويق.',
@@ -5306,14 +5399,14 @@ function monStatus_(s) { return s === 'error' ? ['❌', 'bad'] : s === 'warn' ? 
 function monTime_(iso) { return iso ? new Date(iso).toLocaleTimeString('ar-SA-u-nu-latn', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Riyadh' }) : '—'; }
 function monStrip_(r) {
   var s = monStatus_(r.status);
-  return '<div class="mon-strip ' + s[1] + '"><span class="mon-t">' + monTime_(r.ts) + '</span><b>' + esc(r.name) + '</b><span class="mon-a">' + esc(r.action) + '</span>' +
+  return '<div class="mon-strip click ' + s[1] + '" data-act="monOpen" data-i="' + (MON.rows || []).indexOf(r) + '" title="اضغط للتفاصيل"><span class="mon-t">' + monTime_(r.ts) + '</span><b>' + esc(r.name) + '</b><span class="mon-a">' + esc(r.action) + '</span>' +
     (r.ref ? '<span class="mon-r">' + esc(String(r.ref).slice(0, 40)) + '</span>' : '') + '<span class="mon-m">' + s[0] + ' ' + esc(r.message) + '</span></div>';
 }
 function monBody_(d) {
-  var rows = d.rows || [], cur = rows[0], st = d.stats || {};
+  var rows = MON.rows = d.rows || [], cur = rows[0], st = d.stats || {};
   var ago = cur && cur.ts ? Math.round((Date.now() - new Date(cur.ts).getTime()) / 1000) : null;
   var live = ago !== null && ago < 120;
-  var center = cur ? '<div class="mon-now ' + monStatus_(cur.status)[1] + '"><div class="mon-live">' + (live ? '<span class="mon-dot"></span> يحدث الآن' : '⏸ آخر عملية') + ' · ' + monTime_(cur.ts) + '</div>' +
+  var center = cur ? '<div class="mon-now click ' + monStatus_(cur.status)[1] + '" data-act="monOpen" data-i="0"><div class="mon-live">' + (live ? '<span class="mon-dot"></span> يحدث الآن' : '⏸ آخر عملية') + ' · ' + monTime_(cur.ts) + '</div>' +
     '<div class="mon-big">' + esc(cur.name) + '</div><div class="mon-act">' + esc(cur.action) + (cur.ref ? ' · ' + esc(String(cur.ref).slice(0, 60)) : '') + '</div>' +
     '<div class="mon-msg">' + monStatus_(cur.status)[0] + ' ' + esc(cur.message) + '</div>' + (cur.sec ? '<div class="muted small">المدة: ' + esc(cur.sec) + ' ث</div>' : '') + '</div>'
     : '<div class="mon-now"><div class="mon-big">لا عمليات بعد</div></div>';
@@ -5335,10 +5428,65 @@ function monTick_() {
     }).catch(function () {}).then(monTick_);
   }, 5000);
 }
+/** أين يُفتح هذا البيان؟ من نوع المرجع والوحدة */
+function monTarget_(r) {
+  var ref = String(r.ref || ''), m = String(r.module || '');
+  if (/^AO-/.test(ref)) return ['pipeline', {}, '🧲 مراحل العملاء (الكود)'];
+  if (/^m_|^M/.test(ref) && /classify|draft|decide|dispatch|ingest|inbox/.test(m)) return ['reply', { msg_id: ref }, '💬 الرسالة'];
+  if (/^AQ/.test(ref) || m === 'ask_radar') return ['ask', { focus: ref }, '🎯 من يسأل الآن'];
+  if (/^L/.test(ref) && ref.length > 3) return ['lead', { lead_id: ref }, '👤 ملف العميل'];
+  if (m === 'daily_posts' || m === 'post_schedule') return ['dailyPost', { focus: ref }, '📣 منشور اليوم'];
+  if (m === 'news_watch') return ['news', {}, '📰 الأخبار'];
+  if (m === 'radar_competitors') return ['compwatch', {}, '📡 ماذا تغيّر عند المنافسين'];
+  if (m === 'discount') return ['pipeline', {}, '🧲 مراحل العملاء'];
+  return ['modules', { focus: m }, '⚙️ الوحدة'];
+}
+ACT.monOpen = function (el) {
+  var r = (MON.rows || [])[Number(el.dataset.i)]; if (!r) return;
+  var t = monTarget_(r), s = monStatus_(r.status);
+  openSheet('<h1>' + s[0] + ' ' + esc(r.name) + '</h1><div class="muted small">' + fmtDate(r.ts, true) + ' · ' + monTime_(r.ts) + '</div>' +
+    '<div class="card small"><div><b>الفعل:</b> ' + esc(r.action) + '</div>' + (r.ref ? '<div><b>المرجع:</b> <code>' + esc(r.ref) + '</code></div>' : '') +
+    '<div><b>الوحدة:</b> ' + esc(r.module) + '</div><div><b>النتيجة:</b> ' + esc(r.message) + '</div>' + (r.sec ? '<div><b>المدة:</b> ' + esc(r.sec) + ' ث</div>' : '') + '</div>' +
+    '<div class="btns"><button class="btn pri" data-act="monGo" data-s="' + esc(t[0]) + '" data-args="' + attr(t[1]) + '">افتح ' + t[2] + ' ↗</button>' +
+    (r.ref ? '<button class="btn" data-act="copyVal" data-text="' + esc(r.ref) + '">نسخ المرجع</button>' : '') + '</div>');
+};
+ACT.monGo = function (el) { var a = {}; try { a = JSON.parse(el.dataset.args || '{}'); } catch (e) {} closeSheet(); go(el.dataset.s, a); };
 SCREENS.monitor = { render: function (d) {
   MON.last = '';
   setTimeout(monTick_, 0);
   return '<div class="mon"><div class="row between"><h1>📺 مراقبة الأداء</h1><span class="muted small">تتحدّث كل ٥ ثوانٍ</span></div><div id="monbody">' + monBody_(d) + '</div></div>';
+} };
+</script>
+
+  <script>
+/* ═══════════ 🎯 رادار الفرص والتهديدات — كل دورة لنا مقابل المنافسين: ماذا نفعل الآن ═══════════ */
+var RAD_KIND = { threat: ['تهديد', 'bad'], opp: ['فرصة', 'good'], watch: ['انتبه', 'warn'] };
+SCREENS.radar = { render: function (d) {
+  var c = d.counts || {};
+  var html = north(d.north) + '<h1>🎯 رادار الفرص والتهديدات</h1>' +
+    '<div class="muted small">كل دورة لنا مقابل دورات المنافسين المماثلة: السعر، من يبدأ أولاً، من خفّض — مع ما نفعله. (سجل الأحداث في <a href="#" data-go="compwatch">📡 ماذا تغيّر</a>، والمواعيد في <a href="#" data-go="comptimeline">📈 الخط الزمني</a>)</div>' +
+    '<div class="row">' + [[c.threat || 0, '🔴 تهديد'], [c.opp || 0, '🟢 فرصة'], [c.watch || 0, '🟠 انتبه'], [d.comp_total || 0, 'دورة منافس مرصودة']].map(function (x) {
+      return '<div class="stat"><div class="v">' + x[0] + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') + '</div>';
+  if (!(d.rows || []).length) html += empty('أضف دوراتنا في «الدورات» ليقارنها الرادار بالمنافسين');
+  html += (d.rows || []).map(function (r) {
+    var worst = r.signals.some(function (s) { return s.kind === 'threat'; }) ? 'bad' : r.signals.some(function (s) { return s.kind === 'opp'; }) ? 'good' : 'warn';
+    return '<details class="card rad-' + worst + '"' + (r.score ? ' open' : '') + '><summary><b>' + esc(r.name) + '</b> ' +
+      chip(r.ours ? r.ours.toLocaleString('en') + ' ر.س' : 'بلا سعر', 'acc') + (r.next ? chip('📅 ' + fmtDate(r.next)) : '') + chip(r.comps.length + ' منافس') + '</summary>' +
+      r.signals.map(function (s) {
+        return '<div class="rad-sig"><div>' + chip(RAD_KIND[s.kind][0], RAD_KIND[s.kind][1]) + ' ' + esc(s.t) + '</div><div class="muted small">➡️ ' + esc(s.act) + '</div></div>';
+      }).join('') +
+      (r.comps.length ? '<table class="gt-tbl" style="margin-top:6px"><tr><th>المنافس</th><th>الدورة</th><th>السعر</th><th>ساعات/نوع</th><th></th></tr>' + r.comps.map(function (x) {
+        var y = new Date(x.start || x.at).getFullYear() || new Date().getFullYear();
+        return '<tr><td>' + esc(x.who) + '</td><td>' + esc(x.course) + '</td><td>' + (x.price ? '<b>' + x.price.toLocaleString('en') + '</b>' + (x.prev && x.prev !== x.price ? ' <s class="muted">' + x.prev.toLocaleString('en') + '</s>' : '') : '—') + '</td>' +
+          '<td class="small">' + esc([x.hours ? x.hours + ' س' : '', x.type].filter(String).join(' · ') || '—') + '</td>' +
+          '<td><a href="#" data-go="comptimeline" data-args="' + attr({ year: y, focus: x.offer_id }) + '">📈</a></td></tr>';
+      }).join('') + '</table>' : '') + '</details>';
+  }).join('');
+  html += '<h2>🧭 فجوات السوق — دورات يقدّمها المنافسون ولا نقدّمها</h2>' + ((d.gaps || []).length ? d.gaps.map(function (g) {
+    return '<div class="card small"><b>«' + esc(g.word) + '»</b> ' + chip(g.count + ' دورة') + (g.min ? chip(g.min === g.max ? g.min.toLocaleString('en') + ' ر.س' : g.min.toLocaleString('en') + '–' + g.max.toLocaleString('en') + ' ر.س', 'acc') : '') +
+      '<div class="muted">مثال: ' + esc(g.sample) + ' · عند: ' + esc(g.who.slice(0, 4).join('، ')) + '</div><div class="small">➡️ فكّر في دورة لنا هنا إن كان الطلب واضحاً في «من يسأل الآن».</div></div>';
+  }).join('') : empty('لا فجوات واضحة — كل ما يقدّمه المنافسون نقدّم مثله'));
+  return html;
 } };
 </script>
 
