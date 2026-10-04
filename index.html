@@ -172,8 +172,12 @@ nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--acc
 .cgrp { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 .cgrps { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: flex-start; }
 .cnt.go { border-color: var(--accent); } .cnt.ok b { color: var(--good); } .cnt.bad b { color: var(--bad); }
-.bgrid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-@media (min-width: 760px) { .bgrid { grid-template-columns: 1fr 1fr; } } @media (min-width: 1200px) { .bgrid { grid-template-columns: 1fr 1fr 1fr; } }
+.bstrip { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 5px 10px; margin-bottom: 5px; }
+.bstrip.hl { border-color: var(--accent); }
+.bs-name { min-width: 150px; display: flex; flex-direction: column; line-height: 1.2; }
+.bs-g, .bs-s, .bs-act { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.bs-g { padding-inline-end: 8px; border-inline-end: 1px dashed var(--line); }
+.bs-s { flex: 1; } .bs-act { margin-inline-start: auto; }
 .cnt { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 1px 9px; font-size: 12px; cursor: pointer; }
 .cnt b { color: var(--accent); } .cnt:hover { border-color: var(--accent); } .cnt.on { background: var(--accent-soft); border-color: var(--accent); }
 .envtag { font-size: 11.5px; font-weight: 700; border-radius: 6px; padding: 2px 8px; margin: -8px 10px 8px; display: inline-block; }
@@ -3509,15 +3513,21 @@ SCREENS.sources = { render: function (d, args) {
     '<label class="btn">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="sd_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label></div><div id="sd_prev"></div></details>';
 
   // ── الدفعات والتحليل ──
-  var bch = function (b, n, label, arg, cls) { if (!n) return ''; var a = { batch: b.batch_id }; Object.keys(arg).forEach(function (k) { a[k] = arg[k]; }); return '<button class="cnt ' + (cls || '') + '" data-go="sources" data-args="' + attr(a) + '"><b>' + n + '</b> ' + label + '</button>'; };
-  if (d.batches.length) html += '<h2>الدفعات ' + chip(d.batches.length) + '</h2><div class="bgrid">' + d.batches.map(function (b) {
-    return '<div class="card small"><div class="row between"><b>' + esc(b.source_name) + '</b>' + chip(b.n + ' شخص', 'acc') + '</div><div class="muted">' + fmtDate(b.imported_at, true) + '</div>' +
-      '<div class="cgrp">' + bch(b, b.male, '♂ ذكر', { gender: 'ذكر' }) + bch(b, b.female, '♀ أنثى', { gender: 'أنثى' }) + bch(b, b.nogender, 'بلا جنس', { gender: 'غير محدد' }) + '</div>' +
-      '<div class="cgrp">' + bch(b, b.not_contacted, '📭 لم يُراسَل — تواصل معهم', { st: 'لم يُراسل' }, 'go') + bch(b, b.contacted, '📨 تواصلنا', { st: 'أُرسل,مجدول للإرسال,فشل الإرسال,ردّ,تحوّل لعميل' }) + bch(b, b.replied, '💬 ردّ', { st: 'ردّ,تحوّل لعميل' }, 'ok') + bch(b, b.nocontact, '⛔ لا تراسل', { st: 'لا تراسل' }, 'bad') + bch(b, b.dormant, '⏸ خامل', { st: 'خامل' }) + '</div>' +
-      '<div class="btns"><button class="btn sm" data-act="srcdbRules" data-b="' + esc(b.batch_id) + '">حلّل بالقواعد (فوري)</button>' +
-      '<button class="btn sm pri" data-act="srcdbClaude" data-b="' + esc(b.batch_id) + '"' + (d.claude_ready ? '' : ' disabled title="يحتاج رصيد Claude"') + '>حلّل عبر Claude</button>' +
-      '<button class="btn sm" data-go="sources" data-args="' + attr({ batch: b.batch_id }) + '">اعرضها</button><button class="btn sm bad" data-act="srcdbDelBatch" data-b="' + esc(b.batch_id) + '" data-n="' + esc(b.source_name) + ' (' + b.n + ')">🗑 حذف الدفعة</button></div></div>';
-  }).join('') + '</div>';
+  // الدفعات: شرائط مضغوطة تحت بعض (التصميم المعتمد ٢٠٢٦-١٠-٠٤) — كل رقم يفتح قسمه، والأزرار خلف «⋯»
+  var bch = function (b, n, icon, title, arg, cls) { if (!n) return ''; var a = { batch: b.batch_id }; Object.keys(arg).forEach(function (k) { a[k] = arg[k]; }); return '<button class="cnt ' + (cls || '') + '" title="' + esc(title) + '" data-go="sources" data-args="' + attr(a) + '"><b>' + n.toLocaleString('en') + '</b> ' + icon + '</button>'; };
+  if (d.batches.length) html += '<h2>الدفعات ' + chip(d.batches.length) + ' <span class="muted small" style="font-weight:400">♂ ذكر · ♀ أنثى · ؟ بلا جنس · 📭 لم يُراسَل · 📨 تواصلنا · 💬 ردّ · ⛔ لا تراسل · ⏸ خامل — اضغط أي رقم</span></h2>' + d.batches.map(function (b) {
+    var open = SRCDB.menu === b.batch_id;
+    return '<div class="bstrip' + (f.batch === b.batch_id ? ' hl' : '') + '"><div class="bs-name"><b>' + esc(b.source_name) + '</b><span class="muted small">' + fmtDate(b.imported_at) + '</span></div>' +
+      '<span class="chip acc" title="إجمالي الدفعة">' + b.n.toLocaleString('en') + ' شخص</span>' +
+      '<div class="bs-g">' + bch(b, b.male, '♂', 'ذكر', { gender: 'ذكر' }) + bch(b, b.female, '♀', 'أنثى', { gender: 'أنثى' }) + bch(b, b.nogender, '؟', 'بلا جنس محدد', { gender: 'غير محدد' }) + '</div>' +
+      '<div class="bs-s">' + bch(b, b.not_contacted, '📭', 'لم يُراسَل — تواصل معهم', { st: 'لم يُراسل' }, 'go') + bch(b, b.contacted, '📨', 'تواصلنا معهم', { st: 'أُرسل,مجدول للإرسال,فشل الإرسال,ردّ,تحوّل لعميل' }) +
+        bch(b, b.replied, '💬', 'ردّوا', { st: 'ردّ,تحوّل لعميل' }, 'ok') + bch(b, b.nocontact, '⛔', 'لا تراسل', { st: 'لا تراسل' }, 'bad') + bch(b, b.dormant, '⏸', 'خامل — يمكن تنشيطهم', { st: 'خامل' }) + '</div>' +
+      '<div class="bs-act"><button class="btn sm' + (open ? ' pri' : '') + '" data-act="srcdbMenu" data-b="' + esc(b.batch_id) + '" title="إجراءات الدفعة">⋯</button>' +
+      (open ? '<button class="btn sm" data-act="srcdbRules" data-b="' + esc(b.batch_id) + '">حلّل بالقواعد</button>' +
+        '<button class="btn sm pri" data-act="srcdbClaude" data-b="' + esc(b.batch_id) + '"' + (d.claude_ready ? '' : ' disabled title="يحتاج رصيد Claude"') + '>حلّل عبر Claude</button>' +
+        '<button class="btn sm" data-go="sources" data-args="' + attr({ batch: b.batch_id }) + '">اعرضها</button>' +
+        '<button class="btn sm bad" data-act="srcdbDelBatch" data-b="' + esc(b.batch_id) + '" data-n="' + esc(b.source_name) + ' (' + b.n + ')">🗑 حذف الدفعة</button>' : '') + '</div></div>';
+  }).join('');
 
   // ── القائمة ──
   // 📊 أعداد القاعدة حسب التصنيف — كل رقم يفتح قسمه
@@ -3711,6 +3721,7 @@ ACT.srcdbDelGo = function (el) {
     go('sources', p.batch_id ? {} : (S.args || {}), true);
   }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
+ACT.srcdbMenu = function (el) { SRCDB.menu = SRCDB.menu === el.dataset.b ? '' : el.dataset.b; go('sources', S.args || {}, true); };
 ACT.srcdbAll = function (el) { q('.sd_pick').forEach(function (c) { if (!c.disabled) c.checked = el.checked; }); };
 SRCDB.media = '';
 document.addEventListener('change', function (e) {
