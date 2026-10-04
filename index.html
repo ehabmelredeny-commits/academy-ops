@@ -170,6 +170,11 @@ nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--acc
 .navi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ltr-table { direction: ltr; text-align: left; }
 .cgrp { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.var { display: inline-block; background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 0 6px; font-size: 12px; cursor: pointer; }
+.two { display: grid; grid-template-columns: 1fr; gap: 12px; } @media (min-width: 900px) { .two { grid-template-columns: 1.15fr 1fr; } }
+.prev { background: var(--soft); border-radius: 10px; padding: 8px 10px; white-space: pre-wrap; font-size: 13.5px; min-height: 60px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: none; padding: 3px 11px; font-size: 12.5px; cursor: pointer; color: var(--ink); } .seg button.on { background: var(--accent); color: var(--accent-ink); }
 .cgrps { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: flex-start; }
 .cnt.go { border-color: var(--accent); } .cnt.ok b { color: var(--good); } .cnt.bad b { color: var(--bad); }
 .bstrip { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 5px 10px; margin-bottom: 5px; }
@@ -236,6 +241,11 @@ nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--acc
 .navi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ltr-table { direction: ltr; text-align: left; }
 .cgrp { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.var { display: inline-block; background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 0 6px; font-size: 12px; cursor: pointer; }
+.two { display: grid; grid-template-columns: 1fr; gap: 12px; } @media (min-width: 900px) { .two { grid-template-columns: 1.15fr 1fr; } }
+.prev { background: var(--soft); border-radius: 10px; padding: 8px 10px; white-space: pre-wrap; font-size: 13.5px; min-height: 60px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.seg button { border: 0; background: none; padding: 3px 11px; font-size: 12.5px; cursor: pointer; color: var(--ink); } .seg button.on { background: var(--accent); color: var(--accent-ink); }
 .cgrps { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: flex-start; }
 .cnt.go { border-color: var(--accent); } .cnt.ok b { color: var(--good); } .cnt.bad b { color: var(--bad); }
 .bgrid { display: grid; grid-template-columns: 1fr; gap: 8px; }
@@ -3557,6 +3567,17 @@ SCREENS.sources = { render: function (d, args) {
     (chs.outbound_enabled ? '<span style="color:var(--good)">مفعّل</span>' : '<span style="color:var(--warn)">مقفل</span>') + ' · واتساب ' + (chs.whatsapp ? '✓' + (chs.whatsapp_template ? ' (قالب: ' + esc(chs.whatsapp_template) + ')' : ' — ينقصه القالب') : '✗') +
     ' · X ' + (chs.x ? '✓' : '✗') + ' · الحد اليومي ' + d.cap + ' · <a href="#" data-go="settings" data-args="' + attr({ tab: 'channels' }) + '">الإعدادات ← القنوات</a>' +
     '<div class="muted">يُرسل آلياً فقط لمن حالة موافقته «وافق» أو «عميل سابق». البقية زر واتساب اليدوي.</div></div>';
+  // ✉️ رسالة موحّدة (التصميم المعتمد ٢٠٢٦-١٠-٠٤)
+  html += '<details class="card" id="bm_box" style="border-color:var(--accent)"' + (SRCDB.bmOpen ? ' open' : '') + '><summary><b>✉️ رسالة موحّدة لكل المستلمين</b> <span class="muted small">— تكتبها مرة واحدة وتُملأ المتغيرات لكل شخص</span></summary>' +
+    '<div class="row between" style="margin-top:6px"><span class="small muted">تُطبَّق على:</span><span class="seg">' + [['ids', 'المحدَّدين'], ['filter', 'المعروضين بالتصفية (' + d.matched + ')'], ['all', 'القاعدة كلها (' + d.total + ')']].map(function (o) {
+      return '<button class="' + ((SRCDB.bmScope || 'filter') === o[0] ? 'on' : '') + '" data-act="bmScope" data-s="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</span></div>' +
+    '<div class="two"><div><div class="small muted" style="margin:6px 0 2px">اضغط لإدراج متغير: ' + ['الاسم', 'المدينة', 'الدورة', 'السعر', 'رابط_التسجيل', 'اسم_الأكاديمية'].map(function (v) { return '<span class="var" data-act="bmVar" data-v="' + v + '">{' + v + '}</span>'; }).join(' ') + '</div>' +
+    '<textarea id="bm_tpl" placeholder="هلا {الاسم} 👋 …">' + esc(SRCDB.bmTpl || '') + '</textarea>' +
+    '<div class="row" style="gap:6px;margin-top:6px"><label class="chip" style="cursor:pointer"><input type="checkbox" id="bm_xs" checked> استثنِ من أُرسل له سابقاً</label><label class="chip" style="cursor:pointer"><input type="checkbox" id="bm_xd" checked> استثنِ الخامل</label><span class="chip bad">⛔ «لا تراسل» مستثنون دائماً</span></div></div>' +
+    '<div><div class="small muted" style="margin:6px 0 2px">معاينة على أول شخص:</div><div class="prev" id="bm_prev"><span class="muted">اكتب الرسالة ثم اضغط «معاينة»</span></div><div class="small muted" id="bm_info" style="margin-top:6px"></div></div></div>' +
+    '<div class="btns" style="margin-top:8px"><button class="btn" data-act="bmPreview">👁 معاينة</button><button class="btn pri" data-act="bmApply">✍️ اكتب الرسالة لهم</button><button class="btn" data-act="bmSaveTpl">💾 احفظ كقالب</button>' +
+    '<select id="bm_tpls" data-act="bmPick" style="width:auto"><option value="">قوالب محفوظة…</option></select><button class="btn sm ghost" data-act="bmDelTpl" title="حذف القالب المختار">🗑</button></div>' +
+    '<div class="muted small">لا يُرسل شيء الآن — تُكتب الرسائل جاهزة للإرسال، وترسلها بالضغطة المعتادة (أو الجدولة الآلية).</div></details>';
   html += '<div class="card small row" style="flex-wrap:wrap;gap:6px;align-items:center"><label class="chip" style="cursor:pointer"><input type="checkbox" id="sd_all" data-act="srcdbAll"> تحديد الظاهرين</label>' +
     '<select id="sd_ch"><option>واتساب</option><option>X</option></select>' +
     '<label class="btn sm">🖼️ صورة للرسالة<input type="file" id="sd_media" accept="image/*" hidden></label><span id="sd_media_n" class="muted"></span>' +
@@ -3721,6 +3742,47 @@ ACT.srcdbDelGo = function (el) {
     go('sources', p.batch_id ? {} : (S.args || {}), true);
   }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
+/* ── ✉️ رسالة موحّدة ── */
+function bmArgs_(preview) {
+  var scope = SRCDB.bmScope || 'filter', f = S.args || {};
+  return { template: val('bm_tpl'), scope: scope, ids: scope === 'ids' ? q('.sd_pick').filter(function (c) { return c.checked; }).map(function (c) { return c.value; }) : [],
+    filter: { batch: f.batch || '', seg: f.seg || '', st: f.st || '', city: f.city || '', gender: f.gender || '', consent: f.consent || '', q: f.q || '' },
+    excl_sent: $('bm_xs').checked, excl_dormant: $('bm_xd').checked, preview: !!preview };
+}
+function bmInfo_(r) {
+  var sk = r.skipped || {}; var parts = []; if (sk.sent) parts.push(sk.sent + ' أُرسل لهم'); if (sk.nocontact) parts.push(sk.nocontact + ' لا تراسل'); if (sk.dormant) parts.push(sk.dormant + ' خامل');
+  return 'سيُكتب لـ <b>' + r.count + '</b> شخصاً' + (parts.length ? ' (مستثنى: ' + parts.join(' · ') + ')' : '') + '.';
+}
+function bmLoadTpls_() {
+  api('action', 'sourcesTemplates', {}).then(function (r) { var sel = $('bm_tpls'); if (!sel) return; SRCDB.tpls = r.templates || [];
+    sel.innerHTML = '<option value="">قوالب محفوظة…</option>' + SRCDB.tpls.map(function (t) { return '<option value="' + esc(t.name) + '">' + esc(t.name) + '</option>'; }).join(''); }).catch(function () {});
+}
+ACT.bmScope = function (el) { SRCDB.bmScope = el.dataset.s; SRCDB.bmTpl = val('bm_tpl'); SRCDB.bmOpen = true; go('sources', S.args || {}, true); };
+ACT.bmVar = function (el) { var t = $('bm_tpl'), v = '{' + el.dataset.v + '}', p = t.selectionStart || t.value.length; t.value = t.value.slice(0, p) + v + t.value.slice(p); t.focus(); };
+ACT.bmPreview = function (el) {
+  if (!val('bm_tpl').trim()) return toast('اكتب نص الرسالة', true);
+  el.disabled = true;
+  api('action', 'sourcesBulkDraft', bmArgs_(true)).then(function (r) { el.disabled = false; $('bm_prev').innerHTML = r.sample ? esc(r.sample.text) : '<span class="muted">لا أحد ضمن الاختيار</span>';
+    $('bm_info').innerHTML = (r.sample ? '(' + esc(r.sample.name) + (r.sample.city ? ' — ' + esc(r.sample.city) : '') + ') · ' : '') + bmInfo_(r); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.bmApply = function (el) {
+  if (!val('bm_tpl').trim()) return toast('اكتب نص الرسالة', true);
+  var scope = SRCDB.bmScope || 'filter';
+  if (scope === 'ids' && !q('.sd_pick').some(function (c) { return c.checked; })) return toast('حدّد الأشخاص أولاً', true);
+  if (!confirm(scope === 'all' ? 'كتابة الرسالة لكل القاعدة؟ (لا يُرسل شيء الآن)' : 'كتابة الرسالة لهذه المجموعة؟')) return;
+  el.disabled = true; SRCDB.bmTpl = val('bm_tpl'); SRCDB.bmOpen = true;
+  api('action', 'sourcesBulkDraft', bmArgs_(false)).then(function (r) { toast('✍️ كُتبت لـ ' + r.count + ' شخصاً — جاهزون للإرسال'); go('sources', S.args || {}, true); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
+ACT.bmSaveTpl = function () {
+  var t = val('bm_tpl').trim(); if (!t) return toast('اكتب نص الرسالة أولاً', true);
+  var name = prompt('اسم القالب:', 'دفعة جديدة — واتساب'); if (!name) return;
+  api('action', 'sourcesTemplateSave', { name: name, text: t }).then(function () { toast('💾 حُفظ القالب'); bmLoadTpls_(); }).catch(function (e) { toast(errMsg(e), true); });
+};
+ACT.bmPick = function (el) { var t = (SRCDB.tpls || []).filter(function (x) { return x.name === el.value; })[0]; if (t) { $('bm_tpl').value = t.text; SRCDB.bmTpl = t.text; } };
+ACT.bmDelTpl = function () { var n = val('bm_tpls'); if (!n) return toast('اختر قالباً', true); if (!confirm('حذف القالب «' + n + '»؟')) return; api('action', 'sourcesTemplateSave', { name: n, text: '-', remove: 1 }).then(function () { toast('حُذف'); bmLoadTpls_(); }).catch(function (e) { toast(errMsg(e), true); }); };
+document.addEventListener('input', function (e) { if (e.target && e.target.id === 'bm_tpl') SRCDB.bmTpl = e.target.value; });
+document.addEventListener('toggle', function (e) { if (e.target && e.target.id === 'bm_box') { SRCDB.bmOpen = e.target.open; if (e.target.open) bmLoadTpls_(); } }, true);
 ACT.srcdbMenu = function (el) { SRCDB.menu = SRCDB.menu === el.dataset.b ? '' : el.dataset.b; go('sources', S.args || {}, true); };
 ACT.srcdbAll = function (el) { q('.sd_pick').forEach(function (c) { if (!c.disabled) c.checked = el.checked; }); };
 SRCDB.media = '';
@@ -3814,6 +3876,13 @@ SCREENS.trainers = { render: function (d, args) {
     'والتواصل فردي مهني — لا قوائم جماعية. من يطلب ذلك يُحذف فوراً.</div>' +
     '<div class="btns"><button class="btn pri" data-act="trnCollect">🔄 اجمع من كل أدوات النظام</button><button class="btn good" data-act="trnNew">＋ مدرب يدوياً</button>' +
     '<button class="btn" data-act="trnSearch">🔎 ابحث عن مدربين (صفحة البحث)</button></div>';
+  // 📥 استيراد قائمة مدربين (التصميم المعتمد ٢٠٢٦-١٠-٠٤)
+  html += '<details class="card"' + (d.rows.length ? '' : ' open') + '><summary><b>📥 استيراد قائمة مدربين</b> <span class="muted small">— لصق أو ملف، بعناوين أو بدونها</span></summary>' +
+    '<div class="row" style="gap:6px;margin-top:6px"><div class="grow"><label class="f" style="margin:0 0 2px">اسم المصدر *</label><input type="text" id="ti_src" style="width:100%" placeholder="مثلاً: نادي الهلال — مدربو اللياقة"></div>' +
+    '<div><label class="f" style="margin:0 0 2px">الجهة الافتراضية</label><select id="ti_ent"><option value="">—</option>' + opt(d.types, '') + '</select></div></div>' +
+    '<label class="f">الصق الجدول من إكسل/شيت (بعناوين أو بدونها)</label><textarea id="ti_paste" dir="ltr" class="ltr-table" style="min-height:70px" placeholder="الجنس	الاسم	الجوال	المدينة	التخصص	الحساب"></textarea>' +
+    '<div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" data-act="tiParse">قراءة اللصق</button><label class="btn sm">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="ti_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label>' +
+    '<label class="chip" style="cursor:pointer"><input type="checkbox" id="ti_nohdr"> الملف بلا عناوين (يُكتشف تلقائياً أيضاً)</label></div><div id="ti_prev"></div></details>';
   html += '<div class="row" style="flex-wrap:wrap;gap:6px;margin:8px 0"><input id="tf_q" class="grow" placeholder="بحث بالاسم / الجهة / التخصص" value="' + esc(f.q) + '" data-act="trnFilter">' +
     '<select id="tf_t" data-act="trnFilter"><option value="">كل الجهات</option>' + opt(d.types, f.type) + '</select>' +
     '<select id="tf_g" data-act="trnFilter"><option value="">مدرب ومدربة</option>' + opt(d.genders, f.gender) + '</select>' +
@@ -3840,6 +3909,45 @@ SCREENS.trainers = { render: function (d, args) {
   });
   return html;
 } };
+/* ── 📥 استيراد المدربين ── */
+var TI = { parsed: null };
+var TI_GUESS = { gender: /جنس|النوع|gender|sex/i, name: /اسم|name/i, phone: /جوال|هاتف|موبايل|رقم|phone|mobile|whats/i, city: /مدينة|المدينه|city|منطقة/i, specialty: /تخصص|specialty|مجال|نوع التدريب/i, handle: /حساب|انستا|insta|handle|@|يوزر|user/i, entity_name: /نادي|جهة|club|academy|أكاديمية|مركز/i, notes: /ملاحظ|notes/i };
+function tiPreview_(p) {
+  if (!p) return toast('لم أجد صفوفاً', true);
+  var forced = $('ti_nohdr') && $('ti_nohdr').checked, auto = !forced && srcdbLooksData_(p.headers);
+  if (forced || auto) { p = { rows: [p.headers].concat(p.rows), noHeader: true }; var n = Math.max.apply(null, p.rows.map(function (r) { return r.length; })); p.headers = []; for (var c = 0; c < n; c++) p.headers.push('عمود ' + (c + 1)); if (auto && $('ti_nohdr')) $('ti_nohdr').checked = true; }
+  if (!p.rows.length) return toast('لم أجد صفوفاً', true);
+  TI.parsed = p; var m = {};
+  if (p.noHeader) { var mc = srcdbMapByContent_(p.rows); m = { gender: mc.gender, name: mc.name, phone: mc.phone, city: mc.city, specialty: mc.notes, handle: -1, entity_name: -1, notes: -1 };
+    // عمود فيه @ بلا نطاق = حساب تواصل (لا إيميل)
+    if (mc.email > -1 && !p.rows.some(function (r) { return /@.+\./.test(String(r[mc.email] || '')); })) m.handle = mc.email;
+  } else Object.keys(TI_GUESS).forEach(function (k) { m[k] = p.headers.findIndex(function (h) { return TI_GUESS[k].test(h); }); });
+  var sel = function (k, label) { return '<select id="ti_' + k + '" style="width:auto"><option value="-1">' + label + ' = —</option>' + p.headers.map(function (h, i) { return '<option value="' + i + '"' + (m[k] === i ? ' selected' : '') + '>' + label + ' = ' + esc(h) + '</option>'; }).join('') + '</select>'; };
+  $('ti_prev').innerHTML = '<div class="card small" style="margin-top:8px"><b>' + p.rows.length + ' صف</b> ' + (p.noHeader ? chip('ملف بلا عناوين — الأعمدة خُمّنت من محتواها', 'acc') : '') + ' — اربط الأعمدة (راجعها):' +
+    '<div class="row" style="gap:6px;margin-top:4px">' + sel('gender', 'الجنس') + sel('name', 'الاسم') + sel('phone', 'الجوال') + sel('city', 'المدينة') + sel('specialty', 'التخصص') + sel('handle', 'الحساب') + sel('entity_name', 'الجهة') + '</div>' +
+    '<div style="overflow-x:auto;margin:6px 0"><table class="ltr-table" dir="ltr"><tr>' + p.headers.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr>' + p.rows.slice(0, 4).map(function (r) { return '<tr>' + p.headers.map(function (h, i) { return '<td>' + esc(r[i]) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>' +
+    '<div class="btns"><button class="btn good" data-act="tiImport">استيراد ' + p.rows.length + ' مدرب</button></div></div>';
+}
+ACT.tiParse = function () { tiPreview_(srcdbParseText_(val('ti_paste'))); };
+document.addEventListener('change', function (e) {
+  if (!e.target || e.target.id !== 'ti_file' || !e.target.files || !e.target.files[0]) return;
+  var f = e.target.files[0];
+  if (/\.xlsx?$/i.test(f.name) && typeof XLSX !== 'undefined') { var r = new FileReader(); r.onload = function () { var wb = XLSX.read(new Uint8Array(r.result), { type: 'array' }); var arr = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' }).filter(function (x) { return x.some(function (c) { return String(c).trim(); }); }); tiPreview_({ headers: arr[0].map(String), rows: arr.slice(1).map(function (x) { return x.map(String); }) }); }; r.readAsArrayBuffer(f); }
+  else { var r2 = new FileReader(); r2.onload = function () { tiPreview_(srcdbParseText_(r2.result)); }; r2.readAsText(f, 'UTF-8'); }
+});
+ACT.tiImport = function (el) {
+  var p = TI.parsed; if (!p) return; if (!val('ti_src').trim()) return toast('اكتب اسم المصدر', true);
+  var ix = {}; ['gender', 'name', 'phone', 'city', 'specialty', 'handle', 'entity_name'].forEach(function (k) { ix[k] = Number(val('ti_' + k)); });
+  if (ix.name < 0) return toast('حدّد عمود الاسم', true);
+  var rows = p.rows.map(function (r) { var g = function (k) { return ix[k] > -1 ? String(r[ix[k]] || '').trim() : ''; }; return { gender: g('gender'), name: g('name'), phone: g('phone'), city: g('city'), specialty: g('specialty'), handle: g('handle'), entity_name: g('entity_name') }; });
+  el.disabled = true; var PART = 2500, parts = Math.ceil(rows.length / PART), imp = 0, dup = 0;
+  (function next(i) {
+    if (i >= parts) { toast('استُورد ' + imp + ' مدرب' + (dup ? ' · تجاهل ' + dup + ' مكرراً' : '')); TI.parsed = null; go('trainers', {}, true); return; }
+    el.textContent = '⏳ الجزء ' + (i + 1) + ' من ' + parts;
+    api('action', 'trainersImport', { rows: rows.slice(i * PART, (i + 1) * PART), source_name: val('ti_src'), entity_type: val('ti_ent') }).then(function (r) { imp += r.imported; dup += r.duplicates || 0; next(i + 1); })
+      .catch(function (e) { el.disabled = false; el.textContent = 'استيراد'; toast(errMsg(e), true); });
+  })(0);
+};
 ACT.trnFilter = function () { go('trainers', { q: val('tf_q'), type: val('tf_t'), gender: val('tf_g'), city: val('tf_c'), role: val('tf_r') }, true); };
 ACT.trnCollect = function (el) { el.disabled = true; act('trainersCollect', {}, function (r) { return r.added ? 'أُضيف ' + r.added + ' مدرباً من أدوات النظام' : 'لا جديد — كل المدربين المعروفين موجودون'; }); };
 ACT.trnSearch = function () {
