@@ -170,6 +170,10 @@ nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--acc
 .navi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ltr-table { direction: ltr; text-align: left; }
 .cgrp { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.cgrps { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: flex-start; }
+.cnt.go { border-color: var(--accent); } .cnt.ok b { color: var(--good); } .cnt.bad b { color: var(--bad); }
+.bgrid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 760px) { .bgrid { grid-template-columns: 1fr 1fr; } } @media (min-width: 1200px) { .bgrid { grid-template-columns: 1fr 1fr 1fr; } }
 .cnt { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 1px 9px; font-size: 12px; cursor: pointer; }
 .cnt b { color: var(--accent); } .cnt:hover { border-color: var(--accent); } .cnt.on { background: var(--accent-soft); border-color: var(--accent); }
 .envtag { font-size: 11.5px; font-weight: 700; border-radius: 6px; padding: 2px 8px; margin: -8px 10px 8px; display: inline-block; }
@@ -228,6 +232,10 @@ nav.side .navg-kids button.navi.on { color: var(--accent); background: var(--acc
 .navi-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ltr-table { direction: ltr; text-align: left; }
 .cgrp { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.cgrps { display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: flex-start; }
+.cnt.go { border-color: var(--accent); } .cnt.ok b { color: var(--good); } .cnt.bad b { color: var(--bad); }
+.bgrid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 760px) { .bgrid { grid-template-columns: 1fr 1fr; } } @media (min-width: 1200px) { .bgrid { grid-template-columns: 1fr 1fr 1fr; } }
 .cnt { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 1px 9px; font-size: 12px; cursor: pointer; }
 .cnt b { color: var(--accent); } .cnt:hover { border-color: var(--accent); } .cnt.on { background: var(--accent-soft); border-color: var(--accent); }
 .pcount { display: inline-flex; align-items: center; gap: 3px; border: 1px solid var(--line); border-radius: 999px; padding: 0 2px 0 8px; font-size: 12px; }
@@ -831,6 +839,7 @@ SCREENS.reply = {
       '<div class="chips" style="margin:6px 0">' + chip(m.intent, m.intent === 'شكوى' ? 'bad' : 'acc') + chip(m.segment) +
       (m.confidence !== '' ? chip('ثقة ' + Math.round(m.confidence * 100) + '%') : '') + (l.lead_score !== '' ? chip(l.lead_score + ' نقطة', 'good') : '') +
       (l.current_employer ? chip('يعمل لدى: ' + l.current_employer) : '') + (l.b2b_badge === 'نعم' ? chip('قناة B2B', 'owner') : '') + '</div>' +
+      (d.detail.optout_hint ? '<div class="card small" style="border-color:var(--bad);background:var(--bad-soft)">⚠️ <b>يبدو أن العميل يطلب عدم التواصل.</b> احترام طلبه إلزامي (نظام حماية البيانات). ' + (l.lead_id ? '<button class="btn sm bad" data-act="optout" data-id="' + esc(l.lead_id) + '">تسجيل الانسحاب — إيقاف كل تواصل</button>' : '') + ' <span class="muted">إن لم يكن طلباً فعلياً، تجاهل هذا التنبيه.</span></div>' : '') +
       msgCtxHtml_(m, d.detail) +
       (phone && l.opt_out !== 'نعم' ? '<div class="btns" style="margin-top:0"><a class="btn sm good" target="_blank" rel="noopener" id="waBtn" href="https://wa.me/' + phone + '?text=' + encodeURIComponent(m.final_text || m.draft || '') + '">🟢 تواصل عبر واتساب</a>' + (l.lead_id ? '<button class="btn sm" data-go="lead" data-args="' + attr({ lead_id: l.lead_id }) + '">🧠 ملفه وعلم النفس</button>' : '') + '</div>' : '') +
       (m.subject ? '<div class="muted small">الموضوع: ' + esc(m.subject) + '</div>' : '') +
@@ -3500,12 +3509,15 @@ SCREENS.sources = { render: function (d, args) {
     '<label class="btn">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="sd_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label></div><div id="sd_prev"></div></details>';
 
   // ── الدفعات والتحليل ──
-  if (d.batches.length) html += '<h2>الدفعات</h2>' + d.batches.map(function (b) {
-    return '<div class="card small"><div class="row between"><b>' + esc(b.source_name) + '</b>' + chip(b.n + ' شخص') + '</div><div class="muted">' + fmtDate(b.imported_at, true) + '</div>' +
+  var bch = function (b, n, label, arg, cls) { if (!n) return ''; var a = { batch: b.batch_id }; Object.keys(arg).forEach(function (k) { a[k] = arg[k]; }); return '<button class="cnt ' + (cls || '') + '" data-go="sources" data-args="' + attr(a) + '"><b>' + n + '</b> ' + label + '</button>'; };
+  if (d.batches.length) html += '<h2>الدفعات ' + chip(d.batches.length) + '</h2><div class="bgrid">' + d.batches.map(function (b) {
+    return '<div class="card small"><div class="row between"><b>' + esc(b.source_name) + '</b>' + chip(b.n + ' شخص', 'acc') + '</div><div class="muted">' + fmtDate(b.imported_at, true) + '</div>' +
+      '<div class="cgrp">' + bch(b, b.male, '♂ ذكر', { gender: 'ذكر' }) + bch(b, b.female, '♀ أنثى', { gender: 'أنثى' }) + bch(b, b.nogender, 'بلا جنس', { gender: 'غير محدد' }) + '</div>' +
+      '<div class="cgrp">' + bch(b, b.not_contacted, '📭 لم يُراسَل — تواصل معهم', { st: 'لم يُراسل' }, 'go') + bch(b, b.contacted, '📨 تواصلنا', { st: 'أُرسل,مجدول للإرسال,فشل الإرسال,ردّ,تحوّل لعميل' }) + bch(b, b.replied, '💬 ردّ', { st: 'ردّ,تحوّل لعميل' }, 'ok') + bch(b, b.nocontact, '⛔ لا تراسل', { st: 'لا تراسل' }, 'bad') + bch(b, b.dormant, '⏸ خامل', { st: 'خامل' }) + '</div>' +
       '<div class="btns"><button class="btn sm" data-act="srcdbRules" data-b="' + esc(b.batch_id) + '">حلّل بالقواعد (فوري)</button>' +
       '<button class="btn sm pri" data-act="srcdbClaude" data-b="' + esc(b.batch_id) + '"' + (d.claude_ready ? '' : ' disabled title="يحتاج رصيد Claude"') + '>حلّل عبر Claude</button>' +
       '<button class="btn sm" data-go="sources" data-args="' + attr({ batch: b.batch_id }) + '">اعرضها</button><button class="btn sm bad" data-act="srcdbDelBatch" data-b="' + esc(b.batch_id) + '" data-n="' + esc(b.source_name) + ' (' + b.n + ')">🗑 حذف الدفعة</button></div></div>';
-  }).join('');
+  }).join('') + '</div>';
 
   // ── القائمة ──
   // 📊 أعداد القاعدة حسب التصنيف — كل رقم يفتح قسمه
@@ -3517,9 +3529,10 @@ SCREENS.sources = { render: function (d, args) {
       return '<button class="cnt' + (on ? ' on' : '') + '" data-go="sources" data-args="' + attr(arg) + '"><b>' + obj[k] + '</b> ' + esc(k) + '</button>';
     }).join('') + '</div>' : '';
   };
-  html += '<div class="card small"><div class="row between"><b>📊 القاعدة: ' + d.total + ' شخصاً</b><button class="btn sm ghost" data-go="sources">الكل</button></div>' +
+  html += '<div class="card small"><div class="row between"><b>📊 القاعدة: ' + d.total + ' شخصاً</b><button class="btn sm ghost" data-go="sources">الكل</button></div><div class="cgrps">' +
     cgrp('حالة التواصل', cnt.st, 'st') + cgrp('الموافقة', cnt.consent, 'consent') + cgrp('الشريحة', cnt.seg, 'seg') +
-    cgrp('الجنس', { 'ذكر': d.genders['ذكر'] || 0, 'أنثى': d.genders['أنثى'] || 0, 'غير محدد': d.genders[''] || 0 }, 'gender', function (k) { return k; }) + '</div>';
+    cgrp('الجنس', { 'ذكر': d.genders['ذكر'] || 0, 'أنثى': d.genders['أنثى'] || 0, 'غير محدد': d.genders[''] || 0 }, 'gender', function (k) { return k; }) + '</div>' +
+    (cnt.st['خامل'] && !f.st ? '<div class="muted small">⏸ ' + cnt.st['خامل'] + ' خامل لا يظهرون في القائمة الافتراضية — اضغط «خامل» لعرضهم وتنشيط من تريد.</div>' : '') + '</div>';
   html += '<h2>الأشخاص ' + chip(d.matched + (d.matched !== d.total ? ' من ' + d.total : '')) + '</h2>' +
     '<div class="row" style="gap:6px;margin-bottom:6px"><input type="text" id="sdf_q" class="grow" placeholder="🔍 ابحث بالاسم، الجوال، الإيميل، الاحتياج…" value="' + esc(f.q) + '"><button class="btn sm pri" data-act="srcdbFilter">بحث</button></div>' +
     '<div class="row" style="gap:6px;flex-wrap:wrap">' +
@@ -3544,12 +3557,15 @@ SCREENS.sources = { render: function (d, args) {
   if (d.genders[''] && d.total) html += '<div class="muted small">' + d.genders[''] + ' شخصاً بلا جنس محدد — <a href="#" data-act="srcdbGenderAll">قدّره من الأسماء</a></div>';
   html += pager;
   html += rows.length ? '<div class="grid2">' + rows.map(function (r) {
-    var stop = r.outreach_status === 'لا تراسل' || r.consent_status === 'رفض';
+    var stop = r.outreach_status === 'لا تراسل' || r.consent_status === 'رفض', dormant = r.outreach_status === 'خامل';
+    var att = Number(r.contact_attempts) || 0, tooMany = !stop && !dormant && att >= (d.max_attempts || 3) && r.outreach_status !== 'ردّ' && r.outreach_status !== 'تحوّل لعميل';
     var wa = r.phone ? 'https://wa.me/' + String(r.phone).replace(/\D/g, '') + '?text=' + encodeURIComponent(r.draft_msg || '') : '';
     var mail = r.email ? 'mailto:' + r.email + '?body=' + encodeURIComponent(r.draft_msg || '') : '';
     var searchQ = 'https://www.google.com/search?q=' + encodeURIComponent('"' + (r.name || '') + '"' + (r.email ? ' "' + r.email + '"' : '') + (r.city ? ' ' + r.city : ''));
     return '<div class="card" style="' + (stop ? 'opacity:.6' : '') + '"><div class="row between"><label style="cursor:pointer"><input type="checkbox" class="sd_pick" value="' + esc(r.imp_id) + '"' + (stop ? ' disabled' : '') + '> <b>' + esc(r.name || '(بلا اسم)') + '</b></label>' +
-      chip(r.outreach_status, stop ? 'bad' : r.outreach_status === 'أُرسل' ? 'good' : r.outreach_status === 'جاهز للإرسال' ? 'acc' : '') + '</div>' +
+      chip(r.outreach_status, stop ? 'bad' : dormant ? 'warn' : r.outreach_status === 'أُرسل' ? 'good' : r.outreach_status === 'جاهز للإرسال' ? 'acc' : '') + (att ? chip(att + ' محاولة') : '') + '</div>' +
+      (tooMany ? '<div class="small" style="background:var(--warn-soft);border-radius:8px;padding:4px 8px;margin-top:4px">⚠️ تواصلنا ' + att + ' مرات بلا رد — <button class="btn sm" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="خامل">⏸ اجعله خاملاً</button> <span class="muted">(يُوقف مؤقتاً ويمكن تنشيطه لاحقاً)</span></div>' : '') +
+      (dormant ? '<div class="small" style="margin-top:4px">⏸ خامل منذ ' + fmtDate(r.last_contact) + ' — <button class="btn sm good" data-act="srcdbMark" data-id="' + esc(r.imp_id) + '" data-st="لم يُراسل">▶️ تنشيط</button></div>' : '') +
       '<div class="chips">' + chip(r.segment || 'لم يُحلَّل', r.segment ? 'acc' : '') + chip(r.course_interest) + chip(r.city) + chip(r.gender ? (r.gender === 'أنثى' ? '♀ ' : '♂ ') + r.gender : '') + chip(r.consent_status) + chip(r.analysis_by ? 'تحليل: ' + r.analysis_by : '') + '</div>' +
       (r.need_summary ? '<div class="small"><b>الاحتياج:</b> ' + esc(r.need_summary) + '</div>' : '') +
       (r.outreach_status === 'مجدول للإرسال' ? '<div class="small" style="color:var(--accent)">⏱ مجدول عبر ' + esc(r.send_channel) + (r.send_media ? ' + صورة' : '') + '</div>' : '') +
@@ -3759,7 +3775,7 @@ ACT.srcdbFoundSave = function (el) {
 ACT.srcdbSeg = function (el) { act('sourcesUpdate', { imp_id: el.dataset.id, segment: el.value }, 'حُدّثت الشريحة', false); };
 ACT.srcdbMark = function (el) {
   if (el.dataset.st === 'لا تراسل' && !confirm('لن يُراسل هذا الشخص مرة أخرى. متأكد؟')) return;
-  act('sourcesUpdate', { imp_id: el.dataset.id, outreach_status: el.dataset.st, channel: el.dataset.ch || '' }, 'حُدّث');
+  act('sourcesUpdate', { imp_id: el.dataset.id, outreach_status: el.dataset.st, channel: el.dataset.ch || '' }, function (r) { return r && r.suggest_dormant ? '⚠️ هذه المحاولة رقم ' + r.attempts + ' بلا رد — فكّر في جعله خاملاً' : el.dataset.st === 'خامل' ? '⏸ صار خاملاً — يمكن تنشيطه من زر ▶️' : 'حُدّث'; });
 };
 ACT.srcdbLead = function (el) { act('sourcesToLead', { imp_id: el.dataset.id }, 'أُضيف إلى العملاء'); };
 // بعد فتح واتساب/الإيميل: نسأل هل أُرسلت فعلاً ثم نسجّل
@@ -4309,6 +4325,7 @@ SCREENS.pipeline = { render: function (d) {
           '<div class="row between"><b>' + esc(r.name) + '</b>' + (r.overdue ? chip('⏰ مستحقة', 'bad') : '') + '</div>' +
           '<div class="chips">' + chip('🧠 ' + r.psych_type, 'acc') + (r.objection ? chip('✋ ' + r.objection, 'warn') : '') + (r.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + '</div>' +
           (r.course ? '<div class="muted small">' + esc(r.course) + '</div>' : '') +
+          (r.dormant_hint ? '<div class="small" style="background:var(--warn-soft);border-radius:6px;padding:2px 6px">⚠️ بلا رد منذ ' + r.dormant_hint + ' يوماً — <a href="#" data-act="leadDormant" data-id="' + esc(r.lead_id) + '">⏸ اجعله خاملاً</a></div>' : '') +
           '<div class="small">➡️ ' + esc(r.step) + (r.due ? ' <span class="muted">· ' + fmtDate(r.due, true) + '</span>' : '') + '</div></div>';
       }).join('') + '</div>';
   }).join('') + '</div>';
@@ -4363,7 +4380,8 @@ function leadPsychHtml_(id, d) {
     '<label class="f">الرسالة المقترحة — حسب: <select id="lp_key" style="min-width:0">' + keys.map(function (k) { return '<option' + (k === d.key ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select></label>' +
     (d.message ? '<textarea id="lp_msg" style="min-height:110px">' + esc(d.message) + '</textarea>' : '<div class="muted small">لا رسالة — العميل طلب عدم التواصل.</div>') +
     '<div class="btns">' + (d.message ? '<button class="btn sm good" data-act="lpCopy">📋 انسخ</button>' + (wa ? '<a class="btn sm" id="lp_wa" target="_blank" rel="noopener" href="' + esc(wa) + '">🟢 افتح في واتساب</a>' : '') : '') +
-      '<button class="btn sm" data-act="lpSave" data-id="' + esc(id) + '">💾 احفظ النمط والاعتراض</button></div>' +
+      '<button class="btn sm" data-act="lpSave" data-id="' + esc(id) + '">💾 احفظ النمط والاعتراض</button>' +
+      (LPS.lead && LPS.lead.status === 'خامل' ? '<button class="btn sm good" data-act="leadWake" data-id="' + esc(id) + '">▶️ تنشيط (يعود «تواصلنا»)</button>' : '<button class="btn sm ghost" data-act="leadDormant" data-id="' + esc(id) + '" title="لم يرد بعد عدة محاولات — يوقف التذكيرات ويبقى في العمود «خامل»">⏸ اجعله خاملاً</button>') + '</div>' +
     '<label class="f">⏰ تذكير المتابعة لهذا العميل</label><div class="row" style="gap:6px"><input type="datetime-local" id="lp_date" value="' + esc(lpLocal_(d.next_action_date)) + '">' +
       '<input type="text" id="lp_next" class="grow" placeholder="ماذا ستفعل؟ مثال: أرسل له جدول الدفعة" value="' + esc(d.next_action || st.title || '') + '">' +
       '<button class="btn sm pri" data-act="lpRemind" data-id="' + esc(id) + '">ذكّرني</button>' + (d.next_action_date ? '<button class="btn sm ghost" data-act="lpRemindClear" data-id="' + esc(id) + '">إلغاء التذكير</button>' : '') + '</div>';
@@ -4384,6 +4402,8 @@ document.addEventListener('change', function (e) {
 document.addEventListener('input', function (e) {
   if (e.target && e.target.id === 'lp_msg' && $('lp_wa') && LPS.lead) $('lp_wa').href = 'https://wa.me/' + String(LPS.lead.phone).replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent(e.target.value);
 });
+ACT.leadDormant = function (el) { act('leadStage', { lead_id: el.dataset.id, status: 'خامل' }, '⏸ صار خاملاً — بلا تذكيرات، ويمكن تنشيطه لاحقاً'); };
+ACT.leadWake = function (el) { act('leadStage', { lead_id: el.dataset.id, status: 'تواصلنا' }, '▶️ نُشّط'); };
 ACT.lpCopy = function () { copyText(val('lp_msg')); };
 ACT.lpSave = function (el) { act('leadPsychSave', { lead_id: el.dataset.id, psych_type: val('lp_type'), objection: val('lp_obj') }, 'حُفظ', false); };
 ACT.lpRemind = function (el) {
