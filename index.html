@@ -596,7 +596,10 @@ function go(screen, args, keepScroll) {
 }
 
 /* نسخة محلية من كل شاشة (في هذا المتصفح فقط) لفتح فوري */
-function cacheKey_(screen, args) { return 'ops_scr_' + screen + '_' + JSON.stringify(args || {}); }
+// الذاكرة المؤقتة للشاشات مفصولة لكل بيئة (الأساسي/التجريبي كانا يتشاركان نفس المتصفح فظهرت بيانات التجريبي في الأساسي)
+var CACHE_NS = 'ops_scr_' + (location.pathname.indexOf('/sandbox/') > -1 ? 'sbx_' : 'main_');
+(function () { try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('ops_scr_') === 0 && k.indexOf(CACHE_NS) !== 0) localStorage.removeItem(k); }); } catch (e) {} })();
+function cacheKey_(screen, args) { return CACHE_NS + screen + '_' + JSON.stringify(args || {}); }
 function cacheGet_(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
 function cachePut_(k, data) {
   try { localStorage.setItem(k, JSON.stringify(data)); }
@@ -956,9 +959,16 @@ ACT.markSent = function (el) { act('markSent', { msg_id: el.dataset.id }, 'سُ�
 SCREENS.lead = {
   render: function (d) {
     var l = d.lead;
-    var html = '<h1>' + esc(l.name || l.phone || l.email || 'عميل') + '</h1><div class="card"><div class="kv">' +
+    var ask = d.ask;
+    var html = '<h1>' + esc(l.name || l.phone || l.email || 'عميل') + '</h1>' +
+      (ask ? '<div class="card small" style="border-color:var(--warn)">🌐 <b>جاء من «من يسأل الآن»</b> · ' + esc(ask.platform || '') + (ask.asked_where ? ' · 📍 ' + esc(ask.asked_where) : '') +
+        '<div class="chips" style="margin-top:4px">' + (extUrl(ask.url) ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(extUrl(ask.url)) + '">📝 منشوره / سؤاله ↗</a>' : chip('بلا رابط للمنشور', 'warn')) +
+        (extUrl(ask.asker_url) ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(extUrl(ask.asker_url)) + '">👤 ملفه ' + esc(ask.asker_handle || '') + ' ↗</a>' : (ask.asker_handle ? chip('👤 ' + ask.asker_handle) : chip('👤 السائل غير محدد — أكمله من «من يسأل الآن» ✏️', 'warn'))) +
+        '<a class="chip" href="#" data-go="ask">🎯 افتح الفرصة</a></div>' +
+        (ask.question ? '<div class="quote" style="margin-top:6px">«' + esc(ask.question) + '»</div>' : '') + '</div>' : '') +
+      '<div class="card"><div class="kv">' +
       [['الحالة', l.status], ['النقاط', l.lead_score], ['الشريحة', l.segment], ['النية', l.intent], ['الهاتف', l.phone], ['البريد', l.email],
-        ['المدينة', l.city], ['جهة العمل', l.current_employer], ['المصدر', l.source], ['الحملة', l.utm_campaign], ['الموافقة', l.consent + ' ' + fmtDate(l.consent_date)],
+        ['المدينة', l.city], ['جهة العمل', l.current_employer], ['المصدر', l.source], ['الحسابات', l.handles], ['الحملة', l.utm_campaign], ['الموافقة', l.consent + ' ' + fmtDate(l.consent_date)],
         ['أول رسالة', fmtDate(l.first_message_at, true)], ['زمن الاستجابة', l.response_minutes !== '' ? l.response_minutes + ' دقيقة' : '—'],
         ['منسحب', l.opt_out], ['الدورة المسجّلة', l.enrolled_course], ['المدفوع', l.paid_amount]]
         .map(function (r) { return '<b>' + r[0] + '</b><span>' + esc(r[1] || '—') + '</span>'; }).join('') + '</div></div>';
@@ -3991,7 +4001,7 @@ ACT.trnDel = function (el) { if (confirm('حذف نهائي لبيانات هذ�
   <script>
 /* ═══════════ البيئة التجريبية: شريط أحمر + زر ملاحظة ثابت + شاشة 🧪 التجربة ═══════════ */
 function sbxMark_(n) {
-  var on = n && n.env === 'sandbox';
+  var on = !!(n && n.env === 'sandbox' && location.pathname.indexOf('/sandbox/') > -1); // الأساسي لا يُعلَّم تجريبياً أبداً
   if (on === S.sandbox) return;
   S.sandbox = on;
   if (on && !NAV_MORE.some(function (x) { return x[0] === 'sandbox'; })) NAV_MORE.unshift(['sandbox', '🧪 التجربة']);
@@ -4444,6 +4454,7 @@ SCREENS.pipeline = { render: function (d) {
           '<div class="row between"><b>' + esc(r.name) + '</b>' + (r.overdue ? chip('⏰ مستحقة', 'bad') : '') + '</div>' +
           '<div class="chips">' + chip('🧠 ' + r.psych_type, 'acc') + (r.objection ? chip('✋ ' + r.objection, 'warn') : '') + (r.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + '</div>' +
           (r.course ? '<div class="muted small">' + esc(r.course) + '</div>' : '') +
+          (r.post_url || r.profile_url ? '<div class="chips">' + (r.post_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(r.post_url) + '" onclick="event.stopPropagation()">📝 منشوره ↗</a>' : '') + (r.profile_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(r.profile_url) + '" onclick="event.stopPropagation()">👤 ' + esc(r.handle || 'ملفه') + ' ↗</a>' : '') + '</div>' : '') +
           (r.dormant_hint ? '<div class="small" style="background:var(--warn-soft);border-radius:6px;padding:2px 6px">⚠️ بلا رد منذ ' + r.dormant_hint + ' يوماً — <a href="#" data-act="leadDormant" data-id="' + esc(r.lead_id) + '">⏸ اجعله خاملاً</a></div>' : '') +
           '<div class="small">➡️ ' + esc(r.step) + (r.due ? ' <span class="muted">· ' + fmtDate(r.due, true) + '</span>' : '') + '</div></div>';
       }).join('') + '</div>';
