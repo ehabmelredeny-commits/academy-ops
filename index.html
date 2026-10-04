@@ -4970,7 +4970,7 @@ ACT.clSaveMgr = function (el) { var id = el.dataset.id, c = clRow_(id); c.manage
 /* ═══════════ 📱 تطبيقات المدرب أونلاين / إلى مكانك ═══════════ */
 SCREENS.homeapps = { render: function (d) {
   var html = north(d.north) + '<h1>📱 تطبيقات المدرب أونلاين ' + chip(d.rows.length) + '</h1>';
-  html += '<div class="card small">تطبيقات المدربين أونلاين وإلى مكانك. ⚙️ <b>بحث آلي أسبوعي</b> في متجر Apple السعودي يضيف الجديد «غير مؤكد» لتراجعه. لكل تطبيق: الاسم، الإدارة والتواصل، والتقييم. كل معلومة بمصدرها، وما لم يُتحقق منه مكتوب «غير مؤكد». <b>لماذا تهمك؟</b> هذه التطبيقات تحتاج مدربين معتمدين = قناة توظيف لخرّيجينا وشراكة محتملة.</div>';
+  html += '<div class="card small">تطبيقات المدربين أونلاين وإلى مكانك. ⚙️ <b>بحث آلي أسبوعي</b> في قوائم الصحة واللياقة بمتجر Apple السعودي يضيف الجديد «غير مؤكد» لتراجعه. لكل تطبيق: الاسم، الإدارة والتواصل، والتقييم. كل معلومة بمصدرها، وما لم يُتحقق منه مكتوب «غير مؤكد». <b>لماذا تهمك؟</b> هذه التطبيقات تحتاج مدربين معتمدين = قناة توظيف لخرّيجينا وشراكة محتملة.</div>';
   html += d.rows.length ? '<div class="grid2">' + d.rows.map(function (a) {
     var rate = [a.rating_ios ? '⭐ iOS ' + a.rating_ios : '', a.rating_android ? '⭐ Android ' + a.rating_android : ''].filter(String).join(' · ');
     return '<div class="card small"><div class="row between"><b style="font-size:14px">' + esc(a.name) + '</b>' + chip(a.verified === 'نعم' ? '✓ متحقق' : 'غير مؤكد', a.verified === 'نعم' ? 'good' : 'warn') + '</div>' +
