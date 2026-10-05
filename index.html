@@ -413,9 +413,21 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
-.ch-strip{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}
-.ch-in{flex:1 1 110px;display:flex;flex-direction:column;gap:2px;padding:5px 7px;border:1px solid var(--line);border-inline-start-width:4px;border-radius:9px;font-size:11.5px}
-.ch-in input{width:100%;padding:4px 6px;font-size:14px}
+.sl{display:flex;flex-direction:column;gap:4px;margin:4px 0 10px}
+.sl-head,.sl-row{display:grid;gap:8px;align-items:center;padding:5px 10px;font-size:12px}
+.sl-head{color:var(--muted);font-size:11px;border-bottom:1px solid var(--line);padding-top:0}
+.sl-row{border:1px solid var(--line);border-radius:8px;background:var(--card);white-space:nowrap;min-height:30px}
+.sl-row.click{cursor:pointer}.sl-row.click:hover{border-color:var(--accent)}.sl-row.open{border-color:var(--accent);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.sl-c{overflow:hidden;text-overflow:ellipsis;min-width:0}.sl-c .chip{margin:0;padding:1px 7px;font-size:11px}
+.sl-detail{border:1px solid var(--accent);border-top:0;border-radius:0 0 8px 8px;padding:8px 12px;margin-top:-4px;font-size:12.5px;background:var(--card)}
+.statmini{padding:3px 9px;border:1px solid var(--line);border-radius:8px;font-size:12px}.statmini.good b{color:var(--good)}.statmini.warn b{color:var(--warn)}.statmini.bad b{color:var(--bad)}
+.sdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:5px;vertical-align:1px}
+@media (max-width:760px){.sl-head{display:none}.sl-row{display:flex!important;flex-wrap:wrap;white-space:normal;gap:4px 10px}.sl-c{max-width:100%}.sl-first{flex-basis:100%}}
+.ch-strip{display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden;margin:2px 0 6px}
+.ch-in{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:2px;padding:4px 6px;border:1px solid var(--line);border-inline-start-width:4px;border-radius:9px;font-size:10.5px}
+.ch-in span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ch-in input{width:100%;min-width:0;box-sizing:border-box;padding:3px 5px;font-size:13px;text-align:center}
+@media (max-width:700px){.ch-strip{flex-wrap:wrap}.ch-in{flex:1 1 30%}}
 .ch-bar{margin-bottom:8px}.ch-bars{display:flex;height:16px;border-radius:8px;overflow:hidden;background:rgba(127,127,127,.15);margin-bottom:4px}
 .ch-bars i{display:block;height:100%;color:#fff;font-size:10px;font-style:normal;text-align:center;line-height:16px;overflow:hidden}
 .dp-silent{margin:6px 0;padding:6px 8px;border-radius:8px;background:rgba(141,108,216,.08);font-size:12.5px}
@@ -781,6 +793,27 @@ function north(n) {
     (off ? ' · <span class="north-off" title="' + esc(why) + '">⏸ الميزات الذكية متوقفة</span>' : '') + '</span></div>';
 }
 function empty(t) { return '<div class="empty">' + esc(t) + '</div>'; }
+/**
+ * قائمة أشرطة رفيعة: صف واحد لكل عنصر والمعلومات بجانب بعض بأعمدة لها عناوين (التصميم المعتمد 2026-10-05).
+ *   cols: [[عنوان العمود, عرض CSS, function(row) → html]] · opts.act + opts.id: زر الشريط (فتح التفاصيل/التعديل)
+ *   opts.detail(row): تفاصيل تُفتح تحت الشريط عند الضغط (بدل الانتقال) · الجوال: يلتف الشريط لسطرين
+ */
+function stripList_(cols, rows, opts) {
+  opts = opts || {};
+  var tpl = cols.map(function (c) { return c[1] || '1fr'; }).join(' ');
+  var head = '<div class="sl-head" style="grid-template-columns:' + tpl + '">' + cols.map(function (c) { return '<span>' + esc(c[0]) + '</span>'; }).join('') + '</div>';
+  return '<div class="sl">' + head + rows.map(function (r) {
+    var id = opts.id ? opts.id(r) : '', open = opts.detail && STRIP_OPEN[opts.key || ''] === id;
+    return '<div class="sl-row' + (opts.act || opts.detail ? ' click' : '') + (open ? ' open' : '') + (opts.cls ? ' ' + opts.cls(r) : '') + '" style="grid-template-columns:' + tpl + '"' +
+      (opts.detail ? ' data-act="slToggle" data-k="' + esc(opts.key || '') + '" data-id="' + esc(id) + '"' : opts.act ? ' data-act="' + opts.act + '" data-id="' + esc(id) + '"' : '') + '>' +
+      cols.map(function (c, i) { var v = c[2](r); return '<span class="sl-c' + (i === 0 ? ' sl-first' : '') + '" data-h="' + esc(c[0]) + '">' + (v === '' || v === null || v === undefined ? '<span class="muted">—</span>' : v) + '</span>'; }).join('') + '</div>' +
+      (open ? '<div class="sl-detail" data-id="' + esc(id) + '">' + opts.detail(r) + '</div>' : '');
+  }).join('') + '</div>';
+}
+var STRIP_OPEN = {};
+ACT.slToggle = function (el) { var k = el.dataset.k; STRIP_OPEN[k] = STRIP_OPEN[k] === el.dataset.id ? '' : el.dataset.id; go(S.screen, S.args, true); };
+/** شارات أرقام صغيرة في سطر واحد (بدل مربعات الإحصاء الكبيرة) */
+function statMini_(items) { return '<div class="row" style="gap:6px;flex-wrap:wrap;align-items:center;margin:4px 0 8px">' + items.map(function (x) { return '<span class="statmini ' + (x[2] || '') + '"><b>' + x[0] + '</b> ' + esc(x[1]) + '</span>'; }).join('') + '</div>'; }
 function section(title, items, fn, emptyText) {
   return '<h2>' + esc(title) + ' ' + chip(items.length) + '</h2>' + (items.length ? items.map(fn).join('') : (emptyText ? empty(emptyText) : ''));
 }
@@ -1119,30 +1152,27 @@ ACT.optout = function (el) { if (confirm('إيقاف كل تواصل مع هذا
 SCREENS.targets = {
   render: function (d) {
     var t = d.totals;
-    var html = north(d.north) + '<h1>مشغّلو الأندية</h1><div class="row">' +
-      '<div class="stat"><div class="v">' + t.total + '</div><div class="k">فروع متحققة</div></div>' +
-      '<div class="stat"><div class="v" style="color:var(--good)">' + t.available + '</div><div class="k">متاح مؤكد</div></div>' +
-      '<div class="stat"><div class="v" style="color:var(--warn)">' + t.pending + '</div><div class="k">قيد التحقق</div></div>' +
-      '<div class="stat"><div class="v" style="color:var(--bad)">' + t.excluded + '</div><div class="k">مستبعَد</div></div></div>' +
-      '<div class="muted small" style="margin:6px 0 10px">' + t.unverified + ' مشغّلاً بلا عدد فروع متحقق — لا تُحسب في المجاميع. ' +
-      'تتحدّث تلقائياً من الأخبار وخريطة صنّاع القرار (تحتاج Claude)، ويدوياً من هنا.</div>' +
-      '<div class="btns"><button class="btn pri" data-act="opNew">＋ إضافة جهة</button></div>';
+    var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">مشغّلو الأندية</h1><button class="btn sm pri" data-act="opNew">＋ إضافة جهة</button></div>' +
+      statMini_([[t.total, 'فرع متحقق'], [t.available, 'متاح', 'good'], [t.pending, 'قيد التحقق', 'warn'], [t.excluded, 'مستبعَد', 'bad']]) +
+      '<div class="muted tiny" style="margin:-4px 0 6px">' + t.unverified + ' بلا عدد فروع متحقق (لا تُحسب) · تتحدّث من الأخبار وخريطة صنّاع القرار، ويدوياً من هنا · اضغط أي شريط للتعديل</div>';
     var editing = S.args && S.args.edit;
     if (editing === 'new') html += opForm_({}, d);
-    html += d.operators.map(function (o) {
-      if (editing && String(editing) === String(o.op_id)) return opForm_(o, d);
-      var cls = { 'متاح': 'good', 'مستبعَد': 'bad', 'قيد التحقق': 'warn' }[o.b2b_status] || '';
-      return '<div class="card"><div class="row between"><b>' + esc(o.company) + '</b>' + chip(o.b2b_status, cls) + '</div>' +
-        '<div class="chips" style="margin-top:4px">' + chip(o.branches !== '' ? o.branches + ' فرعاً' : 'فروع غير متحققة') +
-        (o.priority !== '' ? chip('أولوية ' + o.priority, 'acc') : '') + chip(o.hq_city) + chip(o.pipeline_stage) + '</div>' +
-        (o.brands ? '<div class="muted small">' + esc(o.brands) + '</div>' : '') +
-        (o.b2b_blocker ? '<div class="small" style="color:var(--' + (cls || 'muted') + ')">السبب: ' + esc(o.b2b_blocker) +
-          (o.renewal_from ? ' · التجديد: ' + fmtDate(o.renewal_from) : '') + '</div>' : '') +
-        (o.next_step ? '<div class="small"><b>الخطوة التالية:</b> ' + esc(o.next_step) + '</div>' : '') +
-        '<div class="row between" style="margin-top:6px"><span class="muted small">' + (o.count_date ? 'آخر تحديث للفروع: ' + fmtDate(o.count_date) : '') +
-        (o.branches_note ? ' · ' + esc(o.branches_note) : '') + '</span>' +
-        '<button class="btn sm" data-act="opEdit" data-id="' + esc(o.op_id) + '">تعديل</button></div></div>';
-    }).join('');
+    var DOT = { 'متاح': '#2a9d8f', 'مستبعَد': '#c62828', 'قيد التحقق': '#e9a23b' };
+    var list = d.operators.filter(function (o) { return !(editing && String(editing) === String(o.op_id)); });
+    var ed = editing && editing !== 'new' ? d.operators.filter(function (o) { return String(editing) === String(o.op_id); })[0] : null;
+    if (ed) html += opForm_(ed, d);
+    html += stripList_([
+      ['الحالة', '95px', function (o) { return '<span class="sdot" style="background:' + (DOT[o.b2b_status] || '#8a817c') + '"></span>' + esc(o.b2b_status || '—'); }],
+      ['الجهة', 'minmax(160px,2.2fr)', function (o) { return '<b>' + esc(o.company) + '</b>' + (o.brands ? ' <span class="muted tiny">' + esc(o.brands) + '</span>' : ''); }],
+      ['الفروع', '55px', function (o) { return o.branches !== '' ? '<b>' + esc(o.branches) + '</b>' : '<span class="muted" title="غير متحقق">؟</span>'; }],
+      ['أولوية', '50px', function (o) { return o.priority !== '' ? chip(o.priority, 'acc') : ''; }],
+      ['المدينة', '80px', function (o) { return esc(o.hq_city); }],
+      ['المرحلة', '95px', function (o) { return esc(o.pipeline_stage); }],
+      ['السبب / التجديد', 'minmax(120px,2fr)', function (o) { return (o.b2b_blocker ? esc(o.b2b_blocker) : '') + (o.renewal_from ? (o.b2b_blocker ? ' · ' : '') + 'تجديد ' + fmtDate(o.renewal_from) : ''); }],
+      ['الخطوة التالية', 'minmax(120px,2fr)', function (o) { return o.next_step ? '➡️ ' + esc(o.next_step) : ''; }],
+      ['تحديث الفروع', '85px', function (o) { return o.count_date ? fmtDate(o.count_date) : ''; }],
+      ['', '24px', function () { return '✏️'; }]
+    ], list, { act: 'opEdit', id: function (o) { return o.op_id; } });
     return html;
   }
 };
