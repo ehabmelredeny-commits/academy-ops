@@ -408,6 +408,8 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
 .gt-tbl{width:100%;border-collapse:collapse;font-size:13px}.gt-tbl th{text-align:start;color:var(--muted);font-weight:500;width:120px;padding:5px 0;border-bottom:1px solid var(--line)}.gt-tbl td{padding:5px 0;border-bottom:1px solid var(--line)}
 .gt-hist{font-size:12.5px;line-height:1.9}
 .rad-bad{border-inline-start:4px solid #c62828}.rad-good{border-inline-start:4px solid #2a9d8f}.rad-warn{border-inline-start:4px solid #e9a23b}.rad-sig{padding:5px 0;border-bottom:1px dashed var(--line)}
+.busy{position:fixed;top:10px;inset-inline-start:10px;width:22px;height:22px;border-radius:50%;border:3px solid rgba(127,127,127,.25);border-top-color:var(--accent,#0b6e7f);animation:busyspin .8s linear infinite;z-index:999;display:none}
+@keyframes busyspin{to{transform:rotate(360deg)}}
 </style>
 
 </head>
@@ -451,7 +453,7 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
         .then(function (t) {
           var j; try { j = JSON.parse(t); } catch (x) { j = null; }
           if (!j) { if (retries > 0) return setTimeout(function () { done(mk, retries - 1); }, 800); throw new Error('bad'); }
-          if (j.ok) r.s && r.s(j.data); else if (/unauthorized|غير مصر/i.test(j.error || '')) opsAskKey_(true); else r.f && r.f(new Error(j.error || 'خطأ'));
+          if (j.ok) r.s && r.s(j.data); else if (/unauthorized|غير مصر/i.test(j.error || '')) { if (!mk.authRetried) { mk.authRetried = true; return setTimeout(function () { done(mk, retries); }, 1500); } opsAskKey_(true); } else r.f && r.f(new Error(j.error || 'خطأ'));
         })
         .catch(function (e) {
           if (retries > 0 && e.message !== 'bad') return setTimeout(function () { done(mk, retries - 1); }, 800);
@@ -568,9 +570,13 @@ function esc(s) {
 function attr(o) { return esc(JSON.stringify(o)); }
 function $(id) { return document.getElementById(id); }
 
+/** دائرة تحميل صغيرة تظهر ما دام هناك طلب جارٍ، وتختفي عند استقرار الصفحة */
+var BUSY = 0;
+function busy_(d) { BUSY = Math.max(0, BUSY + d); var el = $('busy'); if (!el) { el = document.createElement('div'); el.id = 'busy'; el.className = 'busy'; document.body.appendChild(el); } el.style.display = BUSY ? 'block' : 'none'; }
 function api(kind, name, args) {
+  busy_(1);
   return new Promise(function (resolve, reject) {
-    google.script.run.withSuccessHandler(resolve).withFailureHandler(function (e) { reject(e); })
+    google.script.run.withSuccessHandler(function (x) { busy_(-1); resolve(x); }).withFailureHandler(function (e) { busy_(-1); reject(e); })
       [kind === 'screen' ? 'apiScreen' : 'apiAction'](name, Object.assign({}, args || {}, { __k: UI_KEY }));
   });
 }
@@ -1554,7 +1560,7 @@ SCREENS.dailyPost = { render: function (d) {
       '<textarea id="pb_' + esc(p.post_id) + '"' + (st === 'منشور' ? ' readonly' : '') + '>' + esc(p.body) + '</textarea>' +
       (p.cta ? '<div class="small"><b>الدعوة:</b> ' + esc(p.cta) + '</div>' : '') +
       (p.media_prompt ? '<details class="small"><summary>وصف التصميم</summary>' + esc(p.media_prompt) + '</details>' : '') +
-      (st === 'بانتظار الموافقة' ? '<div class="btns"><button class="btn good" data-act="postApprove" data-id="' + esc(p.post_id) + '">اعتماد ونشر</button>' +
+      (st === 'بانتظار الموافقة' ? '<div class="btns"><button class="btn good" data-act="postApprove" data-id="' + esc(p.post_id) + '">✅ اعتماد (ثم انسخ وانشر بنفسك)</button>' +
         '<button class="btn" data-act="postEdit" data-id="' + esc(p.post_id) + '">حفظ التعديل</button>' +
         '<button class="btn bad" data-act="postReject" data-id="' + esc(p.post_id) + '">رفض مع السبب</button></div>' : '') +
       (st === 'معتمد' ? '<div class="btns"><button class="btn" data-act="copyVal" data-text="' + esc([p.body, p.cta].filter(String).join('\n\n')) + '">نسخ النص</button></div>' +
@@ -1622,7 +1628,7 @@ ACT.postManual = function (el) {
 ACT.postGen = function (el) { el.disabled = true; act('postGenerate', {}, function (r) { return r.message || 'تم'; }); };
 ACT.postApprove = function (el) {
   api('action', 'postEdit', { post_id: el.dataset.id, body: val('pb_' + el.dataset.id) })
-    .then(function () { return act('postApprove', { post_id: el.dataset.id }, 'اعتُمد — انسخه وانشره'); }).catch(function (e) { toast(errMsg(e), true); });
+    .then(function () { return act('postApprove', { post_id: el.dataset.id }, 'اعتُمد — لم يُنشر بعد: انسخ النص وانشره في المنصة ثم اضغط «نشرته ✓»'); }).catch(function (e) { toast(errMsg(e), true); });
 };
 ACT.postEdit = function (el) { act('postEdit', { post_id: el.dataset.id, body: val('pb_' + el.dataset.id) }, 'حُفظ'); };
 ACT.postReject = function (el) { var r = prompt('سبب الرفض (يتعلّم منه النظام):'); if (r) act('postReject', { post_id: el.dataset.id, reason: r }, 'رُفض — سيتجنّبه غداً'); };
