@@ -496,6 +496,8 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 @media (max-width:700px){.dp-st{flex-wrap:wrap;white-space:normal}.dp-mean{max-width:none;flex-basis:100%}}
 .busy{position:fixed;top:10px;inset-inline-start:10px;width:22px;height:22px;border-radius:50%;border:3px solid rgba(127,127,127,.25);border-top-color:var(--accent,#0b6e7f);animation:busyspin .8s linear infinite;z-index:999;display:none}
 @keyframes busyspin{to{transform:rotate(360deg)}}
+/* أي رابط ملصوق في حقل = خط أسود واضح */
+input[dir="ltr"],input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;font-weight:500}
 </style>
 
 </head>
@@ -6081,10 +6083,17 @@ function egReadFiles_() {
   return Promise.all(fs.map(function (f) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok({ data: String(r.result).split(',')[1], mime: f.type }); }; r.readAsDataURL(f); }); }));
 }
 ACT.egExtract = function (el) {
-  var text = val('eg_text'); if (!text.trim() && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق التعليقات أو ارفع صور الشاشة', true);
+  var text = val('eg_text'), url = val('eg_url').trim();
+  if (!text.trim() && !url && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق رابط المنشور أو التعليقات أو ارفع صور الشاشة', true);
   el.disabled = true; el.textContent = '⏳ يقرأ…';
-  egReadFiles_().then(function (imgs) { return api('action', 'engageExtract', { text: text, images: imgs }); })
-    .then(function (r) { el.disabled = false; el.textContent = '🔎 استخرج التعليقات'; $('eg_review').innerHTML = r.items.length ? egReviewHtml_(r) : empty('لم يُعثر على تعليقات — جرّب صورة أوضح أو الصق النص'); })
+  egReadFiles_().then(function (imgs) { return api('action', 'engageExtract', { text: text, images: imgs, url: url }); })
+    .then(function (r) {
+      el.disabled = false; el.textContent = '🔎 استخرج التعليقات';
+      var ln = r.link, note = '';
+      if (ln) { if (ln.ac_id && !val('eg_ac')) $('eg_ac').value = ln.ac_id;
+        note = '<div class="card small" style="margin-top:6px">🔗 <b>' + esc(ln.platform) + '</b>' + (ln.ac_id ? ' · ' + chip('✓ عُرف المنافس: ' + esc($('eg_ac').selectedOptions[0] ? $('eg_ac').selectedOptions[0].text : ''), 'good') : ln.handle ? ' · <span class="muted tiny">الحساب @' + esc(ln.handle) + ' غير مسجّل كمنافس</span>' : '') + ' — ' + esc(ln.note) + '</div>'; }
+      $('eg_review').innerHTML = note + (r.items.length ? egReviewHtml_(r) : (ln && !text.trim() && !r.from_images ? '' : empty('لم يُعثر على تعليقات — جرّب صورة أوضح أو الصق النص')));
+    })
     .catch(function (e) { el.disabled = false; el.textContent = '🔎 استخرج التعليقات'; toast(errMsg(e), true); });
 };
 ACT.egAnalyze = function (el) {
