@@ -702,7 +702,7 @@ function go(screen, args, keepScroll) {
   S.hist = S.hist || [];
   if (!S.backing && S.screen && S.screen !== screen) { S.hist.push({ screen: S.screen, args: S.args }); if (S.hist.length > 30) S.hist.shift(); }
   S.backing = false;
-  S.screen = screen; S.args = args || {};
+  S.screen = screen; S.args = args || {}; screenUse_(screen);
   // شاشات العرض الكثيف تأخذ كامل العرض (بلا هوامش جانبية فارغة)
   if ($('main')) $('main').classList.toggle('wide', ['dailyPost', 'monitor', 'comptimeline', 'radar', 'search'].indexOf(screen) > -1);
   renderNav();
@@ -744,17 +744,27 @@ var CACHE_NS = 'ops_scr_' + (location.pathname.indexOf('/sandbox/') > -1 ? 'sbx_
 function cacheKey_(screen, args) { return CACHE_NS + screen + '_' + JSON.stringify(args || {}); }
 function cacheGet_(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
 function cachePut_(k, data) {
-  try { localStorage.setItem(k, JSON.stringify(data)); }
+  try { localStorage.setItem(k, JSON.stringify(data)); localStorage.setItem(k + '@t', String(Date.now())); }
   catch (e) { try { Object.keys(localStorage).forEach(function (x) { if (x.indexOf('ops_scr_') === 0) localStorage.removeItem(x); }); } catch (e2) {} }
 }
 /** تجهيز الشاشات الرئيسية في الخلفية بعد أول فتح */
+/** يتعلّم الشاشات التي تفتحها أكثر (في هذا الجهاز) ليجهّزها مسبقاً */
+function screenUse_(s) {
+  if (!s || s === 'more' || s === 'lead') return;
+  try { var u = JSON.parse(localStorage.getItem('ops_use') || '{}'); u[s] = (u[s] || 0) + 1; localStorage.setItem('ops_use', JSON.stringify(u)); } catch (e) {}
+}
+function cacheAge_(k) { try { return Date.now() - Number(localStorage.getItem(k + '@t') || 0); } catch (e) { return Infinity; } }
 function prefetch_() {
-  // واحدة بعد الأخرى (لا طلبات متزامنة تزاحم الشاشة المفتوحة)
-  var list = ['today', 'reply', 'dailyPost', 'targets'];
+  // واحدة بعد الأخرى (لا طلبات متزامنة تزاحم الشاشة المفتوحة): الأكثر استخداماً أولاً + الأساسية،
+  // ويُحدَّث ما عمره أكثر من ١٠ دقائق — فتفتح الشاشة فوراً من نسخة حديثة بدل انتظار Google (٢–٥ ثوانٍ لكل طلب)
+  var use = {}; try { use = JSON.parse(localStorage.getItem('ops_use') || '{}'); } catch (e) {}
+  var list = Object.keys(use).sort(function (a, b) { return use[b] - use[a]; }).slice(0, 8);
+  ['today', 'reply', 'dailyPost', 'pipeline', 'ask', 'engage'].forEach(function (s) { if (list.indexOf(s) < 0) list.push(s); });
+  list = list.slice(0, 10);
   (function next(i) {
     if (i >= list.length) return;
     var s = list[i];
-    if (S.screen === s || cacheGet_(cacheKey_(s, {}))) return next(i + 1);
+    if (S.screen === s || (cacheGet_(cacheKey_(s, {})) && cacheAge_(cacheKey_(s, {})) < 10 * 60000)) return next(i + 1);
     api('screen', s, {}).then(function (d) { cachePut_(cacheKey_(s, {}), d); }).catch(function () {})
       .then(function () { setTimeout(function () { next(i + 1); }, 800); });
   })(0);
@@ -1237,6 +1247,7 @@ window.addEventListener('load', function () {
   try { var rs = JSON.parse(sessionStorage.getItem('ops_resume') || 'null'); sessionStorage.removeItem('ops_resume'); if (rs && rs.s && SCREENS[rs.s]) { startScreen = rs.s; startArgs = rs.a || {}; } } catch (e) {}
   go(startScreen, startArgs);
   setTimeout(prefetch_, 6000); // بعد اكتمال الشاشة الأولى
+  setInterval(function () { if (!document.hidden) prefetch_(); }, 10 * 60000); // تبقى النسخ المحفوظة حديثة ما دام النظام مفتوحاً
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
 });
