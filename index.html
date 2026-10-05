@@ -413,6 +413,20 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
+.tl2{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:4px 12px 8px;overflow-x:auto}
+.tl2-axis{position:relative;height:30px;border-bottom:1px solid var(--line);font-size:10.5px;color:var(--muted);min-width:700px}
+.tl2-axis span{position:absolute;bottom:4px;padding-inline-start:3px}
+.tl2-today{position:absolute;top:1px;color:#d64545;font-size:10px;transform:translateX(50%);white-space:nowrap}
+.tl2-grp{font-size:12px;font-weight:600;margin:10px 0 2px;padding-top:6px;border-top:1px dashed var(--line);min-width:700px}.tl2-grp.ours{color:#2a9d8f}
+.tl2-item{padding:3px 0 5px;cursor:pointer;min-width:700px;border-radius:6px}.tl2-item:hover{background:rgba(58,134,255,.06)}
+.tl2-track{position:relative;height:12px;background:repeating-linear-gradient(to left,transparent 0,transparent calc(8.333% - 1px),rgba(127,127,127,.14) calc(8.333% - 1px),rgba(127,127,127,.14) 8.333%)}
+.tl2-now{position:absolute;top:-3px;bottom:-3px;border-inline-start:1px solid #d64545}
+.tl2-line{position:absolute;top:5px;height:2px;background:var(--c);border-radius:2px}
+.tl2-line.est{background:repeating-linear-gradient(90deg,var(--c) 0 5px,transparent 5px 9px)}
+.tl2-line .s,.tl2-line .e{position:absolute;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--c)}
+.tl2-line .s{inset-inline-start:-4px}.tl2-line .e{inset-inline-end:-4px;background:var(--card);border:2px solid var(--c);width:4px;height:4px}
+.tl2-data{font-size:11px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl2-data b{font-weight:600}.tl2-data .p{color:#e9a23b;font-weight:600}.tl2-data s,.tl2-data .m{color:var(--muted)}.tl2-data .a{color:var(--accent)}
 .cs{display:flex;align-items:center;gap:10px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;margin-top:4px;font-size:12.5px;background:var(--card);min-width:0}
 .cs.off{opacity:.45}.cs-dot{width:8px;height:8px;border-radius:50%;background:#e76f51;flex-shrink:0}.cs.off .cs-dot{background:#8a817c}
 .cs-n{width:220px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cs-ic{display:inline-flex;gap:5px;flex:1;flex-wrap:wrap;align-items:center}
@@ -5056,39 +5070,50 @@ var CTL_COLORS = ['#3a86ff', '#e76f51', '#8d6cd8', '#e9a23b', '#d6457a', '#52b78
 SCREENS.comptimeline = { render: function (d, args) {
   CTL.data = d;
   var st = d.stats, y = d.year;
-  var html = north(d.north) + '<h1>📈 خط زمني دورات المنافسين</h1>';
-  html += '<div class="row" style="gap:6px;margin-bottom:6px">' +
+  // التصميم المعتمد 2026-10-05: كل دورة خط رفيع، وتحته مباشرة كل بياناتها بخط صغير — مجمّعة بالمنافس، ودوراتنا مجموعة مستقلة
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">📈 خط زمني دورات المنافسين</h1>' +
+    '<span class="row" style="gap:6px;align-items:center;flex-wrap:wrap">' +
+    [[st.count, 'دورة'], [st.competitors, 'منافس'], [st.min ? st.min.toLocaleString('en') : '—', 'أقل'], [st.avg ? st.avg.toLocaleString('en') : '—', 'متوسط'], [st.max ? st.max.toLocaleString('en') : '—', 'أعلى']].map(function (x) {
+      return '<span class="statmini"><b>' + x[0] + '</b> ' + x[1] + '</span>'; }).join('') +
     '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y - 1, topic: d.topic, sort: d.sort }) + '">‹ ' + (y - 1) + '</button><b>' + y + '</b>' +
-    '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y + 1, topic: d.topic, sort: d.sort }) + '">' + (y + 1) + ' ›</button>' +
+    '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y + 1, topic: d.topic, sort: d.sort }) + '">' + (y + 1) + ' ›</button></span></div>';
+  html += '<div class="row" style="gap:6px;margin:6px 0">' +
     '<select id="ctl_topic" data-act="ctlFilter"><option value="">كل الدورات</option>' + opt(d.topics, d.topic) + '</select>' +
     '<select id="ctl_sort" data-act="ctlFilter">' + [['date', 'ترتيب: التاريخ'], ['price', 'ترتيب: السعر'], ['who', 'ترتيب: المنافس']].map(function (o) { return '<option value="' + o[0] + '"' + (d.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
     '<button class="btn sm good" data-act="compOfferNewTl">＋ إضافة دورة لمنافس (يدوي)</button></div>';
-  html += '<div class="row">' + [[st.count, 'دورة منافس'], [st.competitors, 'منافس'], [st.min ? st.min.toLocaleString('en') : '—', 'أقل سعر'], [st.avg ? st.avg.toLocaleString('en') : '—', 'متوسط السعر'], [st.max ? st.max.toLocaleString('en') : '—', 'أعلى سعر']].map(function (x) {
-    return '<div class="stat"><div class="v">' + x[0] + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') + '</div>';
   if (!d.bars.length) return html + empty('لا دورات في ' + y + ' — أضف دورة منافس يدوياً، أو انتظر الرادار الآلي (يومياً، مجاناً)');
   var from = new Date(y, 0, 1).getTime(), span = new Date(y + 1, 0, 1).getTime() - from;
   var pct = function (t) { return Math.max(0, Math.min(100, (new Date(t).getTime() - from) / span * 100)); };
-  var whoColor = {}, ci = 0;
   var months = ['ينا', 'فبر', 'مار', 'أبر', 'ماي', 'يون', 'يول', 'أغس', 'سبت', 'أكت', 'نوف', 'ديس'];
   var now = Date.now(), nowP = now >= from && now < from + span ? pct(now) : -1;
-  var grid = months.map(function (m, i) { return '<i class="gt-grid" style="inset-inline-start:' + (i / 12 * 100) + '%"></i>'; }).join('') +
-    (nowP >= 0 ? '<i class="gt-now" style="inset-inline-start:' + nowP + '%"></i>' : '');
-  html += '<div class="gt"><div class="gt-row gt-head"><div class="gt-lbl muted small">المنافس · الدورة · الساعات · النوع</div><div class="gt-track">' + months.map(function (m, i) {
-    return '<span style="inset-inline-start:' + (i / 12 * 100) + '%">' + m + '</span>'; }).join('') + (nowP >= 0 ? '<b class="gt-today" style="inset-inline-start:' + nowP + '%">اليوم</b>' : '') + '</div></div>';
-  var lastWho = null;
-  html += d.bars.map(function (b) {
-    var col = b.ours ? '#2a9d8f' : (whoColor[b.who] = whoColor[b.who] || CTL_COLORS[ci++ % CTL_COLORS.length]);
-    var l = pct(b.start), r = pct(b.end), w = Math.max(0.6, r - l);
-    var meta = [b.hours ? b.hours + ' ساعة' : '', b.course_type || '', b.price ? b.price.toLocaleString('en') + ' ر.س' : ''].filter(String).join(' · ');
-    var first = b.who !== lastWho; lastWho = b.who;
-    return '<div class="gt-row click' + (b.ours ? ' ours' : '') + (first && d.sort === 'who' ? ' gt-first' : '') + '" data-act="ctlPick" data-id="' + esc(b.id) + '">' +
-      '<div class="gt-lbl"><span class="gt-dot" style="background:' + col + '"></span><b>' + esc(b.who) + '</b> <span class="gt-course">' + esc(b.course) + '</span>' +
-      (meta ? '<span class="gt-meta">' + esc(meta) + '</span>' : '') + '</div>' +
-      '<div class="gt-track">' + grid +
-      '<div class="gt-bar' + (b.end_estimated ? ' est' : '') + '" style="inset-inline-start:' + l + '%;width:' + w + '%;--c:' + col + '"><i class="gt-s"></i><i class="gt-e"></i>' +
-      '<span class="gt-tag">' + esc(Text_short_(b.course, 26)) + (b.price ? ' · ' + b.price.toLocaleString('en') : '') + '</span></div></div></div>';
-  }).join('') + '</div>';
-  html += '<div class="muted small">كل صف دورة واحدة · الخط الرفيع = مدة الدورة (المتقطع = نهاية تقديرية ' + d.default_days + ' يوماً) · الأخضر = دوراتنا · الخط الأحمر = اليوم · <b>اضغط أي صف للتفاصيل والتعديل</b></div>';
+  var nowLine = nowP >= 0 ? '<i class="tl2-now" style="inset-inline-start:' + nowP + '%"></i>' : '';
+  html += '<div class="tl2"><div class="tl2-axis">' + months.map(function (m, i) { return '<span style="inset-inline-start:' + (i / 12 * 100) + '%">' + m + '</span>'; }).join('') +
+    (nowP >= 0 ? '<b class="tl2-today" style="inset-inline-start:' + nowP + '%">اليوم ▾</b>' : '') + '</div>';
+  // تجميع بالمنافس (دوراتنا آخراً)، والترتيب داخل المجموعة حسب الاختيار
+  var groups = {}, order = [];
+  d.bars.forEach(function (b) { var k = b.ours ? '⭐' : b.who; if (!groups[k]) { groups[k] = []; order.push(k); } groups[k].push(b); });
+  order.sort(function (a, b) { return (a === '⭐') - (b === '⭐') || String(a).localeCompare(String(b), 'ar'); });
+  var ci = 0, money = function (n) { return Number(n).toLocaleString('en'); };
+  order.forEach(function (k) {
+    var list = groups[k], ours = k === '⭐', col = ours ? '#2a9d8f' : CTL_COLORS[ci++ % CTL_COLORS.length];
+    html += '<div class="tl2-grp' + (ours ? ' ours' : '') + '">' + (ours ? '⭐ دوراتنا' : '🏢 ' + esc(k)) + ' <span class="muted">· ' + list.length + (list.length === 1 ? ' دورة' : ' دورات') + '</span></div>';
+    list.forEach(function (b) {
+      var l = pct(b.start), r = pct(b.end), w = Math.max(0.6, r - l);
+      var hist = (b.history || []).filter(function (h) { return h.price; }), first = hist.length > 1 ? hist[0].price : 0;
+      var parts = ['<b>' + esc(b.course) + '</b>',
+        b.price ? '<span class="p">' + money(b.price) + ' ر.س</span>' + (b.base && b.disc && b.base !== b.disc ? ' <s>' + money(b.base) + '</s>' : '') : '<span class="m">السعر غير منشور</span>',
+        '⏱ ' + (b.hours ? esc(b.hours) + ' ساعة' : '—'),
+        b.course_type ? esc(b.course_type) : '',
+        '📅 ' + fmtDate(b.start) + ' ← ' + fmtDate(b.end) + (b.end_estimated ? ' <span class="m">(نهاية تقديرية)</span>' : ''),
+        b.ours ? '' : '<span class="m">' + esc(b.platform === 'website' || !b.platform ? 'الموقع' : b.platform) + (b.captured ? ' · رُصد ' + fmtDate(b.captured) : '') + '</span>',
+        first && first !== b.price ? '<span class="a">📡 السعر ' + (b.price < first ? '↓' : '↑') + ' من ' + money(first) + '</span>' : ''
+      ].filter(String);
+      html += '<div class="tl2-item" data-act="ctlPick" data-id="' + esc(b.id) + '"><div class="tl2-track">' + nowLine +
+        '<div class="tl2-line' + (b.end_estimated ? ' est' : '') + '" style="inset-inline-start:' + l + '%;width:' + w + '%;--c:' + col + '"><i class="s"></i><i class="e"></i></div></div>' +
+        '<div class="tl2-data" style="padding-inline-start:' + Math.min(l, 55) + '%" title="' + esc(b.course) + '">' + parts.join(' · ') + '</div></div>';
+    });
+  });
+  html += '</div><div class="muted tiny" style="margin-top:6px">كل دورة خط رفيع وتحته كل بياناتها · المتقطّع = نهاية تقديرية ' + d.default_days + ' يوماً · الأحمر = اليوم · اضغط أي دورة للتفاصيل والتعديل</div>';
   if (d.focus) setTimeout(function () { ctlShow_(d.focus); }, 0);
   return html;
 }, after: function () {} };
