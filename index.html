@@ -5694,7 +5694,7 @@ function dpComp_(d) {
     '<span class="dp-seg">' + [['ours', '⛶ 100% لنا'], ['split', '◧ ⅓ لنا · ⅔ منافسون'], ['comp', '⛶ 100% منافسون']].map(function (m) {
       return '<button class="' + (mode === m[0] ? 'on' : '') + '" data-act="dpMode" data-m="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span></div></div>';
   var up = d.updated || {};
-  h += '<div class="muted tiny" style="margin:4px 0 6px">⚙️ آلي: الأخبار كل ٣ ساعات · عروض مواقعهم يومياً · منشورات انستغرام/تيك توك/X تُلصق روابطها (المنصات تمنع الجلب)' +
+  h += '<div class="muted tiny" style="margin:4px 0 6px"><b>آخر ٣٠ يوماً</b> (لا اليوم فقط) · ⚙️ آلي: الأخبار كل ٣ ساعات · دورات مواقعهم يومياً · منشورات انستغرام/تيك توك/X تُلصق روابطها (المنصات تمنع الجلب)' +
     (up.last ? ' · آخر تحديث: <b>' + fmtDate(up.last, true) + '</b>' : '') + (up.next ? ' · التالي: ' + fmtDate(up.next, true) : '') + ' · الشاشة تتحدّث كل ٥ دقائق</div>';
   // 🧠 القرارات
   var br = d.brain || [];
@@ -5712,7 +5712,7 @@ function dpComp_(d) {
       (g.hours ? '<span class="chip">⏱ ' + esc(g.hours) + ' س</span>' : '') + '<span class="chip ' + esc(g.cls || '') + '">' + esc(g.kind) + '</span>' +
       '<span class="dp-mean" title="' + esc(g.meaning) + '">🧠 ' + esc(g.meaning) + '</span>' +
       (g.offer_id ? '<a href="#" data-go="comptimeline" data-args="' + attr({ year: y, focus: g.offer_id }) + '" title="الخط الزمني">📈</a>' : '') +
-      '<span class="dp-date">' + fmtDate(g.at) + '</span></div>';
+      '<span class="dp-date" title="' + (g.when === 'رُصد' ? 'وقت رصد النظام له في موقعهم — الموقع لا يذكر وقت النشر' : 'وقت النشر') + '">' + esc(g.when || '') + ' ' + fmtDate(g.at, true) + '</span></div>';
   }).join('') + '</div>' : empty(DP.filter ? 'لا شيء من هذه المنصة' : 'لا نشاط منافسين مسجّل بعد');
   return h;
 }
