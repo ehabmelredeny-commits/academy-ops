@@ -3571,6 +3571,8 @@ ACT.srcExport = function (el) {
 </script>
 
   <script>
+/** معاينة تنسيق واتساب: ~مشطوب~ و *عريض* */
+function waFmt_(s) { return esc(s).replace(/~([^~\n]+)~/g, '<s>$1</s>').replace(/\*([^*\n]+)\*/g, '<b>$1</b>').replace(/\n/g, '<br>'); }
 /* ═══════════ قواعد عملاء المصادر المساعدة ═══════════
  * استيراد (لصق من إكسل أو رفع CSV/XLSX) ← ربط الأعمدة ← تحليل (قواعد أو Claude) ← رسالة مخصصة تُرسل يدوياً واحدة واحدة.
  */
@@ -3672,7 +3674,7 @@ SCREENS.sources = { render: function (d, args) {
   html += '<details class="card" id="bm_box" style="border-color:var(--accent)"' + (SRCDB.bmOpen ? ' open' : '') + '><summary><b>✉️ رسالة موحّدة لكل المستلمين</b> <span class="muted small">— تكتبها مرة واحدة وتُملأ المتغيرات لكل شخص</span></summary>' +
     '<div class="row between" style="margin-top:6px"><span class="small muted">تُطبَّق على:</span><span class="seg">' + [['ids', 'المحدَّدين'], ['filter', 'المعروضين بالتصفية (' + d.matched + ')'], ['all', 'القاعدة كلها (' + d.total + ')']].map(function (o) {
       return '<button class="' + ((SRCDB.bmScope || 'filter') === o[0] ? 'on' : '') + '" data-act="bmScope" data-s="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</span></div>' +
-    '<div class="two"><div><div class="small muted" style="margin:6px 0 2px">اضغط لإدراج متغير: ' + ['الاسم', 'المدينة', 'الدورة', 'السعر', 'رابط_التسجيل', 'اسم_الأكاديمية'].map(function (v) { return '<span class="var" data-act="bmVar" data-v="' + v + '">{' + v + '}</span>'; }).join(' ') + '</div>' +
+    '<div class="two"><div><div class="small muted" style="margin:6px 0 2px">اضغط لإدراج متغير: ' + ['الاسم', 'المدينة', 'الدورة', 'السعر', 'الخصم', 'رابط_التسجيل', 'اسم_الأكاديمية'].map(function (v) { return '<span class="var" data-act="bmVar" data-v="' + v + '">{' + v + '}</span>'; }).join(' ') + '</div>' +
     '<textarea id="bm_tpl" placeholder="هلا {الاسم} 👋 …">' + esc(SRCDB.bmTpl || '') + '</textarea>' +
     '<div class="row" style="gap:6px;margin-top:6px"><label class="chip" style="cursor:pointer"><input type="checkbox" id="bm_xs" checked> استثنِ من أُرسل له سابقاً</label><label class="chip" style="cursor:pointer"><input type="checkbox" id="bm_xd" checked> استثنِ الخامل</label><span class="chip bad">⛔ «لا تراسل» مستثنون دائماً</span></div></div>' +
     '<div><div class="small muted" style="margin:6px 0 2px">معاينة على أول شخص:</div><div class="prev" id="bm_prev"><span class="muted">اكتب الرسالة ثم اضغط «معاينة»</span></div><div class="small muted" id="bm_info" style="margin-top:6px"></div></div></div>' +
@@ -3863,7 +3865,7 @@ ACT.bmVar = function (el) { var t = $('bm_tpl'), v = '{' + el.dataset.v + '}', p
 ACT.bmPreview = function (el) {
   if (!val('bm_tpl').trim()) return toast('اكتب نص الرسالة', true);
   el.disabled = true;
-  api('action', 'sourcesBulkDraft', bmArgs_(true)).then(function (r) { el.disabled = false; $('bm_prev').innerHTML = r.sample ? esc(r.sample.text) : '<span class="muted">لا أحد ضمن الاختيار</span>';
+  api('action', 'sourcesBulkDraft', bmArgs_(true)).then(function (r) { el.disabled = false; $('bm_prev').innerHTML = r.sample ? waFmt_(r.sample.text) + (r.discount_warning ? '<div class="small" style="color:var(--bad)">⚠️ ' + esc(r.discount_warning) + '</div>' : '') : '<span class="muted">لا أحد ضمن الاختيار</span>';
     $('bm_info').innerHTML = (r.sample ? '(' + esc(r.sample.name) + (r.sample.city ? ' — ' + esc(r.sample.city) : '') + ') · ' : '') + bmInfo_(r); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 ACT.bmApply = function (el) {
