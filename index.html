@@ -421,7 +421,7 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .sl-c{overflow:hidden;text-overflow:ellipsis;min-width:0}.sl-c .chip{margin:0;padding:1px 7px;font-size:11px}
 .sl-detail{border:1px solid var(--accent);border-top:0;border-radius:0 0 8px 8px;padding:8px 12px;margin-top:-4px;font-size:12.5px;background:var(--card)}
 .statmini{padding:3px 9px;border:1px solid var(--line);border-radius:8px;font-size:12px}.statmini.good b{color:var(--good)}.statmini.warn b{color:var(--warn)}.statmini.bad b{color:var(--bad)}
-.sl-row.sl-bad{border-color:#c62828}
+.sl-row.sl-bad{border-color:#c62828}.sl-row.sl-off{opacity:.55}
 .sdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:5px;vertical-align:1px}
 @media (max-width:760px){.sl-head{display:none}.sl-row{display:flex!important;flex-wrap:wrap;white-space:normal;gap:4px 10px}.sl-c{max-width:100%}.sl-first{flex-basis:100%}}
 .ch-strip{display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden;margin:2px 0 6px}
@@ -2709,12 +2709,17 @@ SCREENS.people = { render: function (d, args) {
     '<select id="pf_r" class="grow" data-act="pplFilter">' + opt(d.relationships, f.relationship, true) + '</select>' +
     '<select id="pf_s" class="grow" data-act="pplFilter">' + opt(['متحقق', 'غير متحقق', 'غادر الجهة؟'], f.status, true) + '</select>' +
     '<button class="btn sm" data-act="pplCsv">تصدير CSV</button></div>';
-  html += rows.length ? '<div class="grid2">' + rows.map(function (r) {
-    return '<div class="card click" ' + (r.entity_type === 'مشغّل' && /^\d+$/.test(r.op_id) ? 'data-go="operator" data-args="' + attr({ op_id: r.op_id }) + '"' : '') + '><div class="row">' + pframe(r, false) +
-      '<div class="grow"><b>' + esc(r.full_name) + '</b><div class="muted small">' + esc(r.title_ar) + ' · ' + esc(r.company) + ' · ' + esc(r.department) + '</div>' + (r.role_for_us ? '<div class="small">دوره لنا: ' + esc(r.role_for_us) + '</div>' : '') +
-      '<div class="chips">' + chip(r.relationship) + chip(r.status, r.status === 'متحقق' ? 'good' : r.status === 'غادر الجهة؟' ? 'bad' : 'warn') +
-      (r.stale ? chip('معرّض للانتهاء', 'warn') : '') + chip('تحقق: ' + fmtDate(r.last_verified_at)) + '</div></div></div></div>';
-  }).join('') + '</div>' : empty('لا أشخاص بعد — تُبنى الخريطة تدريجياً (مشغّلان يومياً)');
+  html += rows.length ? stripList_([
+    ['', '30px', function (r) { return pframe(r, false); }],
+    ['الاسم', 'minmax(130px,1.6fr)', function (r) { return r.entity_type === 'مشغّل' && /^\d+$/.test(r.op_id) ? '<a href="#" data-go="operator" data-args="' + attr({ op_id: r.op_id }) + '"><b>' + esc(r.full_name) + '</b></a>' : '<b>' + esc(r.full_name) + '</b>'; }],
+    ['المنصب', 'minmax(110px,1.4fr)', function (r) { return esc(r.title_ar); }],
+    ['الجهة', 'minmax(110px,1.4fr)', function (r) { return esc(r.company); }],
+    ['القسم', '90px', function (r) { return esc(r.department); }],
+    ['دوره لنا', 'minmax(100px,1.2fr)', function (r) { return esc(r.role_for_us); }],
+    ['العلاقة', '80px', function (r) { return esc(r.relationship); }],
+    ['الحالة', '95px', function (r) { return chip(r.status, r.status === 'متحقق' ? 'good' : r.status === 'غادر الجهة؟' ? 'bad' : 'warn') + (r.stale ? ' ⏳' : ''); }],
+    ['تحقق', '75px', function (r) { return fmtDate(r.last_verified_at); }]
+  ], rows) : empty('لا أشخاص بعد — تُبنى الخريطة تدريجياً (مشغّلان يومياً)');
   if (d.review.length) html += section('مراجعة الحذف (لم يُتحقق منهم منذ سنة)', d.review, function (r) {
     return '<div class="card"><b>' + esc(r.full_name) + '</b> — ' + esc(r.company) + '<div class="btns"><button class="btn sm" data-act="pplKeep" data-id="' + esc(r.contact_id) + '">ما زال صحيحاً</button>' +
       '<button class="btn sm bad" data-act="pplDel" data-id="' + esc(r.contact_id) + '">احذف</button></div></div>';
@@ -2733,16 +2738,19 @@ ACT.pplCsv = function () {
 /* ─── الفرص ─── */
 SCREENS.opps = { render: function (d) {
   return north(d.north) + '<h1>الفرص ' + chip(d.rows.length) + '</h1><div class="muted small">كل فرصة: مشغّل + سبب للاتصال الآن + شخص + زاوية. «ابدأ» يصنع مسودة تمر بموافقتك — لا يُرسل شيء آلياً.</div>' +
-    (d.rows.length ? d.rows.map(function (o) {
-      return '<div class="card"><div class="row between"><b class="click" data-go="operator" data-args="' + attr({ op_id: o.op_id }) + '">' + esc(o.company) + '</b>' + chip(o.score, 'good') + '</div>' +
-        '<div class="chips">' + chip(o.trigger, 'acc') + chip(o.status) + chip((o.branches || '?') + ' فرعاً') + (o.window_to ? chip('حتى ' + fmtDate(o.window_to), 'warn') : '') + '</div>' +
-        '<div class="row" style="margin:6px 0">' + (o.contact ? pframe(o.contact, false) + '<span><b>' + esc(o.contact.name) + '</b><br><span class="muted small">' + esc(o.contact.title) + '</span></span>'
-          : '<span class="pframe empty">؟</span><span class="muted small">لا صانع قرار معروف — الخريطة ناقصة</span>') + '</div>' +
-        '<div class="quote small">' + esc(o.angle) + '</div>' +
-        '<div class="btns">' + (o.contact && o.status !== 'قيد العمل' ? '<button class="btn good" data-act="oppStart" data-id="' + esc(o.opp_id) + '">ابدأ</button>' : '') +
-        (!o.contact ? '<button class="btn" data-go="operator" data-args="' + attr({ op_id: o.op_id }) + '">أكمل الخريطة</button>' : '') +
-        '<button class="btn" data-act="oppDefer" data-id="' + esc(o.opp_id) + '">أجّل</button><button class="btn bad" data-act="oppReject" data-id="' + esc(o.opp_id) + '">ارفض مع السبب</button></div></div>';
-    }).join('') : empty('لا فرص الآن — تُركّب يومياً من الاختبارات وصنّاع القرار والتجديدات'));
+    (d.rows.length ? stripList_([
+      ['النقاط', '55px', function (o) { return chip(o.score, 'good'); }],
+      ['المشغّل', 'minmax(120px,1.5fr)', function (o) { return '<a href="#" data-go="operator" data-args="' + attr({ op_id: o.op_id }) + '"><b>' + esc(o.company) + '</b></a> <span class="muted tiny">' + esc(o.branches || '?') + ' فرعاً</span>'; }],
+      ['السبب', '110px', function (o) { return chip(o.trigger, 'acc'); }],
+      ['المهلة', '85px', function (o) { return o.window_to ? chip(fmtDate(o.window_to), 'warn') : ''; }],
+      ['صانع القرار', 'minmax(120px,1.4fr)', function (o) { return o.contact ? '<b>' + esc(o.contact.name) + '</b> <span class="muted tiny">' + esc(o.contact.title) + '</span>' : '<span class="muted">غير معروف</span>'; }],
+      ['الزاوية', 'minmax(160px,2.5fr)', function (o) { return '<span class="muted" title="' + esc(o.angle) + '">' + esc(o.angle) + '</span>'; }],
+      ['الحالة', '75px', function (o) { return esc(o.status); }],
+      ['إجراء', 'minmax(170px,auto)', function (o) {
+        return (o.contact && o.status !== 'قيد العمل' ? '<button class="btn sm good" data-act="oppStart" data-id="' + esc(o.opp_id) + '">ابدأ</button> ' : '') +
+          (!o.contact ? '<button class="btn sm" data-go="operator" data-args="' + attr({ op_id: o.op_id }) + '">أكمل الخريطة</button> ' : '') +
+          '<button class="btn sm" data-act="oppDefer" data-id="' + esc(o.opp_id) + '">أجّل</button> <button class="btn sm bad" data-act="oppReject" data-id="' + esc(o.opp_id) + '">ارفض</button>'; }]
+    ], d.rows) : empty('لا فرص الآن — تُركّب يومياً من الاختبارات وصنّاع القرار والتجديدات'));
 } };
 ACT.oppStart = function (el) { el.disabled = true; act('oppStart', { opp_id: el.dataset.id }, 'أُنشئت مسودة B2B — راجعها في شاشة «الرد»'); };
 ACT.oppDefer = function (el) { act('oppStatus', { opp_id: el.dataset.id, status: 'مؤجّلة' }, 'أُجّلت'); };
@@ -3072,16 +3080,17 @@ SCREENS.competitors = { render: function (d, args) {
   if (tab === 'accounts') {
     html += '<div class="card small">حسابات المنافسين الرسمية (جُمعت من مواقعهم، وتضيف غيرها يدوياً). انستغرام وتيك توك لا يسمحان لأي برنامج بقراءة منشورات الآخرين، لذلك: ' +
       'الحساب المعلَّم <b>★ مهم</b> يظهر لك كل يوم في شاشة «اليوم» لتفتحه بضغطة، وإن رأيت عرضاً تسجّله بزر «＋ عرض دورة» فيدخل المقارنة.</div>';
-    html += '<div class="grid2">' + d.competitors.map(function (c) {
-      var accs = d.accounts.filter(function (x) { return String(x.ac_id) === String(c.ac_id); });
-      return '<div class="card"><b>' + esc(c.name) + '</b>' + (extUrl(c.website) ? ' · <a class="small" target="_blank" href="' + esc(extUrl(c.website)) + '">الموقع</a>' : '') +
-        (accs.length ? accs.map(function (x) {
-          return '<div class="row between small" style="margin-top:4px"><a target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">' + esc(x.platform) + ' · ' + esc(x.handle) + '</a>' +
-            '<span><a href="#" data-act="compAccWatch" data-id="' + esc(x.cacc_id) + '" data-on="' + (x.watch === 'نعم' ? '0' : '1') + '" title="مهم للمتابعة = يظهر في شاشة اليوم لتراجعه يومياً">' + (x.watch === 'نعم' ? '★ مهم' : '☆') + '</a> · ' +
-            '<a href="#" data-act="compAccEdit" data-id="' + esc(x.cacc_id) + '">تعديل</a> · <a href="#" data-act="compAccDel" data-id="' + esc(x.cacc_id) + '">حذف</a></span></div>'; }).join('') :
-          '<div class="muted small">لا حسابات بعد</div>') +
-        '<div class="btns"><button class="btn sm" data-act="compAccNew" data-ac="' + esc(c.ac_id) + '">＋ حساب</button></div></div>';
-    }).join('') + '</div>';
+    var nameOf = {}; d.competitors.forEach(function (c) { nameOf[c.ac_id] = c.name; });
+    var accRows = d.accounts.slice().sort(function (a, b) { return String(nameOf[a.ac_id] || '').localeCompare(String(nameOf[b.ac_id] || ''), 'ar'); });
+    html += stripList_([
+      ['مهم', '40px', function (x) { return '<a href="#" data-act="compAccWatch" data-id="' + esc(x.cacc_id) + '" data-on="' + (x.watch === 'نعم' ? '0' : '1') + '" title="مهم للمتابعة = يظهر في شاشة اليوم">' + (x.watch === 'نعم' ? '★' : '☆') + '</a>'; }],
+      ['المنافس', 'minmax(140px,1.6fr)', function (x) { return '<b>' + esc(nameOf[x.ac_id] || '') + '</b>'; }],
+      ['المنصة', '95px', function (x) { return (typeof platIcon_ === 'function' ? platIcon_(x.platform, 'pi-sm') : '') + esc(x.platform); }],
+      ['الحساب', 'minmax(120px,1.4fr)', function (x) { return extUrl(x.url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">' + esc(x.handle || x.url) + ' ↗</a>' : esc(x.handle); }],
+      ['آخر منشور ملصوق', 'minmax(120px,1.5fr)', function (x) { return x.last_post_url ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(x.last_post_url)) + '">' + (x.last_post_at ? fmtDate(x.last_post_at) : 'افتح') + ' ↗</a>' : '<span class="muted">لم يُلصق</span>'; }],
+      ['', '95px', function (x) { return '<a href="#" data-act="compAccEdit" data-id="' + esc(x.cacc_id) + '">تعديل</a> · <a href="#" data-act="compAccDel" data-id="' + esc(x.cacc_id) + '">حذف</a>'; }]
+    ], accRows);
+    html += '<details class="card small"><summary>＋ إضافة حساب لمنافس</summary><div class="chips">' + d.competitors.map(function (c) { return '<button class="chip" data-act="compAccNew" data-ac="' + esc(c.ac_id) + '">' + esc(c.name) + '</button>'; }).join('') + '</div></details>';
   }
   return html;
 } };
@@ -4151,21 +4160,26 @@ SCREENS.trainers = { render: function (d, args) {
     '<select id="tf_g" data-act="trnFilter"><option value="">مدرب ومدربة</option>' + opt(d.genders, f.gender) + '</select>' +
     '<select id="tf_c" data-act="trnFilter"><option value="">كل المدن</option>' + opt(cities, f.city) + '</select>' +
     '<select id="tf_r" data-act="trnFilter"><option value="">كل الأدوار</option>' + opt(d.roles, f.role) + '</select></div>';
-  html += rows.length ? '<div class="grid2">' + rows.map(function (t) {
+  html += rows.length ? '<div class="muted tiny">اضغط أي مدرب للتفاصيل والإجراءات</div>' + stripList_([
+    ['الحالة', '75px', function (t) { return chip(t.status, t.status === 'متحقق' ? 'good' : 'warn'); }],
+    ['المدرب', 'minmax(130px,1.6fr)', function (t) { return '<b>' + esc(t.name) + '</b>' + (t.gender ? ' <span class="muted tiny">' + esc(t.gender) + '</span>' : ''); }],
+    ['الجهة', 'minmax(120px,1.5fr)', function (t) { return (t.entity_name ? '🏢 ' + esc(t.entity_name) : '') + (t.entity_type ? ' <span class="muted tiny">' + esc(t.entity_type) + '</span>' : ''); }],
+    ['المدينة', '75px', function (t) { return esc(t.city); }],
+    ['التخصص', 'minmax(100px,1.3fr)', function (t) { return esc(t.specialty); }],
+    ['الشهادات', 'minmax(100px,1.3fr)', function (t) { return esc(t.certifications); }],
+    ['الدور', '85px', function (t) { return t.role_for_us ? chip(t.role_for_us, 'acc') : ''; }],
+    ['التواصل', '95px', function (t) { var stop = t.outreach_status === 'لا تراسل'; return chip(t.outreach_status || 'لم يُراسل', stop ? 'bad' : t.outreach_status === 'أُرسل' ? 'good' : ''); }],
+    ['الحساب', '45px', function (t) { return extUrl(t.public_handle) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(t.public_handle)) + '" onclick="event.stopPropagation()">↗</a>' : ''; }]
+  ], rows, { key: 'trn', id: function (t) { return t.tr_id; }, cls: function (t) { return t.outreach_status === 'لا تراسل' ? 'sl-off' : ''; }, detail: function (t) {
     var stop = t.outreach_status === 'لا تراسل';
-    return '<div class="card" style="' + (stop ? 'opacity:.6' : '') + '"><div class="row between"><b>' + esc(t.name) + '</b>' + chip(t.status, t.status === 'متحقق' ? 'good' : 'warn') + '</div>' +
-      '<div class="chips">' + chip(t.gender) + chip(t.entity_type) + chip(t.entity_name ? '🏢 ' + t.entity_name : '') + chip(t.city ? '📍 ' + t.city : '') + chip(t.role_for_us, 'acc') + '</div>' +
-      (t.specialty ? '<div class="small">التخصص: ' + esc(t.specialty) + '</div>' : '') + (t.certifications ? '<div class="small">الشهادات: ' + esc(t.certifications) + '</div>' : '') +
-      '<div class="small">' + [extUrl(t.public_handle) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(t.public_handle)) + '">حسابه المهني</a>' : esc(t.public_handle), esc(t.public_contact)].filter(String).join(' · ') + '</div>' +
+    return '<div class="small">' + [extUrl(t.public_handle) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(t.public_handle)) + '">حسابه المهني</a>' : esc(t.public_handle), esc(t.public_contact)].filter(String).join(' · ') + '</div>' +
       '<div class="muted small">المصدر: ' + esc(t.source_kind) + (extUrl(t.source_url) ? ' · <a target="_blank" href="' + esc(extUrl(t.source_url)) + '">الرابط</a>' : '') + (t.last_contact ? ' · آخر تواصل ' + fmtDate(t.last_contact) : '') + '</div>' +
-      (t.notes ? '<div class="muted small">' + esc(t.notes) + '</div>' : '') +
-      '<div class="btns">' + chip(t.outreach_status, stop ? 'bad' : t.outreach_status === 'أُرسل' ? 'good' : '') +
+      (t.notes ? '<div class="muted small">' + esc(t.notes) + '</div>' : '') + '<div class="btns">' +
       (stop ? '' : '<button class="btn sm" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="أُرسل">تواصلت معه ✓</button><button class="btn sm" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="ردّ">ردّ</button>') +
       '<button class="btn sm" data-act="trnEdit" data-id="' + esc(t.tr_id) + '">تعديل</button>' +
-      '<details class="small" style="display:inline-block"><summary>المزيد</summary>' +
       '<button class="btn sm bad" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="لا تراسل">لا تراسل</button>' +
-      '<button class="btn sm bad" data-act="trnDel" data-id="' + esc(t.tr_id) + '">احذف (بطلبه)</button></details></div></div>';
-  }).join('') + '</div>' : empty('لا مدربين بعد — اضغط «اجمع من كل أدوات النظام» أو أضف يدوياً');
+      '<button class="btn sm bad" data-act="trnDel" data-id="' + esc(t.tr_id) + '">احذف (بطلبه)</button></div>';
+  } }) : empty('لا مدربين بعد — اضغط «اجمع من كل أدوات النظام» أو أضف يدوياً');
   if (d.review.length) html += section('مراجعة سنوية (لم يُتحقق منهم منذ سنة)', d.review, function (t) {
     return '<div class="card small row between"><span>' + esc(t.name) + ' — ' + esc(t.entity_name) + '</span><span><button class="btn sm" data-act="trnVerify" data-id="' + esc(t.tr_id) + '">ما زال صحيحاً</button>' +
       '<button class="btn sm bad" data-act="trnDel" data-id="' + esc(t.tr_id) + '">احذف</button></span></div>';
@@ -5768,7 +5782,7 @@ function platKey_(p) {
   if (/موقع|website|web/.test(p)) return 'web';
   return 'other';
 }
-function platIcon_(p, cls, title) { return '<svg class="' + (cls || 'pi') + '"><title>' + esc(title || p) + '</title><use href="#pi-' + platKey_(p) + '"/></svg>'; }
+function platIcon_(p, cls, title) { if (!document.getElementById('pi-instagram')) document.body.insertAdjacentHTML('afterbegin', PLAT_ICONS); return '<svg class="' + (cls || 'pi') + '"><title>' + esc(title || p) + '</title><use href="#pi-' + platKey_(p) + '"/></svg>'; }
 var DP_TYPES = [['صورة', '🖼'], ['نص', '📝'], ['يوميات', '⭕'], ['ريلز', '🎬'], ['ألبوم', '🗂']];
 var DP = { type: 'صورة', off: {}, when: 'now', at: '', body: '', last: null, filter: '', mode: null, timer: null };
 function dpMode_() { if (DP.mode) return DP.mode; try { DP.mode = localStorage.getItem('ops_dp_mode') || 'split'; } catch (e) { DP.mode = 'split'; } return DP.mode; }
