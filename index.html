@@ -5693,8 +5693,7 @@ function dpComp_(d) {
   var h = '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">👁 آخر ما نشره المنافسون ' + chip((d.comp_groups || []).length) + '</h2>' +
     '<div class="row" style="gap:4px;align-items:center;flex-wrap:wrap"><button class="chip' + (DP.filter ? '' : ' acc') + '" data-act="dpFilter" data-k="">الكل</button>' +
     Object.keys(keys).map(function (k) { return '<button class="dp-fi' + (DP.filter === k ? ' on' : '') + '" data-act="dpFilter" data-k="' + k + '">' + platIcon_(k, 'pi-md') + '</button>'; }).join('') +
-    '<span class="dp-seg">' + [['ours', '⛶ 100% لنا'], ['split', '◧ ⅓ لنا · ⅔ منافسون'], ['comp', '⛶ 100% منافسون']].map(function (m) {
-      return '<button class="' + (mode === m[0] ? 'on' : '') + '" data-act="dpMode" data-m="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span></div></div>';
+    '</div></div>';
   var up = d.updated || {};
   h += '<div class="muted tiny" style="margin:4px 0 6px"><b>آخر ٣٠ يوماً</b> (لا اليوم فقط) · ⚙️ آلي: الأخبار كل ٣ ساعات · دورات مواقعهم يومياً · منشورات انستغرام/تيك توك/X تُلصق روابطها (المنصات تمنع الجلب)' +
     (up.last ? ' · آخر تحديث: <b>' + fmtDate(up.last, true) + '</b>' : '') + (up.next ? ' · التالي: ' + fmtDate(up.next, true) : '') + ' · الشاشة تتحدّث كل ٥ دقائق</div>';
@@ -5732,7 +5731,10 @@ SCREENS.dailyPost = { render: function (d) {
   if (!document.getElementById('pi-instagram')) document.body.insertAdjacentHTML('afterbegin', PLAT_ICONS);
   var mode = dpMode_();
   setTimeout(dpAutoRefresh_, 0);
-  return north(d.north) + '<h1>📣 منشور اليوم</h1><div class="dp2 mode-' + mode + '"><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
+  // أزرار تقسيم العرض فوق العمودين — تبقى ظاهرة في كل الأوضاع (حتى 100% لنا أو 100% منافسون)
+  var seg = '<span class="dp-seg">' + [['ours', '⛶ 100% لنا'], ['split', '◧ ⅓ لنا · ⅔ منافسون'], ['comp', '⛶ 100% منافسون']].map(function (m) {
+    return '<button class="' + (mode === m[0] ? 'on' : '') + '" data-act="dpMode" data-m="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span>';
+  return north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">📣 منشور اليوم</h1>' + seg + '</div><div class="dp2 mode-' + mode + '"><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
 } };
 function dpKeep_() { var b = $('dp_body'); if (b) DP.body = b.value; var a = $('dp_at'); if (a) DP.at = a.value; }
 function dpRedrawOurs_() { dpKeep_(); var el = $('dp_ours'); if (el) el.innerHTML = dpOurs_(S.data); }
@@ -5750,7 +5752,8 @@ ACT.dpType = function (el) { DP.type = el.dataset.t; dpRedrawOurs_(); };
 ACT.dpPlat = function (el) { var p = el.dataset.p; DP.off[p] = !DP.off[p]; dpRedrawOurs_(); };
 ACT.dpWhen = function (el) { DP.when = el.dataset.w; dpRedrawOurs_(); };
 ACT.dpFilter = function (el) { DP.filter = el.dataset.k; dpRedrawComp_(); };
-ACT.dpMode = function (el) { DP.mode = el.dataset.m; try { localStorage.setItem('ops_dp_mode', DP.mode); } catch (e) {} var w = document.querySelector('.dp2'); if (w) w.className = 'dp2 mode-' + DP.mode; dpRedrawComp_(); };
+ACT.dpMode = function (el) { DP.mode = el.dataset.m; try { localStorage.setItem('ops_dp_mode', DP.mode); } catch (e) {} var w = document.querySelector('.dp2'); if (w) w.className = 'dp2 mode-' + DP.mode;
+  Array.prototype.forEach.call(document.querySelectorAll('.dp-seg button'), function (b) { b.classList.toggle('on', b.dataset.m === DP.mode); }); };
 ACT.dpSuggest = function (el) {
   el.disabled = true;
   api('action', 'postSuggest', {}).then(function (r) { el.disabled = false; DP.body = r.body; var b = $('dp_body'); if (b) b.value = r.body; toast(r.course ? 'اقتراح عن «' + r.course + '» — عدّله كما تحب' : 'اقتراح جاهز'); })
