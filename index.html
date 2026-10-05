@@ -413,6 +413,13 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
+.cs{display:flex;align-items:center;gap:10px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;margin-top:4px;font-size:12.5px;background:var(--card);min-width:0}
+.cs.off{opacity:.45}.cs-dot{width:8px;height:8px;border-radius:50%;background:#e76f51;flex-shrink:0}.cs.off .cs-dot{background:#8a817c}
+.cs-n{width:220px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cs-ic{display:inline-flex;gap:5px;flex:1;flex-wrap:wrap;align-items:center}
+.cs .chip{margin:0;padding:1px 8px;font-size:11px;white-space:nowrap}.cs-t{font-size:11px;white-space:nowrap}
+.cs-btn{font-size:11px;padding:2px 8px;border-radius:7px;border:1px solid #2a9d8f;background:rgba(42,157,143,.15);color:#2a9d8f;cursor:pointer;white-space:nowrap}
+.cs-btn.ghost{border-color:var(--line);background:none;color:var(--muted)}
+@media (max-width:700px){.cs{flex-wrap:wrap}.cs-n{width:auto;flex:1}}
 .sl{display:flex;flex-direction:column;gap:4px;margin:4px 0 10px}
 .sl-head,.sl-row{display:grid;gap:8px;align-items:center;padding:5px 10px;font-size:12px}
 .sl-head{color:var(--muted);font-size:11px;border-bottom:1px solid var(--line);padding-top:0}
@@ -937,12 +944,8 @@ SCREENS.today = {
     if (d.ask_top && d.ask_top.length) html += '<div class="card" style="border-color:var(--bad)"><b>🔥 فرص رد عالية النية — رد الآن</b>' + d.ask_top.map(function (o) {
       return '<div class="click small" data-go="ask" style="margin-top:5px">' + chip(o.platform, 'acc') + (o.asker ? ' <b>' + esc(o.asker) + '</b>' : '') + ' «' + esc(o.question) + '» ' + chip(o.psych_type ? '🧠 ' + o.psych_type : '') + '</div>'; }).join('') + '</div>';
     if (d.ask_new) html += '<div class="card click" data-go="ask" style="border-color:var(--good)"><b>🎯 ' + d.ask_new + ' شخص يسأل عن دورة الآن</b> <span class="muted small">— رد عليهم قبل غيرك</span></div>';
-    if ((d.watch || []).length) html += section('٧) حسابات منافسين للمراجعة اليوم', d.watch, function (w) {
-      return '<div class="card row between"><span><b>' + esc(w.name) + '</b> · ' + esc(w.platform) + ' <a target="_blank" rel="noopener" href="' + esc(extUrl(w.url)) + '" data-act="watchOpen" data-id="' + esc(w.cacc_id) + '">' + esc(w.handle) + '</a></span>' +
-        '<span><button class="btn sm" data-go="competitors" data-args="' + attr({ tab: 'profiles' }) + '">سجّل عرضاً</button> <button class="btn sm good" data-act="watchDone" data-id="' + esc(w.cacc_id) + '">راجعته ✓</button></span>' +
-        '<div class="row" style="gap:6px;width:100%">' + (w.last_post_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(extUrl(w.last_post_url)) + '">🔗 آخر منشور سجّلته' + (w.last_post_at ? ' · ' + fmtDate(w.last_post_at) : '') + '</a>' : '') +
-        '<input type="text" id="wp_' + esc(w.cacc_id) + '" dir="ltr" class="grow" placeholder="🔗 الصق رابط ما نشره اليوم"><input type="text" id="wn_' + esc(w.cacc_id) + '" placeholder="ملاحظة: عرض؟ سعر؟ دفعة؟"><button class="btn sm pri" data-act="watchPost" data-id="' + esc(w.cacc_id) + '">حفظ المنشور</button></div></div>';
-    });
+    // ٧) 👁 اطّلع وأشّر — شريط لكل منافس بأيقونات حساباته (التصميم المعتمد)
+    if (typeof compReviewHtml_ === 'function') html += compReviewHtml_(d.review);
     var nothing = !d.overdue.length && !d.escalations.length && !d.hot_leads.length && !d.failed.length && !d.renewals.length && !d.high_news.length;
     if (nothing) html += empty('لا شيء يحتاج إجراءً الآن ✓');
     return html;
@@ -3078,8 +3081,8 @@ SCREENS.competitors = { render: function (d, args) {
   }
 
   if (tab === 'accounts') {
-    html += '<div class="card small">حسابات المنافسين الرسمية (جُمعت من مواقعهم، وتضيف غيرها يدوياً). انستغرام وتيك توك لا يسمحان لأي برنامج بقراءة منشورات الآخرين، لذلك: ' +
-      'الحساب المعلَّم <b>★ مهم</b> يظهر لك كل يوم في شاشة «اليوم» لتفتحه بضغطة، وإن رأيت عرضاً تسجّله بزر «＋ عرض دورة» فيدخل المقارنة.</div>';
+    html += compReviewHtml_(d.review);
+    html += '<details class="card small" style="margin-top:10px"><summary><b>⚙️ إدارة الحسابات</b> — تعديل، حذف، ★ مهم، آخر منشور ملصوق</summary>';
     var nameOf = {}; d.competitors.forEach(function (c) { nameOf[c.ac_id] = c.name; });
     var accRows = d.accounts.slice().sort(function (a, b) { return String(nameOf[a.ac_id] || '').localeCompare(String(nameOf[b.ac_id] || ''), 'ar'); });
     html += stripList_([
@@ -3090,10 +3093,28 @@ SCREENS.competitors = { render: function (d, args) {
       ['آخر منشور ملصوق', 'minmax(120px,1.5fr)', function (x) { return x.last_post_url ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(x.last_post_url)) + '">' + (x.last_post_at ? fmtDate(x.last_post_at) : 'افتح') + ' ↗</a>' : '<span class="muted">لم يُلصق</span>'; }],
       ['', '95px', function (x) { return '<a href="#" data-act="compAccEdit" data-id="' + esc(x.cacc_id) + '">تعديل</a> · <a href="#" data-act="compAccDel" data-id="' + esc(x.cacc_id) + '">حذف</a>'; }]
     ], accRows);
-    html += '<details class="card small"><summary>＋ إضافة حساب لمنافس</summary><div class="chips">' + d.competitors.map(function (c) { return '<button class="chip" data-act="compAccNew" data-ac="' + esc(c.ac_id) + '">' + esc(c.name) + '</button>'; }).join('') + '</div></details>';
+    html += '<details class="card small"><summary>＋ إضافة حساب لمنافس</summary><div class="chips">' + d.competitors.map(function (c) { return '<button class="chip" data-act="compAccNew" data-ac="' + esc(c.ac_id) + '">' + esc(c.name) + '</button>'; }).join('') + '</div></details></details>';
   }
   return html;
 } };
+/** 👁 اطّلع وأشّر (التصميم المعتمد): شريط رفيع لكل منافس + أيقونات حساباته (تفتحها) + «✓ تم الاطلاع» صغير. يعود نشطاً وحده عند أي جديد */
+function compReviewHtml_(list) {
+  list = list || []; if (!list.length) return '';
+  var on = list.filter(function (r) { return r.active; }).length;
+  return '<div class="row between" style="align-items:center;margin-top:10px"><b>👁 حسابات المنافسين — اطّلع وأشّر</b><span class="muted tiny">نشط ' + on + ' · تم الاطلاع ' + (list.length - on) + ' · يعود الشريط نشطاً تلقائياً عند أي جديد</span></div>' +
+    list.map(function (r) {
+      return '<div class="cs' + (r.active ? '' : ' off') + '"><span class="cs-dot"></span><b class="cs-n" title="' + esc(r.name) + '">' + esc(r.name) + '</b><span class="cs-ic">' +
+        r.accounts.map(function (x) { return extUrl(x.url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '" title="' + esc(x.platform + (x.handle ? ' · ' + x.handle : '')) + '">' + platIcon_(x.platform, 'pi-md', x.platform + ' ' + (x.handle || '')) + '</a>' : ''; }).join('') +
+        (r.accounts.length ? '' : '<span class="muted tiny">لا حسابات مسجّلة</span>') + '</span>' +
+        (r.why ? '<span class="chip ' + esc(r.cls) + '">' + esc(r.why) + '</span>' : '<span class="chip good">✓ تم الاطلاع</span>') +
+        '<span class="cs-t muted">' + (r.last_reviewed ? 'آخر اطلاع: ' + fmtDate(r.last_reviewed) : 'لم يُطّلع بعد') + '</span>' +
+        (r.active ? '<button class="cs-btn" data-act="csSeen" data-id="' + esc(r.ac_id) + '" data-prev="' + esc(r.last_reviewed || '') + '">✓ تم الاطلاع</button>'
+          : '<button class="cs-btn ghost" data-act="csUndo" data-id="' + esc(r.ac_id) + '">↺ تراجع</button>') + '</div>';
+    }).join('');
+}
+var CS_PREV = {};
+ACT.csSeen = function (el) { CS_PREV[el.dataset.id] = el.dataset.prev; act('compReviewed', { ac_id: el.dataset.id }, 'تم الاطلاع — يعود عند أي جديد'); };
+ACT.csUndo = function (el) { act('compReviewed', { ac_id: el.dataset.id, undo: 1, prev: CS_PREV[el.dataset.id] || '' }, 'أُعيد نشطاً'); };
 /** مطابقة دورتنا مع نوع الدورة: «مدرب شخصي» يطابق «المدرب الشخصي» */
 function compOurs_(ours, topic) {
   var strip = function (s) { return ' ' + Text_norm_(s).split(' ').map(function (w) { return w.indexOf('ال') === 0 && w.length > 3 ? w.slice(2) : w; }).join(' ') + ' '; };
