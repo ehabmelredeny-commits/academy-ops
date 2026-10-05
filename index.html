@@ -413,6 +413,11 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
+.hcbar{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:13px;flex-wrap:wrap}.hcbar.ok{background:rgba(42,157,143,.15);border-bottom:1px solid #2a9d8f}.hcbar.warn{background:rgba(233,162,59,.18);border-bottom:1px solid #e9a23b}
+.hc-g{margin:10px 0 4px;font-size:12.5px;font-weight:600}.hc-g2{margin-top:10px;font-size:12.5px}
+.hc-r{display:grid;grid-template-columns:26px minmax(160px,240px) 1fr auto;gap:8px;align-items:center;padding:6px 10px;border:1px solid var(--line);border-radius:8px;margin-top:4px;background:var(--card);font-size:12.5px}
+.hc-r.bad{border-inline-start:4px solid #c62828}.hc-r.warn{border-inline-start:4px solid #e9a23b}.hc-r.ok{border-inline-start:4px solid #2a9d8f}
+@media (max-width:700px){.hc-r{grid-template-columns:26px 1fr}.hc-r .muted{grid-column:2}}
 .sup-grp{margin:12px 0 2px;padding-top:6px;border-top:1px dashed var(--line);font-size:13px}
 .eg-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.eg-in{border:1px solid var(--line);border-radius:10px;padding:8px}
 .eg-drop{display:block;margin-top:6px;border:2px dashed var(--line);border-radius:10px;padding:14px;text-align:center;font-size:13px;cursor:pointer}
@@ -588,7 +593,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['engage', '💬 التفاعل مع منشورات المنافسين'], ['supporters', '🛡 مؤيدو المنافسين'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
+var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['engage', '💬 التفاعل مع منشورات المنافسين'], ['supporters', '🛡 مؤيدو المنافسين'], ['health', '🩺 فحص النظام'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'بنك الأفكار والمنشورات'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -602,7 +607,7 @@ var NAV_TREE = [
   ['db', '🗂 قاعدة البيانات', ['sources', 'clubs', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
-  ['sys', '⚙️ النظام', ['automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
+  ['sys', '⚙️ النظام', ['health', 'automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
 NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['clubs', '🏟 خريطة الأندية'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
@@ -908,6 +913,7 @@ function poll() {
     if (p.ask_hot > (S.askHot || 0) && S.askHot !== undefined) toast('🔥 فرصة جديدة: ' + p.ask_hot + ' شخص يسأل الآن بنية عالية — افتح «من يسأل الآن»');
     S.askHot = p.ask_hot || 0;
     oppBar_(p);
+    if (typeof healthBar_ === 'function') healthBar_(p);
     renderNav();
     if (S.sig && p.sig !== S.sig && (S.screen === 'today' || S.screen === 'reply') && !S.fresh) {
       S.fresh = true;
@@ -5029,7 +5035,7 @@ var TOOL_TAGS = {
   today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'amp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'a', search: 'ap', keywords: 'amp',
   compwatch: 'am', radar: 'a', competitors: 'm', exams: 'ap', reports: 'a', targets: 'am', kpis: 'a', sources: 'amp', trainers: 'm',
   people: 'amp', opps: 'ap', b2b: 'am', alumni: 'am', campaigns: 'm', content: 'ap', register: 'm', pipeline: 'am', courses: 'm',
-  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am', engage: 'am', supporters: 'a'
+  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am', engage: 'am', supporters: 'a', health: 'a'
 };
 var TAG_INFO = { p: ['💳', 'يحتاج رصيد Claude (مدفوع)'], a: ['⚙️', 'يعمل آلياً'], m: ['✋', 'يدوي — تعمله أنت'] };
 function tagIcons_(k) { return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span title="' + TAG_INFO[c][1] + '" class="ttag">' + TAG_INFO[c][0] + '</span>' : ''; }).join(''); }
@@ -5308,6 +5314,7 @@ var PAGE_INFO = {
       ['ابحث عن مدربين', 'يفتح فئة «استقطاب مدربين» في صفحة البحث.', 'مصدر منهجي لمدربين جدد.'],
       ['تواصلت معه / ردّ', 'تسجّل التواصل الفردي المهني.', 'متابعة العلاقة.'],
       ['لا تراسل / احذف', 'احترام طلبه — حذف فعلي عند الطلب.', 'امتثال لحماية البيانات وسمعة الأكاديمية.']] },
+  health: { t: '🩺 فحص النظام', what: 'النظام يفحص نفسه وحده يومياً 5:30 فجراً: التشغيل الآلي، الحصة، الوحدات، المفاتيح، روابط الدفع والتسجيل، وأخطاء البيانات (دورات مكررة، بلا حد أدنى، بلا موعد).', why: 'تعرف ما يُضيّع العملاء قبل أن تبدأ يومك — والعاجل يصلك ببريد فوري.', btns: [['↻ افحص الآن', 'يشغّل الفحص فوراً بدل انتظار الصباح.', 'تتأكد بعد أي إصلاح.']] },
   supporters: { t: '🛡 مؤيدو المنافسين', what: 'حسابات تعزز منشورات المنافسين ولا تسأل (مرتبط محتمل، مشبوه/وهمي، مؤيد متكرر) — مع الدليل. تُكتشف تلقائياً من التعليقات.', why: 'تُستثنى من الردود والعملاء والتحليل، وتكشف حجم التفاعل المصطنع عند كل منافس. استخدام داخلي فقط.', btns: [['✕ ليس مؤيداً', 'يخرج الحساب إن أخطأ التصنيف — ولا يُعاد.', 'دقة القائمة.']] },
   engage: { t: '💬 التفاعل مع منشورات المنافسين', what: 'تلصق تعليقات منشور منافس أو ترفع صور شاشتها (ويوتيوب يُجلب وحده)، فيستخرج النظام الأسئلة ويكتب رداً مخصصاً لكل سائل ومعه عرض وكود خصم لسؤال السعر.', why: 'جمهور المنافس الذي يسأل الآن هو أقرب عميل لنا — رد سريع وذكي يكسبه.',
     btns: [['📋 انسخ وافتح', 'ينسخ الرد ويفتح المنشور — تلصقه تحت تعليق السائل.', 'رد في ثوانٍ.'], ['✓ رددت', 'يسجّل الرد ويضيف السائل لمراحل العملاء.', 'لا يضيع عميل.']] },
@@ -6132,6 +6139,48 @@ SCREENS.supporters = { render: function (d) {
   return html;
 } };
 ACT.supNot = function (el) { act('supporterStatus', { sup_id: el.dataset.id, status: 'ليس مؤيداً' }, 'أُخرج من القائمة — لن يُعاد تصنيفه'); };
+</script>
+
+  <script>
+/* ═══════════ 🩺 فحص النظام (التصميم المعتمد 2026-10-05) — الفحص يعمل وحده يومياً 5:30؛ هنا النتيجة وزر الإصلاح ═══════════ */
+var HC_LV = { urgent: ['🔴 عاجل', 'bad'], important: ['🟠 مهم', 'warn'], ok: ['🟢 سليم', 'ok'], setup: ['⚪ ينتظر إعداداً منك (ليس خطأ)', ''] };
+function hcRow_(x) {
+  return '<div class="hc-r ' + HC_LV[x.level][1] + '"><span class="hc-i">' + esc(x.icon) + '</span><b>' + esc(x.title) + '</b><span class="muted">' + esc(x.detail) + '</span>' +
+    (x.go && x.level !== 'ok' ? '<button class="btn sm' + (x.level === 'setup' ? '' : ' pri') + '" data-go="' + esc(x.go) + '"' + (x.args ? ' data-args="' + attr(x.args) + '"' : '') + '>' + esc(x.label || 'افتح') + ' ←</button>' : '<span></span>') + '</div>';
+}
+SCREENS.health = { render: function (d) {
+  var h = d.last;
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">🩺 فحص النظام</h1><span class="row" style="gap:6px;align-items:center;flex-wrap:wrap">' +
+    (h ? statMini_([[h.counts.urgent, 'عاجل', 'bad'], [h.counts.important, 'مهم', 'warn'], [h.counts.ok, 'سليم', 'good']]) +
+      '<span class="muted tiny">آخر فحص: ' + fmtDate(h.at, true) + ' · التالي غداً 5:30</span>' : '') +
+    '<button class="btn sm" data-act="hcRun">↻ افحص الآن</button></span></div>';
+  if (!h) return html + empty('لم يُجرَ الفحص بعد — يعمل وحده يومياً 5:30 فجراً، أو اضغط «↻ افحص الآن»');
+  ['urgent', 'important'].forEach(function (lv) {
+    var list = h.items.filter(function (x) { return x.level === lv; });
+    if (list.length) html += '<div class="hc-g">' + HC_LV[lv][0] + '</div>' + list.map(hcRow_).join('');
+  });
+  if (!h.counts.urgent && !h.counts.important) html += '<div class="hc-r ok" style="margin-top:8px"><span class="hc-i">✅</span><b>النظام سليم</b><span class="muted">لا شيء يحتاج انتباهك اليوم</span><span></span></div>';
+  ['ok', 'setup'].forEach(function (lv) {
+    var list = h.items.filter(function (x) { return x.level === lv; });
+    if (list.length) html += '<details class="hc-g2"><summary>' + HC_LV[lv][0] + ' — ' + list.length + '</summary>' + list.map(hcRow_).join('') + '</details>';
+  });
+  return html + '<div class="muted tiny" style="margin-top:8px">📧 المشكلة العاجلة تصلك ببريد فوري حتى لو لم تفتح النظام · الفحص يعمل وحده يومياً 5:30 فجراً</div>';
+} };
+ACT.hcRun = function (el) { el.disabled = true; el.textContent = '⏳ يفحص…'; act('healthRun', {}, 'اكتمل الفحص'); };
+/** شريط فحص الصباح أعلى كل الصفحات: عند أول فتح في اليوم، أو عند ظهور جديد — يُغلق بـ ✕ */
+function healthBar_(p) {
+  var el = $('hcbar'); if (!el) { el = document.createElement('div'); el.id = 'hcbar'; var ob = $('oppbar'); if (ob) ob.parentNode.insertBefore(el, ob.nextSibling); else document.body.insertBefore(el, document.body.firstChild); }
+  var h = p && p.health; if (!h || S.screen === 'health') { el.innerHTML = ''; return; }
+  var sig = h.at + '|' + h.counts.urgent + '|' + h.counts.important, seen = ''; try { seen = localStorage.getItem('ops_hc_seen') || ''; } catch (e) {}
+  if (seen === sig) { el.innerHTML = ''; return; }
+  var bad = h.counts.urgent + h.counts.important, hh = new Date(h.at).toLocaleTimeString('ar-SA-u-nu-latn', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Riyadh' });
+  el.innerHTML = '<div class="hcbar ' + (bad ? 'warn' : 'ok') + '">' + (bad ? '⚠️ <b>فحص الصباح ' + hh + ': ' + bad + ' أشياء تحتاج انتباهك</b> <span class="muted tiny">· 🔴 ' + h.counts.urgent + ' عاجل · 🟠 ' + h.counts.important + ' مهم</span>'
+    : '✅ <b>فحص الصباح ' + hh + ': النظام سليم</b> <span class="muted tiny">· ' + h.counts.ok + ' فحصاً سليماً</span>') +
+    '<span style="margin-inline-start:auto"></span>' + (bad ? '<button class="btn sm pri" data-act="hcOpen" data-sig="' + esc(sig) + '">افتح وأصلح</button>' : '<a href="#" class="tiny" data-act="hcOpen" data-sig="' + esc(sig) + '">التفاصيل ‹</a>') +
+    ' <a href="#" class="tiny" data-act="hcClose" data-sig="' + esc(sig) + '" title="إغلاق — يعود فقط إن ظهر جديد">✕</a></div>';
+}
+ACT.hcClose = function (el) { try { localStorage.setItem('ops_hc_seen', el.dataset.sig); } catch (e) {} var b = $('hcbar'); if (b) b.innerHTML = ''; };
+ACT.hcOpen = function (el) { ACT.hcClose(el); go('health'); };
 </script>
 
 </body>
