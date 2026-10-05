@@ -413,6 +413,11 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
+.ch-strip{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 6px}
+.ch-in{flex:1 1 110px;display:flex;flex-direction:column;gap:2px;padding:5px 7px;border:1px solid var(--line);border-inline-start-width:4px;border-radius:9px;font-size:11.5px}
+.ch-in input{width:100%;padding:4px 6px;font-size:14px}
+.ch-bar{margin-bottom:8px}.ch-bars{display:flex;height:16px;border-radius:8px;overflow:hidden;background:rgba(127,127,127,.15);margin-bottom:4px}
+.ch-bars i{display:block;height:100%;color:#fff;font-size:10px;font-style:normal;text-align:center;line-height:16px;overflow:hidden}
 .dp-silent{margin:6px 0;padding:6px 8px;border-radius:8px;background:rgba(141,108,216,.08);font-size:12.5px}
 .dp-sl{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px dashed var(--line)}
 .dp-dec b{font-size:13px}.dp-dec{padding:5px 8px}
@@ -1739,13 +1744,65 @@ var COURSE_FIELDS = [['name_ar', 'الاسم'], ['name_en', 'الاسم بالإ
   ['seats_left', 'المقاعد المتبقية', 'number'], ['payment_url', 'رابط الدفع', 'url'], ['segment_fit', 'الشرائح المناسبة'], ['key_benefit', 'الفائدة الأساسية'],
   ['gov_requirement', 'الاشتراط الحكومي'], ['recert_years', 'سنوات التجديد', 'number'], ['ceu_body', 'جهة CEU (فارغ = ممنوع ذكر CEU)'],
   ['ceu_count', 'عدد CEU', 'number'], ['ceu_approved', 'CEU معتمد (نعم/لا)']];
+/** مكوّنات الساعات (شريط واحد): المفتاح · الاسم · اللون */
+var COURSE_HOURS = [['h_theory', '📘 نظري', '#3a86ff'], ['h_practical', '🏋️ عملي', '#2a9d8f'], ['h_ojt', '🏢 تطبيق داخل العمل', '#8d6cd8'], ['h_self', '📖 دراسة ذاتية', '#8a817c'],
+  ['h_exams', '📝 اختبارات', '#e76f51'], ['h_workshops', '🛠 ورش عمل', '#e9a23b'], ['h_project', '🎓 مشروع تخرج', '#d6457a']];
+var COURSE_SELECTS = { active: ['نعم', 'لا'], delivery: ['حضوري', 'أونلاين', 'هجين'], credential: ['', 'رخصة', 'شهادة'], ceu_approved: ['', 'نعم', 'لا'] };
 function courseForm(c, i) {
-  return COURSE_FIELDS.map(function (f) {
+  var fields = COURSE_FIELDS.slice();
+  // نوع الاعتماد بعد الاسم مباشرة
+  fields.splice(2, 0, ['credential', 'نوع الاعتماد (رخصة / شهادة)']);
+  var html = fields.map(function (f) {
     var v = c[f[0]] === undefined ? '' : c[f[0]];
     if (f[2] === 'date') v = String(v).slice(0, 10);
+    if (COURSE_SELECTS[f[0]]) return '<label class="f">' + (f[0] === 'delivery' ? 'طريقة الحضور' : f[1].replace(/ \(نعم\/لا\)/, '')) + '</label><select data-cf="' + i + '" data-k="' + f[0] + '">' +
+      COURSE_SELECTS[f[0]].concat(COURSE_SELECTS[f[0]].indexOf(String(v)) < 0 && v ? [String(v)] : []).map(function (o) { return '<option value="' + esc(o) + '"' + (String(v) === o ? ' selected' : '') + '>' + (o || '—') + '</option>'; }).join('') + '</select>' +
+      (f[0] === 'delivery' ? courseHoursStrip_(c, i) : '');
     return '<label class="f">' + f[1] + '</label><input type="' + (f[2] || 'text') + '" data-cf="' + i + '" data-k="' + f[0] + '" value="' + esc(v) + '">';
   }).join('');
+  return html;
 }
+/** شريط واحد لتوزيع ساعات الدورة: حقول صغيرة متجاورة + شريط ملوّن بالنِّسب + الإجمالي + إرشاد حسب نوع الاعتماد */
+function courseHoursStrip_(c, i) {
+  return '<label class="f">توزيع الساعات</label><div class="ch-strip" data-chs="' + i + '">' + COURSE_HOURS.map(function (h) {
+    return '<label class="ch-in" style="border-color:' + h[2] + '"><span>' + h[1] + '</span><input type="number" min="0" step="1" data-cf="' + i + '" data-k="' + h[0] + '" data-chi="' + i + '" value="' + esc(c[h[0]] || '') + '"></label>';
+  }).join('') + '</div><div class="ch-bar" id="chb_' + i + '">' + courseHoursBar_(c, i) + '</div>';
+}
+function courseHoursVals_(i, c) {
+  var v = {}; COURSE_HOURS.forEach(function (h) { var el = document.querySelector('[data-chi="' + i + '"][data-k="' + h[0] + '"]'); v[h[0]] = Number(el ? el.value : (c || {})[h[0]]) || 0; }); return v;
+}
+function courseHoursBar_(c, i) {
+  var v = {}, tot = 0; COURSE_HOURS.forEach(function (h) { v[h[0]] = Number(c[h[0]]) || 0; tot += v[h[0]]; });
+  if (!tot) return '<span class="muted tiny">أدخل الساعات لكل مكوّن — يظهر هنا الشريط والإجمالي والإرشاد</span>';
+  var bar = COURSE_HOURS.filter(function (h) { return v[h[0]]; }).map(function (h) { var p = v[h[0]] / tot * 100;
+    return '<i style="width:' + p + '%;background:' + h[2] + '" title="' + h[1] + ': ' + v[h[0]] + ' ساعة (' + Math.round(p) + '%)">' + (p >= 9 ? Math.round(p) + '%' : '') + '</i>'; }).join('');
+  return '<div class="ch-bars">' + bar + '</div><div class="tiny"><b>الإجمالي: ' + tot + ' ساعة</b> · ' + courseHoursAdvice_(v, tot, c.credential).join(' · ') + '</div>';
+}
+/** إرشاد بالقواعد — لا يخترع اشتراطات: ينبّه فقط للتوازن المعتاد في دورات التدريب الرياضي */
+function courseHoursAdvice_(v, tot, cred) {
+  var pr = function (k) { return v[k] / tot * 100; }, out = [];
+  var hands = pr('h_practical') + pr('h_ojt') + pr('h_workshops');
+  if (cred === 'رخصة') {
+    if (!v.h_exams) out.push('⚠️ رخصة بلا ساعات اختبار — الرخص المهنية تتطلب اختباراً عادةً');
+    if (hands < 40) out.push('⚠️ الجانب العملي ' + Math.round(hands) + '% — للرخصة يُفضَّل ٤٠٪ فأكثر');
+  } else if (cred === 'شهادة') {
+    if (hands < 25) out.push('💡 أضف عملياً/ورشاً — العملي يرفع قيمة الشهادة في السوق');
+  }
+  if (pr('h_self') > 40) out.push('⚠️ الدراسة الذاتية ' + Math.round(pr('h_self')) + '% — مرتفعة');
+  if (pr('h_theory') > 70) out.push('⚠️ نظري ' + Math.round(pr('h_theory')) + '% — يغلب النظري');
+  if (v.h_project && !v.h_theory) out.push('💡 مشروع تخرج بلا نظري');
+  if (!out.length) out.push('✅ توزيع متوازن' + (cred ? ' لـ' + cred : ''));
+  return out;
+}
+document.addEventListener('input', function (e) {
+  var t = e.target; if (!t || !t.dataset || t.dataset.chi === undefined) return;
+  var i = t.dataset.chi, cred = document.querySelector('[data-cf="' + i + '"][data-k="credential"]'), c = courseHoursVals_(i);
+  c.credential = cred ? cred.value : ''; var b = $('chb_' + i); if (b) b.innerHTML = courseHoursBar_(c, i);
+});
+document.addEventListener('change', function (e) {
+  var t = e.target; if (!t || !t.dataset || t.dataset.k !== 'credential') return;
+  var i = t.dataset.cf, c = courseHoursVals_(i); c.credential = t.value; var b = $('chb_' + i); if (b) b.innerHTML = courseHoursBar_(c, i);
+});
 SCREENS.courses = { render: function (d) {
   var html = north(d.north) + '<h1>الدورات</h1><div class="muted small">هذا التبويب هو المصدر الوحيد للأسعار والمواعيد وعبارات الإلحاح.</div>';
   html += d.rows.map(function (c, i) {
