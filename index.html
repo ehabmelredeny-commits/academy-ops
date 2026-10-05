@@ -421,6 +421,7 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .sl-c{overflow:hidden;text-overflow:ellipsis;min-width:0}.sl-c .chip{margin:0;padding:1px 7px;font-size:11px}
 .sl-detail{border:1px solid var(--accent);border-top:0;border-radius:0 0 8px 8px;padding:8px 12px;margin-top:-4px;font-size:12.5px;background:var(--card)}
 .statmini{padding:3px 9px;border:1px solid var(--line);border-radius:8px;font-size:12px}.statmini.good b{color:var(--good)}.statmini.warn b{color:var(--warn)}.statmini.bad b{color:var(--bad)}
+.sl-row.sl-bad{border-color:#c62828}
 .sdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:5px;vertical-align:1px}
 @media (max-width:760px){.sl-head{display:none}.sl-row{display:flex!important;flex-wrap:wrap;white-space:normal;gap:4px 10px}.sl-c{max-width:100%}.sl-first{flex-basis:100%}}
 .ch-strip{display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden;margin:2px 0 6px}
@@ -1380,14 +1381,18 @@ SCREENS.discovery = { render: function (d) {
     '<label class="f">النوع</label><select id="dk">' + opt(d.kinds) + '</select><label class="f">الرابط</label><input type="url" id="du">' +
     '<div class="row"><div class="grow"><label class="f">المدينة</label><input type="text" id="dc"></div><div class="grow"><label class="f">الفروع</label><input type="number" id="db"></div></div>' +
     '<div class="btns"><button class="btn pri" data-act="discAdd">إضافة (مؤكَّد)</button></div></details>' +
-    (d.rows.length ? d.rows.map(function (r) {
-      var btns = r.status === 'جديد' ? '<button class="btn sm good" data-act="discSt" data-id="' + esc(r.disc_id) + '" data-st="مؤكَّد">تأكيد</button><button class="btn sm bad" data-act="discSt" data-id="' + esc(r.disc_id) + '" data-st="مرفوض">رفض</button>' :
-        r.status === 'مؤكَّد' ? '<button class="btn sm" data-act="discPromote" data-id="' + esc(r.disc_id) + '" data-t="Operators">دمج في المشغّلين</button><button class="btn sm" data-act="discPromote" data-id="' + esc(r.disc_id) + '" data-t="Academies">دمج في الأكاديميات</button>' : '';
-      return '<div class="card"><div class="row between"><b>' + esc(r.name) + '</b>' + chip(r.status, r.status === 'جديد' ? 'acc' : r.status === 'مرفوض' ? '' : 'good') + '</div>' +
-        '<div class="chips">' + chip(r.kind) + chip(r.city) + chip(r.claimed_branches ? r.claimed_branches + ' فرعاً (معلن)' : '') + '</div>' +
-        '<div class="muted small">' + esc(r.why_flagged) + '</div>' + (r.evidence_url ? '<div class="small"><b>الدليل:</b> ' + (extUrl(r.evidence_url) ? '<a target="_blank" href="' + esc(extUrl(r.evidence_url)) + '">' + esc(r.evidence_url) + '</a>' : esc(r.evidence_url)) + '</div>' : '') +
-        (btns ? '<div class="btns">' + btns + '</div>' : '') + '</div>';
-    }).join('') : empty('لا اكتشافات بعد'));
+    (d.rows.length ? stripList_([
+      ['الحالة', '80px', function (r) { return chip(r.status, r.status === 'جديد' ? 'acc' : r.status === 'مرفوض' ? '' : 'good'); }],
+      ['الاسم', 'minmax(150px,2fr)', function (r) { return '<b>' + esc(r.name) + '</b>'; }],
+      ['النوع', '90px', function (r) { return esc(r.kind); }],
+      ['المدينة', '80px', function (r) { return esc(r.city); }],
+      ['فروع (معلن)', '70px', function (r) { return esc(r.claimed_branches); }],
+      ['لماذا', 'minmax(150px,2.5fr)', function (r) { return '<span class="muted">' + esc(r.why_flagged) + '</span>'; }],
+      ['الدليل', '50px', function (r) { return extUrl(r.evidence_url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(r.evidence_url)) + '" onclick="event.stopPropagation()">↗</a>' : ''; }],
+      ['إجراء', 'minmax(150px,auto)', function (r) {
+        return r.status === 'جديد' ? '<button class="btn sm good" data-act="discSt" data-id="' + esc(r.disc_id) + '" data-st="مؤكَّد">تأكيد</button> <button class="btn sm bad" data-act="discSt" data-id="' + esc(r.disc_id) + '" data-st="مرفوض">رفض</button>' :
+          r.status === 'مؤكَّد' ? '<button class="btn sm" data-act="discPromote" data-id="' + esc(r.disc_id) + '" data-t="Operators">→ المشغّلين</button> <button class="btn sm" data-act="discPromote" data-id="' + esc(r.disc_id) + '" data-t="Academies">→ الأكاديميات</button>' : ''; }]
+    ], d.rows) : empty('لا اكتشافات بعد'));
 } };
 ACT.discSt = function (el) { act('discoveryStatus', { disc_id: el.dataset.id, status: el.dataset.st }, 'حُدّث'); };
 ACT.discPromote = function (el) { act('discoveryPromote', { disc_id: el.dataset.id, target: el.dataset.t }, function (r) { return 'أُضيف: ' + r.target + ' #' + r.id; }); };
@@ -1400,23 +1405,26 @@ SCREENS.news = { render: function (d, args) {
   var html = north(d.north) + '<h1>الأخبار الرسمية</h1><div class="row">' +
     '<select id="nc" class="grow" data-act="newsFilter">' + opt(d.categories, args.category, 'كل التصنيفات') + '</select>' +
     '<select id="ni" style="width:auto" data-act="newsFilter">' + opt(['عالي', 'متوسط', 'منخفض'], args.impact, 'كل الأثر') + '</select></div>';
-  html += d.rows.length ? d.rows.map(function (n) {
-    return '<div class="card" style="' + (n.seen === 'نعم' ? 'opacity:.7' : '') + '"><div class="chips">' + chip(n.impact || 'غير مقيّم', n.impact === 'عالي' ? 'bad' : n.impact === 'متوسط' ? 'warn' : '') +
-      chip(n.category) + (n.official === 'نعم' ? chip('رسمي', 'good') : chip('غير رسمي')) + chip(fmtDate(n.captured_at)) + '</div>' +
-      '<b>' + esc(n.title) + '</b><div class="small">' + esc(n.summary_ar) + '</div>' +
-      (n.impact_why_ar ? '<div class="small"><b>ما الذي يتغيّر في عرضنا:</b> ' + esc(n.impact_why_ar) + '</div>' : '') +
-      (n.notes ? '<div class="muted small">' + esc(n.notes) + '</div>' : '') +
-      '<div class="btns">' + (n.seen !== 'نعم' ? '<button class="btn sm" data-act="newsSeen" data-id="' + esc(n.news_id) + '">قرأته</button>' : '') +
-      '<button class="btn sm" data-act="newsContent" data-id="' + esc(n.news_id) + '">هذا يستحق محتوى</button>' +
-      '</div>' +
-      (extUrl(n.url) ? '<a class="btn" style="display:inline-block;margin-top:8px" target="_blank" rel="noopener" href="' + esc(extUrl(n.url)) + '">🔗 اقرأ الخبر كاملاً — ' +
-        esc(extUrl(n.url).replace(/^https?:\/\/(www\.)?/, '').split('/')[0]) + '</a>' : '<div class="muted small">لا رابط لهذا الخبر</div>') + '</div>';
-  }).join('') : empty(args.category || args.impact ? 'لا أخبار في هذا التصنيف — اختر «—» لعرض الكل' : 'لا أخبار');
-  html += '<h2>المصادر ' + chip(d.sources.length) + '</h2><div class="muted small" style="margin:-4px 0 8px">هذه ليست أخباراً: هي المواقع التي يراقبها النظام. المفتاح الأخضر = المراقبة تعمل. الأخبار التي تُجلب منها تظهر في الأعلى برابطها.</div>' + d.sources.map(function (s) {
-    return '<div class="card"><div class="row between"><b class="grow">' + esc(s.name) + '</b>' + switchHtml(s.enabled === 'مفعّل', 'srcToggle', s.src_id) + '</div>' +
-      '<div class="chips">' + chip(s.kind) + chip(s.category) + chip(s.check_frequency) + (s.instant_alert === 'نعم' ? chip('تنبيه فوري', 'bad') : '') + '</div>' +
-      '<div class="muted small">' + esc(s.last_status || 'لم يُفحص') + (s.last_checked ? ' · ' + fmtDate(s.last_checked, true) : '') + '</div></div>';
-  }).join('');
+  html += d.rows.length ? '<div class="muted tiny">اضغط أي خبر للملخص والأثر والإجراءات</div>' + stripList_([
+    ['الأثر', '75px', function (n) { return chip(n.impact || 'غير مقيّم', n.impact === 'عالي' ? 'bad' : n.impact === 'متوسط' ? 'warn' : ''); }],
+    ['التاريخ', '80px', function (n) { return fmtDate(n.captured_at); }],
+    ['العنوان', 'minmax(200px,4fr)', function (n) { return (n.seen === 'نعم' ? '<span class="muted">' : '<b>') + esc(n.title) + (n.seen === 'نعم' ? '</span>' : '</b>'); }],
+    ['التصنيف', 'minmax(90px,1fr)', function (n) { return esc(n.category); }],
+    ['المصدر', 'minmax(80px,1fr)', function (n) { return extUrl(n.url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(n.url)) + '" onclick="event.stopPropagation()">' + esc(extUrl(n.url).replace(/^https?:\/\/(www\.)?/, '').split('/')[0]) + ' ↗</a>' : ''; }],
+    ['', '50px', function (n) { return n.official === 'نعم' ? chip('رسمي', 'good') : ''; }]
+  ], d.rows, { key: 'news', id: function (n) { return n.news_id; }, detail: function (n) {
+    return (n.summary_ar ? '<div>' + esc(n.summary_ar) + '</div>' : '') + (n.impact_why_ar ? '<div><b>ما الذي يتغيّر في عرضنا:</b> ' + esc(n.impact_why_ar) + '</div>' : '') +
+      (n.notes ? '<div class="muted small">' + esc(n.notes) + '</div>' : '') + '<div class="btns">' + (n.seen !== 'نعم' ? '<button class="btn sm" data-act="newsSeen" data-id="' + esc(n.news_id) + '">قرأته</button>' : '') +
+      '<button class="btn sm" data-act="newsContent" data-id="' + esc(n.news_id) + '">هذا يستحق محتوى</button>' + (extUrl(n.url) ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(n.url)) + '">🔗 اقرأ الخبر كاملاً</a>' : '') + '</div>';
+  } }) : empty(args.category || args.impact ? 'لا أخبار في هذا التصنيف — اختر «—» لعرض الكل' : 'لا أخبار');
+  html += '<h2>المصادر ' + chip(d.sources.length) + '</h2><div class="muted small" style="margin:-4px 0 8px">هذه ليست أخباراً: هي المواقع التي يراقبها النظام. المفتاح الأخضر = المراقبة تعمل. الأخبار التي تُجلب منها تظهر في الأعلى برابطها.</div>' + stripList_([
+    ['تعمل', '50px', function (s) { return switchHtml(s.enabled === 'مفعّل', 'srcToggle', s.src_id); }],
+    ['المصدر', 'minmax(180px,3fr)', function (s) { return '<b>' + esc(s.name) + '</b>'; }],
+    ['النوع', '70px', function (s) { return esc(s.kind); }],
+    ['التصنيف', 'minmax(90px,1.2fr)', function (s) { return esc(s.category); }],
+    ['التكرار', '70px', function (s) { return esc(s.check_frequency) + (s.instant_alert === 'نعم' ? ' 🔔' : ''); }],
+    ['آخر فحص', 'minmax(140px,2fr)', function (s) { return '<span class="muted">' + esc(s.last_status || 'لم يُفحص') + (s.last_checked ? ' · ' + fmtDate(s.last_checked, true) : '') + '</span>'; }]
+  ], d.sources);
   html += '<div class="card"><b>إضافة مصدر</b><label class="f">الاسم</label><input type="text" id="sn">' +
     '<label class="f">الرابط (أو مصطلح البحث لنوع search)</label><input type="text" id="su">' +
     '<div class="row"><select id="sk" class="grow">' + opt(d.kinds) + '</select><select id="sc" class="grow">' + opt(d.categories) + '</select>' +
@@ -1439,15 +1447,15 @@ SCREENS.modules = { render: function (d) {
   return north(d.north) + '<h1>الوحدات</h1><div class="card"><div class="row between small"><span>تشغيل اليوم ' + Math.round(u.sec / 6) / 10 + ' من ' + u.quota_min + ' دقيقة</span><span>' + u.pct + '%</span></div>' +
     '<div class="bar ' + (u.pct >= 70 ? 'bad' : u.pct >= 60 ? 'warn' : '') + '"><i style="width:' + Math.min(100, u.pct) + '%"></i></div>' +
     (d.paused ? '<div style="color:var(--bad)">⏸ كل الأتمتة موقوفة — من شاشة المخطط</div>' : '') + '</div>' +
-    d.modules.map(function (m) {
-      return '<div class="card"><div class="row between"><b class="grow">' + esc(m.module_name_ar) + '</b>' +
-        (m.kind === 'human' ? chip('لا يُعطَّل', 'owner') : switchHtml(m.enabled === 'مفعّل', 'modToggle', m.module_key)) + '</div>' +
-        (MODULE_INFO[m.module_key] ? '<div class="small">' + esc(MODULE_INFO[m.module_key]) + '</div>' : '') +
-        '<div class="chips">' + chip({ scheduled: 'مجدولة', pipeline_stage: 'مرحلة في مسار الرسائل', human: 'قرارك أنت', hook: 'تُستدعى عند حدث', ui: 'واجهة' }[m.kind] || m.kind) +
-        chip(schedAr_(m.schedule)) + chip({ ok: 'آخر تشغيل: نجح', error: 'آخر تشغيل: خطأ', deferred: 'تنتظر Claude', never: 'لم تعمل بعد', skipped: 'تخطّت' }[m.last_status] || m.last_status, m.last_status === 'error' ? 'bad' : m.last_status === 'deferred' ? 'warn' : '') +
-        (m.last_run ? chip(fmtDate(m.last_run, true)) : '') + (m.critical === 'نعم' ? chip('حرجة', 'acc') : '') + '</div>' +
-        (m.handler ? '<div class="btns"><button class="btn sm" data-act="modRun" data-id="' + esc(m.module_key) + '">شغّلها الآن</button></div>' : '') + '</div>';
-    }).join('');
+    stripList_([
+      ['تعمل', '50px', function (m) { return m.kind === 'human' ? chip('دائماً', 'owner') : switchHtml(m.enabled === 'مفعّل', 'modToggle', m.module_key); }],
+      ['الوحدة', 'minmax(150px,1.6fr)', function (m) { return '<b>' + esc(m.module_name_ar) + '</b>' + (m.critical === 'نعم' ? ' ' + chip('حرجة', 'acc') : ''); }],
+      ['ماذا تفعل', 'minmax(180px,3fr)', function (m) { return '<span class="muted" title="' + esc(MODULE_INFO[m.module_key] || '') + '">' + esc(MODULE_INFO[m.module_key] || '') + '</span>'; }],
+      ['الموعد', '110px', function (m) { return esc(schedAr_(m.schedule)); }],
+      ['آخر تشغيل', '150px', function (m) { var st = { ok: '✅ نجح', error: '❌ خطأ', deferred: '⏳ تنتظر Claude', never: 'لم تعمل', skipped: 'تخطّت' }[m.last_status] || m.last_status;
+        return esc(st) + (m.last_run ? ' <span class="muted tiny">' + fmtDate(m.last_run, true) + '</span>' : ''); }],
+      ['', '95px', function (m) { return m.handler ? '<button class="btn sm" data-act="modRun" data-id="' + esc(m.module_key) + '">شغّلها الآن</button>' : ''; }]
+    ], d.modules, { cls: function (m) { return m.last_status === 'error' ? 'sl-bad' : ''; } });
 } };
 ACT.modToggle = function (el) {
   api('action', 'setEnabled', { module_key: el.dataset.id, enabled: el.checked }).then(function () { toast('حُدّث'); })
@@ -1458,15 +1466,19 @@ ACT.modRun = function (el) { el.disabled = true; act('runNow', { module_key: el.
 /* ─── الحملات + مولّد UTM + التجارب ─── */
 SCREENS.campaigns = { render: function (d) {
   var html = north(d.north) + '<h1>الحملات</h1>';
-  html += d.rows.length ? d.rows.map(function (c) {
-    return '<div class="card"><div class="row between"><b>' + esc(c.name) + '</b>' + chip(c.status, c.status === 'خاسرة' ? 'bad' : 'acc') + '</div>' +
-      '<div class="chips">' + chip(c.objective) + chip('utm: ' + c.utm_campaign) + chip(c.segment) + '</div>' +
-      '<div class="kv" style="margin-top:6px"><b>عملاء</b><span>' + esc(c.leads) + '</span><b>تسجيلات</b><span>' + esc(c.enrolled) + '</span><b>إيراد</b><span>' + esc(c.revenue_sar) +
-      '</span><b>CPL</b><span>' + esc(c.cpl || '—') + '</span><b>CAC</b><span>' + esc(c.cac || '—') + '</span><b>ROAS</b><span>' + esc(c.roas || '—') + '</span></div>' +
-      '<div class="muted small">' + esc(c.margin_note) + '</div>' +
-      '<div class="row" style="margin-top:6px"><input type="number" id="sp_' + esc(c.campaign_id) + '" value="' + esc(c.spend_sar) + '" placeholder="الإنفاق (ريال)" class="grow">' +
-      '<button class="btn sm" data-act="campSpend" data-id="' + esc(c.campaign_id) + '">حفظ الإنفاق</button></div></div>';
-  }).join('') : empty('لا حملات');
+  html += d.rows.length ? stripList_([
+    ['الحالة', '75px', function (c) { return chip(c.status, c.status === 'خاسرة' ? 'bad' : 'acc'); }],
+    ['الحملة', 'minmax(150px,2.5fr)', function (c) { return '<b>' + esc(c.name) + '</b> <span class="muted tiny">' + esc(c.utm_campaign) + '</span>'; }],
+    ['الهدف', '80px', function (c) { return esc(c.objective); }],
+    ['الشريحة', '80px', function (c) { return esc(c.segment); }],
+    ['عملاء', '50px', function (c) { return esc(c.leads); }],
+    ['تسجيل', '50px', function (c) { return esc(c.enrolled); }],
+    ['إيراد', '70px', function (c) { return esc(c.revenue_sar); }],
+    ['CPL', '55px', function (c) { return esc(c.cpl); }],
+    ['CAC', '55px', function (c) { return esc(c.cac); }],
+    ['ROAS', '55px', function (c) { return esc(c.roas); }],
+    ['الإنفاق (ريال)', '150px', function (c) { return '<span class="row" style="gap:4px" onclick="event.stopPropagation()"><input type="number" id="sp_' + esc(c.campaign_id) + '" value="' + esc(c.spend_sar) + '" style="width:80px;padding:2px 5px"><button class="btn sm" data-act="campSpend" data-id="' + esc(c.campaign_id) + '">حفظ</button></span>'; }]
+  ], d.rows) : empty('لا حملات');
   html += '<details class="card"><summary>حملة جديدة</summary><label class="f">الاسم</label><input type="text" id="cn">' +
     '<label class="f">الهدف</label><select id="co">' + opt(d.objectives) + '</select><label class="f">utm_campaign (إنجليزي بلا مسافات)</label><input type="text" id="cu">' +
     '<label class="f">الشريحة</label><select id="cs">' + opt(d.segments, '', true) + '</select><label class="f">الدورة</label><select id="cc"><option value="">—</option>' +
@@ -1519,11 +1531,15 @@ SCREENS.content = { render: function (d) {
       return '<div class="row between small" style="margin-top:6px"><span>' + esc(m.pillar) + '</span><span>' + m.actual + '% / ' + m.target + '%</span></div>' +
         '<div class="bar ' + (Math.abs(m.actual - m.target) > 15 ? 'warn' : '') + '"><i style="width:' + Math.min(100, m.actual) + '%"></i></div>';
     }).join('') + '</div>' +
-    section('التقويم والأفكار', d.rows, function (c) {
-      return '<div class="card"><div class="row between"><b>' + esc(c.hook) + '</b><span class="muted">' + fmtDate(c.planned_date) + '</span></div>' +
-        '<div class="chips">' + chip(c.pillar, 'acc') + chip(c.platform) + chip(c.segment) + chip(c.source_ref) + '</div><div class="small">' + esc(c.body) + '</div>' +
-        '<div class="row" style="margin-top:6px"><select class="grow" data-act="contentSt" data-id="' + esc(c.content_id) + '">' + opt(d.statuses, c.status) + '</select></div></div>';
-    }, 'لا أفكار — تُقترح أسبوعياً');
+    '<h2>التقويم والأفكار ' + chip(d.rows.length) + '</h2>' + (d.rows.length ? stripList_([
+      ['الحالة', '130px', function (c) { return '<select data-act="contentSt" data-id="' + esc(c.content_id) + '" onclick="event.stopPropagation()" style="padding:2px 4px">' + opt(d.statuses, c.status) + '</select>'; }],
+      ['الموعد', '80px', function (c) { return fmtDate(c.planned_date); }],
+      ['الفكرة', 'minmax(160px,2.5fr)', function (c) { return '<b>' + esc(c.hook) + '</b>'; }],
+      ['النص', 'minmax(160px,3fr)', function (c) { return '<span class="muted">' + esc(c.body) + '</span>'; }],
+      ['الركيزة', '85px', function (c) { return c.pillar ? chip(c.pillar, 'acc') : ''; }],
+      ['المنصة', '75px', function (c) { return esc(c.platform); }],
+      ['المصدر', '90px', function (c) { return '<span class="muted tiny">' + esc(c.source_ref) + '</span>'; }]
+    ], d.rows, { key: 'content', id: function (c) { return c.content_id; }, detail: function (c) { return '<div style="white-space:pre-wrap">' + esc(c.body) + '</div>'; } }) : empty('لا أفكار — تُقترح أسبوعياً'));
 } };
 ACT.contentSt = function (el) { act('contentStatus', { content_id: el.dataset.id, status: el.value }, 'حُدّث', false); };
 
@@ -1565,11 +1581,14 @@ ACT.b2bSave = function (el) {
 
 /* ─── الخرّيجون ─── */
 SCREENS.alumni = { render: function (d) {
-  return north(d.north) + '<h1>الخرّيجون</h1>' + section('مواعيد التجديد والإحالات', d.rows, function (a) {
-    return '<div class="card"><div class="row between"><b>' + esc(a.name) + '</b>' + chip('تجديد ' + fmtDate(a.recert_due), 'warn') + '</div>' +
-      '<div class="chips">' + chip(a.course) + chip('كود: ' + a.referral_code, 'acc') + chip('إحالات: ' + (a.referrals_count || 0)) +
-      (a.testimonial_requested === 'نعم' ? chip('اطلب شاهداً') : '') + '</div>' + (a.next_offer ? '<div class="small">العرض التالي: ' + esc(a.next_offer) + '</div>' : '') + '</div>';
-  }, 'لا خرّيجين بعد — من ملف العميل: «أتمّ الدورة»') +
+  return north(d.north) + '<h1>الخرّيجون</h1><h2>مواعيد التجديد والإحالات ' + chip(d.rows.length) + '</h2>' + (d.rows.length ? stripList_([
+    ['الخرّيج', 'minmax(140px,2fr)', function (a) { return '<b>' + esc(a.name) + '</b>'; }],
+    ['الدورة', 'minmax(120px,2fr)', function (a) { return esc(a.course); }],
+    ['التجديد', '90px', function (a) { return a.recert_due ? chip(fmtDate(a.recert_due), 'warn') : ''; }],
+    ['كود الإحالة', '95px', function (a) { return a.referral_code ? chip(a.referral_code, 'acc') : ''; }],
+    ['إحالات', '55px', function (a) { return String(a.referrals_count || 0); }],
+    ['العرض التالي', 'minmax(140px,2fr)', function (a) { return esc(a.next_offer) + (a.testimonial_requested === 'نعم' ? ' ' + chip('اطلب شاهداً') : ''); }]
+  ], d.rows) : empty('لا خرّيجين بعد — من ملف العميل: «أتمّ الدورة»')) +
     section('الشواهد', d.testimonials, function (t) {
       return '<div class="card"><div class="quote">' + esc(t.quote) + '</div><div class="chips">' + chip(t.outcome) +
         (t.consent === 'نعم' ? chip('موافقة: ' + t.consent_scope, 'good') : chip('بلا موافقة — لا يُستخدم', 'bad')) + '</div></div>';
@@ -1587,13 +1606,13 @@ ACT.tSave = function () { act('testimonialSave', { t: { alumni_id: val('ta'), qu
 SCREENS.kpis = { render: function (d) {
   return north(d.north) + '<h1>المؤشرات</h1><div class="row"><div class="stat"><div class="v">' + d.usage.pct + '%</div><div class="k">حصة التشغيل اليوم</div></div>' +
     '<div class="stat"><div class="v">' + d.claude.spent + '$</div><div class="k">Claude اليوم من ' + d.claude.budget + '$</div></div></div>' +
-    d.rows.map(function (k) {
-      var cls = { 'خلف': 'bad', 'على المسار': 'good', 'متقدم': 'good' }[k.status] || '';
-      return '<div class="card"><div class="row between"><b>' + esc(k.name_ar) + '</b>' + chip(k.status, cls) + '</div>' +
-        '<div class="row"><span style="font-size:16px;font-weight:700">' + esc(k.actual === '' ? '—' : k.actual) + '</span>' +
-        (k.target !== '' ? '<span class="muted">الهدف ' + esc(k.target) + '</span>' : '') + (k.is_assumption === 'نعم' ? chip('افتراض', 'warn') : '') + '</div>' +
-        '<div class="muted small">' + esc(k.formula_note) + '</div></div>';
-    }).join('');
+    stripList_([
+      ['الحالة', '90px', function (k) { return chip(k.status, { 'خلف': 'bad', 'على المسار': 'good', 'متقدم': 'good' }[k.status] || ''); }],
+      ['المؤشر', 'minmax(150px,2fr)', function (k) { return '<b>' + esc(k.name_ar) + '</b>'; }],
+      ['الفعلي', '80px', function (k) { return '<b>' + esc(k.actual === '' ? '—' : k.actual) + '</b>'; }],
+      ['الهدف', '80px', function (k) { return esc(k.target) + (k.is_assumption === 'نعم' ? ' ' + chip('افتراض', 'warn') : ''); }],
+      ['كيف يُحسب', 'minmax(180px,3fr)', function (k) { return '<span class="muted">' + esc(k.formula_note) + '</span>'; }]
+    ], d.rows);
 } };
 
 /* ─── منشور اليوم ─── */
