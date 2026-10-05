@@ -505,7 +505,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', 'البحث (كتالوج السوق)'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
+var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'بنك الأفكار والمنشورات'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -513,7 +513,7 @@ var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['ask', '🎯 م�
 var NAV_TREE = [
   ['day', '⚡ عملي اليوم', ['today', 'monitor', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
-  ['search', '🔎 البحث', ['manual', 'search', 'keywords']],
+  ['search', '🔎 البحث', ['search', 'keywords']],
   ['watch', '👁 المراقبة', ['compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'clubs', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
@@ -521,7 +521,7 @@ var NAV_TREE = [
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['manual', '🔍 البحث اليدوي'], ['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['clubs', '🏟 خريطة الأندية'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
+NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['clubs', '🏟 خريطة الأندية'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
@@ -553,7 +553,7 @@ document.addEventListener('toggle', function (e) {
 }, true);
 
 /** زر «↺ إلغاء كل الخيارات» في كل شاشة بحث/تصفية — يعيد الشاشة لحالتها الأولى */
-var CLEARABLE = ['clubs', 'homeapps', 'comptimeline', 'reports', 'inbox', 'pipeline', 'compwatch', 'manual', 'search', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
+var CLEARABLE = ['clubs', 'homeapps', 'comptimeline', 'reports', 'inbox', 'pipeline', 'compwatch', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
 function clearBtn_(screen) {
   if (CLEARABLE.indexOf(screen) < 0) return;
   var h = document.querySelector('#main h1'); if (!h || h.querySelector('.clr')) return;
@@ -4796,7 +4796,7 @@ ACT.rpPreview = function (el) {
   <script>
 /* ═══════════ شارات الأدوات: 💳 مدفوع (رصيد Claude) · ⚙️ آلي · ✋ يدوي ═══════════ */
 var TOOL_TAGS = {
-  today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'amp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'm', search: 'mp', keywords: 'amp',
+  today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'amp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'a', search: 'ap', keywords: 'amp',
   compwatch: 'am', radar: 'a', competitors: 'm', exams: 'ap', reports: 'a', targets: 'am', kpis: 'a', sources: 'amp', trainers: 'm',
   people: 'amp', opps: 'ap', b2b: 'am', alumni: 'am', campaigns: 'm', content: 'ap', register: 'm', pipeline: 'am', courses: 'm',
   payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am'
@@ -5052,13 +5052,8 @@ var PAGE_INFO = {
       ['حساباتهم على السوشال', 'روابط حسابات كل منافس (يدوي) تفتحها بضغطة.', 'متابعة سريعة لعروضهم المنشورة.'],
       ['＋ منافس / ＋ عرض دورة', 'إضافة منافس أو تسجيل عرض رأيته.', 'السوق يتحدّث فوراً حتى بلا Claude.'],
       ['الرادار اليومي', 'يفحص مواقع المنافسين يومياً ويسجّل العروض الجديدة (يحتاج Claude).', 'لا يفوتك عرض منافس.']] },
-  search: { t: 'البحث (كتالوج السوق)', what: 'كتالوج استعلامات بحث جاهزة للسوق (١١ فئة، ٦ نيّات، ٧ جماهير) مع مُركِّب طبقات لتضييق البحث أو توسيعه، وتشغيل في Google أو عبر Claude، وحفظ النتائج.', why: 'تجد عملاء B2B وإشارات التوسّع وأسعار المنافسين وأسئلة الطلاب بمنهجية ثابتة قابلة للتكرار — لا بحث عشوائي.',
-    btns: [['⚡ الجاهزة (Presets)', 'خمس وصفات جاهزة: عميل B2B ساخن، طالب جاهز، تسعير المنافسين، وثائق تنظيمية، رادار التوسّع.', 'نتيجة قوية بضغطة.'],
-      ['الكتالوج + الفلاتر', 'تصفّح حسب الفئة والنيّة والجمهور، و«للمُركِّب» لتعديل أي استعلام.', 'تبدأ من الاستعلام الأنسب لهدفك.'],
-      ['المُركِّب', 'تضيف طبقات: النطاق، الدقة، الحداثة، نوع الملف، الاستبعاد. يمنع التركيبات المتعارضة ويعدّ الكلمات حتى ٣٢.', 'تضيّق للحصول على نتائج أدق أو توسّع لاستكشاف أكثر.'],
-      ['افتح في Google', 'يفتح البحث في تبويب جديد ثم نموذج لتسجيل النتائج المهمة.', 'مجاني ويعمل الآن.'],
-      ['تشغيل عبر Claude', 'يبحث Claude ويستخرج الحقول تلقائياً (فردي أو فئة كاملة).', 'توفير وقت — يحتاج الرصيد.'],
-      ['النتائج + تصدير', 'جداول حسب الفئة، موسومة بقيد المنافسة، والتصدير يستبعد المحظور ويُعطَّل لفئات PDPL.', 'قوائم قابلة للاستخدام بأمان نظامي.']] },
+  search: { t: '🔎 البحث الذكي', what: 'صفحة واحدة تدمج البحث اليدوي وكتالوج السوق: النظام يولّد خطة البحث وحده كل يوم من بياناتك (المدينة، دوراتك، المنافسون) وينفّذها — مجاناً عبر أخبار Bing وخريطة OpenStreetMap، وببحث ويب كامل عبر Claude عند الرصيد. ما تمنعه المنصات يأتي أزراراً جاهزة.', why: 'لا خيارات ولا قوالب تملؤها: تفتح الصفحة فتجد نتائج اليوم وكل نتيجة لها زر يرسلها لمكانها.',
+    btns: [['▶ شغّل المجاني الآن', 'يشغّل البحث المجاني فوراً بدل انتظار الدورة اليومية.', 'نتائج اللحظة.'], ['🚀 افتح الكل', 'يفتح منصات المهمة (X، تيك توك، انستغرام…) على نتائج اللحظة.', 'ما لا يُجلب آلياً تراه بضغطة.'], ['أزرار النتيجة', 'ترسل النتيجة لمكانها: فرصة B2B، عرض منافس، مدرب، فكرة محتوى، فرصة رد.', 'من البحث إلى فعل.']] },
   sources: { t: 'قواعد عملاء المصادر', what: 'استيراد قوائم عملاء من شيت/إكسل، تحليلها وتقسيمها حسب الاحتياج، ورسالة مخصصة لكل شخص تُرسلها أنت بضغطة.', why: 'تحوّل قوائم خاملة (معارض، عملاء قدامى، مسجّلون) إلى محادثات بيع — كل رسالة مناسبة لاحتياج صاحبها.',
     btns: [['📥 استيراد', 'لصق من إكسل أو رفع ملف CSV/Excel، مع ربط الأعمدة تلقائياً ومنع المكرر.', 'قائمتك داخل النظام في دقيقة.'],
       ['حلّل بالقواعد / عبر Claude', 'تقسيم كل شخص لشريحة (ملزَم، طامح، محوِّل مسار…) وتحديد احتياجه والدورة المناسبة، ثم كتابة رسالة مخصصة.', 'الرسالة تخاطب دافع الشخص الحقيقي = ردود أعلى.'],
@@ -5495,6 +5490,72 @@ SCREENS.radar = { render: function (d) {
   }).join('') : empty('لا فجوات واضحة — كل ما يقدّمه المنافسون نقدّم مثله'));
   return html;
 } };
+</script>
+
+  <script>
+/* ═══════════ 🔎 البحث الذكي — صفحة واحدة: النظام يولّد خطة البحث وينفّذها وحده (مجاني دائماً + Claude عند الرصيد) ═══════════ */
+var SS = { cat: '' };
+var SS_ENGINE = { news: ['⚙️ آلي مجاني', 'good', 'أخبار Bing'], osm: ['⚙️ آلي مجاني', 'good', 'خريطة OpenStreetMap'], links: ['👆 بضغطة', 'warn', 'المنصة تمنع الجلب الآلي'] };
+function ssCatLabel_(id) { var c = SEARCH_CATALOG.categories.filter(function (x) { return x.id === id; })[0]; return c ? c.label : (id || '—'); }
+SCREENS.search = { render: function (d) {
+  var plan = d.plan || [], res = d.results || [];
+  d.values = d.values || {}; d.last_by_cat = d.last_by_cat || {}; // نسخة محفوظة من الصفحة القديمة قبل التحديث
+  var html = north(d.north) + '<h1>🔎 البحث الذكي</h1>';
+  html += '<div class="card small" style="border-color:#2a9d8f;background:#eef9f6">⚙️ <b>يعمل وحده يومياً:</b> النظام يولّد خطة البحث من بياناتك (المدينة: <b>' + esc(d.values.CITY) + '</b> · الخدمة: <b>' + esc(d.values.SERVICE) + '</b>' +
+    (d.values.COMPETITOR ? ' · منافس اليوم: <b>' + esc(d.values.COMPETITOR) + '</b>' : '') + ') وتتبدّل العبارات كل يوم.' +
+    '<div style="margin-top:4px">' + chip('مجاني: أخبار Bing + خريطة OpenStreetMap — يعمل دائماً', 'good') + ' ' +
+    chip(d.paid ? 'Claude: بحث ويب كامل لـ ٣ مهام يومياً ✓' : 'Claude: غير مشحون — يضيف بحث الويب الكامل عند الشحن', d.paid ? 'good' : '') + '</div>' +
+    '<div class="muted" style="margin-top:4px">آخر تشغيل آلي: ' + (d.last_run ? fmtDate(d.last_run, true) + ' · ' + esc(d.last_status) : 'لم يعمل بعد') +
+    ' · <button class="btn sm pri" data-act="ssRunNow">▶ شغّل المجاني الآن</button></div></div>';
+  // خطة اليوم مجمّعة بالهدف
+  var groups = {}; plan.forEach(function (m) { (groups[m.cat] = groups[m.cat] || []).push(m); });
+  html += '<h2>🤖 ما يبحث عنه النظام اليوم ' + chip(plan.length + ' مهمة') + '</h2>';
+  html += Object.keys(groups).map(function (cat) {
+    var last = d.last_by_cat[cat], ms = groups[cat], eng = SS_ENGINE[ms[0].engine] || SS_ENGINE.links;
+    return '<details class="card small"><summary><b>' + esc(ssCatLabel_(cat)) + '</b> ' + chip(eng[0], eng[1]) + ' <span class="muted">' + esc(eng[2]) + '</span>' +
+      (last ? ' · ' + chip('آخر نتائج: ' + (last.n || 0) + ' · ' + fmtDate(last.at)) : '') + '</summary>' +
+      ms.map(function (m) {
+        return '<div style="margin-top:6px;border-top:1px dashed var(--line);padding-top:4px"><div><code style="direction:ltr;unicode-bidi:plaintext">' + esc(m.plain || m.query) + '</code></div>' +
+          '<div class="chips">' + m.links.map(function (l) { return '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(l.url) + '">' + esc(l.name) + ' ↗</a>'; }).join('') +
+          '<button class="btn sm" data-act="ssOpenAll" data-q="' + esc(m.plain || m.query) + '" data-l="' + esc(m.links.map(function (l) { return l.name; }).join('|')) + '">🚀 افتح الكل</button></div></div>';
+      }).join('') + '</details>';
+  }).join('');
+  // النتائج
+  var cats = {}; res.forEach(function (r) { cats[r.category_id || '—'] = (cats[r.category_id || '—'] || 0) + 1; });
+  html += '<h2>📥 النتائج ' + chip(res.length) + '</h2><div class="chips"><button class="chip' + (SS.cat ? '' : ' acc') + '" data-act="ssCat" data-c="">الكل</button>' +
+    Object.keys(cats).map(function (c) { return '<button class="chip' + (SS.cat === c ? ' acc' : '') + '" data-act="ssCat" data-c="' + esc(c) + '">' + esc(ssCatLabel_(c)) + ' ' + cats[c] + '</button>'; }).join('') + '</div>';
+  var shown = res.filter(function (r) { return !SS.cat || r.category_id === SS.cat; }).slice(0, 120);
+  html += shown.length ? shown.map(function (r) {
+    var f = r.fields || {}, src = /OpenStreetMap/.test(f.sourceUrl || '') ? 'خريطة' : '';
+    return '<div class="card small"><div class="row between"><b>' + esc(r.title) + '</b><span class="muted">' + fmtDate(r.captured_at) + '</span></div>' +
+      '<div class="chips">' + chip(ssCatLabel_(r.category_id)) + (f.phone ? chip('📞 ' + f.phone) : '') + (f.city ? chip(f.city) : '') + (src ? chip('🗺 ' + src) : '') +
+      (r.non_compete === 'blocked' ? chip('محظور (عدم منافسة)', 'bad') : '') +
+      (extUrl(r.url) ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(extUrl(r.url)) + '">المصدر ↗</a>' : '') +
+      (extUrl(f.map) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(f.map)) + '">📍 الخريطة</a>' : '') + '</div>' +
+      (f.summary ? '<div class="muted">' + esc(f.summary) + '</div>' : '') +
+      '<div class="btns">' + (typeof srcActions_ === 'function' ? srcActions_(r.category_id, r) : '') + ' <button class="btn sm ghost" data-act="srcArchive" data-id="' + esc(r.res_id) + '">أرشفة</button></div></div>';
+  }).join('') : empty('لا نتائج بعد — يعمل البحث الآلي يومياً، أو اضغط «▶ شغّل المجاني الآن»');
+  // أسعار السوق لدوراتنا (من البحث والرادار)
+  if ((d.market || []).length) html += '<details class="card small"><summary><b>💰 أسعار السوق لدوراتنا</b> ' + chip(d.market.length) + '</summary>' + d.market.map(function (c) {
+    return '<div style="margin-top:6px"><b>«' + esc(c.name) + '»</b> ' + chip('سعرنا: ' + (c.ours ? c.ours.toLocaleString('en') : 'غير محدد'), 'acc') +
+      (c.offers.length ? chip('السوق: ' + c.min.toLocaleString('en') + '–' + c.max.toLocaleString('en') + ' (متوسط ' + c.avg.toLocaleString('en') + ')') : chip('لا أسعار منافسين بعد', 'warn')) + '</div>';
+  }).join('') + '</details>';
+  return html;
+} };
+SCREENS.manual = SCREENS.search;
+ACT.ssCat = function (el) { SS.cat = el.dataset.c; go('search', {}, true); };
+ACT.ssRunNow = function (el) {
+  el.disabled = true; el.textContent = '⏳ يبحث… (حتى دقيقة)';
+  act('searchAutoRun', {}, function (r) { return 'تم: ' + r.added + ' نتيجة جديدة من ' + r.runs + ' بحث'; }).catch(function () { el.disabled = false; el.textContent = '▶ شغّل المجاني الآن'; });
+};
+/** يفتح منصات هذه المهمة فقط، كل واحدة في تبويب — أي منصة تفشل تُتخطى ولا توقف البقية */
+ACT.ssOpenAll = function (el) {
+  var opened = 0, blocked = 0;
+  Array.prototype.forEach.call(el.parentNode.querySelectorAll('a.chip'), function (a) {
+    try { if (window.open(a.href, '_blank', 'noopener') === null) blocked++; else opened++; } catch (e) {}
+  });
+  toast(blocked ? 'المتصفح منع ' + blocked + ' نافذة — اسمح بالنوافذ المنبثقة لهذا الموقع ثم اضغط مرة أخرى' : 'فُتحت ' + opened + ' منصة', !!blocked);
+};
 </script>
 
 </body>
