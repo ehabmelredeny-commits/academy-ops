@@ -413,6 +413,10 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
+.eg-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.eg-in{border:1px solid var(--line);border-radius:10px;padding:8px}
+.eg-drop{display:block;margin-top:6px;border:2px dashed var(--line);border-radius:10px;padding:14px;text-align:center;font-size:13px;cursor:pointer}
+.eg-rv.off{opacity:.5}.eg-rv input[type=text],.eg-rv input:not([type]){padding:3px 6px;font-size:12.5px}
+@media (max-width:760px){.eg-two{grid-template-columns:1fr}}
 .tl2{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:4px 12px 8px;overflow-x:auto}
 .tl2-axis{position:relative;height:30px;border-bottom:1px solid var(--line);font-size:10.5px;color:var(--muted);min-width:700px}
 .tl2-axis span{position:absolute;bottom:4px;padding-inline-start:3px}
@@ -431,6 +435,7 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .cs.off{opacity:.45}.cs-dot{width:8px;height:8px;border-radius:50%;background:#e76f51;flex-shrink:0}.cs.off .cs-dot{background:#8a817c}
 .cs-n{width:220px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cs-ic{display:inline-flex;gap:5px;flex:1;flex-wrap:wrap;align-items:center}
 .cs .chip{margin:0;padding:1px 8px;font-size:11px;white-space:nowrap}.cs-t{font-size:11px;white-space:nowrap}
+.cs-eng{text-decoration:none;font-size:14px}
 .cs-btn{font-size:11px;padding:2px 8px;border-radius:7px;border:1px solid #2a9d8f;background:rgba(42,157,143,.15);color:#2a9d8f;cursor:pointer;white-space:nowrap}
 .cs-btn.ghost{border-color:var(--line);background:none;color:var(--muted)}
 @media (max-width:700px){.cs{flex-wrap:wrap}.cs-n{width:auto;flex:1}}
@@ -582,7 +587,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
+var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['engage', '💬 التفاعل مع منشورات المنافسين'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'بنك الأفكار والمنشورات'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -591,7 +596,7 @@ var NAV_TREE = [
   ['day', '⚡ عملي اليوم', ['today', 'monitor', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
   ['search', '🔎 البحث', ['search', 'keywords']],
-  ['watch', '👁 المراقبة', ['compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
+  ['watch', '👁 المراقبة', ['engage', 'compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'clubs', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
@@ -959,6 +964,7 @@ SCREENS.today = {
       return '<div class="click small" data-go="ask" style="margin-top:5px">' + chip(o.platform, 'acc') + (o.asker ? ' <b>' + esc(o.asker) + '</b>' : '') + ' «' + esc(o.question) + '» ' + chip(o.psych_type ? '🧠 ' + o.psych_type : '') + '</div>'; }).join('') + '</div>';
     if (d.ask_new) html += '<div class="card click" data-go="ask" style="border-color:var(--good)"><b>🎯 ' + d.ask_new + ' شخص يسأل عن دورة الآن</b> <span class="muted small">— رد عليهم قبل غيرك</span></div>';
     // ٧) 👁 اطّلع وأشّر — شريط لكل منافس بأيقونات حساباته (التصميم المعتمد)
+    if (d.eng_waiting) html += '<div class="card small row between" style="border-color:#e9a23b"><span>💬 <b>' + d.eng_waiting + '</b> سؤالاً من جمهور المنافسين ينتظر ردك — الردود جاهزة</span><button class="btn sm pri" data-go="engage">افتح ورد</button></div>';
     if (typeof compReviewHtml_ === 'function') html += compReviewHtml_(d.review);
     var nothing = !d.overdue.length && !d.escalations.length && !d.hot_leads.length && !d.failed.length && !d.renewals.length && !d.high_news.length;
     if (nothing) html += empty('لا شيء يحتاج إجراءً الآن ✓');
@@ -3122,6 +3128,7 @@ function compReviewHtml_(list) {
         (r.accounts.length ? '' : '<span class="muted tiny">لا حسابات مسجّلة</span>') + '</span>' +
         (r.why ? '<span class="chip ' + esc(r.cls) + '">' + esc(r.why) + '</span>' : '<span class="chip good">✓ تم الاطلاع</span>') +
         '<span class="cs-t muted">' + (r.last_reviewed ? 'آخر اطلاع: ' + fmtDate(r.last_reviewed) : 'لم يُطّلع بعد') + '</span>' +
+        '<a href="#" class="cs-eng" data-go="engage" data-args="' + attr({ ac: r.ac_id }) + '" title="التفاعل مع منشوراته: الصق تعليقات منشور أو ارفع صورها">💬</a>' +
         (r.active ? '<button class="cs-btn" data-act="csSeen" data-id="' + esc(r.ac_id) + '" data-prev="' + esc(r.last_reviewed || '') + '">✓ تم الاطلاع</button>'
           : '<button class="cs-btn ghost" data-act="csUndo" data-id="' + esc(r.ac_id) + '">↺ تراجع</button>') + '</div>';
     }).join('');
@@ -5010,7 +5017,7 @@ var TOOL_TAGS = {
   today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'amp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'a', search: 'ap', keywords: 'amp',
   compwatch: 'am', radar: 'a', competitors: 'm', exams: 'ap', reports: 'a', targets: 'am', kpis: 'a', sources: 'amp', trainers: 'm',
   people: 'amp', opps: 'ap', b2b: 'am', alumni: 'am', campaigns: 'm', content: 'ap', register: 'm', pipeline: 'am', courses: 'm',
-  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am'
+  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am', engage: 'am'
 };
 var TAG_INFO = { p: ['💳', 'يحتاج رصيد Claude (مدفوع)'], a: ['⚙️', 'يعمل آلياً'], m: ['✋', 'يدوي — تعمله أنت'] };
 function tagIcons_(k) { return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span title="' + TAG_INFO[c][1] + '" class="ttag">' + TAG_INFO[c][0] + '</span>' : ''; }).join(''); }
@@ -5289,6 +5296,8 @@ var PAGE_INFO = {
       ['ابحث عن مدربين', 'يفتح فئة «استقطاب مدربين» في صفحة البحث.', 'مصدر منهجي لمدربين جدد.'],
       ['تواصلت معه / ردّ', 'تسجّل التواصل الفردي المهني.', 'متابعة العلاقة.'],
       ['لا تراسل / احذف', 'احترام طلبه — حذف فعلي عند الطلب.', 'امتثال لحماية البيانات وسمعة الأكاديمية.']] },
+  engage: { t: '💬 التفاعل مع منشورات المنافسين', what: 'تلصق تعليقات منشور منافس أو ترفع صور شاشتها (ويوتيوب يُجلب وحده)، فيستخرج النظام الأسئلة ويكتب رداً مخصصاً لكل سائل ومعه عرض وكود خصم لسؤال السعر.', why: 'جمهور المنافس الذي يسأل الآن هو أقرب عميل لنا — رد سريع وذكي يكسبه.',
+    btns: [['📋 انسخ وافتح', 'ينسخ الرد ويفتح المنشور — تلصقه تحت تعليق السائل.', 'رد في ثوانٍ.'], ['✓ رددت', 'يسجّل الرد ويضيف السائل لمراحل العملاء.', 'لا يضيع عميل.']] },
   monitor: { t: '📺 مراقبة الأداء', what: 'شاشة كالتلفزيون: العملية الآلية الجارية الآن في الوسط، وما سبقها أشرطة حولها — اضغط أي شريط لتفاصيله.', why: 'ترى أن النظام يعمل فعلاً، ومتى، ولمن.', btns: [] },
   pipeline: { t: '🧲 مراحل العملاء', what: 'لوحة العملاء حسب المرحلة (جديد ← تواصلنا ← رد ← عرض مُرسل ← سجّل)، مع النمط النفسي والاعتراض والخطوة التالية وكود الخصم النشط.', why: 'لا يضيع عميل بين المراحل، وتعرف من تتابع اليوم.',
     btns: [['🔎 تحقق من كود', 'يتحقق من كود خصم عند التسجيل ويسجّل استخدامه.', 'سعر واحد صحيح للعميل.']] },
@@ -5987,6 +5996,101 @@ ACT.dpPublish = function (el) {
 };
 ACT.dpPubOne = function (el) { el.disabled = true; api('action', 'postPublish', { post_ids: [el.dataset.id], at: '' }).then(dpAfterPublish_).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 document.addEventListener('change', function (e) { if (e.target && e.target.id === 'dp_media') { var f = e.target.files[0], n = $('dp_media_n'); if (n) n.textContent = f ? ' ✓ ' + f.name : ''; } });
+</script>
+
+  <script>
+/* ═══════════ 💬 التفاعل مع منشورات المنافسين (التصميم المعتمد 2026-10-05) ═══════════ */
+var ENG = { items: null, imgs: [] };
+SCREENS.engage = { render: function (d, args) {
+  var c = d.counts || {};
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">💬 التفاعل مع منشورات المنافسين</h1>' +
+    statMini_([[c.week || 0, 'سؤال هذا الأسبوع'], [c.waiting || 0, 'ينتظر ردك', 'warn'], [c.replied || 0, 'رُدّ عليه', 'good'], [c.leads || 0, 'صاروا عملاء']]) + '</div>';
+  // ١) الإدخال
+  html += '<div class="card"><b>١) أدخل تعليقات منشور منافس</b> <span class="muted tiny">— بالطريقة الأسهل لك</span>' +
+    '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><select id="eg_ac" style="max-width:260px"><option value="">— المنافس —</option>' +
+      (d.competitors || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (String(x.ac_id) === String(d.pick) ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select>' +
+      '<input id="eg_url" dir="ltr" style="flex:1;min-width:220px" placeholder="رابط المنشور https://instagram.com/p/…"></div>' +
+    '<div class="eg-two"><div class="eg-in"><b>📷 ارفع صور الشاشة</b> <span class="chip good">الأسهل على الجوال</span>' +
+      '<label class="eg-drop">⬆️ اسحب الصور هنا أو اضغط للاختيار<br><span class="muted tiny">عدة صور دفعة واحدة · يقرأ النظام النص منها مجاناً</span><input type="file" id="eg_imgs" accept="image/*" multiple hidden></label>' +
+      '<div id="eg_thumbs" class="row tiny" style="gap:6px;margin-top:6px;flex-wrap:wrap"></div></div>' +
+    '<div class="eg-in"><b>📋 أو الصق النص</b> <span class="muted tiny">حدّد الكل ← انسخ ← الصق</span><textarea id="eg_text" style="min-height:96px;margin-top:6px" placeholder="الصق التعليقات كما هي (مع أسماء الحسابات)"></textarea></div></div>' +
+    '<div class="row between" style="margin-top:6px;gap:8px;flex-wrap:wrap"><span class="muted tiny">تظهر لك الأسئلة المستخرجة قبل التحليل لتصحّح أي كلمة · يُستبعد غير الأسئلة (🔥، شكراً، تاقات) تلقائياً</span>' +
+      '<button class="btn pri" data-act="egExtract">🔎 استخرج التعليقات</button></div><div id="eg_review"></div></div>';
+  // يوتيوب
+  var yt = d.yt || {};
+  html += '<div class="card small" style="border-color:#ff0000"><b>▶️ يوتيوب — آلي بالكامل ومجاني</b> ' +
+    (yt.key ? chip('⚙️ يعمل وحده يومياً', 'good') + ' <span class="muted tiny">يراقب ' + yt.channels + ' قناة منافس · آخر فحص: ' + (yt.last_run ? fmtDate(yt.last_run, true) : 'لم يعمل بعد') + '</span>'
+      : chip('بانتظار المفتاح المجاني', 'warn') + ' <span class="muted tiny">أنشئ مفتاح YouTube المجاني من Google ← ضعه في Script Properties باسم <code>YT_API_KEY</code> — بعدها يعمل وحده يومياً</span>') + '</div>';
+  // ٢) الأسئلة والردود
+  var rows = (d.rows || []).filter(function (e) { return e.status !== 'مستبعد'; });
+  html += '<div class="row between" style="align-items:center;margin-top:10px"><b>٢) الأسئلة والردود الجاهزة</b><span class="muted tiny">الرد يُنشر بضغطتك (المنصات تمنع الرد الآلي) · «✓ رددت» يضيف السائل لمراحل العملاء</span></div>';
+  html += rows.length ? stripList_([
+    ['السائل', '120px', function (e) { return '<b>' + (e.asker ? '@' + esc(e.asker) : '—') + '</b>'; }],
+    ['السؤال', 'minmax(140px,2fr)', function (e) { return esc(e.question); }],
+    ['النوع', '120px', function (e) { return String(e.qtype || '').split('،').map(function (t) { return chip(Engage_icon_(t) + ' ' + t, t === 'سعر' ? 'warn' : t === 'اعتماد' ? 'acc' : ''); }).join(' '); }],
+    ['النية', '65px', function (e) { var n = Number(e.intent) || 1; return '★★★★★'.slice(0, n) + '<span class="muted">' + '★★★★★'.slice(0, 5 - n) + '</span>'; }],
+    ['المنافس', 'minmax(90px,1fr)', function (e) { return '<span class="muted tiny">' + esc(e.competitor) + (e.source === 'يوتيوب' ? ' ▶️' : '') + '</span>'; }],
+    ['الرد الجاهز', 'minmax(160px,2.6fr)', function (e) { return '<span class="muted" title="' + esc(e.reply) + '">' + esc(e.reply) + '</span>' + (e.code ? ' ' + chip('🎟 ' + e.code) : ''); }],
+    ['إجراء', '190px', function (e) {
+      return e.status === 'رُدّ' ? chip('✓ رُدّ', 'good') + (e.lead_id ? ' <a href="#" data-go="lead" data-args="' + attr({ lead_id: e.lead_id }) + '">👤</a>' : '') :
+        '<button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '">📋 انسخ وافتح</button> <button class="btn sm good" data-act="egDone" data-id="' + esc(e.eng_id) + '">✓ رددت</button> <a href="#" class="muted tiny" data-act="egSkip" data-id="' + esc(e.eng_id) + '" title="ليس سؤالاً حقيقياً">✕</a>'; }]
+  ], rows, { cls: function (e) { return e.status === 'رُدّ' ? 'sl-off' : ''; } }) : empty('لا أسئلة بعد — الصق تعليقات منشور منافس أو ارفع صورها');
+  // 🧠 ماذا يسأل جمهور المنافسين
+  var st = d.stats || [];
+  if (st.length) html += '<div class="card small" style="margin-top:10px;border-color:#8d6cd8"><b>🧠 ماذا يسأل جمهور المنافسين؟</b> (آخر 30 يوماً)<div class="row" style="gap:6px;margin-top:4px;flex-wrap:wrap">' +
+    st.map(function (s) { return chip(s.icon + ' ' + s.type + ' ' + s.pct + '%', s.type === 'سعر' ? 'warn' : s.type === 'اعتماد' ? 'acc' : ''); }).join('') + '</div>' +
+    '<div class="muted tiny" style="margin-top:4px">➡️ السؤال المتكرر (٣ مرات فأكثر) يتحول تلقائياً إلى فكرة منشور تجيب عنه في <a href="#" data-go="content">💡 بنك الأفكار</a> · ويدخل تحليل <a href="#" data-go="dailyPost">🧠 العقل الآلي</a></div></div>';
+  return html;
+} };
+function Engage_icon_(t) { return { 'سعر': '💰', 'موعد': '📅', 'اعتماد': '🎓', 'مدينة': '📍', 'مقارنة': '⚖️' }[t] || '❓'; }
+function egReviewHtml_(r) {
+  var qs = r.items.filter(function (x) { return x.question; }), other = r.items.length - qs.length;
+  ENG.items = r.items;
+  return '<div class="card" style="margin-top:8px;border-color:var(--accent)"><b>راجِع قبل التحليل</b> <span class="muted tiny">' + r.items.length + ' تعليقاً' + (r.from_images ? ' (من ' + r.from_images + ' صور)' : '') +
+    ' · ' + qs.length + ' سؤالاً · ' + other + ' ليس سؤالاً (يُستبعد) — صحّح أي كلمة أو اسم</span>' +
+    (r.errors && r.errors.length ? '<div class="small" style="color:var(--bad)">' + esc(r.errors.join(' · ')) + '</div>' : '') +
+    r.items.map(function (x, i) {
+      return '<div class="row eg-rv' + (x.question ? '' : ' off') + '" style="gap:6px;margin-top:4px"><input type="checkbox" data-egq="' + i + '"' + (x.question ? ' checked' : '') + ' title="سؤال؟">' +
+        '<input value="' + esc(x.asker) + '" data-ega="' + i + '" dir="ltr" placeholder="الحساب" style="width:130px">' +
+        '<input value="' + esc(x.text) + '" data-egt="' + i + '" style="flex:1"></div>';
+    }).join('') +
+    '<div class="btns"><button class="btn pri" data-act="egAnalyze">🧠 حلّل وجهّز الردود</button></div></div>';
+}
+function egReadFiles_() {
+  var fs = $('eg_imgs') && $('eg_imgs').files ? Array.prototype.slice.call($('eg_imgs').files, 0, 10) : [];
+  return Promise.all(fs.map(function (f) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok({ data: String(r.result).split(',')[1], mime: f.type }); }; r.readAsDataURL(f); }); }));
+}
+ACT.egExtract = function (el) {
+  var text = val('eg_text'); if (!text.trim() && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق التعليقات أو ارفع صور الشاشة', true);
+  el.disabled = true; el.textContent = '⏳ يقرأ…';
+  egReadFiles_().then(function (imgs) { return api('action', 'engageExtract', { text: text, images: imgs }); })
+    .then(function (r) { el.disabled = false; el.textContent = '🔎 استخرج التعليقات'; $('eg_review').innerHTML = r.items.length ? egReviewHtml_(r) : empty('لم يُعثر على تعليقات — جرّب صورة أوضح أو الصق النص'); })
+    .catch(function (e) { el.disabled = false; el.textContent = '🔎 استخرج التعليقات'; toast(errMsg(e), true); });
+};
+ACT.egAnalyze = function (el) {
+  var items = (ENG.items || []).map(function (x, i) {
+    var q = document.querySelector('[data-egq="' + i + '"]'); if (q && !q.checked) return null;
+    return { asker: val_('[data-ega="' + i + '"]'), text: val_('[data-egt="' + i + '"]') };
+  }).filter(Boolean);
+  if (!items.length) return toast('لا أسئلة محددة', true);
+  el.disabled = true; el.textContent = '⏳ يحلّل…';
+  act('engageAnalyze', { ac_id: val('eg_ac'), post_url: val('eg_url'), items: items, source: $('eg_imgs') && $('eg_imgs').files.length ? 'صورة' : 'لصق' },
+    function (r) { return '✓ ' + r.added + ' سؤالاً جاهزة بردودها' + (r.skipped ? ' · استُبعد ' + r.skipped : ''); });
+};
+function val_(sel) { var e = document.querySelector(sel); return e ? e.value : ''; }
+ACT.egCopy = function (el) {
+  var e = (S.data.rows || []).filter(function (x) { return x.eng_id === el.dataset.id; })[0]; if (!e) return;
+  copyText(e.reply);
+  if (extUrl(e.post_url)) window.open(extUrl(e.post_url).replace(/#c\d+_\d+$/, ''), '_blank', 'noopener');
+  toast('نُسخ الرد — الصقه تحت تعليق ' + (e.asker ? '@' + e.asker : 'السائل') + ' ثم اضغط «✓ رددت»');
+};
+ACT.egDone = function (el) { act('engageStatus', { eng_id: el.dataset.id, status: 'رُدّ' }, function (r) { return r.lead_id ? '✓ أُضيف لمراحل العملاء' : '✓ سُجّل'; }); };
+ACT.egSkip = function (el) { act('engageStatus', { eng_id: el.dataset.id, status: 'مستبعد' }, 'استُبعد'); };
+document.addEventListener('change', function (e) {
+  if (!e.target || e.target.id !== 'eg_imgs') return;
+  var t = $('eg_thumbs'); if (!t) return;
+  t.innerHTML = Array.prototype.map.call(e.target.files, function (f, i) { return '<span class="chip">📄 ' + (i + 1) + ' · ' + esc(f.name.slice(0, 18)) + '</span>'; }).join('') + '<span class="muted">' + e.target.files.length + ' صور</span>';
+});
 </script>
 
 </body>
