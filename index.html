@@ -413,6 +413,8 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
+.dp-silent{margin:6px 0;padding:6px 8px;border-radius:8px;background:rgba(141,108,216,.08);font-size:12.5px}
+.dp-sl{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:1px dashed var(--line)}
 .dp-dec b{font-size:13px}.dp-dec{padding:5px 8px}
 .dp2{display:grid;grid-template-columns:1fr 2fr;gap:14px;align-items:start}
 .dp2.mode-comp{grid-template-columns:1fr}.dp2.mode-comp .dp-ours{display:none}
@@ -5697,8 +5699,17 @@ function dpComp_(d) {
   h += '<div class="muted tiny" style="margin:4px 0 6px"><b>آخر ٣٠ يوماً</b> (لا اليوم فقط) · ⚙️ آلي: الأخبار كل ٣ ساعات · دورات مواقعهم يومياً · منشورات انستغرام/تيك توك/X تُلصق روابطها (المنصات تمنع الجلب)' +
     (up.last ? ' · آخر تحديث: <b>' + fmtDate(up.last, true) + '</b>' : '') + (up.next ? ' · التالي: ' + fmtDate(up.next, true) : '') + ' · الشاشة تتحدّث كل ٥ دقائق</div>';
   // 🧠 القرارات
-  var br = d.brain || [];
-  if (br.length || d.brain_text) h += '<div class="card dp-brain"><b>🧠 العقل الآلي — قرارات مقترحة</b>' +
+  var br = d.brain || [], sl = d.silent || [], ss = d.silent_sum;
+  var silentHtml = sl.length ? '<details class="dp-silent"><summary>🕵️ <b>أكاديميات لا تعلن (أو لا نلتقط إعلانها): ' + sl.length + '</b>' +
+      (ss ? ' — القناة الخفية الأكثر شيوعاً: <b>' + esc(ss.top) + '</b> (' + ss.top_n + ')' + (ss.gaps ? ' · ' + ss.gaps + ' لهم حسابات لم نلصق منشوراتها' : '') : '') + '</summary>' +
+      '<div class="muted tiny" style="margin:4px 0">قاعدة العقل: كل جهة تشق طريقها للعمل بطريقة ما — إن لم تعلن فهي تكسب من قناة أخرى. الاستنتاج من أدلتنا فقط، وما لا دليل عليه يُقال «يحتاج تحقق».</div>' +
+      sl.map(function (s) {
+        return '<div class="dp-sl">' + dpAvatar_(s.name, d) + '<div class="grow"><b>' + esc(s.name) + '</b> <span class="chip acc">' + esc(s.main) + '</span>' +
+          (s.channels.length > 1 ? ' <span class="muted tiny">+ ' + esc(s.channels.slice(1).join(' · ')) + '</span>' : '') +
+          '<div class="tiny muted">🔎 ' + esc(s.evidence.join(' · ')) + '</div>' +
+          s.guidance.map(function (g) { return '<div class="tiny">➡️ ' + esc(g) + '</div>'; }).join('') + '</div></div>';
+      }).join('') + '</details>' : '';
+  if (br.length || d.brain_text || sl.length) h += '<div class="card dp-brain"><b>🧠 العقل الآلي — قرارات مقترحة</b>' + silentHtml +
     (d.brain_text ? '<details class="small"' + (br.length ? '' : ' open') + '><summary>📝 تحليل مكتوب (' + fmtDate(d.brain_text.at) + ')</summary><div style="white-space:pre-wrap">' + esc(d.brain_text.text) + '</div></details>' : '') +
     br.map(function (x) { return '<div class="dp-dec ' + x.level + '"><span>' + x.icon + '</span><div class="grow"><b>' + esc(x.title) + '</b><div class="muted tiny">' + esc(x.why) + '</div></div>' +
       (x.act && x.act.go ? '<button class="btn sm" data-go="' + esc(x.act.go) + '">' + esc(x.act.label) + '</button>' : '') + '</div>'; }).join('') + '</div>';
@@ -5732,7 +5743,7 @@ function dpAutoRefresh_() {
   DP.timer = setInterval(function () {
     if (S.screen !== 'dailyPost') return clearInterval(DP.timer);
     if (document.hidden) return;
-    api('screen', 'dailyPost', {}).then(function (d) { if (S.screen !== 'dailyPost') return; S.data.comp_groups = d.comp_groups; S.data.brain = d.brain; S.data.brain_text = d.brain_text; S.data.updated = d.updated; S.data.comp_sites = d.comp_sites; dpRedrawComp_(); }).catch(function () {});
+    api('screen', 'dailyPost', {}).then(function (d) { if (S.screen !== 'dailyPost') return; S.data.comp_groups = d.comp_groups; S.data.brain = d.brain; S.data.brain_text = d.brain_text; S.data.updated = d.updated; S.data.comp_sites = d.comp_sites; S.data.silent = d.silent; S.data.silent_sum = d.silent_sum; dpRedrawComp_(); }).catch(function () {});
   }, 5 * 60000);
 }
 ACT.dpType = function (el) { DP.type = el.dataset.t; dpRedrawOurs_(); };
