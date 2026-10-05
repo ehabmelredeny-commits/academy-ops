@@ -4583,7 +4583,15 @@ ACT.askOpen = function (el) {
   askCopy_(o.ask_id); window.open(extUrl(o.url), '_blank', 'noopener');
   toast('نُسخ الرد — الصقه في المنشور، ثم اضغط «تم الرد»');
 };
-ACT.askCopy = function (el) { askCopy_(el.dataset.id); toast('نُسخ الرد'); };
+ACT.askCopy = function (el) {
+  askCopy_(el.dataset.id);
+  var o = ASK.data.opps.filter(function (x) { return x.ask_id === el.dataset.id; })[0];
+  if (o && /^competitor-post/.test(o.url || '')) {
+    var u = prompt('نُسخ الرد، لكن لا رابط لهذا المنشور (استُخرج من صورة). الصق رابط المنشور ليُفتح تلقائياً:', 'https://');
+    if (u && u !== 'https://') return act('engageSetUrl', { ask_id: o.ask_id, url: u }, function (r) { window.open(r.url, '_blank', 'noopener'); return 'حُفظ الرابط — وفُتح المنشور، الصق الرد'; });
+  }
+  toast('نُسخ الرد — الصقه عند السؤال ثم اضغط «تم الرد ✓»');
+};
 ACT.askSet = function (el) { act('askUpdate', { ask_id: el.dataset.id, status: el.dataset.st }, function (r) { return r && r.followed ? 'أحسنت 👏 سُجّل الرد — وأُضيف للمتابعة (تذكير بعد ٢٤ ساعة)' : el.dataset.st === 'تم الرد' ? 'أحسنت 👏 سُجّل الرد' : 'حُدّث'; }); };
 ACT.askPaste = function (el) {
   if (!val('ap_url').trim()) return toast('الصق رابط المنشور — بدونه لن تستطيع الرجوع للسائل ولا لرسالته', true);
@@ -6123,6 +6131,7 @@ ACT.egAnalyze = function (el) {
     return { asker: val_('[data-ega="' + i + '"]'), text: val_('[data-egt="' + i + '"]') };
   }).filter(Boolean);
   if (!items.length) return toast('لا أسئلة محددة', true);
+  if (!val('eg_url').trim() && !confirm('لم تضع رابط المنشور — بدونه لن يفتح زر «أرسل الرد» المنشور تلقائياً (تستطيع إضافته لاحقاً). تكمل؟')) return;
   el.disabled = true; el.textContent = '⏳ يحلّل…';
   act('engageAnalyze', { ac_id: val('eg_ac'), post_url: val('eg_url'), items: items, source: $('eg_imgs') && $('eg_imgs').files.length ? 'صورة' : 'لصق' },
     function (r) { return '✓ ' + r.added + ' سؤالاً جاهزة بردودها' + (r.skipped ? ' · ليس سؤالاً ' + r.skipped : '') + (r.excluded ? ' · 🛡 استُثني ' + r.excluded + ' مؤيداً' : '') + (r.supporters_new ? ' · 🛡 اكتُشف ' + r.supporters_new + ' مؤيداً جديداً' : ''); });
@@ -6131,8 +6140,9 @@ function val_(sel) { var e = document.querySelector(sel); return e ? e.value : '
 ACT.egCopy = function (el) {
   var e = (S.data.rows || []).filter(function (x) { return x.eng_id === el.dataset.id; })[0]; if (!e) return;
   copyText(e.reply);
-  if (extUrl(e.post_url)) window.open(extUrl(e.post_url).replace(/#c\d+_\d+$/, ''), '_blank', 'noopener');
-  toast('نُسخ الرد — الصقه تحت تعليق ' + (e.asker ? '@' + e.asker : 'السائل') + ' ثم اضغط «✓ رددت»');
+  if (extUrl(e.post_url)) { window.open(extUrl(e.post_url).replace(/#c\d+_\d+$/, ''), '_blank', 'noopener'); return toast('نُسخ الرد وفُتح المنشور — الصقه تحت تعليق ' + (e.asker ? '@' + e.asker : 'السائل') + ' ثم اضغط «✓ رددت»'); }
+  var u = prompt('نُسخ الرد، لكن لا رابط لهذا المنشور (استُخرج من صورة). الصق رابط المنشور ليُفتح تلقائياً:', 'https://');
+  if (u && u !== 'https://') act('engageSetUrl', { eng_id: e.eng_id, url: u }, function (r) { window.open(r.url, '_blank', 'noopener'); return 'حُفظ الرابط لـ ' + r.comments + ' تعليقاً — وفُتح المنشور، الصق الرد'; }); else toast('نُسخ الرد — الصقه يدوياً ثم اضغط «✓ رددت»');
 };
 ACT.egDone = function (el) { act('engageStatus', { eng_id: el.dataset.id, status: 'رُدّ' }, function (r) { return r.lead_id ? '✓ أُضيف لمراحل العملاء' : '✓ سُجّل'; }); };
 ACT.egSkip = function (el) { act('engageStatus', { eng_id: el.dataset.id, status: 'مستبعد' }, 'استُبعد'); };
@@ -6282,10 +6292,22 @@ function ctSound_() { try { return localStorage.getItem('ops_ct_sound') !== '0';
 ACT.ctSound = function () { try { localStorage.setItem('ops_ct_sound', ctSound_() ? '0' : '1'); } catch (e) {} go('control', {}, true); };
 function ctBeep_() { try { var c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(), g = c.createGain(); o.frequency.value = 880; g.gain.value = .08; o.connect(g); g.connect(c.destination); o.start(); setTimeout(function () { o.stop(); c.close(); }, 180); } catch (e) {} }
 function ctReply_(id) { var t = val('ctr_' + id); if (t) { copyText(t); api('action', 'ctAskReply', { id: id, reply: t }).catch(function () {}); } return t; }
-ACT.ctAskSend = function (el) { ctReply_(el.dataset.id); if (extUrl(el.dataset.url)) window.open(extUrl(el.dataset.url), '_blank', 'noopener'); toast('نُسخ الرد — الصقه عند السؤال وأرسله، ثم اضغط «تم الرد ✓»'); };
+ACT.ctAskSend = function (el) {
+  ctReply_(el.dataset.id);
+  if (extUrl(el.dataset.url)) { window.open(extUrl(el.dataset.url), '_blank', 'noopener'); return toast('نُسخ الرد وفُتح المنشور — الصقه عند السؤال وأرسله، ثم اضغط «تم الرد ✓»'); }
+  ctAddUrl_({ ask_id: el.dataset.id }, 'نُسخ الرد، لكن لا رابط لهذا المنشور (استُخرج من صورة). الصق رابط المنشور ليُفتح تلقائياً في المرات القادمة:');
+};
+function ctAddUrl_(ref, msg) {
+  var u = prompt(msg, 'https://'); if (!u || u === 'https://') return toast('نُسخ الرد — الصقه يدوياً عند السؤال، ثم اضغط «تم الرد ✓»');
+  ref.url = u; act('engageSetUrl', ref, function (r) { window.open(r.url, '_blank', 'noopener'); return 'حُفظ الرابط لـ ' + r.comments + ' تعليقاً — وفُتح المنشور، الصق الرد'; });
+}
 ACT.ctAskDone = function (el) { act('ctAskDone', { id: el.dataset.id }, function (r) { return r && r.followed ? 'أحسنت 👏 سُجّل — وتذكير بعد ٢٤ ساعة' : 'أحسنت 👏 سُجّل الرد'; }); };
 ACT.ctAskSkip = function (el) { act('ctAskSkip', { id: el.dataset.id }, 'حُدّث'); };
-ACT.ctEngSend = function (el) { var t = val('ctr_' + el.dataset.id); if (t) copyText(t); if (extUrl(el.dataset.url)) window.open(extUrl(el.dataset.url).replace(/#c\d+_\d+$/, ''), '_blank', 'noopener'); toast('نُسخ الرد — الصقه تحت التعليق ثم اضغط «✓ رددت»'); };
+ACT.ctEngSend = function (el) {
+  var t = val('ctr_' + el.dataset.id); if (t) copyText(t);
+  if (extUrl(el.dataset.url)) { window.open(extUrl(el.dataset.url).replace(/#c\d+_\d+$/, ''), '_blank', 'noopener'); return toast('نُسخ الرد وفُتح المنشور — الصقه تحت التعليق ثم اضغط «✓ رددت»'); }
+  ctAddUrl_({ eng_id: el.dataset.id }, 'نُسخ الرد، لكن لا رابط لهذا المنشور (استُخرج من صورة). الصق رابط المنشور ليُفتح تلقائياً:');
+};
 ACT.ctEngDone = function (el) { act('ctEngDone', { id: el.dataset.id }, function (r) { return r.lead_id ? '✓ أُضيف لمراحل العملاء' : '✓ سُجّل'; }); };
 ACT.ctPostPublish = function (el) { el.disabled = true; act('ctPostPublish', { id: el.dataset.id }, function (r) { return r && r.message ? r.message : 'تم'; }); };
 /* ── الشاشة البيضاء/السوداء (لكل الصفحات) ── */
