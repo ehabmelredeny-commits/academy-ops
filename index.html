@@ -413,6 +413,7 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 .dp2 h2{font-size:15px}.dp2 .card{padding:10px 12px}.dp2 b{font-weight:600}
 .dp-av{width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#fff;border:1px solid var(--line)}
 .dp-av-i{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;background:#5b6b7f}
+.sup-grp{margin:12px 0 2px;padding-top:6px;border-top:1px dashed var(--line);font-size:13px}
 .eg-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}.eg-in{border:1px solid var(--line);border-radius:10px;padding:8px}
 .eg-drop{display:block;margin-top:6px;border:2px dashed var(--line);border-radius:10px;padding:14px;text-align:center;font-size:13px;cursor:pointer}
 .eg-rv.off{opacity:.5}.eg-rv input[type=text],.eg-rv input:not([type]){padding:3px 6px;font-size:12.5px}
@@ -587,7 +588,7 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['engage', '💬 التفاعل مع منشورات المنافسين'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
+var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['engage', '💬 التفاعل مع منشورات المنافسين'], ['supporters', '🛡 مؤيدو المنافسين'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'بنك الأفكار والمنشورات'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
@@ -596,7 +597,7 @@ var NAV_TREE = [
   ['day', '⚡ عملي اليوم', ['today', 'monitor', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
   ['search', '🔎 البحث', ['search', 'keywords']],
-  ['watch', '👁 المراقبة', ['engage', 'compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
+  ['watch', '👁 المراقبة', ['engage', 'supporters', 'compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'clubs', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
@@ -5017,7 +5018,7 @@ var TOOL_TAGS = {
   today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'amp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'a', search: 'ap', keywords: 'amp',
   compwatch: 'am', radar: 'a', competitors: 'm', exams: 'ap', reports: 'a', targets: 'am', kpis: 'a', sources: 'amp', trainers: 'm',
   people: 'amp', opps: 'ap', b2b: 'am', alumni: 'am', campaigns: 'm', content: 'ap', register: 'm', pipeline: 'am', courses: 'm',
-  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am', engage: 'am'
+  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am', engage: 'am', supporters: 'a'
 };
 var TAG_INFO = { p: ['💳', 'يحتاج رصيد Claude (مدفوع)'], a: ['⚙️', 'يعمل آلياً'], m: ['✋', 'يدوي — تعمله أنت'] };
 function tagIcons_(k) { return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span title="' + TAG_INFO[c][1] + '" class="ttag">' + TAG_INFO[c][0] + '</span>' : ''; }).join(''); }
@@ -5296,6 +5297,7 @@ var PAGE_INFO = {
       ['ابحث عن مدربين', 'يفتح فئة «استقطاب مدربين» في صفحة البحث.', 'مصدر منهجي لمدربين جدد.'],
       ['تواصلت معه / ردّ', 'تسجّل التواصل الفردي المهني.', 'متابعة العلاقة.'],
       ['لا تراسل / احذف', 'احترام طلبه — حذف فعلي عند الطلب.', 'امتثال لحماية البيانات وسمعة الأكاديمية.']] },
+  supporters: { t: '🛡 مؤيدو المنافسين', what: 'حسابات تعزز منشورات المنافسين ولا تسأل (مرتبط محتمل، مشبوه/وهمي، مؤيد متكرر) — مع الدليل. تُكتشف تلقائياً من التعليقات.', why: 'تُستثنى من الردود والعملاء والتحليل، وتكشف حجم التفاعل المصطنع عند كل منافس. استخدام داخلي فقط.', btns: [['✕ ليس مؤيداً', 'يخرج الحساب إن أخطأ التصنيف — ولا يُعاد.', 'دقة القائمة.']] },
   engage: { t: '💬 التفاعل مع منشورات المنافسين', what: 'تلصق تعليقات منشور منافس أو ترفع صور شاشتها (ويوتيوب يُجلب وحده)، فيستخرج النظام الأسئلة ويكتب رداً مخصصاً لكل سائل ومعه عرض وكود خصم لسؤال السعر.', why: 'جمهور المنافس الذي يسأل الآن هو أقرب عميل لنا — رد سريع وذكي يكسبه.',
     btns: [['📋 انسخ وافتح', 'ينسخ الرد ويفتح المنشور — تلصقه تحت تعليق السائل.', 'رد في ثوانٍ.'], ['✓ رددت', 'يسجّل الرد ويضيف السائل لمراحل العملاء.', 'لا يضيع عميل.']] },
   monitor: { t: '📺 مراقبة الأداء', what: 'شاشة كالتلفزيون: العملية الآلية الجارية الآن في الوسط، وما سبقها أشرطة حولها — اضغط أي شريط لتفاصيله.', why: 'ترى أن النظام يعمل فعلاً، ومتى، ولمن.', btns: [] },
@@ -6052,7 +6054,7 @@ function egReviewHtml_(r) {
     r.items.map(function (x, i) {
       return '<div class="row eg-rv' + (x.question ? '' : ' off') + '" style="gap:6px;margin-top:4px"><input type="checkbox" data-egq="' + i + '"' + (x.question ? ' checked' : '') + ' title="سؤال؟">' +
         '<input value="' + esc(x.asker) + '" data-ega="' + i + '" dir="ltr" placeholder="الحساب" style="width:130px">' +
-        '<input value="' + esc(x.text) + '" data-egt="' + i + '" style="flex:1"></div>';
+        '<input value="' + esc(x.text) + '" data-egt="' + i + '" style="flex:1">' + (x.supporter ? chip('🛡 ' + x.supporter + ' — مستثنى', 'bad') : '') + '</div>';
     }).join('') +
     '<div class="btns"><button class="btn pri" data-act="egAnalyze">🧠 حلّل وجهّز الردود</button></div></div>';
 }
@@ -6075,7 +6077,7 @@ ACT.egAnalyze = function (el) {
   if (!items.length) return toast('لا أسئلة محددة', true);
   el.disabled = true; el.textContent = '⏳ يحلّل…';
   act('engageAnalyze', { ac_id: val('eg_ac'), post_url: val('eg_url'), items: items, source: $('eg_imgs') && $('eg_imgs').files.length ? 'صورة' : 'لصق' },
-    function (r) { return '✓ ' + r.added + ' سؤالاً جاهزة بردودها' + (r.skipped ? ' · استُبعد ' + r.skipped : ''); });
+    function (r) { return '✓ ' + r.added + ' سؤالاً جاهزة بردودها' + (r.skipped ? ' · ليس سؤالاً ' + r.skipped : '') + (r.excluded ? ' · 🛡 استُثني ' + r.excluded + ' مؤيداً' : '') + (r.supporters_new ? ' · 🛡 اكتُشف ' + r.supporters_new + ' مؤيداً جديداً' : ''); });
 };
 function val_(sel) { var e = document.querySelector(sel); return e ? e.value : ''; }
 ACT.egCopy = function (el) {
@@ -6091,6 +6093,34 @@ document.addEventListener('change', function (e) {
   var t = $('eg_thumbs'); if (!t) return;
   t.innerHTML = Array.prototype.map.call(e.target.files, function (f, i) { return '<span class="chip">📄 ' + (i + 1) + ' · ' + esc(f.name.slice(0, 18)) + '</span>'; }).join('') + '<span class="muted">' + e.target.files.length + ' صور</span>';
 });
+</script>
+
+  <script>
+/* ═══════════ 🛡 مؤيدو المنافسين (التصميم المعتمد 2026-10-05) — استخدام داخلي فقط ═══════════ */
+SCREENS.supporters = { render: function (d) {
+  var c = d.counts || {};
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">🛡 مؤيدو المنافسين</h1>' +
+    statMini_([[c.total || 0, 'حساباً'], [c.linked || 0, 'مرتبط محتمل', 'warn'], [c.fake || 0, 'مشبوه/وهمي', 'bad'], [c.repeat || 0, 'مؤيد متكرر']]) + '</div>' +
+    '<div class="muted tiny" style="margin:-2px 0 8px">يُستنتج من تعليقاتهم على منشورات المنافسين (لا يسألون — يمدحون/يعززون فقط). <b>استخدام داخلي:</b> يُستثنون تلقائياً من كل إدخال (لصق، صور، يوتيوب، رادار الأسئلة) — لا رد ولا عميل ولا تحليل · لا تواصل ولا تبليغ ولا نشر · يُحذف من لم يظهر منذ ٦ أشهر</div>';
+  if (!(d.groups || []).length) return html + empty('لا مؤيدين مكتشفين بعد — تُكتشف تلقائياً من التعليقات في «💬 التفاعل مع منشورات المنافسين»');
+  d.groups.forEach(function (g) {
+    html += '<div class="sup-grp"><b>🏢 ' + esc(g.competitor) + '</b> <span class="muted tiny">· ' + g.rows.length + ' مؤيدين' +
+      (g.total_comments ? ' · تفاعل مصطنع محتمل: <b style="color:' + (g.fake_pct >= 25 ? '#e76f51' : 'inherit') + '">' + g.fake_pct + '%</b> من ' + g.total_comments + ' تعليقاً مرئياً' : '') + '</span></div>';
+    html += stripList_([
+      ['التصنيف', '125px', function (s) { return chip(s.category, /مشبوه/.test(s.category) ? 'bad' : /مرتبط/.test(s.category) ? 'warn' : ''); }],
+      ['الحساب', 'minmax(140px,1.5fr)', function (s) { var ic = typeof platIcon_ === 'function' ? platIcon_(s.platform, 'pi-sm') : '';
+        return ic + (extUrl(s.profile_url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(s.profile_url)) + '"><b>' + esc(s.handle) + '</b></a>' : '<b>' + esc(s.handle) + '</b>'); }],
+      ['الدليل', 'minmax(180px,2.6fr)', function (s) { return '<span class="muted" title="' + esc(s.sample) + '">' + esc(s.evidence) + '</span>'; }],
+      ['تعليقات', '60px', function (s) { return esc(s.comments); }],
+      ['منشورات', '60px', function (s) { return esc(s.posts); }],
+      ['آخر ظهور', '85px', function (s) { return fmtDate(s.last_seen); }],
+      ['', '95px', function (s) { return '<a href="#" class="muted tiny" data-act="supNot" data-id="' + esc(s.sup_id) + '" title="خطأ في التصنيف — لن يُعاد تصنيفه">✕ ليس مؤيداً</a>'; }]
+    ], g.rows);
+  });
+  html += '<div class="card small" style="margin-top:10px;border-color:#8d6cd8"><b>🧠 يستفيد منها النظام:</b> لا يُجهَّز لهم رد ولا يدخلون «من يسأل الآن» أو مراحل العملاء · لا يُحسبون في «ماذا يسأل جمهور المنافسين» · العقل الآلي ينبّه عندما يكون تفاعل منافس مصطنعاً بنسبة كبيرة</div>';
+  return html;
+} };
+ACT.supNot = function (el) { act('supporterStatus', { sup_id: el.dataset.id, status: 'ليس مؤيداً' }, 'أُخرج من القائمة — لن يُعاد تصنيفه'); };
 </script>
 
 </body>
