@@ -501,6 +501,7 @@ main.wide h1{font-size:19px;margin:4px 0 8px}
 input,textarea,select{color:var(--ink)!important;-webkit-text-fill-color:var(--ink);background-color:var(--card)}
 input::placeholder,textarea::placeholder{color:#a0a7b2!important;-webkit-text-fill-color:#a0a7b2;opacity:1;font-weight:400}
 input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webkit-text-fill-color:#000;background:#fff!important;font-weight:500}
+.tipbar{position:fixed;left:16px;bottom:16px;z-index:9999;width:420px;max-width:calc(100vw - 32px);background:#fff6c2;color:#3a2f00;border:1px solid #e6c84a;border-radius:10px;padding:9px 12px;box-shadow:0 6px 18px rgba(0,0,0,.35);font-size:13px;line-height:1.7;display:none;pointer-events:none}.tipbar b{font-size:13.5px}
 </style>
 
 </head>
@@ -609,12 +610,12 @@ var NAV_TREE = [
   ['search', '🔎 البحث', ['search', 'keywords']],
   ['watch', '👁 المراقبة', ['engage', 'supporters', 'compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
-  ['db', '🗂 قاعدة البيانات', ['sources', 'clubs', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
+  ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['health', 'automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['clubs', '🏟 خريطة الأندية'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
+NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
 NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
@@ -1282,7 +1283,7 @@ var I18N_BASE = {
   'جارٍ التحميل…': 'Loading…', 'يتحدّث…': 'Updating…', 'تعذّر التحميل': 'Failed to load', 'إعادة المحاولة': 'Retry', 'لا شيء يحتاج إجراءً الآن ✓': 'Nothing needs action now ✓',
   'لماذا تهمك؟ وماذا يفعل كل زر؟': 'Why it matters, and what each button does', 'مخطط النظام كاملاً ←': 'Full system map →',
   'اعتماد وإرسال': 'Approve & send', 'تعديل ثم إرسال': 'Edit then send', 'رفض': 'Reject', 'حفظ الرد اليدوي': 'Save manual reply', 'إغلاق بلا رد': 'Close without reply',
-  'تم الرد ✓': 'Replied ✓', 'ليست فرصة': 'Not an opportunity', '📋 افتح وردّ': '📋 Open & reply', '📋 انسخ الرد': '📋 Copy reply',
+  'تم الرد ✓': 'Replied ✓', 'ليست فرصة': 'Not an opportunity', '📋 افتح وردّ': '📋 Open & reply', '📋 انسخ الرد': '📋 Copy reply', '📤 أرسل الرد': '📤 Send reply',
   'واتساب': 'WhatsApp', 'إيميل': 'Email', 'انستغرام': 'Instagram', 'تيك توك': 'TikTok', 'سناب شات': 'Snapchat', 'لينكدإن': 'LinkedIn', 'فيسبوك': 'Facebook', 'يوتيوب': 'YouTube',
   'أرسلت ✓': 'Sent ✓', 'ردّ': 'Replied', 'لا تراسل': 'Do not contact', 'أضف كعميل': 'Add as lead', '🔎 ابحث عنه': '🔎 Search for them',
   'نعم': 'Yes', 'لا': 'No', 'جديد': 'New', 'مفعّل': 'Enabled', 'معطّل': 'Disabled', 'نشط': 'Active', 'موقوف': 'Paused',
@@ -4438,10 +4439,10 @@ SCREENS.ask = { render: function (d, args) {
         '<div class="row" style="gap:6px;margin-top:6px"><div class="grow">' + askPersonaSel_('apx_' + esc(o.ask_id), o.persona) + '</div>' +
         '<button class="btn sm" data-act="askRegen" data-id="' + esc(o.ask_id) + '" title="اكتب الرد من جديد حسب الحالة المختارة (مع الرابط)">↻ رد جديد</button></div>' +
         '<label class="f">الرد المقترح' + (o.reply_by === 'Claude' ? ' ' + chip('✨ كتبه Claude', 'acc') : '') + ' (عدّله كما تحب)</label><textarea id="ar_' + esc(o.ask_id) + '" style="min-height:80px">' + esc(o.suggested_reply) + '</textarea>' +
-        '<div class="btns">' + (extUrl(o.url) ? '<button class="btn sm good" data-act="askOpen" data-id="' + esc(o.ask_id) + '">📋 افتح وردّ</button>' :
-          '<button class="btn sm good" data-act="askCopy" data-id="' + esc(o.ask_id) + '">📋 انسخ الرد</button>') +
-        '<button class="btn sm" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="تم الرد">تم الرد ✓</button>' +
-        '<button class="btn sm ghost" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="ليست فرصة">ليست فرصة</button></div>') + '</div>';
+        '<div class="btns">' + (extUrl(o.url) ? '<button class="btn sm good" data-act="askOpen" data-id="' + esc(o.ask_id) + '" data-tip="ينسخ الرد ويفتح المنشور عند التعليق ← الصق (Ctrl+V) واضغط إرسال في المنصة. ⚠️ يدوي: انستغرام وتيك توك يمنعان الرد الآلي على تعليقات الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button>' :
+          '<button class="btn sm good" data-act="askCopy" data-id="' + esc(o.ask_id) + '" data-tip="ينسخ الرد ← الصقه حيث سأل الشخص واضغط إرسال. ⚠️ يدوي: المنصات تمنع الرد الآلي على الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button>') +
+        '<button class="btn sm" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="تم الرد" data-tip="اضغطه بعد أن ترسل الرد فعلاً — يُسجَّل ويُضاف السائل للمتابعة (تذكير بعد ٢٤ ساعة).">تم الرد ✓</button>' +
+        '<button class="btn sm ghost" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="ليست فرصة" data-tip="ليس عميلاً محتملاً (سؤال عام، إعلان، منافس) — يختفي من القائمة ويتعلم منه النظام.">ليست فرصة</button></div>') + '</div>';
   }).join('') + '</div>' : empty(d.claude_ready ? 'لا فرص الآن — المسح اليومي يعمل ٨ صباحاً، أو ابحث بنفسك بالأسفل' : 'لا فرص بعد — ابحث بنفسك بالأزرار بالأسفل، والصق أي سؤال تجده (المسح التلقائي يعمل مع رصيد Claude)');
 
   // ── 💬 تعليقات تحت منشورات المنافسين: هنا يسأل الجمهور فعلاً ──
@@ -5322,7 +5323,7 @@ var PAGE_INFO = {
   health: { t: '🩺 فحص النظام', what: 'النظام يفحص نفسه وحده يومياً 5:30 فجراً: التشغيل الآلي، الحصة، الوحدات، المفاتيح، روابط الدفع والتسجيل، وأخطاء البيانات (دورات مكررة، بلا حد أدنى، بلا موعد).', why: 'تعرف ما يُضيّع العملاء قبل أن تبدأ يومك — والعاجل يصلك ببريد فوري.', btns: [['↻ افحص الآن', 'يشغّل الفحص فوراً بدل انتظار الصباح.', 'تتأكد بعد أي إصلاح.']] },
   supporters: { t: '🛡 مؤيدو المنافسين', what: 'حسابات تعزز منشورات المنافسين ولا تسأل (مرتبط محتمل، مشبوه/وهمي، مؤيد متكرر) — مع الدليل. تُكتشف تلقائياً من التعليقات.', why: 'تُستثنى من الردود والعملاء والتحليل، وتكشف حجم التفاعل المصطنع عند كل منافس. استخدام داخلي فقط.', btns: [['✕ ليس مؤيداً', 'يخرج الحساب إن أخطأ التصنيف — ولا يُعاد.', 'دقة القائمة.']] },
   engage: { t: '💬 التفاعل مع منشورات المنافسين', what: 'تلصق تعليقات منشور منافس أو ترفع صور شاشتها (ويوتيوب يُجلب وحده)، فيستخرج النظام الأسئلة ويكتب رداً مخصصاً لكل سائل ومعه عرض وكود خصم لسؤال السعر.', why: 'جمهور المنافس الذي يسأل الآن هو أقرب عميل لنا — رد سريع وذكي يكسبه.',
-    btns: [['📋 انسخ وافتح', 'ينسخ الرد ويفتح المنشور — تلصقه تحت تعليق السائل.', 'رد في ثوانٍ.'], ['✓ رددت', 'يسجّل الرد ويضيف السائل لمراحل العملاء.', 'لا يضيع عميل.']] },
+    btns: [['📤 أرسل الرد', 'ينسخ الرد ويفتح المنشور — تلصقه تحت تعليق السائل وترسل (يدوي: المنصات تمنع الرد الآلي).', 'رد في ثوانٍ.'], ['✓ رددت', 'يسجّل الرد ويضيف السائل لمراحل العملاء.', 'لا يضيع عميل.']] },
   monitor: { t: '📺 مراقبة الأداء', what: 'شاشة كالتلفزيون: العملية الآلية الجارية الآن في الوسط، وما سبقها أشرطة حولها — اضغط أي شريط لتفاصيله.', why: 'ترى أن النظام يعمل فعلاً، ومتى، ولمن.', btns: [] },
   pipeline: { t: '🧲 مراحل العملاء', what: 'لوحة العملاء حسب المرحلة (جديد ← تواصلنا ← رد ← عرض مُرسل ← سجّل)، مع النمط النفسي والاعتراض والخطوة التالية وكود الخصم النشط.', why: 'لا يضيع عميل بين المراحل، وتعرف من تتابع اليوم.',
     btns: [['🔎 تحقق من كود', 'يتحقق من كود خصم عند التسجيل ويسجّل استخدامه.', 'سعر واحد صحيح للعميل.']] },
@@ -5599,26 +5600,17 @@ var TIP = { el: null, timer: null };
 function tipShow_(target) {
   var txt = tipFor_(target); if (!txt) return;
   var shown = typeof tr === 'function' ? tr(txt) : txt;
+  var name = tipNorm_(target.dataset.ar || (/^(INPUT|SELECT|TEXTAREA)$/.test(target.tagName) ? '' : target.textContent)).slice(0, 50);
   var b = TIP.el || (TIP.el = document.createElement('div'));
-  b.className = 'tipbox'; b.textContent = shown; b.dataset.src = txt; document.body.appendChild(b);
+  b.className = 'tipbar'; b.dataset.src = txt; document.body.appendChild(b);
   b.style.direction = (typeof i18nOn_ === 'function' && i18nOn_()) ? 'ltr' : 'rtl';
-  var r = target.getBoundingClientRect(), bw = Math.min(300, window.innerWidth - 16);
-  b.style.maxWidth = bw + 'px';
-  var left = Math.max(8, Math.min(window.innerWidth - bw - 8, r.left + r.width / 2 - bw / 2));
-  var top = r.bottom + 8 + window.scrollY;
-  if (r.bottom + 90 > window.innerHeight) top = r.top + window.scrollY - b.offsetHeight - 8;
-  // عناصر القائمة الجانبية: الفقاعة بجانب القائمة (لا تغطي الخيارات تحتها)
-  var side = target.closest && target.closest('nav.side');
-  if (side) {
-    var sr = side.getBoundingClientRect(), rtl = document.documentElement.dir !== 'ltr';
-    left = rtl ? Math.max(8, sr.left - bw - 8) : Math.min(window.innerWidth - bw - 8, sr.right + 8);
-    b.style.display = 'block'; b.style.left = left + 'px'; // للقياس قبل التوسيط
-    top = Math.max(window.scrollY + 8, r.top + window.scrollY + r.height / 2 - b.offsetHeight / 2);
-  }
-  b.style.left = left + 'px'; b.style.top = top + 'px'; b.style.display = 'block';
+  b.innerHTML = '<b>💡 ' + esc(name || 'شرح') + '</b><div>' + esc(shown) + '</div>';
+  b.style.display = 'block';
 }
 function tipHide_() { clearTimeout(TIP.timer); if (TIP.el) TIP.el.style.display = 'none'; }
-var TIP_SEL = 'button, .btn, a.btn, .chip[data-act], input, select, textarea, nav button, [data-go], [data-act], [data-tip]';
+var TIP_SEL = 'button, .btn, a.btn, .chip[data-act], input, select, textarea, nav button, [data-go], [data-act], [data-tip], [title]';
+// العنوان الأصلي للمتصفح يُنقل للشريط الأصفر (لا فقاعتان)
+document.addEventListener('mouseover', function (e) { var t = e.target.closest && e.target.closest('[title]'); if (t && t.title) { if (!t.dataset.tip) t.dataset.tip = t.title; t.removeAttribute('title'); } }, true);
 document.addEventListener('mouseover', function (e) {
   if (!tipsOn_()) return;
   var t = e.target.closest && e.target.closest(TIP_SEL); if (!t || t === TIP.cur) return;
@@ -5633,7 +5625,7 @@ document.addEventListener('touchstart', function (e) {
   clearTimeout(TIP.timer); TIP.timer = setTimeout(function () { tipShow_(t); setTimeout(tipHide_, 3500); }, 500);
 }, { passive: true });
 document.addEventListener('touchend', function () { clearTimeout(TIP.timer); }, { passive: true });
-document.addEventListener('scroll', tipHide_, { passive: true });
+
 /** بالإنجليزية: تُترجم كل نصوص الشرح مسبقاً ليظهر أول وقوف مترجماً */
 function tipsPrefetch_() {
   if (typeof i18nOn_ !== 'function' || !i18nOn_()) return;
@@ -6058,7 +6050,7 @@ SCREENS.engage = { render: function (d, args) {
     ['الرد الجاهز', 'minmax(160px,2.6fr)', function (e) { return '<span class="muted" title="' + esc(e.reply) + '">' + esc(e.reply) + '</span>' + (e.code ? ' ' + chip('🎟 ' + e.code) : ''); }],
     ['إجراء', '190px', function (e) {
       return e.status === 'رُدّ' ? chip('✓ رُدّ', 'good') + (e.lead_id ? ' <a href="#" data-go="lead" data-args="' + attr({ lead_id: e.lead_id }) + '">👤</a>' : '') :
-        '<button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '">📋 انسخ وافتح</button> <button class="btn sm good" data-act="egDone" data-id="' + esc(e.eng_id) + '">✓ رددت</button> <a href="#" class="muted tiny" data-act="egSkip" data-id="' + esc(e.eng_id) + '" title="ليس سؤالاً حقيقياً">✕</a>'; }]
+        '<button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '" data-tip="ينسخ الرد ويفتح المنشور عند التعليق ← الصق (Ctrl+V) واضغط إرسال في المنصة. ⚠️ يدوي: انستغرام وتيك توك يمنعان الرد الآلي على تعليقات الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button> <button class="btn sm good" data-act="egDone" data-id="' + esc(e.eng_id) + '">✓ رددت</button> <a href="#" class="muted tiny" data-act="egSkip" data-id="' + esc(e.eng_id) + '" title="ليس سؤالاً حقيقياً">✕</a>'; }]
   ], rows, { cls: function (e) { return e.status === 'رُدّ' ? 'sl-off' : ''; } }) : empty('لا أسئلة بعد — الصق تعليقات منشور منافس أو ارفع صورها');
   // 🧠 ماذا يسأل جمهور المنافسين
   var st = d.stats || [];
