@@ -38,7 +38,7 @@ body { font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif; font
 a { color: var(--accent); }
 button, input, select, textarea { font: inherit; color: inherit; }
 .wrap { display: flex; min-height: 100vh; }
-main { flex: 1; min-width: 0; padding: 12px 16px calc(var(--nav-h) + 24px); max-width: 1100px; margin: 0 auto; width: 100%; }
+main { flex: 1; min-width: 0; padding: 12px 16px calc(var(--nav-h) + 24px); max-width: none; margin: 0; width: 100%; }
 
 /* ─── التنقل: شريط سفلي على الجوال، جانبي على الكومبيوتر ─── */
 nav.bottom { position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: var(--card);
@@ -1749,14 +1749,24 @@ function courseForm(c, i) {
 SCREENS.courses = { render: function (d) {
   var html = north(d.north) + '<h1>الدورات</h1><div class="muted small">هذا التبويب هو المصدر الوحيد للأسعار والمواعيد وعبارات الإلحاح.</div>';
   html += d.rows.map(function (c, i) {
-    return '<details class="card"><summary><b>' + esc(c.name_ar || c.course_id) + '</b> · ' + esc(c.price_sar || '—') + ' ر.س · هامش ' + esc(c.margin_pct) + '%' +
-      (c.margin_is_assumption === 'نعم' ? ' (افتراض)' : '') + '</summary>' + courseForm(c, i) +
-      '<div class="btns"><button class="btn pri" data-act="courseSave" data-i="' + i + '" data-id="' + esc(c.course_id) + '">حفظ</button></div></details>';
+    var off = c.active === 'لا';
+    return '<details class="card"' + (off ? ' style="opacity:.55"' : '') + '><summary><b>' + esc(c.name_ar || c.course_id) + '</b> · ' + esc(c.price_sar || '—') + ' ر.س · هامش ' + esc(c.margin_pct) + '%' +
+      (c.margin_is_assumption === 'نعم' ? ' (افتراض)' : '') + (off ? ' ' + chip('⏸ موقوفة', 'warn') : '') + '</summary>' + courseForm(c, i) +
+      '<div class="btns"><button class="btn pri" data-act="courseSave" data-i="' + i + '" data-id="' + esc(c.course_id) + '">حفظ</button>' +
+      '<button class="btn" data-act="courseActive" data-id="' + esc(c.course_id) + '" data-on="' + (off ? 'نعم' : 'لا') + '">' + (off ? '▶ إعادة تفعيل' : '⏸ إيقاف الدورة') + '</button>' +
+      '<button class="btn bad" data-act="courseDelete" data-id="' + esc(c.course_id) + '" data-n="' + esc(c.name_ar || '') + '">🗑 حذف</button></div>' +
+      '<div class="muted tiny">⏸ الإيقاف يخفيها من العروض والردود ويحفظ بياناتها · 🗑 الحذف نهائي ويُرفض إن كانت مرتبطة بدفعات أو مدفوعات</div></details>';
   }).join('');
   html += '<details class="card"><summary>دورة جديدة</summary>' + courseForm({ active: 'نعم' }, 'new') +
     '<div class="btns"><button class="btn pri" data-act="courseSave" data-i="new">إضافة</button></div></details>';
   return html;
 } };
+ACT.courseActive = function (el) { act('courseActive', { course_id: el.dataset.id, active: el.dataset.on }, el.dataset.on === 'لا' ? 'أُوقفت الدورة' : 'أُعيد تفعيلها'); };
+ACT.courseDelete = function (el) {
+  if (!confirm('حذف «' + el.dataset.n + '» نهائياً؟\n(البديل الآمن: «⏸ إيقاف الدورة»)')) return;
+  var pw = prompt('كلمة تأكيد الحذف:'); if (!pw) return;
+  act('courseDelete', { course_id: el.dataset.id, password: pw, password2: pw }, 'حُذفت الدورة');
+};
 ACT.courseSave = function (el) {
   var c = { course_id: el.dataset.id || '' };
   q('[data-cf="' + el.dataset.i + '"]').forEach(function (i) { c[i.dataset.k] = i.value; });
