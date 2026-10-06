@@ -637,11 +637,11 @@ var NAV_TREE = [
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
-  ['sales', '💰 المبيعات والدورات', ['pipeline', 'courses', 'calendar', 'payments']],
+  ['sales', '💰 المبيعات والدورات', ['pipeline', 'members', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['health', 'automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
 NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
-NAV_MORE.push(['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
+NAV_MORE.push(['members', '🪪 العضويات والإحالات'], ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
   return f ? f[1] : '';
@@ -5359,6 +5359,7 @@ var PAGE_INFO = {
       ['ابحث عن مدربين', 'يفتح فئة «استقطاب مدربين» في صفحة البحث.', 'مصدر منهجي لمدربين جدد.'],
       ['تواصلت معه / ردّ', 'تسجّل التواصل الفردي المهني.', 'متابعة العلاقة.'],
       ['لا تراسل / احذف', 'احترام طلبه — حذف فعلي عند الطلب.', 'امتثال لحماية البيانات وسمعة الأكاديمية.']] },
+  members: { t: '🪪 العضويات والإحالات', what: 'أعضاء الأكاديمية الذين وقّعوا الموافقة، وأرقام عضوياتهم، ومن أحضروه، وكلفة الخصومات مقابل العائد.', why: 'الإحالة بتوصية شخصية أرخص وأقوى قناة إقناع — وهنا تقيس هل تربح منها فعلاً.', btns: [['📤 أرسل البطاقة', 'ينسخ نص البطاقة (الاسم والرقم والجملة) لترسله بنفسك.', 'يدوي بموافقتك.'], ['تسجيل ودفع ←', 'من ملف العميل: عند تسجيل دفعه يصدر رقم عضويته إن وقّع الموافقة.', 'الخصم يُحسب تلقائياً دون النزول عن الحد الأدنى.']] },
   control: { t: '🎛 غرفة التحكم', what: 'الصفحة الأم: كل ما يحدث الآن في شريط واحد لكل حدث، تردّ وتقرّر من البطاقة نفسها، وشريط الصفحات بأضوائها، وما ينتظر قرارك، وما يقوله العقل، والقادم اليوم.', why: 'تفتحها أول الدوام وتعمل منها — لا تتنقل بين الصفحات إلا للتفاصيل.', btns: [['📤 أرسل الرد', 'ينسخ الرد ويفتح المنشور — تلصق وترسل (يدوي: المنصات تمنع الرد الآلي).', 'ثم «تم الرد ✓».'], ['يحتاجني', 'يعرض فقط ما له زر تنفيذ ينتظرك.', 'تركيز.'], ['🔔 الصوت', 'صوت قصير عند وصول عاجل جديد فقط.', 'لا إزعاج.']] },
   health: { t: '🩺 فحص النظام', what: 'النظام يفحص نفسه وحده يومياً 5:30 فجراً: التشغيل الآلي، الحصة، الوحدات، المفاتيح، روابط الدفع والتسجيل، وأخطاء البيانات (دورات مكررة، بلا حد أدنى، بلا موعد).', why: 'تعرف ما يُضيّع العملاء قبل أن تبدأ يومك — والعاجل يصلك ببريد فوري.', btns: [['↻ افحص الآن', 'يشغّل الفحص فوراً بدل انتظار الصباح.', 'تتأكد بعد أي إصلاح.']] },
   supporters: { t: '🛡 مؤيدو المنافسين', what: 'حسابات تعزز منشورات المنافسين ولا تسأل (مرتبط محتمل، مشبوه/وهمي، مؤيد متكرر) — مع الدليل. تُكتشف تلقائياً من التعليقات.', why: 'تُستثنى من الردود والعملاء والتحليل، وتكشف حجم التفاعل المصطنع عند كل منافس. استخدام داخلي فقط.', btns: [['✕ ليس مؤيداً', 'يخرج الحساب إن أخطأ التصنيف — ولا يُعاد.', 'دقة القائمة.']] },
@@ -6331,6 +6332,40 @@ ACT.ctPostPublish = function (el) { el.disabled = true; act('ctPostPublish', { i
 function themeIs_() { var t = document.documentElement.getAttribute('data-theme'); if (t) return t; return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
 ACT.themeToggle = function () { var next = themeIs_() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', next); try { localStorage.setItem('ops_theme', next); } catch (e) {} go(S.screen, S.args, true); };
 try { var th0 = localStorage.getItem('ops_theme'); if (th0) document.documentElement.setAttribute('data-theme', th0); } catch (e) {}
+</script>
+
+  <script>
+/* ═══════════ 🪪 العضويات والإحالات (التصميم المعتمد 2026-10-06) ═══════════ */
+SCREENS.members = { render: function (d) {
+  var st = d.stats, s = d.settings, pn = function (n) { return Number(n || 0).toLocaleString('en'); };
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">🪪 العضويات والإحالات <span class="muted tiny">· الخصم غير معلن — المعلن «خصومات تصل إلى ' + d.cap + '%» · لا ينزل أي سعر عن الحد الأدنى</span></h1>' +
+    '<span class="tag" data-tip="تُعدَّل من الإعدادات ← Settings: member_referee_pct و member_referrer_pct و member_cap_pct">⚙️ الخصم: صديق ' + s.referee + '% · رصيد العضو ' + s.referrer + '% · سقف ' + s.cap + '%</span></div>';
+  html += '<div class="ct-bottom" style="margin:6px 0">' + [[st.members, 'أعضاء نشطون'], [st.candidates, 'بانتظار الدفع'], [st.referrals, 'إحالات'], [st.converted, 'دفعوا'], [pn(st.revenue) + ' ر.س', 'عائد'], [pn(d.cost) + ' ر.س', 'كلفة الخصومات'],
+    [d.ratio === null ? '—' : d.ratio + '×', 'العائد لكل ريال خصم']].map(function (k) { return '<span class="ct-k"><b>' + esc(k[0]) + '</b> ' + k[1] + '</span>'; }).join('') + '</div>';
+  var mem = (d.members || []).map(function (m) {
+    var act = m.status === 'نشط' ? '<button class="btn sm" data-act="memCard" data-mem="' + attr(m) + '" data-tip="ينسخ نص البطاقة (الاسم + رقم العضوية + الجملة) لترسله بنفسك — يُستبدل بصورة البطاقة بعد تصميمها">📤 أرسل البطاقة</button>' : '<span class="muted tiny">يصدر رقمه بعد «تسجيل ودفع»</span>';
+    return '<div class="ct-ev"><span class="no">' + esc(m.member_no || '—') + '</span><span class="ct-tx"><b>' + esc(m.name) + '</b> <span class="muted">· ' + (m.issued_at ? 'منذ ' + Math.max(0, Math.round((Date.now() - new Date(m.issued_at)) / 864e5)) + ' يوماً' : 'وقّع الموافقة') + '</span></span>' +
+      '<span class="tag ' + (m.status === 'نشط' ? 'auto' : m.status === 'مرشّح' ? 'warn' : '') + '">' + (m.status === 'نشط' ? '🟢 نشط' : m.status === 'مرشّح' ? '⏳ مرشّح' : esc(m.status)) + '</span>' +
+      (m.status === 'نشط' ? '<span class="tag">' + (Number(m.referrals_paid) ? m.referrals_paid + ' إحالات · رصيد ' + m.credit_pct + '%' : 'لا إحالات بعد') + '</span>' : '') + act + '</div>';
+  }).join('');
+  var rf = (d.referrals || []).map(function (r) {
+    var cls = r.status === 'دفع' ? 'auto' : r.status === 'مسجّل' ? 'warn' : 'bad', lab = r.status === 'دفع' ? 'دفع ' + pn(r.amount) : r.status === 'مسجّل' ? '⏳ سجّل ولم يدفع' : 'رُفض';
+    return '<div class="ct-ev"><span class="ct-tx"><b>' + esc(r.referee_name || '—') + '</b> ← بعضوية <span class="no">' + esc(r.member_no) + '</span>' + (r.note && r.status === 'مرفوض' ? ' <span class="muted tiny">· ' + esc(r.note) + '</span>' : '') + '</span>' +
+      (d.courses[r.course_id] ? '<span class="tag">' + esc(d.courses[r.course_id]) + '</span>' : '') + '<span class="tag ' + cls + '">' + lab + '</span></div>';
+  }).join('');
+  html += '<div class="ct-grid" style="grid-template-columns:1fr 1fr"><div class="card"><b>🪪 الأعضاء</b>' + (mem || empty('لا أعضاء بعد — يظهر المرشّح عند توقيع الموافقة في نموذج التسجيل')) + '</div>' +
+    '<div class="card"><b>🔗 الإحالات</b> <span class="muted tiny">— من أحضر من، وهل دفع</span>' + (rf || empty('لا إحالات بعد')) +
+    (st.top && st.top.length ? '<div class="ct-ev" style="margin-top:8px"><b>🏆 الأكثر إحضاراً</b><span class="ct-tx muted">' + st.top.map(function (t) { return esc(t.name) + ' (' + t.n + ')'; }).join(' · ') + '</span></div>' : '') + '</div></div>';
+  html += '<div class="card" style="margin-top:8px"><b>⚖️ حماية الهامش</b> <span class="muted tiny">— تُحسب آلياً:</span> <span class="tag auto">لا خصم نزل عن الحد الأدنى ✓</span> <span class="tag ' + (d.max_pct > d.cap ? 'bad' : 'auto') + '">أعلى خصم نُفّذ ' + d.max_pct + '% (السقف ' + d.cap + '%) ' + (d.max_pct > d.cap ? '✗' : '✓') + '</span> <span class="tag">' + d.rejected + ' محاولة مرفوضة اليوم</span>' +
+    (d.no_floor.length ? ' <span class="tag warn">⚠️ بلا حد أدنى (لا خصم عليها): ' + d.no_floor.map(esc).join('، ') + '</span>' : '') + '</div>';
+  return html;
+} };
+ACT.memCard = function (el) {
+  var m = JSON.parse(el.dataset.mem), d = (SCREENS.members.cur || {});
+  var pitch = (S.data && S.data.pitch) || '';
+  copyText('مبروك ' + (m.name || '') + '! رقم عضويتك في مجتمع الأكاديمية: ' + m.member_no + (pitch ? '\n' + pitch : ''));
+  toast('نُسخ نص البطاقة — أرسله بنفسك (واتساب مثلاً)');
+};
 </script>
 
 </body>
