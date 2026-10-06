@@ -22,6 +22,8 @@ button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-
 <label for="persona">وضعك الحالي</label><select id="persona"><option value="">اختر</option><option>أبدأ في المجال من الصفر</option><option>مدرب حالياً وأريد التطوير</option>
 <option>أحتاج رخصة أو شهادة لعملي</option><option>أقارن بين الشهادات</option></select>
 <label for="note">سؤالك أو ملاحظتك (اختياري)</label><textarea id="note"></textarea>
+<label for="member_no">رقم عضوية صديق (اختياري)</label><input id="member_no" dir="ltr" placeholder="مثال: M-23456" autocomplete="off" maxlength="30">
+<label class="chk"><input type="checkbox" id="member_consent"> أوافق (اختيارياً) على عضويتي في مجتمع الأكاديمية بعد إتمام دورتي، وأن يُستخدم رقم عضويتي لمنح أصدقائي خصومات تساعد الأكاديمية في التسويق. يمكنني الانسحاب في أي وقت.</label>
 <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 <label class="chk"><input type="checkbox" id="consent"> أوافق على تواصل الأكاديمية معي عبر واتساب أو الاتصال بخصوص الدورات. يمكنني إيقاف التواصل في أي وقت بكتابة «إيقاف». <a href="../privacy/" target="_blank">سياسة الخصوصية</a></label>
 <button id="go" type="submit">أرسل طلبي</button><div class="err" id="err"></div></form>
@@ -53,7 +55,7 @@ $('f').addEventListener('submit',function(e){
   if(!$('consent').checked)return $('err').textContent='نحتاج موافقتك على التواصل لنرسل لك التفاصيل';
   $('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
   var body={name:$('name').value,phone:$('phone').value,email:$('email').value,city:$('city').value,course:$('course').value,persona:$('persona').value,note:$('note').value,
-    website:$('website').value,consent:$('consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||''};
+    website:$('website').value,consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||''};
   fetch(EXEC+'?public=register',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(j){
     if(!j.ok){$('go').disabled=false;$('go').textContent='أرسل طلبي';$('err').textContent=j.error||'حدث خطأ';return}
     track('Lead');$('f').style.display='none';$('done').style.display='block';
