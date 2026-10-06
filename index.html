@@ -525,6 +525,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 :root[data-theme=light] .tag.auto,:root:not([data-theme=dark]) .tag.auto{background:#e6f7ec;color:#1f7a45}:root:not([data-theme=dark]) .tag.warn{background:#fff3d6;color:#8a5a00}:root:not([data-theme=dark]) .tag.bad{background:#fdecea;color:#8a1c14}
 .btn.blue{background:#5aa9e6;color:#04121f;border:0;font-weight:700}
 .ct-bottom{display:flex;gap:6px;margin-top:8px;align-items:stretch;flex-wrap:wrap}.ct-k{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:11.5px;display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct-k.grow{flex:1;min-width:200px}
+.ct-bd{margin-top:6px;font-size:12px}.ct-bd summary{cursor:pointer}.ct-tpl{display:flex;gap:6px;align-items:flex-start;margin-top:4px}.ct-tpl b{flex:0 0 74px;font-size:11.5px;padding-top:4px}.ct-tpl textarea{flex:1;min-height:42px;font-size:12px;line-height:1.5}
 .ct-bars{display:inline-flex;gap:3px;align-items:flex-end;height:22px;margin:0 6px}.ct-bars i{display:block;width:8px;background:#2bb673;border-radius:2px}
 </style>
 
@@ -6275,7 +6276,7 @@ SCREENS.control = { render: function (d) {
     side.push('<div class="ct-ev n"><span class="ct-tx" data-tip="' + esc(b.why || '') + '">' + esc(b.icon) + ' ' + esc(b.text) + '</span><button class="btn sm blue" data-go="' + esc(b.act.go) + '">' + esc(b.act.label) + '</button></div>');
   });
   html += '<div><div class="card"><b>⏳ ينتظر قرارك</b> ' + (side.length ? '<span class="n">' + side.length + '</span>' : chip('لا شيء ✓', 'good')) + side.join('') + '</div>' +
-    '<div class="card" style="margin-top:8px"><b>🧠 العقل يقول اليوم</b><div class="muted tiny" style="line-height:1.9;margin-top:3px">' + ((d.brain || []).length ? d.brain.map(function (b) { return '<div data-tip="' + esc(b.why || '') + '">• ' + esc(b.text) + '</div>'; }).join('') : 'يتعلّم من الأسئلة والردود — يحتاج أياماً من البيانات') + '</div></div></div></div>';
+    '<div class="card" style="margin-top:8px"><b>🧠 العقل يقول اليوم</b><div class="muted tiny" style="line-height:1.9;margin-top:3px">' + ((d.brain || []).length ? d.brain.map(function (b) { return '<div data-tip="' + esc(b.why || '') + '">• ' + esc(b.text) + '</div>'; }).join('') : 'يتعلّم من الأسئلة والردود — يحتاج أياماً من البيانات') + '</div>' + brainDetails_(d.brain_view) + '</div></div></div>';
   // الشريط السفلي
   var t = d.today || {}, wk = d.week || { bars: [] }, mx = Math.max.apply(null, wk.bars.concat([1]));
   html += '<div class="ct-bottom"><div class="ct-k"><b>اليوم:</b> ' + t.asks + ' سؤال · ' + t.replied + ' رُدّ · ' + t.leads + ' عملاء جدد · ' + t.reg + ' تسجيل · <b>' + fmtNum(t.sar) + ' ر.س</b> · جوجل ' + d.quota + '%</div>' +
@@ -6289,6 +6290,16 @@ SCREENS.control = { render: function (d) {
   d.events.forEach(function (e) { CT.seen[e.id] = 1; });
   clearTimeout(CT.timer); CT.timer = setTimeout(function () { if (S.screen === 'control' && !document.hidden) go('control', {}, true); }, 60000);
 } };
+function brainDetails_(v) {
+  if (!v) return '';
+  var rows = v.personas.map(function (p) { return '<div class="ct-tpl"><b>' + esc(p) + '</b><textarea id="bt_' + esc(p) + '" placeholder="لا قالب بعد — يُكتب عند التدريب الأسبوعي (أو اكتب قالبك)">' + esc(v.replies[p] || '') + '</textarea><button class="btn sm" data-act="brainTplSave" data-p="' + esc(p) + '">حفظ</button></div>'; }).join('');
+  var fears = (v.fears || []).map(function (f) { return '<div class="tiny">• <b>' + esc(f.fear) + '</b> ← ' + esc(f.handle) + '</div>'; }).join('');
+  var perf = v.variants.map(function (x) { return esc(x.name) + ': ' + x.n + ' استعمالاً' + (x.n ? ' · تجاوب ' + x.e : ''); }).join(' · ');
+  return '<details class="ct-bd"><summary data-tip="القوالب التي كتبها Claude من أسئلة جمهورك — عدّلها قبل أن تُستعمل. الأرقام لا تُكتب فيها أبداً: تُملأ من بيانات دوراتك">🧪 قوالب الرد التي كتبها العقل ' + (v.at ? '<span class="muted tiny">(' + fmtDate(v.at, true) + ')</span>' : '') + '</summary>' +
+    rows + (fears ? '<div style="margin-top:6px"><b class="tiny">أهم المخاوف في أسئلة جمهورك:</b>' + fears + '</div>' : '') +
+    '<div class="muted tiny" style="margin-top:6px">المتغيرات المسموحة: ' + v.placeholders.map(esc).join(' ') + ' · أداء الصياغات: ' + perf + '</div></details>';
+}
+ACT.brainTplSave = function (el) { var p = el.dataset.p; act('brainTplSave', { persona: p, text: val('bt_' + p) }, 'حُفظ القالب'); };
 function ctList_(d) {
   var f = CT.filter, list = d.events.filter(function (e) { return f === 'all' || (f === 'need' ? e.level !== 'd' && (e.acts || []).some(function (b) { return b.a; }) : e.cat === f); });
   return list.length ? list.map(ctEvent_).join('') : empty('لا شيء هنا الآن — النظام يراقب ويضيف ما يحدث وحده');
