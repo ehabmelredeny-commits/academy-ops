@@ -1970,6 +1970,12 @@ SCREENS.settings = { render: function (d, args) {
     var st = d.channels || {}, outb = (d.settings.filter(function (x) { return x.key === 'outbound_enabled'; })[0] || {}).value;
     var key = function (k, label, ph, pw) { return '<div class="row" style="gap:6px;margin:4px 0"><label class="f grow">' + label + '<input id="sk_' + k + '" type="' + (pw ? 'password' : 'text') + '" placeholder="' + esc(ph || '') + '" autocomplete="off"></label>' +
       '<button class="btn sm" data-act="secretSave" data-k="' + k + '">حفظ</button></div>'; };
+    html += '<div class="card" style="border-color:var(--accent)"><b>🧠 Claude (الذكاء الاصطناعي) ' + (st.claude ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">من console.anthropic.com ← API Keys ← Create key. يشغّل الردود الذكية والبحث والتحليل المكتوب. يتوقف النظام وحده عند الميزانية اليومية (إعداد claude_daily_budget_usd). يبدأ بـ sk-ant-… لا تشاركه مع أحد.</div>' +
+      key('CLAUDE_API_KEY', 'مفتاح Claude', 'sk-ant-…', true) + '</div>' +
+      '<div class="card"><b>▶️ يوتيوب ' + (st.youtube ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">مفتاح مجاني من Google Cloud ← YouTube Data API v3 — يفعّل مراقبة تعليقات المنافسين والبحث عن السائلين.</div>' +
+      key('YT_API_KEY', 'مفتاح YouTube Data API', 'AIza…', true) + '</div>' +
+      '<div class="card"><b>فيسبوك ' + (st.facebook ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">للنشر على صفحة الأكاديمية فقط (رمز صفحة طويل الأمد + معرّف الصفحة).</div>' +
+      key('FB_PAGE_TOKEN', 'رمز الصفحة', '…', true) + key('FB_PAGE_ID', 'معرّف الصفحة', '1234…') + '</div>';
     html += '<div class="card"><div class="row between"><b>مفتاح الإرسال الآلي العام</b><span>' + switchHtml(String(outb) === 'true', 'outboundToggle', 'x') + '</span></div>' +
       '<div class="small muted">عند الإيقاف لا يخرج أي شيء آلياً مهما جُدول. التشغيل = المرحلة ١.</div></div>' +
       '<div class="card"><b>واتساب ' + (st.whatsapp ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">من حساب Meta للأعمال باسم الأكاديمية (System User) — لا حساب شخصي. رقم مخصص للأكاديمية. ' +
