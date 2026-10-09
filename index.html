@@ -393,7 +393,9 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
 .mon-ticker-in{display:inline-block;padding-inline-start:100%;animation:montk 60s linear infinite}
 @keyframes montk{to{transform:translateX(100%)}}
 @media (max-width:820px){.mon-grid{grid-template-columns:1fr}.mon-now{order:-1;position:static}.mon-col{max-height:none}}
-.focus-hl{outline:3px solid #f1c21b;outline-offset:2px;transition:outline .3s}
+.focus-hl{outline:3px solid #f1c21b;outline-offset:3px;animation:hlblink 1s ease-in-out 8;position:relative}
+@keyframes hlblink{0%,100%{box-shadow:0 0 0 0 rgba(241,194,27,0)}50%{box-shadow:0 0 0 10px rgba(241,194,27,.45)}}
+.focus-hl::before{content:'🎯 هنا';position:absolute;top:-11px;inset-inline-start:10px;background:#f1c21b;color:#2a2200;font-size:11px;font-weight:700;border-radius:6px;padding:0 7px;z-index:2}
 .mon-strip.click{cursor:pointer}.mon-strip.click:hover{transform:translateX(-3px);box-shadow:0 2px 8px rgba(0,0,0,.18)}.mon-now.click{cursor:pointer}
 .gt{border:1px solid var(--line);border-radius:10px;background:var(--card);overflow-x:auto;padding:4px 0}
 .gt-row{display:flex;align-items:stretch;min-width:760px;border-bottom:1px solid rgba(127,127,127,.12)}
@@ -732,7 +734,7 @@ function focusItem_(id) {
   var card = el.closest('.card, details, tr') || el;
   if (card.tagName === 'DETAILS') card.open = true;
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  card.classList.add('focus-hl'); setTimeout(function () { card.classList.remove('focus-hl'); }, 4000);
+  card.classList.add('focus-hl'); setTimeout(function () { card.classList.remove('focus-hl'); }, 9000);
 }
 function go(screen, args, keepScroll) {
   if (screen === 'more') { renderMore(); return; }
@@ -1516,8 +1518,20 @@ SCREENS.news = { render: function (d, args) {
 ACT.newsFilter = function () { go('news', { category: val('nc'), impact: val('ni') }); };
 ACT.newsSeen = function (el) { act('newsSeen', { news_id: el.dataset.id }, 'تم'); };
 ACT.newsContent = function (el) {
-  var a = prompt('ما زاوية المنشور؟'); if (!a) return;
-  act('newsContent', { news_id: el.dataset.id, angle: a }, 'أُضيفت فكرة إلى تقويم المحتوى');
+  var n = ((S.data && S.data.rows) || []).filter(function (x) { return x.news_id === el.dataset.id; })[0] || {};
+  var picks = ['ماذا يعني هذا الخبر لمدرب اللياقة؟', 'ما الفرصة التي يفتحها لنا؟', 'تنبيه لمتدربينا: ما الذي يجب أن يعرفوه؟', 'رأي الأكاديمية فيه'];
+  window.__nc = el.dataset.id;
+  openSheet('<h3 style="margin:0 0 6px">✍️ فكرة محتوى من هذا الخبر</h3><div class="small"><b>' + esc(n.title || '') + '</b><div class="muted tiny">' + esc(n.source_name || '') + (n.captured_at ? ' · ' + fmtDate(n.captured_at, true) : '') + '</div></div>' +
+    '<div class="muted tiny" style="margin-top:6px">اختر زاوية جاهزة أو اكتب زاويتك — تُسجَّل بتاريخها ووقتها في ملاحظات الخبر وتدخل تقويم المحتوى كفكرة.</div>' +
+    '<div class="chips" style="margin:6px 0">' + picks.map(function (p) { return '<button class="btn sm" data-act="ncPick" data-p="' + esc(p) + '">' + esc(p) + '</button>'; }).join('') + '</div>' +
+    '<textarea id="nc_a" style="width:100%;min-height:70px" placeholder="زاوية المنشور…"></textarea>' +
+    '<div class="btns"><button class="btn pri" data-act="ncSave">💾 أضف إلى تقويم المحتوى</button><button class="btn" data-act="closeSheet">إلغاء</button></div>');
+};
+ACT.ncPick = function (el) { $('nc_a').value = el.dataset.p; };
+ACT.ncSave = function (el) {
+  var a = val('nc_a').trim(); if (!a) return toast('اختر زاوية أو اكتبها', true);
+  el.disabled = true; act('newsContent', { news_id: window.__nc, angle: a }, 'أُضيفت فكرة إلى تقويم المحتوى');
+  var c = $('sheet'); if (c) c.remove();
 };
 ACT.srcToggle = function (el) { act('newsToggleSource', { src_id: el.dataset.id, enabled: el.checked }, 'حُدّث', false); };
 ACT.srcAdd = function () { act('newsAddSource', { name: val('sn'), url: val('su'), kind: val('sk'), category: val('sc'), frequency: val('sf') }, 'أُضيف المصدر'); };
@@ -4470,12 +4484,13 @@ SCREENS.ask = { render: function (d, args) {
   html += shown.length ? '<div class="grid2" id="ask_list">' + shown.map(function (o) {
     var done = o.status !== 'جديد', left = Math.max(0, Math.ceil(((Time_(o.expires_at) || 0) - Date.now()) / 864e5));
     var hay = [o.question, o.city, o.platform, o.persona, o.status, o.suggested_reply, o.asker_name, o.asker_handle].join(' ');
-    return '<div class="card" data-hay="' + esc(hay) + '" style="' + (done ? 'opacity:.6' : '') + '"><div class="row between"><span>' + chip(o.platform, 'acc') + chip(o.persona) + '</span>' +
+    return '<div class="card" data-id="' + esc(o.ask_id) + '" data-hay="' + esc(hay) + '" style="' + (done ? 'opacity:.6' : '') + '"><div class="row between"><span>' + chip(o.platform, 'acc') + chip(o.persona) + '</span>' +
       '<span title="قوة النية">' + '★★★★★'.slice(0, Number(o.intent_score) || 1) + '<span class="muted">' + '★★★★★'.slice(0, 5 - (Number(o.intent_score) || 1)) + '</span></span></div>' +
       askAskerHtml_(o) +
       (o.offer_code ? '<div class="small" style="margin:4px 0;padding:4px 8px;border-radius:6px;background:#fdecea;color:#8a1c14">💸 عرض شخصي جاهز: <b>' + esc(o.offer_price) + ' ر.س</b> · الكود <b>' + esc(o.offer_code) + '</b> · صالح ٢٤ ساعة — الرد أدناه يحتويه</div>' : '') +
       (o.analysis ? '<details class="small" style="margin-top:4px"' + (o.priority === 'عالية' ? ' open' : '') + '><summary>🔎 التحليل ' + chip(o.priority ? 'أولوية ' + o.priority : '', o.priority === 'عالية' ? 'bad' : o.priority === 'متوسطة' ? 'warn' : '') + (o.objection ? chip('✋ ' + o.objection, 'warn') : '') + '</summary><div style="white-space:pre-wrap">' + esc(o.analysis) + '</div></details>' : '') +
-      '<div style="margin:6px 0;white-space:pre-wrap">«' + esc(o.question) + '»</div>' +
+      (o.ctx ? '<div class="small" style="margin-top:6px;padding:4px 8px;border-radius:8px;background:var(--accent-soft)">📍 تعليق على منشور <b>' + esc(o.ctx.competitor) + '</b>' + (o.ctx.offers.length ? ' · أحدث عروضهم (المنشور غالباً عنها): ' + o.ctx.offers.map(function (x) { return '«' + esc(x) + '»'; }).join('، ') : '') + ' ' + (o.ctx.has_url ? '' : '<button class="btn sm" data-act="askLink" data-id="' + esc(o.ask_id) + '">🔗 حدّد المنشور</button>') + '</div>' : '') +
+      '<div class="aq" style="margin:6px 0;white-space:pre-wrap;border-inline-start:4px solid ' + (/سعر/.test(o.qtype || '') ? '#e5484d' : /اعتماد/.test(o.qtype || '') ? '#3b82f6' : /موعد/.test(o.qtype || '') ? '#f5a524' : '#9aa4b2') + ';padding-inline-start:8px"><span style="font-size:16px">' + esc(o.qicon || '❓') + '</span> <b>' + esc(o.qtype || 'سؤال') + '</b> «' + esc(o.question) + '»</div>' +
       '<div class="muted small">' + (o.city ? '📍 ' + esc(o.city) + ' · ' : '') + '🕒 سأل: ' + (o.asked_at ? fmtDate(o.asked_at, true) : 'غير محدد') + ' · رُصد: ' + fmtDate(o.found_at, true) + ' · ' + esc(o.source) + ' · يُحذف بعد ' + left + ' يوماً</div>' +
       (done ? '<div class="small">' + chip(o.status, o.status === 'تم الرد' ? 'good' : '') + '</div>' :
         '<div class="row" style="gap:6px;margin-top:6px"><div class="grow">' + askPersonaSel_('apx_' + esc(o.ask_id), o.persona) + '</div>' +
@@ -4566,11 +4581,33 @@ ACT.askToLead = function (el) {
   api('action', 'askToLead', { ask_id: el.dataset.id }).then(function (r) { toast('أُضيف لمراحل العملاء'); go('lead', { lead_id: r.lead_id }); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
+ACT.askLink = function (el) { linkHelpModal_({ ask_id: el.dataset.id }); };
+/** نافذة «حدّد المنشور» المشتركة (من يسأل / التفاعل / غرفة التحكم): تخبرك من المنافس وأين حساباته وكيف تنسخ الرابط */
+function linkHelpModal_(ref) {
+  api('action', 'engageLinkHelp', ref).then(function (h) {
+    var accts = (h.accounts || []).map(function (a) { return '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(a.url)) + '">' + esc(a.platform) + (a.handle ? ' ' + esc(a.handle) : '') + ' ↗</a>'; }).join(' ') || '<span class="muted">لا حسابات مسجّلة لهذا المنافس — أضفها من «ملفات المنافسين»</span>';
+    var offs = (h.offers || []).map(function (o) { return '<div class="muted tiny">• «' + esc(o.headline) + '» ' + esc(o.platform || '') + '</div>'; }).join('');
+    window.__lh = ref;
+    openSheet('<h3 style="margin:0 0 6px">🔗 المنشور الذي كُتب عليه التعليق</h3>' +
+      '<div class="small">' + (h.competitor ? 'التعليق عند <b>' + esc(h.competitor) + '</b>' : '') + (h.asker ? ' من <b>@' + esc(h.asker) + '</b>' : '') + '<br><span class="muted">«' + esc(h.question) + '»</span></div>' +
+      (offs ? '<div style="margin-top:4px"><b class="tiny">أحدث ما عرفناه عنهم (غالباً المنشور عنه):</b>' + offs + '</div>' : '') +
+      '<ol class="small" style="line-height:2"><li>افتح حساب المنافس: ' + accts + '</li><li>افتح المنشور الذي عليه التعليق</li><li>اضغط ⋯ ثم <b>«نسخ الرابط»</b></li><li>الصقه هنا:</li></ol>' +
+      '<input id="lh_url" dir="ltr" placeholder="https://www.instagram.com/p/…" style="width:100%">' +
+      '<div class="btns"><button class="btn pri" data-act="lhSave">💾 احفظ وافتح المنشور</button><button class="btn" data-act="closeSheet">لاحقاً</button></div>');
+  }).catch(function (e) { toast(errMsg(e), true); });
+}
+ACT.lhSave = function (el) {
+  var u = val('lh_url').trim(); if (!u) return toast('الصق رابط المنشور', true);
+  el.disabled = true;
+  var p = Object.assign({}, window.__lh, { url: u });
+  api('action', 'engageSetUrl', p).then(function (r) { toast('حُفظ الرابط لـ ' + r.comments + ' تعليقاً'); window.open(r.url, '_blank', 'noopener'); var c = $('sheet'); if (c) c.remove(); go(S.screen, S.args, true); })
+    .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
 ACT.askAskerEdit = function (el) {
   var o = ASK.data.opps.filter(function (x) { return x.ask_id === el.dataset.id; })[0]; if (!o) return;
   var box = $('aw_' + o.ask_id); if (box.innerHTML) { box.innerHTML = ''; return; }
   var dt = o.asked_at ? new Date(o.asked_at) : null; if (dt && !isNaN(dt)) dt.setMinutes(dt.getMinutes() - dt.getTimezoneOffset());
-  box.innerHTML = '<div class="row" style="gap:6px;margin-top:6px"><input type="text" id="ae_n" placeholder="الاسم" value="' + esc(o.asker_name || '') + '">' +
+  box.innerHTML = '<div class="muted tiny" style="margin-top:6px">اكتب ما تعرفه عن السائل — كل الخانات اختيارية. ' + (o.ctx ? '<button class="btn sm" data-act="askLink" data-id="' + esc(o.ask_id) + '">🔗 لا أعرف الرابط؟ ساعدني</button>' : '') + '</div><div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><input type="text" id="ae_n" placeholder="الاسم" value="' + esc(o.asker_name || '') + '">' +
     '<input type="text" id="ae_h" dir="ltr" placeholder="@المعرّف" value="' + esc(o.asker_handle || '') + '"><input type="text" id="ae_u" dir="ltr" placeholder="رابط ملفه" value="' + esc(o.asker_url || '') + '">' +
     '<input type="text" id="ae_w" list="ae_wl" placeholder="أين كتبه؟" value="' + esc(o.asked_where || '') + '"><datalist id="ae_wl"><option value="منشوره الخاص"><option value="تعليق تحت منشور منافس"><option value="تعليق تحت منشورنا"><option value="مجموعة أو منتدى"><option value="هاشتاق / بحث عام"></datalist>' +
     '<input type="datetime-local" id="ae_t" value="' + (dt && !isNaN(dt) ? dt.toISOString().slice(0, 16) : '') + '"><button class="btn sm pri" data-act="askAskerSave" data-id="' + esc(o.ask_id) + '">حفظ</button></div>';
@@ -4605,8 +4642,8 @@ ACT.askCopy = function (el) {
   askCopy_(el.dataset.id);
   var o = ASK.data.opps.filter(function (x) { return x.ask_id === el.dataset.id; })[0];
   if (o && /^competitor-post/.test(o.url || '')) {
-    var u = prompt('نُسخ الرد، لكن لا رابط لهذا المنشور (استُخرج من صورة). الصق رابط المنشور ليُفتح تلقائياً:', 'https://');
-    if (u && u !== 'https://') return act('engageSetUrl', { ask_id: o.ask_id, url: u }, function (r) { window.open(r.url, '_blank', 'noopener'); return 'حُفظ الرابط — وفُتح المنشور، الصق الرد'; });
+    toast('نُسخ الرد — لا رابط لهذا المنشور بعد');
+    return linkHelpModal_({ ask_id: o.ask_id });
   }
   toast('نُسخ الرد — الصقه عند السؤال ثم اضغط «تم الرد ✓»');
 };
@@ -6194,8 +6231,7 @@ ACT.egCopy = function (el) {
   var e = (S.data.rows || []).filter(function (x) { return x.eng_id === el.dataset.id; })[0]; if (!e) return;
   copyText(e.reply);
   if (extUrl(e.post_url)) { window.open(extUrl(e.post_url).replace(/#c\d+_\d+$/, ''), '_blank', 'noopener'); return toast('نُسخ الرد وفُتح المنشور — الصقه تحت تعليق ' + (e.asker ? '@' + e.asker : 'السائل') + ' ثم اضغط «✓ رددت»'); }
-  var u = prompt('نُسخ الرد، لكن لا رابط لهذا المنشور (استُخرج من صورة). الصق رابط المنشور ليُفتح تلقائياً:', 'https://');
-  if (u && u !== 'https://') act('engageSetUrl', { eng_id: e.eng_id, url: u }, function (r) { window.open(r.url, '_blank', 'noopener'); return 'حُفظ الرابط لـ ' + r.comments + ' تعليقاً — وفُتح المنشور، الصق الرد'; }); else toast('نُسخ الرد — الصقه يدوياً ثم اضغط «✓ رددت»');
+  toast('نُسخ الرد — لا رابط لهذا المنشور بعد'); linkHelpModal_({ eng_id: e.eng_id });
 };
 ACT.egDone = function (el) { act('engageStatus', { eng_id: el.dataset.id, status: 'رُدّ' }, function (r) { return r.lead_id ? '✓ أُضيف لمراحل العملاء' : '✓ سُجّل'; }); };
 ACT.egSkip = function (el) { act('engageStatus', { eng_id: el.dataset.id, status: 'مستبعد' }, 'استُبعد'); };
@@ -6360,10 +6396,7 @@ ACT.ctAskSend = function (el) {
   if (extUrl(el.dataset.url)) { window.open(extUrl(el.dataset.url), '_blank', 'noopener'); return toast('نُسخ الرد وفُتح المنشور — الصقه عند السؤال وأرسله، ثم اضغط «تم الرد ✓»'); }
   ctAddUrl_({ ask_id: el.dataset.id }, 'نُسخ الرد، لكن لا رابط لهذا المنشور (استُخرج من صورة). الصق رابط المنشور ليُفتح تلقائياً في المرات القادمة:');
 };
-function ctAddUrl_(ref, msg) {
-  var u = prompt(msg, 'https://'); if (!u || u === 'https://') return toast('نُسخ الرد — الصقه يدوياً عند السؤال، ثم اضغط «تم الرد ✓»');
-  ref.url = u; act('engageSetUrl', ref, function (r) { window.open(r.url, '_blank', 'noopener'); return 'حُفظ الرابط لـ ' + r.comments + ' تعليقاً — وفُتح المنشور، الصق الرد'; });
-}
+function ctAddUrl_(ref) { toast('نُسخ الرد — لا رابط لهذا المنشور بعد'); linkHelpModal_(ref); }
 ACT.ctAskDone = function (el) { act('ctAskDone', { id: el.dataset.id }, function (r) { return r && r.followed ? 'أحسنت 👏 سُجّل — وتذكير بعد ٢٤ ساعة' : 'أحسنت 👏 سُجّل الرد'; }); };
 ACT.ctAskSkip = function (el) { act('ctAskSkip', { id: el.dataset.id }, 'حُدّث'); };
 ACT.ctEngSend = function (el) {
