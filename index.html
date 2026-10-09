@@ -529,6 +529,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 .ct-bottom{display:flex;gap:6px;margin-top:8px;align-items:stretch;flex-wrap:wrap}.ct-k{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:11.5px;display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct-k.grow{flex:1;min-width:200px}
 .ct-bd{margin-top:6px;font-size:12px}.ct-bd summary{cursor:pointer}.ct-tpl{display:flex;gap:6px;align-items:flex-start;margin-top:4px}.ct-tpl b{flex:0 0 74px;font-size:11.5px;padding-top:4px}.ct-tpl textarea{flex:1;min-height:42px;font-size:12px;line-height:1.5}
 #cpill{position:fixed;top:6px;inset-inline-end:8px;z-index:60}.cpill{display:inline-flex;gap:5px;align-items:center;font-size:11px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1px 9px;color:var(--ink);text-decoration:none}.cpill .d{width:8px;height:8px;border-radius:50%}
+.vbar{position:sticky;top:0;z-index:80;background:#1d4ed8;color:#fff;text-align:center;padding:5px 10px;font-size:13px}.vbar a{color:#fff;text-decoration:underline;font-weight:700}
 .ct-bars{display:inline-flex;gap:3px;align-items:flex-end;height:22px;margin:0 6px}.ct-bars i{display:block;width:8px;background:#2bb673;border-radius:2px}
 </style>
 
@@ -536,6 +537,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
+  var APP_BUILD = "mv18dsgb";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -961,6 +963,19 @@ function poll() {
 ACT.reload = function () { go(S.screen, S.args); };
 ACT.leadOrigin = function (el) { act('leadOrigin', { lead_id: el.dataset.id, url: val('lo_url'), asker_url: val('lo_au'), asker_handle: val('lo_ah') }, 'حُفظ — الرابط ظاهر الآن في ملف العميل'); };
 /** شريط تنبيه الفرص في كل الصفحات: من يسأل علناً وله عرض سعر جاهز بكود — حتى لا تفوت الفرصة */
+/** نسخة جديدة نُشرت؟ شريط «حدّث» بدل أن تبقى نسخة قديمة في المتصفح (سبب «البيانات فارغة» أحياناً) */
+function versionCheck_() {
+  if (typeof APP_BUILD === 'undefined') return;
+  fetch('version.txt?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (v) {
+    v = String(v || '').trim(); if (!v || v === APP_BUILD) return;
+    var el = $('vbar'); if (!el) { el = document.createElement('div'); el.id = 'vbar'; document.body.insertBefore(el, document.body.firstChild); }
+    el.innerHTML = '<div class="vbar">🔄 <b>نسخة جديدة من النظام جاهزة</b> — <a href="#" data-act="vReload">اضغط لتحميلها الآن</a></div>';
+  }).catch(function () {});
+}
+ACT.vReload = function () { try { sessionStorage.removeItem('ops_resume'); } catch (e) {} location.href = location.pathname + '?r=' + Date.now(); };
+setInterval(function () { if (!document.hidden) versionCheck_(); }, 3 * 60000);
+document.addEventListener('visibilitychange', function () { if (!document.hidden) versionCheck_(); });
+window.addEventListener('load', function () { setTimeout(versionCheck_, 4000); });
 /** شارة Claude الدائمة: 🟢 يعمل · 🔴 مفتاح ناقص/خاطئ/رصيد منتهٍ (كل ما يعتمد عليه يتلوّن بها) */
 function claudePill_(c) {
   var el = $('cpill'); if (!el || !c) return;
@@ -4468,7 +4483,7 @@ SCREENS.ask = { render: function (d, args) {
   ASK.data = d;
   var st = d.stats, rate = st.total ? Math.round(st.replied / st.total * 100) : 0;
   var fresh = d.opps.filter(function (o) { return o.status === 'جديد'; });
-  var html = north(d.north) + '<h1>🎯 من يسأل الآن ' + chip(fresh.length + ' فرصة', fresh.length ? 'good' : '') + '</h1>';
+  var html = north(d.north) + '<h1>🎯 من يسأل الآن ' + chip(fresh.length + ' فرصة', fresh.length ? 'good' : '') + '</h1>' + askScanLine_(d);
   html += '<div class="row" style="flex-wrap:wrap">' +
     '<div class="stat"><div class="v">' + st.total + '</div><div class="k">سؤالاً رُصد (٣٠ يوماً)</div></div>' +
     '<div class="stat"><div class="v" style="color:var(--good)">' + rate + '%</div><div class="k">نسبة ما رددت عليه</div></div>' +
@@ -4581,6 +4596,14 @@ ACT.askToLead = function (el) {
   api('action', 'askToLead', { ask_id: el.dataset.id }).then(function (r) { toast('أُضيف لمراحل العملاء'); go('lead', { lead_id: r.lead_id }); })
     .catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
+/** هل تتحدّث الصفحة؟ آخر مسح وآخر سؤال جديد + زر مسح فوري (يستعمل رصيد Claude) */
+function askScanLine_(d) {
+  var ago = function (v) { var t = v ? new Date(v).getTime() : 0; if (!t) return 'لم يحدث'; var m = Math.round((Date.now() - t) / 60000); return m < 60 ? 'منذ ' + m + ' د' : m < 1440 ? 'منذ ' + Math.round(m / 60) + ' س' : 'منذ ' + Math.round(m / 1440) + ' يوماً'; };
+  var sc = d.last_scan || {};
+  return '<div class="small muted" style="margin:2px 0 6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">🔄 آخر مسح آلي: <b>' + ago(sc.at) + '</b> (' + esc(sc.status || '—') + (sc.items !== undefined && sc.items !== '' ? ' · ' + sc.items + ' جديد' : '') + ') · آخر سؤال جديد: <b>' + ago(d.last_found) + '</b>' + (d.stale ? ' · <b>' + d.stale + '</b> أقدم من ٣ أيام' : '') +
+    ' · يعمل يومياً 8 صباحاً <button class="btn sm" data-act="askScanNow" data-tip="يبحث الآن في المنصات عن أسئلة جديدة (يستعمل رصيد Claude، سنتات قليلة)">🔎 امسح الآن</button></div>';
+}
+ACT.askScanNow = function (el) { el.disabled = true; el.textContent = '⏳ يبحث…'; act('runNow', { module_key: 'ask_radar' }, function (r) { return r && r.message ? r.message : 'اكتمل المسح'; }); };
 ACT.askLink = function (el) { linkHelpModal_({ ask_id: el.dataset.id }); };
 /** نافذة «حدّد المنشور» المشتركة (من يسأل / التفاعل / غرفة التحكم): تخبرك من المنافس وأين حساباته وكيف تنسخ الرابط */
 function linkHelpModal_(ref) {
@@ -6349,6 +6372,7 @@ SCREENS.control = { render: function (d) {
   // الجانب: ينتظر قرارك + العقل
   var side = [];
   if (w.hot) side.push('<div class="ct-ev u"><span class="ct-tx">🔴 ' + w.hot + ' سؤال بنية عالية/سعر — الفرصة تنتهي خلال ساعات</span><button class="btn sm pri" data-act="ctFilter" data-f="need">رد عليها ←</button></div>');
+  if (w.stale) side.push('<div class="ct-ev n"><span class="ct-tx" data-tip="أسئلة جديدة مرّ عليها أكثر من ٣ أيام ولم تُغلق — ردّ أو اضغط «ليست فرصة» لتنظيفها">🕓 ' + w.stale + ' سؤالاً أقدم من ٣ أيام بلا رد</span><button class="btn sm" data-go="ask">افتح</button></div>');
   if (w.inbox) side.push('<div class="ct-ev n"><span class="ct-tx">💬 ' + w.inbox + ' رسالة تنتظر ردك</span><button class="btn sm pri" data-go="inbox">افتح</button></div>');
   if (w.late) side.push('<div class="ct-ev n"><span class="ct-tx">⏰ ' + w.late + ' متابعة متأخرة</span><button class="btn sm" data-go="pipeline">افتح</button></div>');
   if (w.eng) side.push('<div class="ct-ev n"><span class="ct-tx">💬 ' + w.eng + ' تعليق عند المنافسين ينتظر ردك</span><button class="btn sm" data-act="ctFilter" data-f="lead">اعرض</button></div>');
