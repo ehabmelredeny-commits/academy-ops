@@ -541,7 +541,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv1f1t1d";
+  var APP_BUILD = "mv1fkzb3";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -6213,7 +6213,7 @@ document.addEventListener('change', function (e) { if (e.target && e.target.id =
 
   <script>
 /* ═══════════ 💬 التفاعل مع منشورات المنافسين (التصميم المعتمد 2026-10-05) ═══════════ */
-var ENG = { items: null, imgs: [] };
+var ENG = { items: null, imgs: [], pasted: [] };
 SCREENS.engage = { render: function (d, args) {
   var c = d.counts || {};
   var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">💬 التفاعل مع منشورات المنافسين</h1>' +
@@ -6221,14 +6221,16 @@ SCREENS.engage = { render: function (d, args) {
   // ١) الإدخال
   html += '<div class="card"><b>١) أدخل تعليقات منشور منافس</b> <span class="muted tiny">— بالطريقة الأسهل لك</span>' +
     '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><select id="eg_ac" style="max-width:260px"><option value="">— المنافس —</option>' +
-      (d.competitors || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (String(x.ac_id) === String(d.pick) ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select>' +
+      (d.competitors || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (String(x.ac_id) === String(d.pick || egLastAc_()) ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select>' +
       '<input id="eg_url" dir="ltr" style="flex:1;min-width:220px" placeholder="رابط المنشور https://instagram.com/p/…"></div>' +
     '<div class="eg-two"><div class="eg-in"><b>📷 ارفع صور الشاشة</b> <span class="chip good">الأسهل على الجوال</span>' +
+      '<button class="btn sm" data-act="egClip" data-tip="خذ لقطة بـ Win+Shift+S (أو لقطة الجوال) ثم اضغط هنا — أو اضغط Ctrl+V في أي مكان بهذه الصفحة">📋 الصق لقطة من الحافظة</button> <span class="muted tiny">أو Ctrl+V</span>' +
       '<label class="eg-drop">⬆️ اسحب الصور هنا أو اضغط للاختيار<br><span class="muted tiny">عدة صور دفعة واحدة · يقرأ النظام النص منها مجاناً</span><input type="file" id="eg_imgs" accept="image/*" multiple hidden></label>' +
       '<div id="eg_thumbs" class="row tiny" style="gap:6px;margin-top:6px;flex-wrap:wrap"></div></div>' +
     '<div class="eg-in"><b>📋 أو الصق النص</b> <span class="muted tiny">حدّد الكل ← انسخ ← الصق</span><textarea id="eg_text" style="min-height:96px;margin-top:6px" placeholder="الصق التعليقات كما هي (مع أسماء الحسابات)"></textarea></div></div>' +
     '<div class="row between" style="margin-top:6px;gap:8px;flex-wrap:wrap"><span class="muted tiny">تظهر لك الأسئلة المستخرجة قبل التحليل لتصحّح أي كلمة · يُستبعد غير الأسئلة (🔥، شكراً، تاقات) تلقائياً</span>' +
-      '<button class="btn pri" data-act="egExtract">🔎 استخرج التعليقات</button></div><div id="eg_review"></div></div>';
+      '<span class="row" style="gap:6px"><button class="btn" data-act="egExtract" data-tip="يقرأ التعليقات ويعرضها لتراجعها وتصحّح الأسماء قبل التسجيل">🔎 استخرج وراجع</button>' +
+        '<button class="btn pri" data-act="egQuick" data-tip="بضغطة واحدة: يقرأ الصور والنص، يحدد الأسئلة بأي موضوع، يستبعد المؤيدين، يكتب الردود ويسجّلها في «من يسأل الآن» — بلا مراجعة">⚡ سجّل كل شيء بضغطة</button></span></div><div id="eg_review"></div></div>';
   // يوتيوب
   var yt = d.yt || {};
   html += '<div class="card small" style="border-color:#ff0000"><b>▶️ يوتيوب — آلي بالكامل ومجاني</b> ' +
@@ -6271,11 +6273,11 @@ function egReviewHtml_(r) {
 }
 function egReadFiles_() {
   var fs = $('eg_imgs') && $('eg_imgs').files ? Array.prototype.slice.call($('eg_imgs').files, 0, 10) : [];
-  return Promise.all(fs.map(function (f) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok({ data: String(r.result).split(',')[1], mime: f.type }); }; r.readAsDataURL(f); }); }));
+  return Promise.all(fs.map(function (f) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok({ data: String(r.result).split(',')[1], mime: f.type }); }; r.readAsDataURL(f); }); })).then(function (a) { return a.concat(ENG.pasted).slice(0, 10); });
 }
 ACT.egExtract = function (el) {
   var text = val('eg_text'), url = val('eg_url').trim();
-  if (!text.trim() && !url && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق رابط المنشور أو التعليقات أو ارفع صور الشاشة', true);
+  if (!text.trim() && !url && !ENG.pasted.length && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق رابط المنشور أو التعليقات أو ارفع صور الشاشة', true);
   el.disabled = true; el.textContent = '⏳ يقرأ…';
   egReadFiles_().then(function (imgs) { return api('action', 'engageExtract', { text: text, images: imgs, url: url }); })
     .then(function (r) {
@@ -6287,6 +6289,45 @@ ACT.egExtract = function (el) {
     })
     .catch(function (e) { el.disabled = false; el.textContent = '🔎 استخرج التعليقات'; toast(errMsg(e), true); });
 };
+/** ⚡ ضغطة واحدة: كل شيء إلى النظام */
+function egLastAc_() { try { return localStorage.getItem('ops_eg_ac') || ''; } catch (e) { return ''; } }
+ACT.egQuick = function (el) {
+  var text = val('eg_text'), url = val('eg_url').trim();
+  if (!text.trim() && !url && !ENG.pasted.length && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق لقطة (Ctrl+V) أو ارفع صوراً أو الصق رابط المنشور/النص أولاً', true);
+  var old = el.textContent; el.disabled = true; el.textContent = '⏳ يقرأ ويحلّل ويسجّل…';
+  try { if (val('eg_ac')) localStorage.setItem('ops_eg_ac', val('eg_ac')); } catch (e) {}
+  egReadFiles_().then(function (imgs) { return api('action', 'engageQuick', { text: text, images: imgs, url: url, ac_id: val('eg_ac') }); })
+    .then(function (r) {
+      el.disabled = false; el.textContent = old;
+      if (!r.added) { $('eg_review').innerHTML = '<div class="card small" style="margin-top:6px">' + esc(r.message || 'لا أسئلة جديدة') + (r.errors && r.errors.length ? '<div class="muted tiny">' + r.errors.map(esc).join(' · ') + '</div>' : '') + '</div>'; return; }
+      ENG.pasted = []; var t = $('eg_thumbs'); if (t) t.innerHTML = '';
+      toast('✓ سُجّل ' + r.added + ' سؤالاً بردودها' + (r.competitor ? ' (' + r.competitor.split(/\s[—–-]\s/)[0] + ')' : '') + (r.excluded || r.supporters ? ' · 🛡 استُثني مؤيدون' : '') + (r.skipped ? ' · ' + r.skipped + ' ليست أسئلة' : ''));
+      go('engage', {}, true);
+    })
+    .catch(function (e) { el.disabled = false; el.textContent = old; toast(errMsg(e), true); });
+};
+/** 📋 من الحافظة: صور (وروابط نصية) */
+ACT.egClip = function () {
+  if (!navigator.clipboard || !navigator.clipboard.read) return toast('المتصفح لا يسمح بقراءة الحافظة — اضغط Ctrl+V داخل الصفحة', true);
+  navigator.clipboard.read().then(function (items) {
+    var jobs = [];
+    items.forEach(function (it) { it.types.forEach(function (tp) { if (/^image\//.test(tp)) jobs.push(it.getType(tp).then(function (b) { return egAddBlob_(b); })); else if (tp === 'text/plain') jobs.push(it.getType(tp).then(function (b) { return b.text(); }).then(function (t) { egAddText_(t); })); }); });
+    return Promise.all(jobs);
+  }).then(function () { toast('أُضيف ما في الحافظة'); }).catch(function () { toast('لم أقرأ الحافظة — اضغط Ctrl+V داخل الصفحة', true); });
+};
+function egAddBlob_(b) {
+  return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { if (ENG.pasted.length < 10) ENG.pasted.push({ data: String(r.result).split(',')[1], mime: b.type || 'image/png' }); egThumbs_(); ok(); }; r.readAsDataURL(b); });
+}
+function egAddText_(t) { t = String(t || '').trim(); if (!t) return; if (/^https?:\/\/\S+$/.test(t) && !val('eg_url')) { if ($('eg_url')) $('eg_url').value = t; } else if ($('eg_text')) $('eg_text').value = ($('eg_text').value ? $('eg_text').value + '\n' : '') + t; }
+function egThumbs_() { var t = $('eg_thumbs'); if (!t) return; var f = $('eg_imgs') && $('eg_imgs').files ? $('eg_imgs').files.length : 0; t.innerHTML = '<span class="chip good">📋 ' + ENG.pasted.length + ' ملصقة</span>' + (f ? '<span class="chip">📄 ' + f + ' ملف</span>' : '') + '<a href="#" data-act="egClear" class="tiny">✕ مسح</a>'; }
+ACT.egClear = function () { ENG.pasted = []; var t = $('eg_thumbs'); if (t) t.innerHTML = ''; };
+document.addEventListener('paste', function (e) {
+  if (S.screen !== 'engage' || !e.clipboardData) return;
+  var got = false;
+  Array.prototype.forEach.call(e.clipboardData.items || [], function (it) { if (/^image\//.test(it.type)) { got = true; egAddBlob_(it.getAsFile()); } });
+  if (got) { e.preventDefault(); toast('أُضيفت لقطة — اضغط ⚡ سجّل كل شيء بضغطة'); }
+  else { var tx = e.clipboardData.getData('text/plain'); if (tx && !/^(INPUT|TEXTAREA)$/.test((e.target || {}).tagName || '')) { egAddText_(tx); e.preventDefault(); } }
+});
 ACT.egAnalyze = function (el) {
   var items = (ENG.items || []).map(function (x, i) {
     var q = document.querySelector('[data-egq="' + i + '"]'); if (q && !q.checked) return null;
