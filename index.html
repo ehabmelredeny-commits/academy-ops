@@ -541,7 +541,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv1fkzb3";
+  var APP_BUILD = "mv1g6c8n";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -967,6 +967,33 @@ function poll() {
 ACT.reload = function () { go(S.screen, S.args); };
 ACT.leadOrigin = function (el) { act('leadOrigin', { lead_id: el.dataset.id, url: val('lo_url'), asker_url: val('lo_au'), asker_handle: val('lo_ah') }, 'حُفظ — الرابط ظاهر الآن في ملف العميل'); };
 /** شريط تنبيه الفرص في كل الصفحات: من يسأل علناً وله عرض سعر جاهز بكود — حتى لا تفوت الفرصة */
+/**
+ * 🖥 تصوير الشاشة بضغطة: تختار النافذة/التبويب مرة واحدة، وبعد عدّ تنازلي يلتقط لقطات متتابعة (وأنت تمرّر التعليقات)
+ * ثم يعيدها صوراً جاهزة. صوت قصير عند كل لقطة. لا تُحفظ أي لقطة خارج طلب التسجيل.
+ */
+function screenGrab_(opts) {
+  opts = opts || {}; var n = opts.n || 6, gap = opts.gap || 3000, delay = opts.delay || 5000;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) return Promise.reject(new Error('هذا المتصفح لا يدعم تصوير الشاشة — استعمل Chrome أو Edge على الكمبيوتر'));
+  return navigator.mediaDevices.getDisplayMedia({ video: true, audio: false }).then(function (stream) {
+    return new Promise(function (resolve, reject) {
+      var v = document.createElement('video'); v.srcObject = stream; v.muted = true;
+      var shots = [], title = document.title, done = function () { try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} document.title = title; resolve(shots); };
+      stream.getVideoTracks()[0].addEventListener('ended', done);
+      v.play().then(function () {
+        var left = Math.round(delay / 1000), tick = setInterval(function () { document.title = '⏳ ' + left + ' — اذهب للتعليقات'; left--; if (left < 0) { clearInterval(tick); grab(); } }, 1000);
+        function beep() { try { var c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator(), g = c.createGain(); o.frequency.value = 880; g.gain.value = .08; o.connect(g); g.connect(c.destination); o.start(); setTimeout(function () { o.stop(); c.close(); }, 140); } catch (e) {} }
+        function grab() {
+          if (!v.videoWidth) return setTimeout(grab, 300);
+          var cv = document.createElement('canvas'), sc = Math.min(1, 1600 / v.videoWidth); cv.width = Math.round(v.videoWidth * sc); cv.height = Math.round(v.videoHeight * sc);
+          cv.getContext('2d').drawImage(v, 0, 0, cv.width, cv.height);
+          shots.push({ data: cv.toDataURL('image/jpeg', 0.88).split(',')[1], mime: 'image/jpeg' }); beep(); document.title = '📸 ' + shots.length + '/' + n;
+          if (shots.length >= n) return done();
+          setTimeout(grab, gap);
+        }
+      }).catch(function (e) { try { stream.getTracks().forEach(function (t) { t.stop(); }); } catch (x) {} reject(e); });
+    });
+  });
+}
 /** نسخة جديدة نُشرت؟ شريط «حدّث» بدل أن تبقى نسخة قديمة في المتصفح (سبب «البيانات فارغة» أحياناً) */
 function versionCheck_() {
   if (typeof APP_BUILD === 'undefined') return;
@@ -3118,12 +3145,12 @@ ACT.calSheet = function (el) {
 /* ═══════════ المنافسون: مقارنة الدورات · ملفات المنافسين · حساباتهم ═══════════ */
 var COMP = { data: null };
 
-function compMoney_(v) { return v === '' || v === undefined || v === null ? '' : Number(v).toLocaleString('en') + ' ر.س'; }
+function compMoney_(v, cur) { if (v === '' || v === undefined || v === null) return ''; cur = cur && cur !== 'ر.س' ? cur : 'SAR'; var n = Number(v).toLocaleString('en'); var peg = { USD: 3.75, AED: 3.75 / 3.6725 }; return cur === 'SAR' ? n + ' ر.س' : n + ' ' + cur + (peg[cur] ? ' ≈ ' + Math.round(Number(v) * peg[cur]).toLocaleString('en') + ' ر.س' : ''); }
 function compPrice_(o) {
   var b = o.base_price, d = o.discount_price;
   if (d !== '' && d !== undefined && b !== '' && b !== undefined && Number(d) < Number(b))
-    return '<s class="muted">' + compMoney_(b) + '</s> <b style="color:var(--good)">' + compMoney_(d) + '</b> <span class="chip warn">خصم ' + Math.round((1 - d / b) * 100) + '%</span>';
-  return b !== '' && b !== undefined ? '<b>' + compMoney_(b) + '</b>' : '<span class="muted">السعر غير معلن</span>';
+    return '<s class="muted">' + compMoney_(b, o.currency) + '</s> <b style="color:var(--good)">' + compMoney_(d, o.currency) + '</b> <span class="chip warn">خصم ' + Math.round((1 - d / b) * 100) + '%</span>';
+  return b !== '' && b !== undefined ? '<b>' + compMoney_(b, o.currency) + '</b>' : '<span class="muted">السعر غير معلن</span>';
 }
 /** بطاقة عرض واحد داخل المخطط */
 function compOfferCard_(o, showComp) {
@@ -3280,7 +3307,7 @@ function compOfferForm_(o) {
     '<label class="f">المنافس *</label><select id="of_ac">' + d.competitors.map(function (c) { return '<option value="' + esc(c.ac_id) + '"' + (String(c.ac_id) === String(o.ac_id) ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('') + '</select>' +
     '<label class="f">نوع الدورة (للمقارنة)</label><select id="of_key"><option value="">—</option>' + opt(d.topics, o.course_key) + '</select>' +
     compField_('of_name', 'اسم الدورة كما يعلنها *', o.course_name) +
-    '<div class="row"><div class="grow">' + compField_('of_base', 'السعر الأساسي (ر.س)', o.base_price, 'number') + '</div><div class="grow">' + compField_('of_disc', 'بعد الخصم (إن وُجد)', o.discount_price, 'number') + '</div></div>' +
+    '<div class="row"><div class="grow">' + compField_('of_base', 'السعر الأساسي', o.base_price, 'number') + '<label class="f">العملة</label><select id="of_cur">' + ['SAR', 'USD', 'AED', 'EUR', 'GBP'].map(function (c) { return '<option' + ((o.currency || 'SAR') === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select>' + '</div><div class="grow">' + compField_('of_disc', 'بعد الخصم (إن وُجد)', o.discount_price, 'number') + '</div></div>' +
     '<div class="row"><div class="grow">' + compField_('of_start', 'البداية', compIso_(o.start_date), 'date') + '</div><div class="grow">' + compField_('of_end', 'النهاية', compIso_(o.end_date), 'date') + '</div></div>' +
     '<label class="f">طريقة الحضور</label><select id="of_del"><option value="">—</option>' + opt(d.delivery, o.delivery) + '</select>' +
     compField_('of_loc', 'المكان', o.location) + compField_('of_dur', 'المدة (ساعات/أيام)', o.duration) + compField_('of_ins', 'مقدّم الدورة', o.instructor) +
@@ -3290,7 +3317,7 @@ function compOfferForm_(o) {
     (o.offer_id ? '<button class="btn bad" data-act="compOfferDel" data-id="' + esc(o.offer_id) + '">حذف</button>' : '') + '</div>');
 }
 ACT.compOfferSave = function (el) {
-  var o = { offer_id: el.dataset.id, ac_id: val('of_ac'), course_key: val('of_key'), course_name: val('of_name'), base_price: val('of_base'), discount_price: val('of_disc'),
+  var o = { offer_id: el.dataset.id, ac_id: val('of_ac'), course_key: val('of_key'), course_name: val('of_name'), base_price: val('of_base'), discount_price: val('of_disc'), currency: val('of_cur') || 'SAR',
     start_date: val('of_start'), end_date: val('of_end'), delivery: val('of_del'), location: val('of_loc'), duration: val('of_dur'), instructor: val('of_ins'),
     accreditation: val('of_acc'), url: val('of_url'), notes: val('of_notes') };
   if (!o.course_name.trim()) return toast('اكتب اسم الدورة', true);
@@ -5090,7 +5117,7 @@ SCREENS.compwatch = { render: function (d, args) {
         ['عروض', '52px', function (x) { return x.offers; }], ['جديد', '52px', function (x) { return x.fresh || ''; }], ['تغيّر سعر', '64px', function (x) { return x.changes ? '<b>' + x.changes + '</b>' : ''; }],
         ['حساباته', 'minmax(100px,1fr)', function (x) { return x.platforms.length ? '<span class="muted tiny">' + x.platforms.map(esc).join('، ') + '</span>' : '<span class="muted tiny">—</span>'; }],
         ['', '150px', function (x) { return '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.ad_url) + '" data-tip="مكتبة إعلانات ميتا (مجانية): كل إعلان نشط لهذا المنافس على انستغرام وفيسبوك">📢 إعلاناته</a> <button class="btn sm" data-act="cmpCapture" data-id="' + esc(x.ac_id) + '">📸 أضف</button>'; }]
-      ], cv.list) + '</div>';
+      ], cv.list, { key: 'cov', id: function (x) { return x.ac_id; }, detail: covDetail_ }) + covExcluded_(cv) + '</div>';
   }
   html += '<div class="muted small">المصدر: ' + '⚙️ الرادار الآلي (يومياً من مواقعهم، مجاناً) + أخبارهم من Bing + ' + 'ما تسجّله يدوياً في <a href="#" data-go="competitors">ملفات المنافسين</a> و<a href="#" data-go="manual">البحث اليدوي</a>.</div>';
   // ربط بالخط الزمني: كل عرض يفتح صفّه هناك مباشرة (التفاصيل + الساعات + النوع + تغيّر السعر)
@@ -5115,16 +5142,46 @@ SCREENS.compwatch = { render: function (d, args) {
       (extUrl(x.url) ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">افتح ↗</a>' : '') + '</div>'; }, 'كل الحسابات المراقَبة روجعت');
   return html;
 } };
+/** تفاصيل منافس: كل عرض بدورته وسعره (وأصله بالعملة الأجنبية) وموعد بدايته ومتى ووقت رُصد ومنصته */
+function covDetail_(x) {
+  if (!x.offers_list || !x.offers_list.length) return '<div class="small muted">لا عروض مسجّلة بعد. ' + esc(x.why) + ' — اضغط «📸 أضف» أو «📢 إعلاناته».</div>';
+  var rows = x.offers_list.map(function (o) {
+    return '<tr><td><b>' + esc(o.headline || '') + '</b>' + (o.hours ? ' <span class="muted tiny">' + esc(o.hours) + ' س</span>' : '') + (o.type ? ' ' + chip(o.type) : '') + '</td>' +
+      '<td>' + (o.price ? '<b>' + esc(o.sar ? o.sar.toLocaleString('en') : o.price) + '</b> ر.س' + (o.note ? '<div class="muted tiny">' + esc(o.note) + '</div>' : '') : '<span class="muted">غير معلن</span>') + '</td>' +
+      '<td>' + (o.start ? esc(fmtDate(o.start)) : '<span class="muted">—</span>') + '</td><td>' + esc(fmtDate(o.at, true)) + '</td><td>' + esc(o.platform || '') + '</td>' +
+      '<td>' + (extUrl(o.url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(o.url)) + '">↗</a>' : '') + '</td></tr>';
+  }).join('');
+  return '<div style="overflow-x:auto"><table class="small" style="width:100%;border-collapse:collapse"><thead><tr class="muted"><th>الدورة/العرض</th><th>السعر</th><th>تاريخ البداية</th><th>رُصد (تاريخ ووقت)</th><th>المنصة</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><button class="btn sm" data-act="cmpCapture" data-id="' + esc(x.ac_id) + '">📸 أضف إعلاناً</button><button class="btn sm ghost" data-act="cmpExclude" data-id="' + esc(x.ac_id) + '" data-on="1" data-tip="لا يُحذف: يخرج من الرصد ويظهر في قائمة المستبعدين لتعيده">⛔ ليس منافساً</button></div>';
+}
+function covExcluded_(cv) {
+  if (!cv.excluded || !cv.excluded.length) return '';
+  return '<details style="margin-top:6px"><summary class="small muted">⛔ ' + cv.excluded.length + ' جهات مستبعدة من الرصد (خارج المنافسة) — تعتمد على تصنيفك السابق</summary>' + cv.excluded.map(function (x) {
+    return '<div class="ct-ev"><span class="ct-tx"><b>' + esc(String(x.name).split(/\s[—–-]\s/)[0]) + '</b> <span class="muted tiny">' + esc(x.type) + (x.notes ? ' · ' + esc(x.notes) : '') + '</span></span><button class="btn sm" data-act="cmpExclude" data-id="' + esc(x.ac_id) + '" data-on="0">↩ أعده للرصد</button></div>'; }).join('') + '</details>';
+}
+ACT.cmpExclude = function (el) { act('compExclude', { ac_id: el.dataset.id, exclude: el.dataset.on === '1' }, el.dataset.on === '1' ? 'استُبعد من الرصد (يمكن إعادته)' : 'أُعيد للرصد'); };
 ACT.cmpCapture = function (el) {
   var opts = (CW_COVER() || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (x.ac_id === el.dataset.id ? ' selected' : '') + '>' + esc(String(x.name).split(/\s[—–-]\s/)[0]) + '</option>'; }).join('');
   openSheet('<h3 style="margin:0 0 6px">📸 أضف إعلاناً رأيته</h3><div class="muted tiny" style="margin-bottom:6px">أعطِ النظام ما رأيته: رابط الإعلان، ولقطة شاشة (أو الصق نصه). يقرأ السعر والموعد والعملة ويسجّله باسم المنافس.</div>' +
-    '<label class="f">المنافس</label><select id="cc_ac">' + opts + '</select>' +
+    '<label class="f">المنافس</label><select id="cc_ac"><option value="">— يتعرف عليه النظام من اللقطة —</option>' + opts + '</select>' +
     '<label class="f">رابط الإعلان / المنشور (اختياري لكنه يفتح لاحقاً)</label><input id="cc_url" dir="ltr" placeholder="https://www.instagram.com/p/…">' +
+    '<button class="btn pri" data-act="cmpScreen" style="margin:4px 0" data-tip="افتح حساب المنافس أو إعلانه في تبويب آخر، اضغط هنا واختر ذلك التبويب: يصوّره 6 مرات وأنت تمرّر، ثم يقرأ الإعلانات ويسجّلها ويتعرف على المنافس وحده">🖥 صوّر شاشتي وسجّل (الأسرع)</button>' +
     '<label class="f">لقطة الشاشة (يمكن أكثر من صورة)</label><input id="cc_img" type="file" accept="image/*" multiple>' +
     '<label class="f">أو الصق نص الإعلان</label><textarea id="cc_txt" style="min-height:70px" placeholder="مثال: دورة المدرب الشخصي … السعر 400 دولار … تبدأ 20 أكتوبر"></textarea>' +
     '<div class="btns"><button class="btn pri" data-act="cmpCaptureGo">🔎 اقرأ وسجّل</button></div><div id="cc_res"></div>');
 };
 function CW_COVER() { return (S.data && S.data.coverage && S.data.coverage.list) || []; }
+ACT.cmpScreen = function (el) {
+  if (!confirm('١) اختر التبويب الذي فيه حساب المنافس أو الإعلان.\n٢) 5 ثوانٍ للذهاب إليه، ثم 6 لقطات كل 3 ثوانٍ — مرّر المنشورات ببطء.\n٣) يقرأ ويسجّل ويتعرف على المنافس وحده. تكمل؟')) return;
+  var old = el.textContent; el.disabled = true; el.textContent = '🖥 اختر النافذة…';
+  screenGrab_({ n: 6, gap: 3000, delay: 5000 }).then(function (shots) {
+    window.focus(); el.textContent = '⏳ يقرأ ويسجّل…';
+    return api('action', 'compCapture', { ac_id: val('cc_ac'), url: val('cc_url'), text: val('cc_txt'), images: shots });
+  }).then(function (r) { el.disabled = false; el.textContent = old;
+    $('cc_res').innerHTML = '<div class="card small" style="margin-top:6px">✓ <b>' + esc(String(r.competitor || '').split(/\s[—–-]\s/)[0]) + '</b> — سُجّل <b>' + r.added + '</b> عرض' + (r.important ? ' · 📢 ' + r.important + ' مهم (وصلك بريد)' : '') + (r.rows || []).map(function (x) { return '<div>• ' + esc(x.headline) + (x.price ? ' — <b>' + esc(x.price) + '</b> ' + esc(x.currency || 'ر.س') : '') + (x.note ? ' <span class="muted">(' + esc(x.note) + ')</span>' : '') + '</div>'; }).join('') + '</div>';
+    if (r.added) setTimeout(function () { go('compwatch', S.args, true); }, 2500); })
+  .catch(function (e) { el.disabled = false; el.textContent = old; toast(errMsg(e) || 'أُلغي التصوير', true); });
+};
 ACT.cmpCaptureGo = function (el) {
   var files = $('cc_img').files ? Array.prototype.slice.call($('cc_img').files, 0, 6) : [];
   if (!files.length && !val('cc_txt').trim()) return toast('ارفع لقطة أو الصق نص الإعلان', true);
@@ -6230,6 +6287,7 @@ SCREENS.engage = { render: function (d, args) {
     '<div class="eg-in"><b>📋 أو الصق النص</b> <span class="muted tiny">حدّد الكل ← انسخ ← الصق</span><textarea id="eg_text" style="min-height:96px;margin-top:6px" placeholder="الصق التعليقات كما هي (مع أسماء الحسابات)"></textarea></div></div>' +
     '<div class="row between" style="margin-top:6px;gap:8px;flex-wrap:wrap"><span class="muted tiny">تظهر لك الأسئلة المستخرجة قبل التحليل لتصحّح أي كلمة · يُستبعد غير الأسئلة (🔥، شكراً، تاقات) تلقائياً</span>' +
       '<span class="row" style="gap:6px"><button class="btn" data-act="egExtract" data-tip="يقرأ التعليقات ويعرضها لتراجعها وتصحّح الأسماء قبل التسجيل">🔎 استخرج وراجع</button>' +
+        '<button class="btn pri" data-act="egScreen" data-tip="الأسرع: تختار التبويب الذي فيه التعليقات، يصوّره 6 مرات (كل 3 ثوانٍ) وأنت تمرّر التعليقات، ثم يقرأ ويحلّل ويسجّل — كل ذلك بضغطة واحدة">🖥 صوّر شاشتي وسجّل</button>' +
         '<button class="btn pri" data-act="egQuick" data-tip="بضغطة واحدة: يقرأ الصور والنص، يحدد الأسئلة بأي موضوع، يستبعد المؤيدين، يكتب الردود ويسجّلها في «من يسأل الآن» — بلا مراجعة">⚡ سجّل كل شيء بضغطة</button></span></div><div id="eg_review"></div></div>';
   // يوتيوب
   var yt = d.yt || {};
@@ -6291,6 +6349,15 @@ ACT.egExtract = function (el) {
 };
 /** ⚡ ضغطة واحدة: كل شيء إلى النظام */
 function egLastAc_() { try { return localStorage.getItem('ops_eg_ac') || ''; } catch (e) { return ''; } }
+ACT.egScreen = function (el) {
+  if (!confirm('١) بعد الموافقة اختر التبويب أو النافذة التي فيها التعليقات.\n٢) لديك 5 ثوانٍ لتذهب إليها، ثم يلتقط 6 لقطات كل 3 ثوانٍ — مرّر التعليقات ببطء بينها.\n٣) يسمع صوتاً عند كل لقطة، ثم يقرأ ويسجّل وحده. تكمل؟')) return;
+  var old = el.textContent; el.disabled = true; el.textContent = '🖥 اختر النافذة…';
+  screenGrab_({ n: 6, gap: 3000, delay: 5000 }).then(function (shots) {
+    el.disabled = false; el.textContent = old; window.focus();
+    ENG.pasted = (ENG.pasted || []).concat(shots).slice(0, 10); egThumbs_();
+    var q = document.querySelector('[data-act="egQuick"]'); if (q) ACT.egQuick(q);
+  }).catch(function (e) { el.disabled = false; el.textContent = old; toast(errMsg(e) || 'أُلغي التصوير', true); });
+};
 ACT.egQuick = function (el) {
   var text = val('eg_text'), url = val('eg_url').trim();
   if (!text.trim() && !url && !ENG.pasted.length && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق لقطة (Ctrl+V) أو ارفع صوراً أو الصق رابط المنشور/النص أولاً', true);
