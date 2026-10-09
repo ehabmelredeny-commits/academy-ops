@@ -541,7 +541,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv18thz1";
+  var APP_BUILD = "mv1ejsy6";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -4605,6 +4605,7 @@ function askScanLine_(d) {
   var ago = function (v) { var t = v ? new Date(v).getTime() : 0; if (!t) return 'لم يحدث'; var m = Math.round((Date.now() - t) / 60000); return m < 60 ? 'منذ ' + m + ' د' : m < 1440 ? 'منذ ' + Math.round(m / 60) + ' س' : 'منذ ' + Math.round(m / 1440) + ' يوماً'; };
   var sc = d.last_scan || {};
   return '<div class="small muted" style="margin:2px 0 6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">🔄 آخر مسح آلي: <b>' + ago(sc.at) + '</b> (' + esc(sc.status || '—') + (sc.items !== undefined && sc.items !== '' ? ' · ' + sc.items + ' جديد' : '') + ') · آخر سؤال جديد: <b>' + ago(d.last_found) + '</b>' + (d.stale ? ' · <b>' + d.stale + '</b> أقدم من ٣ أيام' : '') +
+    (d.scan_detail ? '<details style="flex-basis:100%"><summary>ماذا حدث في آخر مسح؟ <span class="muted tiny">(' + esc(d.scan_detail.detail) + ')</span></summary>' + (d.scan_detail.per || []).map(function (x) { return '<div class="tiny">• «' + esc(x.p) + '» ← ' + (x.e ? '⚠️ ' + esc(x.e) : x.n + ' نتيجة') + '</div>'; }).join('') + '</details>' : '') +
     ' · يعمل يومياً 8 صباحاً <button class="btn sm" data-act="askScanNow" data-tip="يبحث الآن في المنصات عن أسئلة جديدة (يستعمل رصيد Claude، سنتات قليلة)">🔎 امسح الآن</button></div>';
 }
 ACT.askScanNow = function (el) { el.disabled = true; el.textContent = '⏳ يبحث…'; act('runNow', { module_key: 'ask_radar' }, function (r) { return r && r.message ? r.message : 'اكتمل المسح'; }); };
