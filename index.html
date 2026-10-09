@@ -526,6 +526,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 .btn.blue{background:#5aa9e6;color:#04121f;border:0;font-weight:700}
 .ct-bottom{display:flex;gap:6px;margin-top:8px;align-items:stretch;flex-wrap:wrap}.ct-k{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-size:11.5px;display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ct-k.grow{flex:1;min-width:200px}
 .ct-bd{margin-top:6px;font-size:12px}.ct-bd summary{cursor:pointer}.ct-tpl{display:flex;gap:6px;align-items:flex-start;margin-top:4px}.ct-tpl b{flex:0 0 74px;font-size:11.5px;padding-top:4px}.ct-tpl textarea{flex:1;min-height:42px;font-size:12px;line-height:1.5}
+#cpill{position:fixed;top:6px;inset-inline-end:8px;z-index:60}.cpill{display:inline-flex;gap:5px;align-items:center;font-size:11px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1px 9px;color:var(--ink);text-decoration:none}.cpill .d{width:8px;height:8px;border-radius:50%}
 .ct-bars{display:inline-flex;gap:3px;align-items:flex-end;height:22px;margin:0 6px}.ct-bars i{display:block;width:8px;background:#2bb673;border-radius:2px}
 </style>
 
@@ -598,6 +599,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
     opsAskKey_(false);
   });
 </script>
+  <div id="cpill"></div>
   <div id="oppbar"></div>
   <div class="wrap">
     <nav class="side" id="side"></nav>
@@ -624,13 +626,13 @@ var ICON = {
   more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>'
 };
 var NAV_MAIN = [['control', 'غرفة التحكم', 'control'], ['today', 'اليوم', 'today'], ['reply', 'الرد', 'reply'], ['dailyPost', 'منشور اليوم', 'post'], ['flow', 'المخطط', 'flow'], ['more', 'المزيد', 'more']];
-var NAV_MORE = [['monitor', '📺 مراقبة الأداء'], ['engage', '💬 التفاعل مع منشورات المنافسين'], ['supporters', '🛡 مؤيدو المنافسين'], ['health', '🩺 فحص النظام'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
+var NAV_MORE = [['engage', '💬 التفاعل مع منشورات المنافسين'], ['supporters', '🛡 مؤيدو المنافسين'], ['health', '🩺 فحص النظام'], ['ask', '🎯 من يسأل الآن'], ['register', '🔗 نموذج التسجيل'], ['payments', '💰 المدفوعات'], ['sources', 'قواعد عملاء المصادر'], ['trainers', 'المدربون'], ['calendar', 'تقويم الدورات'], ['targets', 'مشغّلو الأندية'], ['competitors', 'ملفات المنافسين'], ['search', '🔎 البحث الذكي'], ['radar', '🎯 رادار الفرص والتهديدات'], ['discovery', 'الاكتشافات'], ['news', 'الأخبار الرسمية'], ['modules', 'الوحدات'],
   ['campaigns', 'الحملات'], ['content', 'بنك الأفكار والمنشورات'], ['b2b', 'B2B'], ['alumni', 'الخرّيجون'], ['kpis', 'المؤشرات'],
   ['keywords', 'الكلمات'], ['courses', 'الدورات'], ['settings', 'الإعدادات'], ['info', 'INFO — دليل النظام']];
 
 /** شجرة الأقسام: كل قسم وفروعه (الترتيب الرسمي للنظام) — NAV_MORE يبقى قائمة مسطّحة لمن يحتاجها */
 var NAV_TREE = [
-  ['day', '⚡ عملي اليوم', ['control', 'today', 'monitor', 'inbox', 'reply', 'dailyPost', 'ask']],
+  ['day', '⚡ عملي اليوم', ['control', 'today', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
   ['search', '🔎 البحث', ['search', 'keywords']],
   ['watch', '👁 المراقبة', ['engage', 'supporters', 'compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
@@ -944,6 +946,7 @@ function poll() {
     if (p.ask_hot > (S.askHot || 0) && S.askHot !== undefined) toast('🔥 فرصة جديدة: ' + p.ask_hot + ' شخص يسأل الآن بنية عالية — افتح «من يسأل الآن»');
     S.askHot = p.ask_hot || 0;
     oppBar_(p);
+    claudePill_(p.claude);
     if (typeof healthBar_ === 'function') healthBar_(p);
     renderNav();
     if (S.sig && p.sig !== S.sig && (S.screen === 'today' || S.screen === 'reply') && !S.fresh) {
@@ -956,6 +959,12 @@ function poll() {
 ACT.reload = function () { go(S.screen, S.args); };
 ACT.leadOrigin = function (el) { act('leadOrigin', { lead_id: el.dataset.id, url: val('lo_url'), asker_url: val('lo_au'), asker_handle: val('lo_ah') }, 'حُفظ — الرابط ظاهر الآن في ملف العميل'); };
 /** شريط تنبيه الفرص في كل الصفحات: من يسأل علناً وله عرض سعر جاهز بكود — حتى لا تفوت الفرصة */
+/** شارة Claude الدائمة: 🟢 يعمل · 🔴 مفتاح ناقص/خاطئ/رصيد منتهٍ (كل ما يعتمد عليه يتلوّن بها) */
+function claudePill_(c) {
+  var el = $('cpill'); if (!el || !c) return;
+  var col = c.light === 'green' ? '#2bb673' : c.light === 'red' ? '#e5484d' : '#f5a524';
+  el.innerHTML = '<a href="#" data-go="settings" data-args=\'{"tab":"channels"}\' class="cpill" style="border-color:' + col + '" data-tip="' + esc((c.msg || '') + ' — اضغط لفتح مفتاح Claude') + '"><span class="d" style="background:' + col + '"></span>Claude: ' + esc(c.label) + '</a>';
+}
 function oppBar_(p) {
   var el = $('oppbar'); if (!el) return;
   var n = p.ask_offers || 0, h = p.ask_hot || 0;
@@ -1808,6 +1817,7 @@ ACT.postSched = function (el) {
 };
 ACT.postPub = function (el) { act('postPublished', { post_id: el.dataset.id, ref: val('pu_' + el.dataset.id) }, 'سُجّل النشر'); };
 
+ACT.claudePing = function (el) { el.disabled = true; el.textContent = '⏳ يختبر…'; api('action', 'claudePing').then(function (r) { toast(r.light === 'green' ? '✓ Claude يعمل والرصيد سليم' : '✗ ' + r.label + ' — ' + r.msg, r.light !== 'green'); go('settings', { tab: 'channels' }, true); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 ACT.secretSave = function (el) {
   var k = el.dataset.k, v = val('sk_' + k);
   if (!v && !confirm('حذف ' + k + '؟')) return;
@@ -1972,7 +1982,8 @@ SCREENS.settings = { render: function (d, args) {
     var key = function (k, label, ph, pw) { return '<div class="row" style="gap:6px;margin:4px 0"><label class="f grow">' + label + '<input id="sk_' + k + '" type="' + (pw ? 'password' : 'text') + '" placeholder="' + esc(ph || '') + '" autocomplete="off"></label>' +
       '<button class="btn sm" data-act="secretSave" data-k="' + k + '">حفظ</button></div>'; };
     html += '<div class="card" style="border-color:var(--accent)"><b>🧠 Claude (الذكاء الاصطناعي) ' + (st.claude ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">من console.anthropic.com ← API Keys ← Create key. يشغّل الردود الذكية والبحث والتحليل المكتوب. يتوقف النظام وحده عند الميزانية اليومية (إعداد claude_daily_budget_usd). يبدأ بـ sk-ant-… لا تشاركه مع أحد.</div>' +
-      key('CLAUDE_API_KEY', 'مفتاح Claude', 'sk-ant-…', true) + '</div>' +
+      key('CLAUDE_API_KEY', 'مفتاح Claude', st.claude ? '✓ محفوظ على الخادم (لا يُعرض) — الصق مفتاحاً جديداً فقط للاستبدال' : 'sk-ant-…', true) +
+      '<div class="row" style="gap:6px;margin-top:4px;align-items:center"><button class="btn sm" data-act="claudePing">🔌 اختبر الاتصال والرصيد</button><span class="tag ' + (d.claude_status && d.claude_status.light === 'green' ? 'auto' : d.claude_status && d.claude_status.light === 'red' ? 'bad' : 'warn') + '">' + (d.claude_status ? esc(d.claude_status.label) : '') + '</span></div></div>' +
       '<div class="card"><b>▶️ يوتيوب ' + (st.youtube ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">مفتاح مجاني من Google Cloud ← YouTube Data API v3 — يفعّل مراقبة تعليقات المنافسين والبحث عن السائلين.</div>' +
       key('YT_API_KEY', 'مفتاح YouTube Data API', 'AIza…', true) + '</div>' +
       '<div class="card"><b>فيسبوك ' + (st.facebook ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">للنشر على صفحة الأكاديمية فقط (رمز صفحة طويل الأمد + معرّف الصفحة).</div>' +
@@ -4959,6 +4970,19 @@ SCREENS.compwatch = { render: function (d, args) {
     return '<button class="btn sm' + (d.days === t[0] ? ' pri' : '') + '" data-go="compwatch" data-args="' + attr({ days: t[0] }) + '">' + t[1] + '</button>'; }).join('') + '</div>';
   html += '<div class="row">' + [[c.changes, 'تغيير سعر'], [c.offers, 'عرض جديد'], [c.cheaper, 'أرخص منا'], [c.news, 'خبر عنهم'], [c.accounts, 'حساب لم تراجعه']].map(function (x) {
     return '<div class="stat"><div class="v">' + x[0] + '</div><div class="k">' + x[1] + '</div></div>'; }).join('') + '</div>';
+  var cv = d.coverage;
+  if (cv) {
+    html += '<div class="card" style="margin-top:6px"><div class="row between" style="gap:6px;flex-wrap:wrap;align-items:center"><b>🔎 رصد المنافسين <span class="muted tiny">— هل نراهم فعلاً؟ (' + cv.list.length + ' منافساً)</span></b><span class="row" style="gap:4px;flex-wrap:wrap">' +
+      chip('🟢 ' + cv.counts.ok + ' مرصود', 'good') + chip('🟠 ' + cv.counts.warn + ' بلا عروض ظاهرة', 'warn') + chip('🔴 ' + cv.counts.bad + ' بلا رصد', 'bad') +
+      '<button class="btn sm pri" data-act="cmpCapture" data-tip="المنصات (انستغرام/تيك توك/سناب) تمنع الرصد الآلي: خذ لقطة للإعلان أو الصق رابطه ونصه، والنظام يقرأ السعر والعرض ويسجّله باسم المنافس">📸 أضف إعلاناً رأيته</button></span></div>' +
+      stripList_([
+        ['المنافس', 'minmax(150px,1.6fr)', function (x) { return '<b>' + esc(String(x.name).split(/\s[—–-]\s/)[0]) + '</b>'; }],
+        ['الحالة', 'minmax(200px,2.4fr)', function (x) { return '<span class="d ' + (x.state === 'ok' ? 'g' : x.state === 'warn' ? 'o' : 'r') + '"></span> <span class="muted tiny">' + esc(x.why) + '</span>'; }],
+        ['عروض', '52px', function (x) { return x.offers; }], ['جديد', '52px', function (x) { return x.fresh || ''; }], ['تغيّر سعر', '64px', function (x) { return x.changes ? '<b>' + x.changes + '</b>' : ''; }],
+        ['حساباته', 'minmax(100px,1fr)', function (x) { return x.platforms.length ? '<span class="muted tiny">' + x.platforms.map(esc).join('، ') + '</span>' : '<span class="muted tiny">—</span>'; }],
+        ['', '150px', function (x) { return '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(x.ad_url) + '" data-tip="مكتبة إعلانات ميتا (مجانية): كل إعلان نشط لهذا المنافس على انستغرام وفيسبوك">📢 إعلاناته</a> <button class="btn sm" data-act="cmpCapture" data-id="' + esc(x.ac_id) + '">📸 أضف</button>'; }]
+      ], cv.list) + '</div>';
+  }
   html += '<div class="muted small">المصدر: ' + '⚙️ الرادار الآلي (يومياً من مواقعهم، مجاناً) + أخبارهم من Bing + ' + 'ما تسجّله يدوياً في <a href="#" data-go="competitors">ملفات المنافسين</a> و<a href="#" data-go="manual">البحث اليدوي</a>.</div>';
   // ربط بالخط الزمني: كل عرض يفتح صفّه هناك مباشرة (التفاصيل + الساعات + النوع + تغيّر السعر)
   var tl = function (x) { if (!x.offer_id) return ''; var y = new Date(x.start || x.at).getFullYear() || new Date().getFullYear();
@@ -4967,10 +4991,10 @@ SCREENS.compwatch = { render: function (d, args) {
   var link = function (u) { return extUrl(u) ? ' <a target="_blank" rel="noopener" href="' + esc(extUrl(u)) + '">↗</a>' : ''; };
   html += section('💲 تغييرات الأسعار', d.price_changes, function (x) {
     return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + tl(x) + meta(x) + '<div>' + chip(x.delta < 0 ? '🔻 خفّض ' + Math.abs(x.delta) : '🔺 رفع ' + x.delta, x.delta < 0 ? 'bad' : 'good') +
-      ' ' + x.old_price + ' ← <b>' + x.price + '</b> ر.س <span class="muted">' + fmtDate(x.at) + '</span></div>' +
+      ' ' + x.old_price + ' ← <b>' + x.price + '</b> ر.س ' + (x.note ? chip('💱 ' + x.note, 'warn') + ' ' : '') + '<span class="muted">' + fmtDate(x.at) + '</span></div>' +
       (x.delta < 0 ? '<div class="muted">🧠 خفض السعر عند المنافس = لا تخفض سعرك فوراً؛ أبرز قيمتك (الاعتماد، الساعات العملية، الدعم) في ردودك هذا الأسبوع.</div>' : '') + '</div>'; }, 'لا تغييرات أسعار في هذه الفترة');
   html += section('🆕 عروض ودورات جديدة', d.offers_new, function (x) {
-    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + tl(x) + '<div class="chips">' + meta(x) + (x.price ? chip(x.price + ' ر.س', 'acc') : '') + chip(x.platform) + chip(x.type) + (x.course_type ? '' : chip(x.delivery)) +
+    return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '»' + link(x.url) + tl(x) + '<div class="chips">' + meta(x) + (x.price ? chip(x.price + ' ر.س', 'acc') : '') + (x.note ? chip('💱 ' + x.note, 'warn') : '') + chip(x.platform) + chip(x.type) + (x.course_type ? '' : chip(x.delivery)) +
       (x.end_date ? chip('ينتهي ' + fmtDate(x.end_date), 'warn') : '') + ' <span class="muted">' + fmtDate(x.at) + '</span></div></div>'; }, 'لا عروض جديدة في هذه الفترة');
   html += section('⚠️ أرخص منا', d.cheaper_than_us, function (x) {
     return '<div class="card small"><b>' + esc(x.entity) + '</b> · «' + esc(x.course) + '» بـ <b>' + x.price + '</b> مقابل دورتنا «' + esc(x.our_course) + '» بـ ' + x.ours + ' ر.س' + link(x.url) + tl(x) + meta(x) +
@@ -4982,6 +5006,27 @@ SCREENS.compwatch = { render: function (d, args) {
       (extUrl(x.url) ? '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(x.url)) + '">افتح ↗</a>' : '') + '</div>'; }, 'كل الحسابات المراقَبة روجعت');
   return html;
 } };
+ACT.cmpCapture = function (el) {
+  var opts = (CW_COVER() || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (x.ac_id === el.dataset.id ? ' selected' : '') + '>' + esc(String(x.name).split(/\s[—–-]\s/)[0]) + '</option>'; }).join('');
+  openSheet('<h3 style="margin:0 0 6px">📸 أضف إعلاناً رأيته</h3><div class="muted tiny" style="margin-bottom:6px">أعطِ النظام ما رأيته: رابط الإعلان، ولقطة شاشة (أو الصق نصه). يقرأ السعر والموعد والعملة ويسجّله باسم المنافس.</div>' +
+    '<label class="f">المنافس</label><select id="cc_ac">' + opts + '</select>' +
+    '<label class="f">رابط الإعلان / المنشور (اختياري لكنه يفتح لاحقاً)</label><input id="cc_url" dir="ltr" placeholder="https://www.instagram.com/p/…">' +
+    '<label class="f">لقطة الشاشة (يمكن أكثر من صورة)</label><input id="cc_img" type="file" accept="image/*" multiple>' +
+    '<label class="f">أو الصق نص الإعلان</label><textarea id="cc_txt" style="min-height:70px" placeholder="مثال: دورة المدرب الشخصي … السعر 400 دولار … تبدأ 20 أكتوبر"></textarea>' +
+    '<div class="btns"><button class="btn pri" data-act="cmpCaptureGo">🔎 اقرأ وسجّل</button></div><div id="cc_res"></div>');
+};
+function CW_COVER() { return (S.data && S.data.coverage && S.data.coverage.list) || []; }
+ACT.cmpCaptureGo = function (el) {
+  var files = $('cc_img').files ? Array.prototype.slice.call($('cc_img').files, 0, 6) : [];
+  if (!files.length && !val('cc_txt').trim()) return toast('ارفع لقطة أو الصق نص الإعلان', true);
+  el.disabled = true; el.textContent = '⏳ يقرأ…';
+  Promise.all(files.map(function (f) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok({ data: String(r.result).split(',')[1], mime: f.type }); }; r.readAsDataURL(f); }); }))
+    .then(function (imgs) { return api('action', 'compCapture', { ac_id: val('cc_ac'), url: val('cc_url'), text: val('cc_txt'), images: imgs }); })
+    .then(function (r) { el.disabled = false; el.textContent = '🔎 اقرأ وسجّل';
+      $('cc_res').innerHTML = r.added ? '<div class="card small" style="margin-top:6px">✓ سُجّل <b>' + r.added + '</b> عرض:' + r.rows.map(function (x) { return '<div>• ' + esc(x.headline) + (x.price ? ' — <b>' + esc(x.price) + '</b> ' + esc(x.currency || 'ر.س') : '') + (x.note ? ' <span class="muted">(' + esc(x.note) + ')</span>' : '') + '</div>'; }).join('') + '</div>' : empty(r.message || 'لا جديد');
+      if (r.added) setTimeout(function () { go('compwatch', S.args, true); }, 1800); })
+    .catch(function (e) { el.disabled = false; el.textContent = '🔎 اقرأ وسجّل'; toast(errMsg(e), true); });
+};
 </script>
 
   <script>
