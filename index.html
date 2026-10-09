@@ -530,6 +530,10 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 .ct-bd{margin-top:6px;font-size:12px}.ct-bd summary{cursor:pointer}.ct-tpl{display:flex;gap:6px;align-items:flex-start;margin-top:4px}.ct-tpl b{flex:0 0 74px;font-size:11.5px;padding-top:4px}.ct-tpl textarea{flex:1;min-height:42px;font-size:12px;line-height:1.5}
 #cpill{position:fixed;top:6px;inset-inline-end:8px;z-index:60}.cpill{display:inline-flex;gap:5px;align-items:center;font-size:11px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1px 9px;color:var(--ink);text-decoration:none}.cpill .d{width:8px;height:8px;border-radius:50%}
 .vbar{position:sticky;top:0;z-index:80;background:#1d4ed8;color:#fff;text-align:center;padding:5px 10px;font-size:13px}.vbar a{color:#fff;text-decoration:underline;font-weight:700}
+.pf{display:flex;margin:6px 0 4px}.pf-st{flex:1;position:relative;padding:5px 9px;background:var(--card);border:1px solid var(--line);margin-inline-start:-1px;font-size:12px}.pf-st b{font-size:16px}
+.pf-arr{position:absolute;inset-inline-start:-15px;top:50%;transform:translateY(-50%);z-index:2;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 6px;font-size:10.5px;color:#2bb673;font-weight:700}.pf-arr.bad{color:#e5484d}
+.pf-bar{height:5px;border-radius:3px;background:var(--soft);margin-top:3px;overflow:hidden}.pf-bar i{display:block;height:100%}.pf-b{flex:0 0 80px;height:7px;background:var(--soft);border-radius:4px;overflow:hidden}.pf-b i{display:block;height:100%}
+.kc-late{border-color:#e5484d!important;background:rgba(229,72,77,.06)}
 .ct-bars{display:inline-flex;gap:3px;align-items:flex-end;height:22px;margin:0 6px}.ct-bars i{display:block;width:8px;background:#2bb673;border-radius:2px}
 </style>
 
@@ -537,7 +541,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv18dsgb";
+  var APP_BUILD = "mv18thz1";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -4905,27 +4909,70 @@ SCREENS.pipeline = { render: function (d) {
   html += '<div class="tabs">' + [['board', 'لوحة المراحل'], ['psych', '🧠 دليل علم النفس للتقفيل']].map(function (t) {
     return '<button class="btn sm' + (PIPE.tab === t[0] ? ' pri' : '') + '" data-act="pipeTab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('') + '</div>';
   if (PIPE.tab === 'psych') return html + pipePsychGuide_(d);
-  html += '<div class="row" style="margin-bottom:6px"><input type="text" id="pipe_q" class="grow" placeholder="🔍 ابحث بالاسم، الجوال، النمط، الاعتراض، الدورة…" value="' + esc(PIPE.f) + '">' +
-    '<span class="muted small">اسحب البطاقة بين الأعمدة لتغيير المرحلة · اضغطها لفتح ملف العميل وعلم النفس</span></div>';
+  var fl = d.flt || {};
+  html += '<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:6px;align-items:center"><input type="text" id="pipe_q" class="grow" style="min-width:180px" placeholder="🔍 ابحث بالاسم، الجوال، النمط، الاعتراض، الدورة…" value="' + esc(PIPE.f) + '">' +
+    '<select id="pf_days">' + [[7, 'آخر 7 أيام'], [30, 'آخر 30 يوماً'], [90, 'آخر 90 يوماً']].map(function (x) { return '<option value="' + x[0] + '"' + (d.days === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>' +
+    '<select id="pf_course"><option value="">كل الدورات</option>' + (d.courses || []).map(function (c) { return '<option' + (fl.course === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    '<select id="pf_src"><option value="">كل المصادر</option>' + (d.sources_list || []).map(function (c) { return '<option' + (fl.source === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    '<span class="muted tiny">اسحب البطاقة بين الأعمدة · اضغطها لفتح الملف</span></div>';
+  html += pipeFunnelHtml_(d.funnel, d.insight);
   html += '<div class="card small" style="border-color:#2a9d8f;background:#eef9f6">⚙️ <b>آلي — كود الخصم الشخصي:</b> يصدر وحده لمن يسأل عن السعر (واتساب: يُرسل فوراً · المنصات العامة: جاهز بضغطة)، ' +
     'يذكّر العميل حين يبقى ١٢ ساعة ثم قبل الانتهاء بساعة، وينتهي بعد ٢٤ ساعة. أكواد نشطة الآن: <b>' + (d.codes_active || 0) + '</b>' +
     ' · <a href="#" data-act="codeCheck">🔎 تحقق من كود عند التسجيل</a></div>';
   html += '<div class="kanban">' + d.stages.map(function (s) {
-    var list = d.rows.filter(function (r) { return r.status === s; });
+    var list = d.rows.filter(function (r) { return r.status === s; }), st = (d.funnel.stages || []).filter(function (x) { return x.name === s; })[0];
     return '<div class="kcol" data-stage="' + esc(s) + '"><h3><span><span style="display:inline-block;width:9px;height:9px;border-radius:3px;background:' + (PIPE_COLORS[s] || '#888') + '"></span> ' + esc(s) + '</span>' + chip(list.length) + '</h3>' +
       list.map(function (r) {
         var hay = [r.name, r.phone, r.psych_type, r.objection, r.course, r.source, r.step].join(' ');
-        return '<div class="card click kcard" draggable="true" data-id="' + esc(r.lead_id) + '" data-hay="' + esc(hay) + '" data-go="lead" data-args="' + attr({ lead_id: r.lead_id }) + '" style="border-inline-start:4px solid ' + (PIPE_COLORS[s] || '#888') + '">' +
-          '<div class="row between"><b>' + esc(r.name) + '</b>' + (r.overdue ? chip('⏰ مستحقة', 'bad') : '') + '</div>' +
-          '<div class="chips">' + chip('🧠 ' + r.psych_type, 'acc') + (r.objection ? chip('✋ ' + r.objection, 'warn') : '') + (r.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + (r.code ? chip('⚙️ 🎟 ' + r.code + ' · ' + r.code_price + ' ر.س · باقي ' + r.code_left_h + ' س', r.code_left_h <= 1 ? 'bad' : 'warn') : '') + '</div>' +
-          (r.course ? '<div class="muted small">' + esc(r.course) + '</div>' : '') +
-          (r.post_url || r.profile_url ? '<div class="chips">' + (r.post_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(r.post_url) + '" onclick="event.stopPropagation()">📝 منشوره ↗</a>' : '') + (r.profile_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(r.profile_url) + '" onclick="event.stopPropagation()">👤 ' + esc(r.handle || 'ملفه') + ' ↗</a>' : '') + '</div>' : '') +
-          (r.dormant_hint ? '<div class="small" style="background:var(--warn-soft);border-radius:6px;padding:2px 6px">⚠️ بلا رد منذ ' + r.dormant_hint + ' يوماً — <a href="#" data-act="leadDormant" data-id="' + esc(r.lead_id) + '">⏸ اجعله خاملاً</a></div>' : '') +
+        return '<div class="card click kcard' + (r.late || r.overdue ? ' kc-late' : '') + '" draggable="true" data-id="' + esc(r.lead_id) + '" data-hay="' + esc(hay) + '" data-go="lead" data-args="' + attr({ lead_id: r.lead_id }) + '" style="border-inline-start:4px solid ' + (PIPE_COLORS[r.status] || '#888') + '">' +
+          '<div class="row between"><b>' + esc(r.name) + '</b>' + (r.late ? '<span class="tag bad">⏰ ' + esc(r.late) + '</span>' : r.overdue ? '<span class="tag bad">⏰ مستحقة</span>' : '') + '</div>' +
+          '<div class="chips">' + chip('🧠 ' + r.psych_type, 'acc') + (r.objection ? chip('✋ ' + r.objection, 'warn') : '') + (r.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + (r.code ? chip('🎟 ' + r.code + (r.code_left_h !== undefined ? ' · ' + r.code_left_h + ' س' : ''), 'warn') : '') + '</div>' +
+          (r.course ? '<div class="muted small">' + esc(r.course) + (r.age_h !== null && r.age_h !== undefined ? ' · في المرحلة ' + (r.age_h >= 48 ? Math.round(r.age_h / 24) + ' يوماً' : Math.round(r.age_h) + ' س') : '') + '</div>' : (r.age_h !== null && r.age_h !== undefined ? '<div class="muted small">في المرحلة ' + (r.age_h >= 48 ? Math.round(r.age_h / 24) + ' يوماً' : Math.round(r.age_h) + ' س') + '</div>' : '')) +
+          (r.post_url || r.profile_url ? '<div class="chips">' + (r.post_url ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(r.post_url) + '" onclick="event.stopPropagation()">📝 منشوره ↗</a>' : '') + (r.profile_url ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(r.profile_url) + '" onclick="event.stopPropagation()">👤 ↗</a>' : '') + '</div>' : '') +
+          (r.dormant_hint ? '<div class="small" style="background:var(--warn-soft);border-radius:6px;padding:2px 6px">⚠️ بلا رد منذ ' + r.dormant_hint + ' يوماً — <a href="#" data-act="leadDormant" data-id="' + esc(r.lead_id) + '" onclick="event.stopPropagation()">انقله «خامل»</a></div>' : '') +
           '<div class="small">➡️ ' + esc(r.step) + (r.due ? ' <span class="muted">· ' + fmtDate(r.due, true) + '</span>' : '') + '</div></div>';
       }).join('') + '</div>';
   }).join('') + '</div>';
+  html += pipeBottom_(d.funnel);
   return html;
 }, after: function () { pipeFilter_(); } };
+/** قمع التحويل: كم وصل لكل مرحلة، نسبة الانتقال للتالية، زمن البقاء، وأكبر تسرّب (من العقل) */
+function pipeFunnelHtml_(f, ins) {
+  if (!f || !f.n) return '<div class="card small muted">🧠 لا عملاء في هذه الفترة بعد — يظهر القمع عند وصول أول العملاء</div>';
+  var h = '<div class="pf">' + f.stages.map(function (s, i) {
+    var w = f.stages[0].n ? Math.max(4, Math.round(100 * s.n / f.stages[0].n)) : 4;
+    return '<div class="pf-st"' + (s.samples ? ' data-tip="متوسط البقاء في هذه المرحلة محسوب من ' + s.samples + ' انتقال فعلي"' : ' data-tip="لا سجل انتقالات كافٍ بعد لحساب زمن البقاء"') + '>' +
+      (i ? '<span class="pf-arr' + (s.conv !== null && s.conv < 40 ? ' bad' : '') + '">' + (s.conv === null ? '—' : s.conv + '%') + ' ←</span>' : '') +
+      '<b>' + s.n + '</b> ' + esc(s.name) + (s.hours !== null ? '<span class="muted tiny"> · ' + (s.hours >= 48 ? Math.round(s.hours / 24) + ' يوم' : s.hours + ' س') + '</span>' : '') +
+      '<div class="pf-bar"><i style="width:' + w + '%;background:' + (PIPE_COLORS[s.name] || '#888') + '"></i></div></div>';
+  }).join('') + '</div>';
+  var lines = (ins || []).map(function (x) { return '<div class="small">' + esc(x.icon) + ' ' + esc(x.text) + '</div>'; }).join('');
+  return h + (lines || '<div class="small muted">🧠 العقل يتعلّم: يحتاج ' + 5 + ' عملاء على الأقل في المرحلة ليحدد أكبر تسرّب</div>') + (f.note ? '<div class="muted tiny" style="margin-top:2px">ℹ️ ' + esc(f.note) + '</div>' : '');
+}
+function pipeBottom_(f) {
+  if (!f || !f.n) return '';
+  var mx = Math.max.apply(null, (f.lost || []).map(function (x) { return x.n; }).concat([1]));
+  var lost = (f.lost || []).slice(0, 6).map(function (x) { return '<div class="ct-ev"><span class="ct-tx">' + esc(x.reason) + '</span><span class="pf-b"><i style="width:' + Math.round(100 * x.n / mx) + '%;background:#e5484d"></i></span><b>' + x.n + '</b></div>'; }).join('') || '<div class="muted small">لا خسائر في هذه الفترة</div>';
+  var src = (f.sources || []).slice(0, 6).map(function (x) { return '<div class="ct-ev"><span class="ct-tx">' + esc(x.src) + (x.low ? ' <span class="muted tiny">(عيّنة صغيرة)</span>' : '') + '</span><span class="pf-b"><i style="width:' + Math.max(3, x.rate) + '%;background:#2bb673"></i></span><b>' + x.rate + '%</b><span class="muted tiny">' + x.reg + '/' + x.n + '</span></div>'; }).join('');
+  return '<div class="ct-grid" style="grid-template-columns:1fr 1fr;margin-top:8px"><div class="card"><b>🏷️ لماذا نخسر؟</b> <span class="muted tiny">— السبب إلزامي عند «مفقود»</span>' + lost + '</div>' +
+    '<div class="card"><b>📊 من أين يأتي الأفضل؟</b> <span class="muted tiny">— نسبة التسجيل حسب المصدر</span>' + src + '</div></div>';
+}
+document.addEventListener('change', function (e) {
+  if (!e.target || ['pf_days', 'pf_course', 'pf_src'].indexOf(e.target.id) < 0) return;
+  go('pipeline', { days: Number(val('pf_days')), course: val('pf_course'), source: val('pf_src') });
+});
+/** نقل إلى «مفقود»: يلزم سبب الخسارة (يتعلّم منه العقل) */
+function pipeLostModal_(lead, then) {
+  window.__pl = { lead: lead, then: then };
+  openSheet('<h3 style="margin:0 0 6px">🏷️ لماذا خسرنا «' + esc(lead.name) + '»؟</h3><div class="muted tiny" style="margin-bottom:6px">اختر السبب الأقرب — يستعمله العقل ليقترح كيف نخسر أقل.</div>' +
+    '<div class="chips">' + (PIPE.data.lost_reasons || []).map(function (r) { return '<button class="btn" data-act="plLost" data-r="' + esc(r) + '">' + esc(r) + '</button>'; }).join('') + '</div>' +
+    '<div class="btns"><button class="btn" data-act="closeSheet">إلغاء (يبقى في مكانه)</button></div>');
+}
+ACT.plLost = function (el) {
+  var p = window.__pl || {}; if (!p.lead) return;
+  api('action', 'leadStage', { lead_id: p.lead.lead_id, status: 'مفقود', reason: el.dataset.r }).then(function () { toast('«' + p.lead.name + '» ← مفقود (' + el.dataset.r + ')'); var c = $('sheet'); if (c) c.remove(); go('pipeline', PIPE.data ? { days: PIPE.data.days, course: PIPE.data.flt.course, source: PIPE.data.flt.source } : {}, true); })
+    .catch(function (e2) { toast(errMsg(e2), true); });
+};
 ACT.codeCheck = function () {
   openSheet('<h1>🔎 تحقق من كود خصم</h1><input type="text" id="cc_code" placeholder="AO-XXXX" style="direction:ltr"><div class="btns"><button class="btn pri" data-act="codeCheckGo">تحقق</button></div><div id="cc_out"></div>');
 };
@@ -4962,7 +5009,8 @@ document.addEventListener('drop', function (e) {
   e.preventDefault(); k.classList.remove('drop');
   var p = String(e.dataTransfer.getData('text/plain') || '').split('|'); if (p[0] !== 'lead') return;
   var r = PIPE.data.rows.filter(function (x) { return x.lead_id === p[1]; })[0]; if (!r || r.status === k.dataset.stage) return;
-  api('action', 'leadStage', { lead_id: p[1], status: k.dataset.stage }).then(function () { toast('«' + r.name + '» ← ' + k.dataset.stage); go('pipeline', {}, true); })
+  if (k.dataset.stage === 'مفقود') return pipeLostModal_(r);
+  api('action', 'leadStage', { lead_id: p[1], status: k.dataset.stage }).then(function () { toast('«' + r.name + '» ← ' + k.dataset.stage); go('pipeline', { days: PIPE.data.days, course: PIPE.data.flt.course, source: PIPE.data.flt.source }, true); })
     .catch(function (e2) { toast(errMsg(e2), true); });
 });
 
