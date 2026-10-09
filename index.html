@@ -534,6 +534,10 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 .pf-arr{position:absolute;inset-inline-start:-15px;top:50%;transform:translateY(-50%);z-index:2;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 6px;font-size:10.5px;color:#2bb673;font-weight:700}.pf-arr.bad{color:#e5484d}
 .pf-bar{height:5px;border-radius:3px;background:var(--soft);margin-top:3px;overflow:hidden}.pf-bar i{display:block;height:100%}.pf-b{flex:0 0 80px;height:7px;background:var(--soft);border-radius:4px;overflow:hidden}.pf-b i{display:block;height:100%}
 .kc-late{border-color:#e5484d!important;background:rgba(229,72,77,.06)}
+.st-hd{display:flex;align-items:center;gap:8px;cursor:pointer;flex-wrap:wrap}.st-hd b{font-size:13.5px}
+.st-th,.st-tr{display:grid;grid-template-columns:2.6fr 92px 90px 82px 76px 70px 64px 86px 28px;gap:6px;align-items:center;padding:3px 6px}.st-th{color:var(--muted);font-size:10.5px;border-bottom:1px solid var(--line);margin-top:6px}.st-tr{border-bottom:1px solid var(--line);font-size:11.5px}.st-tr.off{opacity:.55}.st-n{overflow:hidden;text-overflow:ellipsis}.old{text-decoration:line-through;color:var(--muted)}
+.st-wo{display:grid;grid-template-columns:1.2fr 2fr auto;gap:8px;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+@media(max-width:900px){.st-th{display:none}.st-tr,.st-wo{grid-template-columns:1fr 1fr}}
 .ct-bars{display:inline-flex;gap:3px;align-items:flex-end;height:22px;margin:0 6px}.ct-bars i{display:block;width:8px;background:#2bb673;border-radius:2px}
 </style>
 
@@ -541,7 +545,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv1jkqhi";
+  var APP_BUILD = "mv1juf42";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -643,7 +647,7 @@ var NAV_TREE = [
   ['day', '⚡ عملي اليوم', ['control', 'today', 'inbox', 'reply', 'dailyPost', 'ask']],
   ['news', '📰 الأخبار', ['news', 'discovery']],
   ['search', '🔎 البحث', ['search', 'keywords']],
-  ['watch', '👁 المراقبة', ['engage', 'supporters', 'compwatch', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
+  ['watch', '👁 المراقبة', ['engage', 'supporters', 'compwatch', 'storecourses', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
   ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
@@ -651,7 +655,7 @@ var NAV_TREE = [
   ['sys', '⚙️ النظام', ['health', 'automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
 NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
-NAV_MORE.push(['members', '🪪 العضويات والإحالات'], ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
+NAV_MORE.push(['storecourses', '🛒 دورات المنافسين بمواقع الدفع'], ['members', '🪪 العضويات والإحالات'], ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 function navLabel_(k) {
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
   return f ? f[1] : '';
@@ -5570,6 +5574,7 @@ var PAGE_INFO = {
       ['ابحث عن مدربين', 'يفتح فئة «استقطاب مدربين» في صفحة البحث.', 'مصدر منهجي لمدربين جدد.'],
       ['تواصلت معه / ردّ', 'تسجّل التواصل الفردي المهني.', 'متابعة العلاقة.'],
       ['لا تراسل / احذف', 'احترام طلبه — حذف فعلي عند الطلب.', 'امتثال لحماية البيانات وسمعة الأكاديمية.']] },
+  storecourses: { t: '🛒 دورات المنافسين بمواقع الدفع', what: 'كل دورات كل منافس كما تُعرض في صفحة الشراء نفسها: السعر، البداية، حضوري/عن بعد، رجال/نساء، المدينة، الساعات وعملي/نظري — ومعها ما تعلّمه العقل من السوق.', why: 'سعر صفحة الدفع هو السعر الحقيقي (لا الإعلان). ومنه نبني متجرنا وأسعارنا ونتجنب أخطاء المنافسين.', btns: [['🔄 اقرأ المتاجر الآن', 'يقرأ المتاجر المسموحة لخوادم جوجل؛ ما تحجبه المواقع يُقرأ بالجامع المحلي من جهازك.', 'مجاني.'], ['حفظ (رابط الشراء)', 'للمنافس الذي لا نقرأ متجره: ضع رابط صفحة الدورات فيُقرأ.', 'يدوي.']] },
   members: { t: '🪪 العضويات والإحالات', what: 'أعضاء الأكاديمية الذين وقّعوا الموافقة، وأرقام عضوياتهم، ومن أحضروه، وكلفة الخصومات مقابل العائد.', why: 'الإحالة بتوصية شخصية أرخص وأقوى قناة إقناع — وهنا تقيس هل تربح منها فعلاً.', btns: [['📤 أرسل البطاقة', 'ينسخ نص البطاقة (الاسم والرقم والجملة) لترسله بنفسك.', 'يدوي بموافقتك.'], ['تسجيل ودفع ←', 'من ملف العميل: عند تسجيل دفعه يصدر رقم عضويته إن وقّع الموافقة.', 'الخصم يُحسب تلقائياً دون النزول عن الحد الأدنى.']] },
   control: { t: '🎛 غرفة التحكم', what: 'الصفحة الأم: كل ما يحدث الآن في شريط واحد لكل حدث، تردّ وتقرّر من البطاقة نفسها، وشريط الصفحات بأضوائها، وما ينتظر قرارك، وما يقوله العقل، والقادم اليوم.', why: 'تفتحها أول الدوام وتعمل منها — لا تتنقل بين الصفحات إلا للتفاصيل.', btns: [['📤 أرسل الرد', 'ينسخ الرد ويفتح المنشور — تلصق وترسل (يدوي: المنصات تمنع الرد الآلي).', 'ثم «تم الرد ✓».'], ['يحتاجني', 'يعرض فقط ما له زر تنفيذ ينتظرك.', 'تركيز.'], ['🔔 الصوت', 'صوت قصير عند وصول عاجل جديد فقط.', 'لا إزعاج.']] },
   health: { t: '🩺 فحص النظام', what: 'النظام يفحص نفسه وحده يومياً 5:30 فجراً: التشغيل الآلي، الحصة، الوحدات، المفاتيح، روابط الدفع والتسجيل، وأخطاء البيانات (دورات مكررة، بلا حد أدنى، بلا موعد).', why: 'تعرف ما يُضيّع العملاء قبل أن تبدأ يومك — والعاجل يصلك ببريد فوري.', btns: [['↻ افحص الآن', 'يشغّل الفحص فوراً بدل انتظار الصباح.', 'تتأكد بعد أي إصلاح.']] },
@@ -6625,6 +6630,77 @@ ACT.memCard = function (el) {
   copyText('مبروك ' + (m.name || '') + '! رقم عضويتك في مجتمع الأكاديمية: ' + m.member_no + (pitch ? '\n' + pitch : ''));
   toast('نُسخ نص البطاقة — أرسله بنفسك (واتساب مثلاً)');
 };
+</script>
+
+  <script>
+/* ═══════════ 🛒 دورات المنافسين بمواقع الدفع (التصميم المعتمد 2026-10-10) — من صفحة الشراء نفسها فقط ═══════════ */
+var ST = { data: null, open: null, f: { q: '', deliv: '', gender: '', city: '', other: false } };
+function stFilter_(c) {
+  var f = ST.f; if (c.kind === 'منتج آخر' && !f.other) return false;
+  if (f.deliv && c.delivery !== f.deliv) return false;
+  if (f.gender && c.gender !== f.gender) return false;
+  if (f.city && c.city !== f.city) return false;
+  if (f.q) { var n = typeof normAr_ === 'function' ? normAr_ : function (x) { return String(x || '').toLowerCase(); }; if (n(c.name + ' ' + c.brand).indexOf(n(f.q)) < 0) return false; }
+  return true;
+}
+function stAgo_(v) { var t = v ? new Date(v).getTime() : 0; if (!t) return 'لم تُقرأ'; var m = Math.round((Date.now() - t) / 60000); return m < 60 ? 'منذ ' + m + ' د' : m < 1440 ? 'منذ ' + Math.round(m / 60) + ' س' : 'منذ ' + Math.round(m / 1440) + ' يوماً'; }
+function stMoney_(c) {
+  if (!c.price) return '<span class="muted">غير معلن</span>';
+  var main = c.sar ? '<b>' + c.sar.toLocaleString('en') + '</b> ر.س' : '<b>' + Number(c.price).toLocaleString('en') + '</b> ' + esc(c.currency);
+  return main + (c.currency !== 'SAR' && c.sar ? '<div class="muted tiny">≈ ' + Number(c.price).toLocaleString('en') + ' ' + esc(c.currency) + '</div>' : '') + (c.prev && Number(c.prev) !== Number(c.price) ? '<div class="old tiny">' + Number(c.prev).toLocaleString('en') + '</div>' : '');
+}
+function stRows_(g) {
+  var list = g.courses.filter(stFilter_);
+  if (!list.length) return '<div class="muted small" style="padding:6px">لا دورات تطابق الفلاتر هنا</div>';
+  return '<div class="st-th"><span>الدورة</span><span>السعر</span><span>البداية</span><span>الطريقة</span><span>الفئة</span><span>المدينة</span><span>الساعات</span><span>عملي / نظري</span><span></span></div>' + list.map(function (c) {
+    return '<div class="st-tr' + (c.available ? '' : ' off') + '"><span class="st-n" data-tip="' + esc(c.desc || c.name) + '"><b>' + esc(c.name) + '</b>' + (c.brand ? ' <span class="tag">' + esc(c.brand) + '</span>' : '') + (c.is_new ? ' <span class="tag auto">جديد</span>' : '') + (c.kind && c.kind !== 'دورة' ? ' <span class="tag">' + esc(c.kind) + '</span>' : '') + (!c.available ? ' <span class="tag bad">غير متاح</span>' : '') + '</span>' +
+      '<span>' + stMoney_(c) + '</span><span>' + (c.start ? esc(fmtDate(c.start)) : '<span class="muted">—</span>') + '</span><span>' + (esc(c.delivery) || '<span class="muted">—</span>') + '</span><span>' + (esc(c.gender) || 'للجميع') + '</span>' +
+      '<span>' + (esc(c.city) || '<span class="muted">—</span>') + '</span><span>' + (c.hours ? esc(c.hours) + ' س' : '<span class="muted">—</span>') + '</span><span>' + (c.practical || c.theory ? esc(c.practical || '؟') + ' / ' + esc(c.theory || '؟') : '<span class="muted">—</span>') + '</span>' +
+      '<span>' + (extUrl(c.url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(c.url)) + '" data-tip="صفحة الشراء">↗</a>' : '') + '</span></div>';
+  }).join('');
+}
+function stMarket_(d) {
+  var m = d.market; if (!m || !m.ready) return '<div class="card small muted">🧠 دراسة السوق: ' + esc((m && m.note) || 'تحتاج دورات مقروءة أكثر') + '</div>';
+  var bands = (m.bands || []).map(function (b) { return '<div class="ct-ev"><span class="ct-tx"><b>' + esc(b.family) + '</b> <span class="muted tiny">(' + b.n + ' دورة)</span></span><span class="tag">' + b.min.toLocaleString('en') + ' – ' + b.max.toLocaleString('en') + '</span><span>الوسيط <b>' + b.med.toLocaleString('en') + '</b></span>' + (b.ours ? '<span class="tag ' + (b.pos === 'قرب الوسيط' ? 'auto' : 'warn') + '">سعرنا ' + b.ours.toLocaleString('en') + ' — ' + esc(b.pos) + '</span>' : '') + '</div>'; }).join('');
+  var dl = m.delivery || {}, tot = m.n || 1, mix = Object.keys(dl).filter(function (k) { return dl[k]; }).map(function (k) { return '<span class="tag">' + esc(k) + ' ' + Math.round(100 * dl[k] / tot) + '%</span>'; }).join(' ');
+  var mis = (m.mistakes || []).map(function (x) { return '<div class="small" style="margin:2px 0">⚠️ <b>' + esc(x.who) + ':</b> ' + esc(x.text) + ' <span class="muted">← ' + esc(x.fix) + '</span></div>'; }).join('') || '<div class="muted small">لا أخطاء ظاهرة</div>';
+  var tips = (m.tips || []).map(function (t) { return '<div class="small" style="margin:2px 0">💡 ' + esc(t) + '</div>'; }).join('');
+  var nar = d.narrative && d.narrative.text ? '<div class="card small" style="margin-top:6px;border-color:var(--accent)"><b>🧠 خطة العقل لمتجرنا وتسويقنا</b> <span class="muted tiny">(' + esc(stAgo_(d.narrative.at)) + ')</span><div style="white-space:pre-wrap;margin-top:4px">' + esc(d.narrative.text) + '</div></div>' : '';
+  var sw = d.sweep ? '<div class="muted tiny" style="margin-top:4px">🔎 مسح السوق الأسبوعي: ' + esc(stAgo_(d.sweep.at)) + ' · وجد ' + d.sweep.added + ' جهة جديدة للمراجعة' + (d.sweep.names && d.sweep.names.length ? ': ' + d.sweep.names.map(esc).join('، ') : '') + ' <a href="#" data-go="discovery">الاكتشافات ←</a></div>' : '';
+  return '<details class="card" style="margin-top:6px"' + (ST.open === '__m' ? ' open' : '') + '><summary><b>🧠 ما تعلّمه العقل من السوق</b> <span class="muted tiny">— من ' + m.n + ' دورة مقروءة في صفحات الدفع · يغذّي بناء متجرنا وتسويقنا</span></summary>' +
+    '<div style="margin-top:6px"><b class="small">نطاقات الأسعار لكل فئة</b>' + bands + '</div><div class="small" style="margin-top:6px">طريقة التقديم: ' + mix + ' · نساء فقط ' + m.women + ' · رجال فقط ' + m.men + ' · باقات ' + m.bundles + '</div>' +
+    '<div style="margin-top:6px"><b class="small">💡 قرارات لمتجرنا (من الأرقام)</b>' + tips + '</div><div style="margin-top:6px"><b class="small">⚠️ أخطاء عند المنافسين لنتجنبها</b>' + mis + '</div>' + nar + sw + '</details>';
+}
+SCREENS.storecourses = { render: function (d) {
+  ST.data = d;
+  if (ST.open === null) ST.open = d.groups[0] ? d.groups[0].ac_id : '';
+  var f = ST.f, all = []; d.groups.forEach(function (g) { all = all.concat(g.courses); });
+  var cities = {}; all.forEach(function (c) { if (c.city) cities[c.city] = 1; });
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">🛒 دورات المنافسين بمواقع الدفع <span class="muted tiny">· من صفحة الشراء نفسها فقط · ' + d.total + ' دورة · ' + d.groups.length + ' متجراً</span></h1><span class="row" style="gap:6px;flex-wrap:wrap">' +
+    '<input id="st_q" placeholder="🔍 ابحث في الدورات" value="' + esc(f.q) + '" style="width:160px">' +
+    '<select id="st_d"><option value="">الطريقة: الكل</option>' + ['حضوري', 'عن بعد', 'دراسة ذاتية', 'مدمج'].map(function (x) { return '<option' + (f.deliv === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select>' +
+    '<select id="st_g"><option value="">الفئة: الكل</option>' + ['نساء فقط', 'رجال فقط'].map(function (x) { return '<option' + (f.gender === x ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select>' +
+    '<select id="st_c"><option value="">المدينة: الكل</option>' + Object.keys(cities).map(function (x) { return '<option' + (f.city === x ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select>' +
+    '<label class="chip"><input type="checkbox" id="st_o"' + (f.other ? ' checked' : '') + '> منتجات أخرى</label>' +
+    '<button class="btn sm pri" data-act="stRead" data-tip="يقرأ المتاجر التي تسمح لخوادم جوجل. المتاجر التي تحجبها (سلة على Cloudflare…) تُقرأ من جهازك بالجامع المحلي: scripts/store-collector.js">🔄 اقرأ المتاجر الآن</button></span></div>' + stMarket_(d);
+  html += d.groups.map(function (g) {
+    var open = ST.open === g.ac_id, shown = g.courses.filter(stFilter_).length;
+    return '<div class="card" style="margin-top:6px"><div class="st-hd" data-act="stToggle" data-id="' + esc(g.ac_id) + '"><span>' + (open ? '▾' : '▸') + '</span><b>' + esc(g.name) + '</b><span class="tag acc">' + esc(g.platform) + '</span><span class="tag">' + g.n + ' دورة' + (shown !== g.n ? ' · ' + shown + ' مطابقة' : '') + '</span>' +
+      (g.changed ? '<span class="tag bad">🔻 تغيّر ' + g.changed + '</span>' : '') + '<span class="muted tiny" style="margin-inline-start:auto">قُرئ ' + esc(stAgo_(g.seen)) + '</span></div>' + (open ? stRows_(g) : '') + '</div>';
+  }).join('') || empty('لم تُقرأ متاجر بعد — اضغط «اقرأ المتاجر الآن» أو شغّل الجامع المحلي');
+  if (d.without && d.without.length) html += '<div class="card" style="margin-top:8px"><b>⚠️ منافسون لا نقرأ متجرهم (' + d.without.length + ')</b> <span class="muted tiny">— السبب، وأين تضع رابط صفحة الشراء</span>' + d.without.map(function (w) {
+    return '<div class="st-wo"><b>' + esc(String(w.name).split(/\s[—–-]\s/)[0]) + '</b><span class="muted tiny">' + esc(w.why) + '</span><span class="row" style="gap:4px"><input id="sw_' + esc(w.ac_id) + '" dir="ltr" placeholder="رابط صفحة الشراء/الدورات" value="' + esc(w.site) + '" style="width:230px"><button class="btn sm pri" data-act="stSetUrl" data-id="' + esc(w.ac_id) + '">حفظ</button><button class="btn sm" data-act="cmpCapture" data-id="' + esc(w.ac_id) + '">📸 أضف من لقطة</button></span></div>'; }).join('') + '</div>';
+  return html;
+} };
+document.addEventListener('input', function (e) { if (e.target && e.target.id === 'st_q') { ST.f.q = e.target.value; clearTimeout(ST.t); ST.t = setTimeout(function () { go('storecourses', {}, true); var q = $('st_q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } }, 350); } });
+document.addEventListener('change', function (e) {
+  if (!e.target || S.screen !== 'storecourses') return;
+  var id = e.target.id; if (id === 'st_d') ST.f.deliv = e.target.value; else if (id === 'st_g') ST.f.gender = e.target.value; else if (id === 'st_c') ST.f.city = e.target.value; else if (id === 'st_o') ST.f.other = e.target.checked; else return;
+  go('storecourses', {}, true);
+});
+ACT.stToggle = function (el) { ST.open = ST.open === el.dataset.id ? '' : el.dataset.id; go('storecourses', {}, true); };
+ACT.stSetUrl = function (el) { act('storeSetUrl', { ac_id: el.dataset.id, url: val('sw_' + el.dataset.id) }, 'حُفظ — يُقرأ في أقرب تشغيل'); };
+ACT.stRead = function (el) { el.disabled = true; el.textContent = '⏳ يقرأ…'; act('storeReadNow', {}, function (r) { return r && r.message ? r.message : 'اكتملت القراءة'; }); };
 </script>
 
 </body>
