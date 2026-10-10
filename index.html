@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2kxcj7";
+  var APP_BUILD = "mv2l41lq";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -729,11 +729,12 @@ function $(id) { return document.getElementById(id); }
 /** دائرة تحميل صغيرة تظهر ما دام هناك طلب جارٍ، وتختفي عند استقرار الصفحة */
 var BUSY = 0;
 function busy_(d) { BUSY = Math.max(0, BUSY + d); var el = $('busy'); if (!el) { el = document.createElement('div'); el.id = 'busy'; el.className = 'busy'; document.body.appendChild(el); } el.style.display = BUSY ? 'block' : 'none'; }
-function api(kind, name, args) {
-  busy_(1);
+/** quiet = طلب خلفية (الاستطلاع، التحميل المسبق): لا يُظهر دائرة التحميل */
+function api(kind, name, args, quiet) {
+  var bz = quiet ? 0 : 1; busy_(bz);
   var o = kind === 'action' && typeof optStart_ === 'function' ? optStart_() : null;
   return new Promise(function (resolve, reject) {
-    google.script.run.withSuccessHandler(function (x) { busy_(-1); optEnd_(o, true); resolve(x); }).withFailureHandler(function (e) { busy_(-1); optEnd_(o, false); reject(e); })
+    google.script.run.withSuccessHandler(function (x) { busy_(-bz); optEnd_(o, true); resolve(x); }).withFailureHandler(function (e) { busy_(-bz); optEnd_(o, false); reject(e); })
       [kind === 'screen' ? 'apiScreen' : 'apiAction'](name, Object.assign({}, args || {}, { __k: UI_KEY }));
   });
 }
@@ -809,7 +810,9 @@ function go(screen, args, keepScroll) {
     if (cached && cached.poll && snap.poll && cached.poll.sig === snap.poll.sig) return;
     draw(snap, true); S.shownStale = true;
   });
-  api('screen', screen, S.args).then(function (data) {
+  // الدائرة فقط عند انتظار حقيقي: إن عُرضت نسخة محفوظة/لقطة أو كان تحديثاً خلفياً فالتحديث يتم بهدوء
+  var quiet = !!(cached || SUPA || S.quietGo); S.quietGo = false;
+  api('screen', screen, S.args, quiet).then(function (data) {
     gotFresh = true;
     cachePut_(ck, data);
     draw(data, false);
@@ -870,7 +873,8 @@ function prefetch_() {
     if (i >= list.length) return;
     var s = list[i];
     if (S.screen === s || (cacheGet_(cacheKey_(s, {})) && cacheAge_(cacheKey_(s, {})) < 10 * 60000)) return next(i + 1);
-    api('screen', s, {}).then(function (d) { cachePut_(cacheKey_(s, {}), d); }).catch(function () {})
+    // من Supabase أولاً (أقل من ثانية، بلا ضغط على جوجل)، وإلا من جوجل بهدوء
+    (SUPA ? supaGet_(s) : Promise.resolve(null)).then(function (d) { return d || api('screen', s, {}, true); }).then(function (d) { if (d) cachePut_(cacheKey_(s, {}), d); }).catch(function () {})
       .then(function () { setTimeout(function () { next(i + 1); }, 800); });
   })(0);
 }
@@ -1017,7 +1021,7 @@ document.addEventListener('change', function (e) {
 /* ─── التحديث الحي: استدعاء خفيف كل ٦٠ ثانية، شارة «جديد» بدل إعادة التحميل ─── */
 function poll() {
   if (document.hidden) return;
-  api('action', 'poll').then(function (p) {
+  api('action', 'poll', {}, true).then(function (p) {
     BADGES.reply = (p.awaiting + p.escalated) || '';
     BADGES.today = p.failed || '';
     BADGES.ask = p.ask_hot || '';
@@ -1050,7 +1054,7 @@ function liveCheck_() {
     if (!snap || scr !== S.screen) return;
     var sig = JSON.stringify(snap).length + ':' + (snap.poll ? snap.poll.sig : '') + ':' + JSON.stringify(snap).slice(-200);
     var prev = (S.liveSig || {})[scr]; S.liveSig = S.liveSig || {}; S.liveSig[scr] = sig;
-    if (prev && prev !== sig && !BUSY) go(scr, S.args, true);
+    if (prev && prev !== sig && !BUSY) { S.quietGo = true; go(scr, S.args, true); }
   });
 }
 ACT.leadOrigin = function (el) { act('leadOrigin', { lead_id: el.dataset.id, url: val('lo_url'), asker_url: val('lo_au'), asker_handle: val('lo_ah') }, 'حُفظ — الرابط ظاهر الآن في ملف العميل'); };
