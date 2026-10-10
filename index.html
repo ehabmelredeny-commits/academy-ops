@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2l41lq";
+  var APP_BUILD = "mv2l8ch3";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -6319,7 +6319,7 @@ function dpComp_(d) {
   if (br.length || d.brain_text || sl.length) h += '<div class="card dp-brain"><b>🧠 العقل الآلي — قرارات مقترحة</b>' + silentHtml +
     (d.brain_text ? '<details class="small"' + (br.length ? '' : ' open') + '><summary>📝 تحليل مكتوب (' + fmtDate(d.brain_text.at) + ')</summary><div style="white-space:pre-wrap">' + esc(d.brain_text.text) + '</div></details>' : '') +
     br.map(function (x) { return '<div class="dp-dec ' + x.level + '"><span>' + x.icon + '</span><div class="grow"><b>' + esc(x.title) + '</b><div class="muted tiny">' + esc(x.why) + '</div></div>' +
-      (x.act && x.act.go ? '<button class="btn sm" data-go="' + esc(x.act.go) + '">' + esc(x.act.label) + '</button>' : '') + '</div>'; }).join('') + '</div>';
+      (x.act && x.act.go ? '<button class="btn sm" data-go="' + esc(x.act.go) + '"' + (x.act.args ? ' data-args="' + attr(x.act.args) + '"' : '') + '>' + esc(x.act.label) + '</button>' : '') + (x.act2 ? '<button class="btn sm" data-go="' + esc(x.act2.go) + '">' + esc(x.act2.label) + '</button>' : '') + '</div>'; }).join('') + '</div>';
   h += gs.length ? '<div class="dp-strips">' + gs.map(function (g) {
     var y = new Date(g.at).getFullYear();
     return '<div class="dp-st' + (g.multi ? ' multi' : '') + '"><span class="dp-icons">' + g.plats.map(function (p) {
@@ -6669,7 +6669,7 @@ SCREENS.control = { render: function (d) {
   if (w.drafts) side.push('<div class="ct-ev n"><span class="ct-tx">📝 منشور اليوم جاهز</span><button class="btn sm pri" data-go="dailyPost">نشر</button></div>');
   if (w.disc) side.push('<div class="ct-ev n"><span class="ct-tx">🔎 ' + w.disc + ' اكتشافات للمراجعة</span><button class="btn sm" data-go="discovery">راجع</button></div>');
   (d.brain || []).filter(function (b) { return b.act; }).slice(0, 2).forEach(function (b) {
-    side.push('<div class="ct-ev n"><span class="ct-tx" data-tip="' + esc(b.why || '') + '">' + esc(b.icon) + ' ' + esc(b.text) + '</span><button class="btn sm blue" data-go="' + esc(b.act.go) + '">' + esc(b.act.label) + '</button></div>');
+    side.push('<div class="ct-ev n"><span class="ct-tx" data-tip="' + esc(b.why || '') + '">' + esc(b.icon) + ' ' + esc(b.text) + '</span><button class="btn sm blue" data-go="' + esc(b.act.go) + '"' + (b.act.args ? ' data-args="' + attr(b.act.args) + '"' : '') + '>' + esc(b.act.label) + '</button>' + (b.act2 ? '<button class="btn sm" data-go="' + esc(b.act2.go) + '">' + esc(b.act2.label) + '</button>' : '') + '</div>');
   });
   html += '<div><div class="card"><b>⏳ ينتظر قرارك</b> ' + (side.length ? '<span class="n">' + side.length + '</span>' : chip('لا شيء ✓', 'good')) + side.join('') + '</div>' +
     '<div class="card" style="margin-top:8px"><b>🧠 العقل يقول اليوم</b><div class="muted tiny" style="line-height:1.9;margin-top:3px">' + ((d.brain || []).length ? d.brain.map(function (b) { return '<div data-tip="' + esc(b.why || '') + '">• ' + esc(b.text) + '</div>'; }).join('') : 'يتعلّم من الأسئلة والردود — يحتاج أياماً من البيانات') + '</div>' + brainDetails_(d.brain_view) + '</div></div></div>';
