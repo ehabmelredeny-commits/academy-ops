@@ -550,12 +550,22 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 @media(max-width:900px){.st-th{display:none}.st-tr,.st-wo{grid-template-columns:1fr 1fr}}
 .ct-bars{display:inline-flex;gap:3px;align-items:flex-end;height:22px;margin:0 6px}.ct-bars i{display:block;width:8px;background:#2bb673;border-radius:2px}
 </style>
+<style>
+/* القائمة الجانبية المسطّحة: ٨ سقوف (2026-10-10) */
+nav.side .navflat { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+nav.side .navflat button.navi.navtop { display: flex; align-items: center; gap: 6px; width: 100%; font-size: 14px; font-weight: 700; padding: 9px 10px !important; border-radius: 8px; color: var(--ink); background: transparent; border: 0; cursor: pointer; text-align: start; }
+nav.side .navflat button.navi.navtop .navi-t { flex: 1; }
+nav.side .navflat button.navi.navtop:hover { background: var(--soft); }
+nav.side .navflat button.navi.navtop.on { background: var(--accent); color: #fff; }
+nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
+.tabsbar { overflow-x: auto; flex-wrap: wrap; }
+</style>
 
 </head>
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2oqjr0";
+  var APP_BUILD = "mv2p6u32";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -668,11 +678,15 @@ NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '
 NAV_MORE.push(['ads', '📣 الإعلانات الموجّهة'], ['sysmap', '🗺 خريطة النظام والنواقص'], ['storecourses', '🛒 دورات المنافسين بمواقع الدفع'], ['members', '🪪 العضويات والإحالات'], ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 /* الشاشات المدمجة (موافقة المالك 2026-10-10): بند واحد في القائمة + تبويبات أعلى الشاشة. كل تبويب = الشاشة القديمة بكل وظائفها */
 var TAB_GROUPS = [
-  ['control', '🎛 غرفة التحكم', [['control', 'اللوحة'], ['kpis', 'المؤشرات'], ['reports', 'التقارير'], ['health', 'فحص النظام']]],
-  ['inbox', '💬 الرسائل', [['inbox', 'صندوق الرسائل'], ['reply', 'الرد']]],
-  ['ask', '🎯 الفرص والسائلون', [['ask', 'من يسأل الآن'], ['radar', 'الرادار'], ['discovery', 'الاكتشاف'], ['opps', 'الفرص']]],
-  ['compwatch', '📡 المنافسون', [['compwatch', 'ماذا تغيّر'], ['competitors', 'ملفات المنافسين'], ['comptimeline', 'الخط الزمني'], ['storecourses', 'دوراتهم بمواقع الدفع']]],
-  ['automap', '🤖 المهام التلقائية', [['automap', 'ماذا يعمل وحده'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف']]]
+  /* إعادة الترتيب المعتمدة 2026-10-10: ٨ سقوف بدل ٣٣ بنداً. كل تبويب = الشاشة القديمة بكل وظائفها، والأسماء الداخلية لم تتغيّر (كل الروابط تعمل) */
+  ['control', '🎛 غرفة التحكم', [['control', 'اللوحة'], ['today', 'اليوم'], ['kpis', 'المؤشرات'], ['reports', 'التقارير'], ['health', 'فحص النظام']]],
+  ['ask', '👥 العملاء', [['ask', '🎯 يسألون الآن'], ['sources', '📂 للتواصل'], ['inbox', '💬 الرسائل'], ['reply', '✍️ الرد'], ['pipeline', '🧲 المراحل'], ['members', '🪪 مسجّلون وأعضاء'], ['alumni', '🎓 خرّيجون']]],
+  ['targets', '🏢 الأندية والشركات', [['targets', 'مشغّلو الأندية'], ['opps', 'فرص الأندية'], ['people', 'صنّاع القرار'], ['b2b', 'B2B'], ['trainers', 'المدربون']]],
+  ['compwatch', '📡 المنافسون', [['compwatch', 'ماذا تغيّر'], ['competitors', 'ملفاتهم'], ['comptimeline', 'الخط الزمني'], ['storecourses', 'دوراتهم بمواقع الدفع'], ['engage', 'التفاعل مع منشوراتهم'], ['supporters', 'مؤيدوهم'], ['radar', 'الفرص والتهديدات']]],
+  ['news', '📰 السوق والبحث', [['news', 'الأخبار'], ['discovery', 'الاكتشافات'], ['search', 'البحث الذكي'], ['keywords', 'الكلمات'], ['homeapps', 'تطبيقات المدرب'], ['exams', 'الاختبارات']]],
+  ['dailyPost', '📣 التسويق', [['dailyPost', 'منشور اليوم'], ['ads', 'الإعلانات الموجّهة'], ['campaigns', 'الحملات'], ['content', 'بنك الأفكار'], ['register', 'نموذج التسجيل']]],
+  ['courses', '🎓 الدورات والمبيعات', [['courses', 'الدورات'], ['calendar', 'التقويم'], ['payments', 'المدفوعات']]],
+  ['sysmap', '⚙️ النظام', [['sysmap', 'خريطة النظام والنواقص'], ['automap', '🤖 المهام التلقائية'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف'], ['settings', 'الإعدادات'], ['info', 'الدليل'], ['sandbox', 'التجريبي']]]
 ];
 function tabGroup_(k) { for (var i = 0; i < TAB_GROUPS.length; i++) { if (TAB_GROUPS[i][2].some(function (t) { return t[0] === k; })) return TAB_GROUPS[i]; } return null; }
 function tabsBar_(screen) {
@@ -690,19 +704,12 @@ function navOpen_(g, v) {
   o[g] = v; try { localStorage.setItem('ops_nav', JSON.stringify(o)); } catch (e) {}
 }
 function navTreeHtml_(cur, cards) {
-  return NAV_TREE.map(function (g) {
-    var kids = g[2].filter(function (k) { return navLabel_(k); });
-    if (!kids.length) return '';
-    var tg = tabGroup_(cur); if (tg) cur = tg[0]; // تبويب داخل مجموعة ← يُبرز رأس المجموعة
-    var here = kids.indexOf(cur) > -1, open = cards ? (here || navOpen_(g[0]) === true || (navOpen_(g[0]) === undefined && g[0] === 'day')) : (here || (!cur && g[0] === 'day'));
-    return '<details class="navg' + (here ? ' here' : '') + '" data-g="' + g[0] + '"' + (open ? ' open' : '') + '><summary><span class="navg-t">' + g[1] + '</span><span class="navg-n">' + kids.length + '</span></summary>' +
-      (cards ? '' : '<div class="navg-kids">') +
-      (cards ? '<div class="grid2">' : '') + kids.map(function (k) {
-        var b = BADGES[k] ? '<span class="dot">' + BADGES[k] + '</span>' : '';
-        return cards ? '<div class="card click" data-go="' + k + '"><b>' + navLabel_(k) + '</b> ' + (typeof tagIcons_ === 'function' ? tagIcons_(k) : '') + b + '</div>'
-          : '<button class="navi' + (k === cur ? ' on' : '') + '" data-go="' + k + '"><span class="navi-t">' + navLabel_(k) + '</span>' + b + (typeof tagIcons_ === 'function' ? '<span class="ttags">' + tagIcons_(k) + '</span>' : '') + '</button>';
-      }).join('') + (cards ? '</div>' : '</div>') + '</details>';
-  }).join('');
+  var tg = tabGroup_(cur), here = tg ? tg[0] : cur;
+  return '<div class="navflat' + (cards ? ' grid2' : '') + '">' + TAB_GROUPS.filter(function (g) { return SCREENS[g[0]] || g[0] === 'control'; }).map(function (g) {
+    var n = g[2].reduce(function (t, x) { return t + (Number(BADGES[x[0]]) || 0); }, 0), b = n ? '<span class="dot">' + n + '</span>' : '';
+    return cards ? '<div class="card click" data-go="' + g[0] + '"><b>' + g[1] + '</b> <span class="muted tiny">' + g[2].length + ' شاشات</span>' + b + '</div>'
+      : '<button class="navi navtop' + (g[0] === here ? ' on' : '') + '" data-go="' + g[0] + '"><span class="navi-t">' + g[1] + '</span>' + b + '<span class="muted tiny">' + g[2].length + '</span></button>';
+  }).join('') + '</div>';
 }
 document.addEventListener('toggle', function (e) {
   var d = e.target; if (!d || !d.classList || !d.classList.contains('navg')) return;
