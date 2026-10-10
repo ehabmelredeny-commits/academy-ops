@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2pou5c";
+  var APP_BUILD = "mv2pree4";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -689,10 +689,11 @@ var TAB_GROUPS = [
   ['sysmap', '⚙️ النظام', [['sysmap', 'خريطة النظام والنواقص'], ['automap', '🤖 المهام التلقائية'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف'], ['settings', 'الإعدادات'], ['info', 'الدليل'], ['sandbox', 'التجريبي']]]
 ];
 function tabGroup_(k) { for (var i = 0; i < TAB_GROUPS.length; i++) { if (TAB_GROUPS[i][2].some(function (t) { return t[0] === k; })) return TAB_GROUPS[i]; } return null; }
+function tabTip_(k, label) { var p = typeof PAGE_INFO !== 'undefined' && PAGE_INFO[k]; return p && p.what ? p.what : 'افتح «' + label + '»'; }
 function tabsBar_(screen) {
   var g = tabGroup_(screen); if (!g) return '';
   var sbx = location.pathname.indexOf('/sandbox/') > -1;
-  return '<div class="tabsbar">' + g[2].filter(function (t) { return t[0] !== 'sandbox' || sbx; }).map(function (t) { return '<button class="tabb' + (t[0] === screen ? ' on' : '') + '" data-go="' + t[0] + '">' + esc(t[1]) + (BADGES[t[0]] ? ' <span class="dot">' + BADGES[t[0]] + '</span>' : '') + '</button>'; }).join('') + '</div>';
+  return '<div class="tabsbar">' + g[2].filter(function (t) { return t[0] !== 'sandbox' || sbx; }).map(function (t) { return '<button class="tabb' + (t[0] === screen ? ' on' : '') + '" data-go="' + t[0] + '" data-tip="' + esc(tabTip_(t[0], t[1])) + '">' + esc(t[1]) + (BADGES[t[0]] ? ' <span class="dot">' + BADGES[t[0]] + '</span>' : '') + '</button>'; }).join('') + '</div>';
 }
 function navLabel_(k) {
   var g = tabGroup_(k); if (g) return g[0] === k ? g[1] : ''; // عضو غير رئيسي في مجموعة: لا يظهر في القائمة
@@ -709,7 +710,7 @@ function navTreeHtml_(cur, cards) {
   return '<div class="navflat' + (cards ? ' grid2' : '') + '">' + TAB_GROUPS.filter(function (g) { return SCREENS[g[0]] || g[0] === 'control'; }).map(function (g) {
     var n = g[2].reduce(function (t, x) { return t + (Number(BADGES[x[0]]) || 0); }, 0), b = n ? '<span class="dot">' + n + '</span>' : '';
     return cards ? '<div class="card click" data-go="' + g[0] + '"><b>' + g[1] + '</b> <span class="muted tiny">' + g[2].length + ' شاشات</span>' + b + '</div>'
-      : '<button class="navi navtop' + (g[0] === here ? ' on' : '') + '" data-go="' + g[0] + '"><span class="navi-t">' + g[1] + '</span>' + b + '<span class="muted tiny">' + g[2].length + '</span></button>';
+      : '<button class="navi navtop' + (g[0] === here ? ' on' : '') + '" data-go="' + g[0] + '" data-tip="' + esc('يحتوي: ' + g[2].map(function (x) { return x[1]; }).join(' · ')) + '"><span class="navi-t">' + g[1] + '</span>' + b + '<span class="muted tiny">' + g[2].length + '</span></button>';
   }).join('') + '</div>';
 }
 document.addEventListener('toggle', function (e) {
@@ -1118,7 +1119,10 @@ function claudePill_(c) {
 function oppBar_(p) {
   var el = $('oppbar'); if (!el) return;
   var n = p.ask_offers || 0, h = p.ask_hot || 0;
-  if ((!n && !h) || S.screen === 'ask' || S.screen === 'monitor') { el.innerHTML = ''; el.className = ''; return; }
+  // لا أسئلة جديدة آخر ٣ أيام لكن هناك أسئلة تنتظر ردك ← شريط بلون أهدأ بدل الاختفاء
+  var w = Math.max(p.eng_waiting || 0, p.ask_stale || 0);
+  if (S.screen === 'ask' || S.screen === 'monitor' || S.screen === 'engage' || (!n && !h && !w)) { el.innerHTML = ''; el.className = ''; return; }
+  if (!n && !h) { el.className = 'oppbar soft'; el.innerHTML = '<span>⏳ <b>' + w + '</b> سؤالاً من جمهور المنافسين ينتظر ردك — لا جديد آخر ٣ أيام، لكن الرد الآن ما زال يجلب عملاء</span><button class="btn sm pri" data-go="engage">افتح وردّ</button>'; return; }
   el.className = 'oppbar';
   el.innerHTML = '<span>🔥 ' + (n ? '<b>' + n + '</b> شخص يسأل عن السعر الآن — العرض والكود جاهزان' : '<b>' + h + '</b> فرصة بنية عالية تنتظر ردك') +
     ' · الكود صالح ٢٤ ساعة</span><button class="btn sm pri" data-go="ask">افتح وردّ الآن</button>';
