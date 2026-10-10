@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2q6k07";
+  var APP_BUILD = "mv2qcrjj";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -1480,6 +1480,25 @@ window.addEventListener('load', function () {
 <script>
 ACT.lmCopy = function () { copyText(val('lm_text')); };
 ACT.lmSent = function (el) { act('leadMessageSent', { lead_id: el.dataset.id, via: el.dataset.via }, '✓ سُجّل التواصل'); };
+</script>
+<script>
+/* ✉️ راسله — نافذة واحدة لكل الجداول (عميل/سائل/تعليق منافس/قاعدة مصادر): يعرف منصته ويجهّز رسالة كاملة، و«أرسلتُها» تحدّث السلسلة كلها */
+ACT.msgSheet = function (el) {
+  var ref = JSON.parse(el.dataset.ref || '{}'); window.__msgRef = ref;
+  openSheet('<h3 style="margin:0 0 6px">✉️ راسله</h3><div id="ms_box" class="small muted">⏳ يجهّز الرسالة حسب منصته…</div>');
+  api('action', 'personMessage', ref).then(function (m) {
+    var b = $('ms_box'); if (!b) return; b.className = '';
+    b.innerHTML = '<div class="muted tiny">' + (m.platform ? 'منصته: <b>' + esc(m.platform) + '</b>' : 'المنصة غير معروفة') + (m.handle ? ' · @' + esc(m.handle) : '') + '</div>' +
+      (m.missing ? '<div class="small" style="color:var(--warn)">⚠️ ' + esc(m.missing) + '</div>' : '') +
+      '<textarea id="ms_text" style="min-height:150px;width:100%;margin-top:4px">' + esc(m.text) + '</textarea><div class="btns" style="flex-wrap:wrap">' +
+      m.channels.map(function (c) { return '<a class="btn sm' + (c.main ? ' pri' : '') + '" target="_blank" rel="noopener" href="' + esc(c.url) + '" data-mscopy="1">' + esc(c.label) + '</a>'; }).join('') +
+      '<button class="btn sm" data-act="msCopy">📋 انسخ</button><button class="btn sm good" data-act="msSent" data-via="' + esc(m.platform || 'يدوي') + '">✓ أرسلتُها</button></div>' +
+      '<div class="muted tiny">الزر ينسخ الرسالة ويفتح محادثته — الصقها واضغط إرسال. «أرسلتُها» تحدّث حالته في كل الجداول (السائل ← العميل ← المراحل).</div>';
+    Array.prototype.forEach.call(b.querySelectorAll('a[data-mscopy]'), function (a) { a.addEventListener('click', function () { copyText(val('ms_text')); }); });
+  }).catch(function (e) { var b = $('ms_box'); if (b) b.textContent = errMsg(e); });
+};
+ACT.msCopy = function () { copyText(val('ms_text')); };
+ACT.msSent = function (el) { var p = Object.assign({}, window.__msgRef, { via: el.dataset.via }); act('leadMessageSent', p, '✓ سُجّل التواصل في كل الجداول').then(function () { var c = $('sheet'); if (c) c.remove(); }); };
 </script>
 
   <script>
@@ -4338,7 +4357,7 @@ SCREENS.sources = { render: function (d, args) {
       (r.send_error ? '<div class="small" style="color:var(--bad)">' + esc(r.send_error) + '</div>' : '') +
       '<div class="small muted">' + [r.phone, r.email].filter(String).map(esc).join(' · ') + ' · ' + esc(r.source_name) + '</div>' +
       (r.handles ? '<div class="small">الحسابات: ' + esc(r.handles) + '</div>' : '') +
-      '<div class="btns"><a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '" data-act="srcdbSearched" data-id="' + esc(r.imp_id) + '">🔎 ابحث عنه</a>' +
+      '<div class="btns"><button class="btn sm pri" data-act="msgSheet" data-ref="' + attr({ imp_id: r.imp_id }) + '">✉️ راسله</button><a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '" data-act="srcdbSearched" data-id="' + esc(r.imp_id) + '">🔎 ابحث عنه</a>' +
       '<button class="btn sm pri" data-act="srcdbFound" data-id="' + esc(r.imp_id) + '">➕ أضف ما وجدته وانقله للتسويق</button></div>' +
       (stop ? '<div class="small" style="color:var(--bad)">طلب عدم التواصل — لا تُرسل له.</div>' :
         '<textarea id="dm_' + esc(r.imp_id) + '" style="min-height:90px">' + esc(r.draft_msg || '') + '</textarea>' +
@@ -4837,7 +4856,7 @@ SCREENS.ask = { render: function (d, args) {
         '<div class="row" style="gap:6px;margin-top:6px"><div class="grow">' + askPersonaSel_('apx_' + esc(o.ask_id), o.persona) + '</div>' +
         '<button class="btn sm" data-act="askRegen" data-id="' + esc(o.ask_id) + '" title="اكتب الرد من جديد حسب الحالة المختارة (مع الرابط)">↻ رد جديد</button></div>' +
         '<label class="f">الرد المقترح' + (o.reply_by === 'Claude' ? ' ' + chip('✨ كتبه Claude', 'acc') : '') + (o.reply_variant ? ' <span class="tag" data-tip="العقل يجرّب صياغات مختلفة ويقيس أيها يتجاوب أكثر — لا تتغير نيّتك، عدّل النص كما تحب">🧪 صياغة: ' + esc(o.reply_variant) + '</span>' : '') + ' (عدّله كما تحب)</label><textarea id="ar_' + esc(o.ask_id) + '" style="min-height:80px">' + esc(o.suggested_reply) + '</textarea>' +
-        '<div class="btns">' + (extUrl(o.url) ? '<button class="btn sm good" data-act="askOpen" data-id="' + esc(o.ask_id) + '" data-tip="ينسخ الرد ويفتح المنشور عند التعليق ← الصق (Ctrl+V) واضغط إرسال في المنصة. ⚠️ يدوي: انستغرام وتيك توك يمنعان الرد الآلي على تعليقات الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button>' :
+        '<div class="btns"><button class="btn sm" data-act="msgSheet" data-ref="' + attr({ ask_id: o.ask_id }) + '" data-tip="رسالة خاصة كاملة على منصته (أو واتساب) تدفعه للتواصل">✉️ راسله</button>' + (extUrl(o.url) ? '<button class="btn sm good" data-act="askOpen" data-id="' + esc(o.ask_id) + '" data-tip="ينسخ الرد ويفتح المنشور عند التعليق ← الصق (Ctrl+V) واضغط إرسال في المنصة. ⚠️ يدوي: انستغرام وتيك توك يمنعان الرد الآلي على تعليقات الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button>' :
           '<button class="btn sm good" data-act="askCopy" data-id="' + esc(o.ask_id) + '" data-tip="ينسخ الرد ← الصقه حيث سأل الشخص واضغط إرسال. ⚠️ يدوي: المنصات تمنع الرد الآلي على الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button>') +
         '<button class="btn sm" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="تم الرد" data-tip="اضغطه بعد أن ترسل الرد فعلاً — يُسجَّل ويُضاف السائل للمتابعة (تذكير بعد ٢٤ ساعة).">تم الرد ✓</button>' +
         '<button class="btn sm ghost" data-act="askSet" data-id="' + esc(o.ask_id) + '" data-st="ليست فرصة" data-tip="ليس عميلاً محتملاً (سؤال عام، إعلان، منافس) — يختفي من القائمة ويتعلم منه النظام.">ليست فرصة</button></div>') + '</div>';
@@ -6535,7 +6554,7 @@ SCREENS.engage = { after: function () {
     ['الرد الجاهز', 'minmax(160px,2.6fr)', function (e) { return '<span class="muted" title="' + esc(e.reply) + '">' + esc(e.reply) + '</span>' + (e.code ? ' ' + chip('🎟 ' + e.code) : ''); }],
     ['إجراء', '190px', function (e) {
       return e.status === 'رُدّ' ? chip('✓ رُدّ', 'good') + (e.lead_id ? ' <a href="#" data-go="lead" data-args="' + attr({ lead_id: e.lead_id }) + '">👤</a>' : '') :
-        '<button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '" data-tip="ينسخ الرد ويفتح المنشور عند التعليق ← الصق (Ctrl+V) واضغط إرسال في المنصة. ⚠️ يدوي: انستغرام وتيك توك يمنعان الرد الآلي على تعليقات الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button> <button class="btn sm good" data-act="egDone" data-id="' + esc(e.eng_id) + '">✓ رددت</button> <a href="#" class="muted tiny" data-act="egSkip" data-id="' + esc(e.eng_id) + '" title="ليس سؤالاً حقيقياً">✕</a>'; }]
+        '<button class="btn sm" data-act="msgSheet" data-ref="' + attr({ eng_id: e.eng_id }) + '" data-tip="رسالة خاصة كاملة على منصته (أو واتساب)">✉️ راسله</button><button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '" data-tip="ينسخ الرد ويفتح المنشور عند التعليق ← الصق (Ctrl+V) واضغط إرسال في المنصة. ⚠️ يدوي: انستغرام وتيك توك يمنعان الرد الآلي على تعليقات الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button> <button class="btn sm good" data-act="egDone" data-id="' + esc(e.eng_id) + '">✓ رددت</button> <a href="#" class="muted tiny" data-act="egSkip" data-id="' + esc(e.eng_id) + '" title="ليس سؤالاً حقيقياً">✕</a>'; }]
   ], rows, { cls: function (e) { return e.status === 'رُدّ' ? 'sl-off' : ''; } }) : empty('لا أسئلة بعد — الصق تعليقات منشور منافس أو ارفع صورها');
   // 🧠 ماذا يسأل جمهور المنافسين
   var st = d.stats || [];
