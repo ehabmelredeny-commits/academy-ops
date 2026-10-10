@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2pv50x";
+  var APP_BUILD = "mv2pz15q";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -1122,7 +1122,7 @@ function oppBar_(p) {
   // لا أسئلة جديدة آخر ٣ أيام لكن هناك أسئلة تنتظر ردك ← شريط بلون أهدأ بدل الاختفاء
   var w = Math.max(p.eng_waiting || 0, p.ask_stale || 0);
   if (S.screen === 'ask' || S.screen === 'monitor' || S.screen === 'engage' || (!n && !h && !w)) { el.innerHTML = ''; el.className = ''; return; }
-  if (!n && !h) { el.className = 'oppbar soft'; el.innerHTML = '<span>⏳ <b>' + w + '</b> سؤالاً من جمهور المنافسين ينتظر ردك — لا جديد آخر ٣ أيام، لكن الرد الآن ما زال يجلب عملاء</span><button class="btn sm pri" data-go="engage">افتح وردّ</button>'; return; }
+  if (!n && !h) { el.className = 'oppbar soft'; el.innerHTML = '<span>⏳ <b>' + w + '</b> سؤالاً ينتظر ردك · لم يُلتقط سؤال جديد منذ ٣ أيام — الناس يسألون عند المنافسين لكن النظام لا يرى تعليقاتهم إلا حين تلتقطها (📌 أرسل للنظام)</span><button class="btn sm pri" data-go="engage">التقط وردّ</button>'; return; }
   el.className = 'oppbar';
   el.innerHTML = '<span>🔥 ' + (n ? '<b>' + n + '</b> شخص يسأل عن السعر الآن — العرض والكود جاهزان' : '<b>' + h + '</b> فرصة بنية عالية تنتظر ردك') +
     ' · الكود صالح ٢٤ ساعة</span><button class="btn sm pri" data-go="ask">افتح وردّ الآن</button>';
