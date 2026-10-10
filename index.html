@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2lboxh";
+  var APP_BUILD = "mv2ldd68";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -768,7 +768,7 @@ function act(name, args, okMsg, reload) {
 function focusItem_(id) {
   var el = document.querySelector('#main [data-id="' + String(id).replace(/"/g, '') + '"]');
   if (!el) return;
-  var card = el.closest('.card, details, tr') || el;
+  var card = el.closest('.sl-row, .ct-ev, tr, .card, details') || el; // أضيق عنصر: صف المنافس نفسه لا الجدول كله
   if (card.tagName === 'DETAILS') card.open = true;
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   card.classList.add('focus-hl'); setTimeout(function () { card.classList.remove('focus-hl'); }, 9000);
