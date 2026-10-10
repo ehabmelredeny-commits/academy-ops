@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2p6u32";
+  var APP_BUILD = "mv2p8hi4";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -1572,6 +1572,42 @@ ACT.adLink = function () {
 ACT.adCopyGen = function () { act('adCopyGen', { platform: val('ac_pl'), course: val('ac_course') }, function (r) { return 'كُتبت ' + r.n + ' نصوص — راجعها واعتمد ما يناسبك'; }); };
 ACT.adCopySet = function (el) { act('adCopySet', { copy_id: el.dataset.id, status: el.dataset.st }, el.dataset.st === 'معتمد' ? 'اعتُمد' : 'أُخفي'); };
 ACT.adCopyCopy = function (el) { copyText(el.dataset.v); };
+</script>
+
+  <script>
+/* ═══════════ 📱 تطبيقات المدرب أونلاين (نُقلت من ClubsView عند إلغاء خريطة الأندية) ═══════════ */
+SCREENS.homeapps = { render: function (d) {
+  var html = north(d.north) + '<h1>📱 تطبيقات المدرب أونلاين ' + chip(d.rows.length) + '</h1>';
+  html += '<div class="card small">تطبيقات المدربين أونلاين وإلى مكانك. ⚙️ <b>بحث آلي أسبوعي</b> في قوائم الصحة واللياقة بمتجر Apple السعودي يضيف الجديد «غير مؤكد» لتراجعه. لكل تطبيق: الاسم، الإدارة والتواصل، والتقييم. كل معلومة بمصدرها، وما لم يُتحقق منه مكتوب «غير مؤكد». <b>لماذا تهمك؟</b> هذه التطبيقات تحتاج مدربين معتمدين = قناة توظيف لخرّيجينا وشراكة محتملة.</div>';
+  html += d.rows.length ? '<div class="grid2">' + d.rows.map(function (a) {
+    var rate = [a.rating_ios ? '⭐ iOS ' + a.rating_ios : '', a.rating_android ? '⭐ Android ' + a.rating_android : ''].filter(String).join(' · ');
+    return '<div class="card small"><div class="row between"><b style="font-size:14px">' + esc(a.name) + '</b>' + chip(a.verified === 'نعم' ? '✓ متحقق' : 'غير مؤكد', a.verified === 'نعم' ? 'good' : 'warn') + '</div>' +
+      (a.company ? '<div>🏢 ' + esc(a.company) + '</div>' : '') + (a.management ? '<div>👔 الإدارة: ' + esc(a.management) + '</div>' : '') +
+      '<div class="chips" style="margin-top:4px">' + (extUrl(a.website) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(a.website)) + '">🌐 الموقع</a>' : '') +
+      (a.email ? '<a class="chip" href="mailto:' + esc(a.email) + '">✉️ ' + esc(a.email) + '</a>' : '') + (a.phone ? '<a class="chip" href="tel:' + esc(a.phone) + '">📞 ' + esc(a.phone) + '</a>' : '') +
+      (a.social ? '<span class="chip">' + esc(a.social) + '</span>' : '') + '</div>' +
+      '<div style="margin-top:4px">' + (rate ? '<b>' + esc(rate) + '</b>' : '<span class="muted">التقييم غير متوفر</span>') + (a.rating_note ? ' <span class="muted">— ' + esc(a.rating_note) + '</span>' : '') + '</div>' +
+      (a.notes ? '<div class="muted">' + esc(a.notes) + '</div>' : '') +
+      '<div class="muted" style="margin-top:4px">' + (extUrl(a.source_url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(a.source_url)) + '">المصدر ↗</a> · ' : '') + 'حُدّث ' + fmtDate(a.updated_at) +
+      ' · <a href="#" data-act="haEdit" data-id="' + esc(a.app_id) + '">تعديل</a></div></div>';
+  }).join('') + '</div>' : empty('لا تطبيقات بعد');
+  html += '<details class="card small" id="ha_form_box"><summary>➕ أضف / عدّل تطبيقاً</summary><input type="hidden" id="ha_id"><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">' +
+    [['name', 'اسم التطبيق *'], ['company', 'الشركة المالكة'], ['management', 'الإدارة (المؤسس/المدير)'], ['website', 'الموقع'], ['email', 'البريد'], ['phone', 'الهاتف'], ['social', 'حسابات التواصل'], ['rating_ios', 'تقييم App Store'], ['rating_android', 'تقييم Google Play'], ['rating_note', 'ملاحظة التقييم (عدد المقيّمين…)'], ['source_url', 'رابط المصدر'], ['notes', 'ملاحظات']]
+      .map(function (f) { return '<input type="text" id="ha_' + f[0] + '" placeholder="' + f[1] + '">'; }).join('') +
+    '<select id="ha_verified"><option value="غير مؤكد">غير مؤكد</option><option value="نعم">متحقق</option></select><button class="btn sm pri" data-act="haSave">حفظ</button></div></details>';
+  return html;
+} };
+var HA_FIELDS = ['name', 'company', 'management', 'website', 'email', 'phone', 'social', 'rating_ios', 'rating_android', 'rating_note', 'source_url', 'notes', 'verified'];
+ACT.haEdit = function (el) {
+  var a = (S.data.rows || []).filter(function (x) { return x.app_id === el.dataset.id; })[0]; if (!a) return;
+  $('ha_form_box').open = true; $('ha_id').value = a.app_id; HA_FIELDS.forEach(function (f) { if ($('ha_' + f)) $('ha_' + f).value = a[f] || ''; });
+  $('ha_form_box').scrollIntoView({ block: 'center' });
+};
+ACT.haSave = function () {
+  if (!val('ha_name').trim()) return toast('اكتب اسم التطبيق', true);
+  var x = { app_id: val('ha_id') }; HA_FIELDS.forEach(function (f) { x[f] = val('ha_' + f); });
+  act('homeAppSave', { app: x }, 'حُفظ');
+};
 </script>
 
   <script>
