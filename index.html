@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2o66c2";
+  var APP_BUILD = "mv2o7ssf";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -5588,6 +5588,9 @@ SCREENS.comptimeline = { render: function (d, args) {
       return '<span class="statmini"><b>' + x[0] + '</b> ' + x[1] + '</span>'; }).join('') +
     '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y - 1, topic: d.topic, sort: d.sort }) + '">‹ ' + (y - 1) + '</button><b>' + y + '</b>' +
     '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y + 1, topic: d.topic, sort: d.sort }) + '">' + (y + 1) + ' ›</button></span></div>';
+  // 🧠 العقل: فجوات الخط الزمني = أفضل نافذة لبدء دوراتنا (لا منافس يبدأ نفس الدورة فيها)
+  html += (d.gaps && d.gaps.length ? d.gaps.map(function (g) { return '<div class="card small" style="border-color:#24a148;padding:6px 10px;margin:4px 0">📆 <b>أفضل نافذة لبدء «' + esc(g.course) + '»: ' + esc(g.from) + ' ← ' + esc(g.to) + '</b> <span class="muted">— ' + esc(g.why) + '</span></div>'; }).join('')
+    : '<div class="muted tiny" style="margin:4px 0">📆 العقل يبحث عن فجوات في الخط الزمني لاقتراح موعد بدء دوراتنا — يحتاج موعدَي بدء معروفين على الأقل لنفس الدورة عند المنافسين (أغلبهم لا ينشر مواعيده).</div>');
   html += '<div class="row" style="gap:6px;margin:6px 0">' +
     '<select id="ctl_topic" data-act="ctlFilter"><option value="">كل الدورات</option>' + opt(d.topics, d.topic) + '</select>' +
     '<select id="ctl_sort" data-act="ctlFilter">' + [['date', 'ترتيب: التاريخ'], ['price', 'ترتيب: السعر'], ['who', 'ترتيب: المنافس']].map(function (o) { return '<option value="' + o[0] + '"' + (d.sort === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
