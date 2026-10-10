@@ -393,6 +393,12 @@ nav.side .lang-sw button { width: auto; display: inline-block; padding: 5px 12px
 .mon-ticker-in{display:inline-block;padding-inline-start:100%;animation:montk 60s linear infinite}
 @keyframes montk{to{transform:translateX(100%)}}
 @media (max-width:820px){.mon-grid{grid-template-columns:1fr}.mon-now{order:-1;position:static}.mon-col{max-height:none}}
+.opt-wait{opacity:.6;pointer-events:none;position:relative}
+.opt-wait::after{content:'⏳';margin-inline-start:4px}
+.opt-card{opacity:.7;transition:opacity .15s}
+.opt-ok{box-shadow:0 0 0 2px #24a148 !important}
+.opt-ok::after{content:' ✓';color:#24a148;font-weight:700}
+.opt-bad{box-shadow:0 0 0 2px #da1e28 !important}
 .focus-hl{outline:3px solid #f1c21b;outline-offset:3px;animation:hlblink 1s ease-in-out 8;position:relative}
 @keyframes hlblink{0%,100%{box-shadow:0 0 0 0 rgba(241,194,27,0)}50%{box-shadow:0 0 0 10px rgba(241,194,27,.45)}}
 .focus-hl::before{content:'🎯 هنا';position:absolute;top:-11px;inset-inline-start:10px;background:#f1c21b;color:#2a2200;font-size:11px;font-weight:700;border-radius:6px;padding:0 7px;z-index:2}
@@ -545,7 +551,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2h5qze";
+  var APP_BUILD = "mv2hbc9d";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -706,8 +712,9 @@ var BUSY = 0;
 function busy_(d) { BUSY = Math.max(0, BUSY + d); var el = $('busy'); if (!el) { el = document.createElement('div'); el.id = 'busy'; el.className = 'busy'; document.body.appendChild(el); } el.style.display = BUSY ? 'block' : 'none'; }
 function api(kind, name, args) {
   busy_(1);
+  var o = kind === 'action' && typeof optStart_ === 'function' ? optStart_() : null;
   return new Promise(function (resolve, reject) {
-    google.script.run.withSuccessHandler(function (x) { busy_(-1); resolve(x); }).withFailureHandler(function (e) { busy_(-1); reject(e); })
+    google.script.run.withSuccessHandler(function (x) { busy_(-1); optEnd_(o, true); resolve(x); }).withFailureHandler(function (e) { busy_(-1); optEnd_(o, false); reject(e); })
       [kind === 'screen' ? 'apiScreen' : 'apiAction'](name, Object.assign({}, args || {}, { __k: UI_KEY }));
   });
 }
@@ -967,9 +974,22 @@ document.addEventListener('click', function (e) {
   if (a && a.tagName !== 'INPUT' && a.tagName !== 'SELECT' && a.tagName !== 'TEXTAREA') {
     e.preventDefault();
     var f = ACT[a.getAttribute('data-act')];
+    S.lastBtn = { el: a, at: Date.now() };
     if (f) f(a);
   }
 });
+/* استجابة فورية: الزر وبطاقته يتغيّران لحظة الضغط (قبل رد جوجل)، ثم ✓ أو ✗ */
+function optStart_() {
+  var b = S.lastBtn; if (!b || Date.now() - b.at > 400 || !document.body.contains(b.el)) return null;
+  S.lastBtn = null;
+  var card = b.el.closest('.card, tr, details, .strip'); b.el.classList.add('opt-wait'); if (card) card.classList.add('opt-card');
+  return { el: b.el, card: card };
+}
+function optEnd_(o, ok) {
+  if (!o) return;
+  o.el.classList.remove('opt-wait'); if (o.card) o.card.classList.remove('opt-card');
+  o.el.classList.add(ok ? 'opt-ok' : 'opt-bad'); setTimeout(function () { o.el.classList.remove('opt-ok', 'opt-bad'); }, 1500);
+}
 document.addEventListener('change', function (e) {
   var a = e.target.closest('[data-act]');
   if (a && (a.tagName === 'INPUT' || a.tagName === 'SELECT' || a.tagName === 'TEXTAREA')) { var f = ACT[a.getAttribute('data-act')]; if (f) f(a); }
@@ -998,6 +1018,22 @@ function poll() {
   }).catch(function () { });
 }
 ACT.reload = function () { go(S.screen, S.args); };
+
+/* تحديث حي: كل ٢٠ ثانية تُقارن لقطة Supabase للشاشة الحالية (طلب سريع مجاني)؛ إن تغيّرت تُعاد الشاشة من جوجل بهدوء دون تحريك الصفحة.
+   لا يحدث أثناء الكتابة أو مع نافذة مفتوحة أو أثناء طلب جارٍ. */
+function liveCheck_() {
+  if (document.hidden || !SUPA || BUSY || !S.screen || Object.keys(S.args || {}).length) return;
+  var ae = document.activeElement;
+  if (ae && /^(TEXTAREA|INPUT|SELECT)$/.test(ae.tagName)) return;
+  if (document.querySelector('.modal, .sheet.open, dialog[open]')) return;
+  var scr = S.screen;
+  supaGet_(scr).then(function (snap) {
+    if (!snap || scr !== S.screen) return;
+    var sig = JSON.stringify(snap).length + ':' + (snap.poll ? snap.poll.sig : '') + ':' + JSON.stringify(snap).slice(-200);
+    var prev = (S.liveSig || {})[scr]; S.liveSig = S.liveSig || {}; S.liveSig[scr] = sig;
+    if (prev && prev !== sig && !BUSY) go(scr, S.args, true);
+  });
+}
 ACT.leadOrigin = function (el) { act('leadOrigin', { lead_id: el.dataset.id, url: val('lo_url'), asker_url: val('lo_au'), asker_handle: val('lo_ah') }, 'حُفظ — الرابط ظاهر الآن في ملف العميل'); };
 /** شريط تنبيه الفرص في كل الصفحات: من يسأل علناً وله عرض سعر جاهز بكود — حتى لا تفوت الفرصة */
 /**
@@ -1377,6 +1413,7 @@ window.addEventListener('load', function () {
   setInterval(function () { if (!document.hidden) prefetch_(); }, 10 * 60000); // تبقى النسخ المحفوظة حديثة ما دام النظام مفتوحاً
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
+  setInterval(liveCheck_, 20000);
 });
 </script>
 
