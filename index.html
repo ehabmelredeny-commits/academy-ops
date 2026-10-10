@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2pz15q";
+  var APP_BUILD = "mv2q6k07";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -1338,6 +1338,20 @@ ACT.markSent = function (el) { act('markSent', { msg_id: el.dataset.id }, 'سُ�
 
 /* ═══════════ ملف العميل ═══════════ */
 SCREENS.lead = {
+  after: function (d) {
+    var box = $('lm_box'); if (!box || $('staleNote')) return;
+    api('action', 'leadMessage', { lead_id: d.lead.lead_id }, true).then(function (m) {
+      if (!$('lm_box')) return;
+      $('lm_pl').textContent = m.platform ? 'منصته: ' + m.platform + (m.handle ? ' · @' + m.handle : '') : '';
+      $('lm_box').className = '';
+      $('lm_box').innerHTML = (m.missing ? '<div class="small" style="color:var(--warn)">⚠️ ' + esc(m.missing) + '</div>' : '') +
+        '<textarea id="lm_text" style="min-height:130px;width:100%;margin-top:4px">' + esc(m.text) + '</textarea>' +
+        '<div class="btns" style="flex-wrap:wrap">' + m.channels.map(function (c) { return '<a class="btn sm' + (c.main ? ' pri' : '') + '" target="_blank" rel="noopener" href="' + esc(c.url) + '" data-tip="ينسخ الرسالة ثم يفتح المحادثة — الصقها واضغط إرسال">' + esc(c.label) + '</a>'; }).join('') +
+        '<button class="btn sm" data-act="lmCopy">📋 انسخ الرسالة</button><button class="btn sm good" data-act="lmSent" data-id="' + esc(d.lead.lead_id) + '" data-via="' + esc(m.platform || 'يدوي') + '" data-tip="بعد ما ترسلها: يسجّل أنك تواصلت (المرحلة «تواصلنا»)">✓ أرسلتُها</button></div>' +
+        '<div class="muted tiny">عدّل الرسالة كما تريد · يفتح الزر المحادثة وتلصق الرسالة (الحسابات غير مربوطة للإرسال الآلي بعد)</div>';
+      Array.prototype.forEach.call($('lm_box').querySelectorAll('a.btn'), function (a) { a.addEventListener('click', function () { copyText(val('lm_text')); }); });
+    }).catch(function (e) { if ($('lm_box')) $('lm_box').textContent = errMsg(e); });
+  },
   render: function (d) {
     var l = d.lead;
     var ask = d.ask;
@@ -1359,6 +1373,10 @@ SCREENS.lead = {
         ['أول رسالة', fmtDate(l.first_message_at, true)], ['زمن الاستجابة', l.response_minutes !== '' ? l.response_minutes + ' دقيقة' : '—'],
         ['منسحب', l.opt_out], ['الدورة المسجّلة', l.enrolled_course], ['المدفوع', l.paid_amount]]
         .map(function (r) { return '<b>' + r[0] + '</b><span>' + esc(r[1] || '—') + '</span>'; }).join('') + '</div></div>';
+    // ✉️ راسله: يعرف منصته ويجهّز رسالة كاملة + زر يفتح محادثته (الإرسال منك — الحسابات غير مربوطة بعد)
+    html += l.opt_out === 'نعم' ? '<div class="card small" style="border-color:var(--bad)">⛔ طلب عدم التواصل — لا تُرسل له شيئاً</div>' :
+      '<div class="card" style="border-color:var(--accent)"><div class="row between" style="align-items:center"><b>✉️ راسله</b><span id="lm_pl" class="muted tiny"></span></div>' +
+      '<div id="lm_box" class="small muted">⏳ يجهّز الرسالة حسب منصته…</div></div>';
     html += '<div class="card"><b>سجّل ودفع</b><label class="f">الدورة</label><select id="encourse">' +
       d.courses.map(function (c) { return '<option value="' + esc(c.course_id) + '">' + esc(c.name_ar) + '</option>'; }).join('') +
       '<option value="other">أخرى</option></select><label class="f">المبلغ المدفوع (ريال)</label><input type="number" id="enamount">' +
@@ -1458,6 +1476,10 @@ window.addEventListener('load', function () {
     supaInit_().then(function (c) { if (!c) return; api('action', 'supaSeed', { names: Object.keys(SCREENS).filter(function (s) { return /^[A-Za-z0-9_]+$/.test(s) && s !== 'more'; }) }).then(function () { try { localStorage.setItem('ops_supa_seed', d); } catch (e) {} }); });
   }, 15000);
 });
+</script>
+<script>
+ACT.lmCopy = function () { copyText(val('lm_text')); };
+ACT.lmSent = function (el) { act('leadMessageSent', { lead_id: el.dataset.id, via: el.dataset.via }, '✓ سُجّل التواصل'); };
 </script>
 
   <script>
