@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2russd";
+  var APP_BUILD = "mv2s6bnh";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -680,7 +680,7 @@ NAV_MORE.push(['ads', '📣 الإعلانات الموجّهة'], ['sysmap', '�
 var TAB_GROUPS = [
   /* إعادة الترتيب المعتمدة 2026-10-10: ٨ سقوف بدل ٣٣ بنداً. كل تبويب = الشاشة القديمة بكل وظائفها، والأسماء الداخلية لم تتغيّر (كل الروابط تعمل) */
   ['control', '🎛 غرفة التحكم', [['control', 'اللوحة'], ['today', 'اليوم'], ['kpis', 'المؤشرات'], ['reports', 'التقارير'], ['health', 'فحص النظام']]],
-  ['ask', '👥 العملاء', [['ask', '🎯 يسألون الآن'], ['sources', '📂 للتواصل'], ['inbox', '💬 الرسائل'], ['reply', '✍️ الرد'], ['pipeline', '🧲 المراحل'], ['members', '🪪 مسجّلون وأعضاء'], ['alumni', '🎓 خرّيجون']]],
+  ['ask', '👥 العملاء', [['ask', '🎯 يسألون الآن'], ['persons', '👤 الأشخاص'], ['sources', '📂 للتواصل'], ['inbox', '💬 الرسائل'], ['reply', '✍️ الرد'], ['pipeline', '🧲 المراحل'], ['members', '🪪 مسجّلون وأعضاء'], ['alumni', '🎓 خرّيجون']]],
   ['targets', '🏢 الأندية والشركات', [['targets', 'مشغّلو الأندية'], ['opps', 'فرص الأندية'], ['people', 'صنّاع القرار'], ['b2b', 'B2B'], ['trainers', 'المدربون']]],
   ['compwatch', '📡 المنافسون', [['compwatch', 'ماذا تغيّر'], ['competitors', 'ملفاتهم'], ['comptimeline', 'الخط الزمني'], ['storecourses', 'دوراتهم بمواقع الدفع'], ['engage', 'التفاعل مع منشوراتهم'], ['supporters', 'مؤيدوهم'], ['radar', 'الفرص والتهديدات']]],
   ['news', '📰 السوق والبحث', [['news', 'الأخبار'], ['discovery', 'الاكتشافات'], ['search', 'البحث الذكي'], ['keywords', 'الكلمات'], ['homeapps', 'تطبيقات المدرب'], ['exams', 'الاختبارات']]],
@@ -1355,7 +1355,7 @@ SCREENS.lead = {
   render: function (d) {
     var l = d.lead;
     var ask = d.ask;
-    var html = '<h1>' + esc(l.name || l.phone || l.email || 'عميل') + '</h1>' +
+    var html = '<h1>' + esc(l.name || l.phone || l.email || 'عميل') + ' ' + personChip_(l.person_id) + '</h1>' +
       (ask ? '<div class="card small" style="border-color:var(--warn)">🌐 <b>جاء من «من يسأل الآن»</b> · ' + esc(ask.platform || '') + (ask.asked_where ? ' · 📍 ' + esc(ask.asked_where) : '') +
         '<div class="chips" style="margin-top:4px">' + (extUrl(ask.url) ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(extUrl(ask.url)) + '">📝 منشوره / سؤاله ↗</a>' : chip('بلا رابط للمنشور', 'warn')) +
         (extUrl(ask.asker_url) ? '<a class="chip acc" target="_blank" rel="noopener" href="' + esc(extUrl(ask.asker_url)) + '">👤 ملفه ' + esc(ask.asker_handle || '') + ' ↗</a>' : (ask.asker_handle ? chip('👤 ' + ask.asker_handle) : chip('👤 السائل غير محدد — أكمله من «من يسأل الآن» ✏️', 'warn'))) +
@@ -1654,6 +1654,60 @@ ACT.haSave = function () {
   var x = { app_id: val('ha_id') }; HA_FIELDS.forEach(function (f) { x[f] = val('ha_' + f); });
   act('homeAppSave', { app: x }, 'حُفظ');
 };
+</script>
+
+  <script>
+/* ═══════════ 👤 الأشخاص: الملف الموحّد + القائمة واقتراحات الربط (التصميم المعتمد 2026-10-10) ═══════════ */
+function personChip_(pid, label) { return pid ? '<a href="#" class="chip acc" data-go="person" data-args="' + attr({ person_id: pid }) + '" data-tip="الملف الموحّد: كل تاريخه من كل الجداول">👤 ' + esc(label || 'الملف الموحّد') + '</a>' : ''; }
+function pStatus_(p) { return p.opt_out === 'نعم' ? chip('⛔ لا تراسل', 'bad') : chip(p.status || '—', /دفع|عضو/.test(String(p.status)) ? 'good' : /تواصلنا|رد/.test(String(p.status)) ? 'acc' : ''); }
+SCREENS.person = { render: function (d) {
+  var p = d.person, ids = d.ids || {};
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">👤 ' + esc(p.name || p.handles || 'شخص بلا اسم') + ' ' + pStatus_(p) + '</h1>' +
+    '<span class="row" style="gap:4px;flex-wrap:wrap">' + (p.opt_out !== 'نعم' ? '<button class="btn sm pri" data-act="msgSheet" data-ref="' + attr(ids.lead_id ? { lead_id: ids.lead_id } : ids.ask_id ? { ask_id: ids.ask_id } : ids.eng_id ? { eng_id: ids.eng_id } : { imp_id: ids.imp_id }) + '">✉️ راسله</button>' : '') +
+    (ids.lead_id ? '<button class="btn sm" data-go="lead" data-args="' + attr({ lead_id: ids.lead_id }) + '">🧲 ملف العميل والمراحل</button>' : '') +
+    (p.opt_out !== 'نعم' ? '<button class="btn sm bad" data-act="pOptOut" data-id="' + esc(p.person_id) + '" data-tip="يسري على كل الجداول فوراً: لن يُراسَل من أي مكان">⛔ لا تراسل</button>' : '') + '</span></div>';
+  html += '<div class="ct-bottom" style="margin:6px 0">' + [[(d.where || []).map(function (w) { return w.label + (w.n > 1 ? ' ×' + w.n : ''); }).join(' · ') || '—', 'أين ظهر'], [[p.course_interest, p.segment, p.city].filter(String).join(' · ') || '—', 'اهتمامه'],
+    [p.last_contact ? fmtDate(p.last_contact, true) : 'لم نراسله', 'آخر تواصل'], [(d.lead && d.lead.paid_amount ? Number(d.lead.paid_amount).toLocaleString('en') + ' ر.س' : '—') + ' · ' + (d.member && d.member.member_no ? '🪪 ' + d.member.member_no : '—'), 'الدفع والعضوية']]
+    .map(function (k) { return '<span class="ct-k"><b>' + esc(k[0]) + '</b> ' + k[1] + '</span>'; }).join('') + '</div>';
+  html += '<div class="card"><div class="row" style="gap:6px;flex-wrap:wrap;align-items:flex-end">' +
+    [['name', 'الاسم', p.name], ['phone', 'الجوال', p.phone], ['email', 'البريد', p.email], ['handles', 'الحسابات (@…)', p.handles], ['city', 'المدينة', p.city]].map(function (f) { return '<label class="f" style="flex:1;min-width:140px">' + f[1] + '<input id="pf_' + f[0] + '" value="' + esc(f[2] || '') + '"' + (f[0] === 'phone' || f[0] === 'handles' || f[0] === 'email' ? ' dir="ltr"' : '') + '></label>'; }).join('') +
+    '<button class="btn sm" data-act="pSave" data-id="' + esc(p.person_id) + '" data-tip="يُكمل ما ينقص الملف — الرقم أو الحساب الجديد يربطه تلقائياً بأي ظهور آخر له">💾 حفظ</button></div><div class="muted tiny">person_id: ' + esc(p.person_id) + ' · أول ظهور: ' + esc(p.first_seen || '') + '</div></div>';
+  var sug = (d.suggestions || []).map(function (s) { var o = s.a.person_id === p.person_id ? s.b : s.a;
+    return '<div class="ct-ev"><span class="ct-tx">🔗 ' + esc(s.why) + ': <b>' + esc(o.name || o.handles || o.person_id) + '</b> <span class="muted tiny">(' + esc(o.first_seen || '') + (o.phone ? ' · جوال ' + esc(o.phone) : '') + ')</span></span>' +
+      '<a class="btn sm" href="#" data-go="person" data-args="' + attr({ person_id: o.person_id }) + '">افتح</a><button class="btn sm pri" data-act="pMerge" data-keep="' + esc(p.person_id) + '" data-drop="' + esc(o.person_id) + '">✓ نفس الشخص</button><button class="btn sm" data-act="pReject" data-a="' + esc(p.person_id) + '" data-b="' + esc(o.person_id) + '">✕ شخص آخر</button></div>'; }).join('');
+  if (sug) html += '<div class="card" style="border-color:var(--warn)"><b>🔗 اقتراحات ربط — هل هذا هو نفسه؟</b>' + sug + '</div>';
+  html += '<div class="card"><b>🕒 تاريخه كاملاً</b> <span class="muted tiny">— من كل الجداول · كل ما يحدث لاحقاً يُضاف هنا وحده</span>' +
+    ((d.timeline || []).map(function (e) { return '<div class="ct-ev" style="padding:3px 6px"><span class="muted tiny" style="min-width:110px">' + esc(fmtDate(e.at, true)) + '</span><span class="ct-tx">' + esc(e.icon) + ' ' + esc(e.text) + '</span>' + (e.go ? '<a class="btn sm ghost" href="#" data-go="' + esc(e.go) + '" data-args="' + attr(e.args || {}) + '">←</a>' : '') + '</div>'; }).join('') || empty('لا أحداث بعد')) + '</div>';
+  return html;
+} };
+ACT.pSave = function (el) { var o = { person_id: el.dataset.id }; ['name', 'phone', 'email', 'handles', 'city'].forEach(function (k) { o[k] = val('pf_' + k); }); act('personSave', o, 'حُفظ'); };
+ACT.pOptOut = function (el) { if (!confirm('لن يُراسَل هذا الشخص من أي مكان في النظام. متأكد؟')) return; act('personOptOut', { person_id: el.dataset.id }, '⛔ سُجّل في كل الجداول'); };
+ACT.pMerge = function (el) { act('personMerge', { keep: el.dataset.keep, drop: el.dataset.drop }, 'دُمجا في ملف واحد'); };
+ACT.pReject = function (el) { act('personReject', { a: el.dataset.a, b: el.dataset.b }, 'لن يُقترح مرة أخرى'); };
+
+SCREENS.persons = { render: function (d) {
+  var st = d.stats || {};
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">👤 الأشخاص <span class="muted tiny">— هوية واحدة لكل شخص عبر كل الجداول</span></h1>' +
+    '<span class="row" style="gap:4px"><input id="ps_q" placeholder="ابحث: اسم، جوال، @حساب" value="' + esc(d.q || '') + '" style="min-width:220px"><button class="btn sm" data-act="psSearch">🔎</button></span></div>';
+  html += '<div class="ct-bottom" style="margin:6px 0">' + [[st.persons, 'شخص'], [st.merged, 'دُمج'], [st.opt_out, 'لا تراسل'], [st.suggestions, 'اقتراح ربط']].map(function (k) { return '<span class="ct-k"><b>' + esc(k[0]) + '</b> ' + k[1] + '</span>'; }).join('') +
+    (st.backfill ? ' <span class="tag auto">✓ كل الصفوف القديمة مربوطة</span>' : ' <span class="tag warn">⏳ الربط الأولي يعمل في الخلفية</span> <button class="btn sm" data-act="psBackfill">▶ أكمل الآن</button>') + '</div>';
+  var sug = (d.suggestions || []).map(function (s) {
+    return '<div class="ct-ev"><span class="ct-tx">🔗 ' + esc(s.why) + ': <b>' + esc(s.a.name || s.a.handles) + '</b> <span class="muted tiny">(' + esc(s.a.first_seen || '') + ')</span> ⇄ <b>' + esc(s.b.name || s.b.handles) + '</b> <span class="muted tiny">(' + esc(s.b.first_seen || '') + ')</span></span>' +
+      '<a class="btn sm" href="#" data-go="person" data-args="' + attr({ person_id: s.a.person_id }) + '">افتح</a><button class="btn sm pri" data-act="pMerge" data-keep="' + esc(s.a.person_id) + '" data-drop="' + esc(s.b.person_id) + '">✓ نفس الشخص</button><button class="btn sm" data-act="pReject" data-a="' + esc(s.a.person_id) + '" data-b="' + esc(s.b.person_id) + '">✕ شخص آخر</button></div>'; }).join('');
+  if (sug) html += '<div class="card" style="border-color:var(--warn)"><b>🔗 اقتراحات ربط تنتظر تأكيدك</b> <span class="muted tiny">— نفس الحساب في مكانين؛ الرقم والبريد يُربطان آلياً بلا سؤال</span>' + sug + '</div>';
+  html += '<div class="card"><b>الأشخاص</b> <span class="muted tiny">(' + d.total + (d.total > 200 ? ' — يظهر أول ٢٠٠، ابحث للباقي' : '') + ')</span>' +
+    stripList_([
+      ['الاسم', 'minmax(140px,1.6fr)', function (p) { return '<b>' + esc(p.name || p.handles || '—') + '</b>'; }],
+      ['الحسابات', 'minmax(100px,1fr)', function (p) { return '<span class="muted tiny" dir="ltr">' + esc(p.handles || '') + '</span>'; }],
+      ['الجوال', '90px', function (p) { return p.phone ? '<span dir="ltr">' + esc(p.phone) + '</span>' : ''; }],
+      ['الحالة', '110px', function (p) { return pStatus_(p); }], ['أول ظهور', '110px', function (p) { return esc(p.first_seen || ''); }],
+      ['آخر تواصل', '110px', function (p) { return p.last_contact ? esc(fmtDate(p.last_contact)) : '<span class="muted">—</span>'; }]
+    ], d.rows || [], { key: 'persons', id: function (p) { return p.person_id; }, act: 'psOpen' }) + '</div>';
+  return html;
+} };
+ACT.psSearch = function () { go('persons', { q: val('ps_q') }); };
+ACT.psOpen = function (el) { go('person', { person_id: el.dataset.id }); };
+ACT.psBackfill = function (el) { el.disabled = true; act('personBackfill', {}, function (r) { return r.done ? '✓ اكتمل الربط' : 'رُبط ' + r.linked + ' · متبقٍ ' + r.remaining + ' (اضغط مرة أخرى)'; }); };
 </script>
 
   <script>
@@ -4357,7 +4411,7 @@ SCREENS.sources = { render: function (d, args) {
       (r.send_error ? '<div class="small" style="color:var(--bad)">' + esc(r.send_error) + '</div>' : '') +
       '<div class="small muted">' + [r.phone, r.email].filter(String).map(esc).join(' · ') + ' · ' + esc(r.source_name) + '</div>' +
       (r.handles ? '<div class="small">الحسابات: ' + esc(r.handles) + '</div>' : '') +
-      '<div class="btns"><button class="btn sm pri" data-act="msgSheet" data-ref="' + attr({ imp_id: r.imp_id }) + '">✉️ راسله</button><a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '" data-act="srcdbSearched" data-id="' + esc(r.imp_id) + '">🔎 ابحث عنه</a>' +
+      '<div class="btns"><button class="btn sm pri" data-act="msgSheet" data-ref="' + attr({ imp_id: r.imp_id }) + '">✉️ راسله</button>' + (r.person_id ? '<a class="btn sm" href="#" data-go="person" data-args="' + attr({ person_id: r.person_id }) + '">👤 ملفه</a>' : '') + '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(searchQ) + '" data-act="srcdbSearched" data-id="' + esc(r.imp_id) + '">🔎 ابحث عنه</a>' +
       '<button class="btn sm pri" data-act="srcdbFound" data-id="' + esc(r.imp_id) + '">➕ أضف ما وجدته وانقله للتسويق</button></div>' +
       (stop ? '<div class="small" style="color:var(--bad)">طلب عدم التواصل — لا تُرسل له.</div>' :
         '<textarea id="dm_' + esc(r.imp_id) + '" style="min-height:90px">' + esc(r.draft_msg || '') + '</textarea>' +
@@ -4923,7 +4977,7 @@ document.addEventListener('input', function (e) {
 });
 function normAr_(t) { return String(t || '').toLowerCase().replace(/[إأآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[ً-ْ]/g, '').trim(); }
 function askAskerHtml_(o) {
-  var who = o.asker_name || o.asker_handle;
+  var who = (o.asker_name || o.asker_handle || '') + (o.person_id ? ' <a href="#" data-go="person" data-args="' + attr({ person_id: o.person_id }) + '" data-tip="الملف الموحّد: كل تاريخه">👤</a>' : '');
   var banner = '<div class="small" style="margin-top:6px;padding:4px 8px;border-radius:8px;background:var(--warn-soft)">🌐 <b>منشور علني على ' + esc(o.platform) + ' — ليس رسالة لنا.</b> ' +
     (o.asked_where ? '📍 كتبه: <b>' + esc(o.asked_where) + '</b>' : '<span class="muted">أين كتبه؟ (منشوره / تحت منشور منافس / مجموعة) — اضغط ✏️</span>') +
     ' · ' + (o.lead_id ? '✓ يُتابَع في <a href="#" data-go="lead" data-args="' + attr({ lead_id: o.lead_id }) + '">مراحل العملاء</a>' : 'يدخل المتابعة تلقائياً عند «تم الرد»') + '</div>';
@@ -6546,7 +6600,7 @@ SCREENS.engage = { after: function () {
   var rows = (d.rows || []).filter(function (e) { return e.status !== 'مستبعد'; });
   html += '<div class="row between" style="align-items:center;margin-top:10px"><b>٢) الأسئلة والردود الجاهزة</b><span class="muted tiny">الرد يُنشر بضغطتك (المنصات تمنع الرد الآلي) · «✓ رددت» يضيف السائل لمراحل العملاء</span></div>';
   html += rows.length ? stripList_([
-    ['السائل', '120px', function (e) { return '<b>' + (e.asker ? '@' + esc(e.asker) : '—') + '</b>'; }],
+    ['السائل', '120px', function (e) { return '<b>' + (e.asker ? '@' + esc(e.asker) : '—') + '</b>' + (e.person_id ? ' <a href="#" data-go="person" data-args="' + attr({ person_id: e.person_id }) + '" data-tip="الملف الموحّد">👤</a>' : ''); }],
     ['السؤال', 'minmax(140px,2fr)', function (e) { return esc(e.question); }],
     ['النوع', '120px', function (e) { return String(e.qtype || '').split('،').map(function (t) { return chip(Engage_icon_(t) + ' ' + t, t === 'سعر' ? 'warn' : t === 'اعتماد' ? 'acc' : ''); }).join(' '); }],
     ['النية', '65px', function (e) { var n = Number(e.intent) || 1; return '★★★★★'.slice(0, n) + '<span class="muted">' + '★★★★★'.slice(0, 5 - n) + '</span>'; }],
