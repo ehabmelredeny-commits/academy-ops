@@ -545,7 +545,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2ftc4r";
+  var APP_BUILD = "mv2gqmcm";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -776,7 +776,15 @@ function go(screen, args, keepScroll) {
   S.shownStale = false;
   if (cached) { draw(cached, true); S.shownStale = true; }
   else if (!keepScroll) $('main').innerHTML = '<div class="loading">جارٍ التحميل…</div>';
+  // لقطة Supabase (أسرع من جوجل) — تُعرض حتى يصل الرد الكامل من جوجل
+  var gotFresh = false;
+  if (!keepScroll && !Object.keys(S.args).length) supaGet_(screen).then(function (snap) {
+    if (!snap || gotFresh || token !== S.token) return;
+    if (cached && cached.poll && snap.poll && cached.poll.sig === snap.poll.sig) return;
+    draw(snap, true); S.shownStale = true;
+  });
   api('screen', screen, S.args).then(function (data) {
+    gotFresh = true;
     cachePut_(ck, data);
     draw(data, false);
   }).catch(function (e) {
@@ -785,6 +793,27 @@ function go(screen, args, keepScroll) {
     $('main').innerHTML = '<div class="card"><b>تعذّر التحميل</b><div class="muted">' + esc(errMsg(e)) + '</div>' +
       '<div class="btns"><button class="btn" data-go="' + esc(screen) + '">إعادة المحاولة</button></div></div>';
   });
+}
+
+/* Supabase: الرابط والمفتاح العام من الخادم (مرة)، واسم الصف = SHA-256(مفتاح الدخول|الشاشة|{}) */
+var SUPA = null;
+function supaInit_(force) {
+  if (CACHE_NS.indexOf('sbx_') > -1) return Promise.resolve(null);
+  if (!force) {
+    var s = null; try { s = JSON.parse(localStorage.getItem('ops_supa') || 'null'); } catch (e) {}
+    if (s && (s.url || Date.now() - (s.at || 0) < 6 * 3600e3)) return Promise.resolve(SUPA = s.url ? s : null); // غير مربوط: يُعاد السؤال كل ٦ ساعات
+  }
+  return api('action', 'supaClient').then(function (c) { SUPA = c && c.url ? c : null; try { localStorage.setItem('ops_supa', JSON.stringify(SUPA || { at: Date.now() })); } catch (e) {} return SUPA; }).catch(function () { return null; });
+}
+function supaGet_(screen) {
+  if (!window.crypto || !crypto.subtle || !window.fetch) return Promise.resolve(null);
+  return supaInit_().then(function (c) {
+    if (!c) return null;
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(UI_KEY + '|' + screen + '|{}')).then(function (b) {
+      var k = Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+      return fetch(c.url.replace(/\/$/, '') + '/rest/v1/rpc/get_screen', { method: 'POST', headers: { apikey: c.anon, Authorization: 'Bearer ' + c.anon, 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k }) });
+    }).then(function (r) { return r.ok ? r.json() : null; });
+  }).catch(function () { return null; });
 }
 
 /* نسخة محلية من كل شاشة (في هذا المتصفح فقط) لفتح فوري */
@@ -1881,6 +1910,7 @@ ACT.postSched = function (el) {
 };
 ACT.postPub = function (el) { act('postPublished', { post_id: el.dataset.id, ref: val('pu_' + el.dataset.id) }, 'سُجّل النشر'); };
 
+ACT.supaPush = function (el) { el.disabled = true; el.textContent = '⏳ يدفع…'; api('action', 'supaPush').then(function (r) { el.disabled = false; el.textContent = '⚡ اختبر الدفع الآن'; supaInit_(true); toast(r.pushed ? '✓ دُفعت ' + r.pushed + ' شاشات إلى Supabase' + (r.errors && r.errors.length ? ' (تعذّر ' + r.errors.length + ')' : '') : '✗ لم يُدفع شيء', !r.pushed); }).catch(function (e) { el.disabled = false; el.textContent = '⚡ اختبر الدفع الآن'; toast(errMsg(e), true); }); };
 ACT.claudePing = function (el) { el.disabled = true; el.textContent = '⏳ يختبر…'; api('action', 'claudePing').then(function (r) { toast(r.light === 'green' ? '✓ Claude يعمل والرصيد سليم' : '✗ ' + r.label + ' — ' + r.msg, r.light !== 'green'); go('settings', { tab: 'channels' }, true); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 ACT.secretSave = function (el) {
   var k = el.dataset.k, v = val('sk_' + k);
@@ -2051,7 +2081,11 @@ SCREENS.settings = { render: function (d, args) {
       '<div class="card"><b>▶️ يوتيوب ' + (st.youtube ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">مفتاح مجاني من Google Cloud ← YouTube Data API v3 — يفعّل مراقبة تعليقات المنافسين والبحث عن السائلين.</div>' +
       key('YT_API_KEY', 'مفتاح YouTube Data API', 'AIza…', true) + '</div>' +
       '<div class="card"><b>فيسبوك ' + (st.facebook ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">للنشر على صفحة الأكاديمية فقط (رمز صفحة طويل الأمد + معرّف الصفحة).</div>' +
-      key('FB_PAGE_TOKEN', 'رمز الصفحة', '…', true) + key('FB_PAGE_ID', 'معرّف الصفحة', '1234…') + '</div>';
+      key('FB_PAGE_TOKEN', 'رمز الصفحة', '…', true) + key('FB_PAGE_ID', 'معرّف الصفحة', '1234…') + '</div>' +
+      '<div class="card"><b>⚡ Supabase (السرعة) ' + (st.supabase && st.supabase_anon ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">جوجل يبقى الأصل؛ Supabase يعرض الشاشات فوراً. من Project Settings ← API Keys. المفتاح السري (secret / service_role) يُلصق هنا فقط — لا تشاركه مع أحد.</div>' +
+      key('SUPABASE_URL', 'رابط المشروع', 'https://xxxx.supabase.co') + key('SUPABASE_ANON', 'المفتاح العام (publishable / anon)', 'sb_publishable_… أو eyJ…', true) +
+      key('SUPABASE_SECRET', 'المفتاح السري (secret / service_role)', st.supabase ? '✓ محفوظ — الصق جديداً للاستبدال فقط' : 'sb_secret_… أو eyJ…', true) +
+      '<div class="row" style="gap:6px;margin-top:4px"><button class="btn sm" data-act="supaPush">⚡ اختبر الدفع الآن</button></div></div>';
     html += '<div class="card"><div class="row between"><b>مفتاح الإرسال الآلي العام</b><span>' + switchHtml(String(outb) === 'true', 'outboundToggle', 'x') + '</span></div>' +
       '<div class="small muted">عند الإيقاف لا يخرج أي شيء آلياً مهما جُدول. التشغيل = المرحلة ١.</div></div>' +
       '<div class="card"><b>واتساب ' + (st.whatsapp ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">من حساب Meta للأعمال باسم الأكاديمية (System User) — لا حساب شخصي. رقم مخصص للأكاديمية. ' +
