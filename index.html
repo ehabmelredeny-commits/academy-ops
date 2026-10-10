@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2pree4";
+  var APP_BUILD = "mv2pv50x";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -686,7 +686,7 @@ var TAB_GROUPS = [
   ['news', '📰 السوق والبحث', [['news', 'الأخبار'], ['discovery', 'الاكتشافات'], ['search', 'البحث الذكي'], ['keywords', 'الكلمات'], ['homeapps', 'تطبيقات المدرب'], ['exams', 'الاختبارات']]],
   ['dailyPost', '📣 التسويق', [['dailyPost', 'منشور اليوم'], ['ads', 'الإعلانات الموجّهة'], ['campaigns', 'الحملات'], ['content', 'بنك الأفكار'], ['register', 'نموذج التسجيل']]],
   ['courses', '🎓 الدورات والمبيعات', [['courses', 'الدورات'], ['calendar', 'التقويم'], ['payments', 'المدفوعات']]],
-  ['sysmap', '⚙️ النظام', [['sysmap', 'خريطة النظام والنواقص'], ['automap', '🤖 المهام التلقائية'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف'], ['settings', 'الإعدادات'], ['info', 'الدليل'], ['sandbox', 'التجريبي']]]
+  ['sysmap', '⚙️ النظام', [['sysmap', 'خريطة النظام والنواقص'], ['automap', '🤖 الأوتوماتيك'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف'], ['settings', 'الإعدادات'], ['info', 'الدليل'], ['sandbox', 'التجريبي']]]
 ];
 function tabGroup_(k) { for (var i = 0; i < TAB_GROUPS.length; i++) { if (TAB_GROUPS[i][2].some(function (t) { return t[0] === k; })) return TAB_GROUPS[i]; } return null; }
 function tabTip_(k, label) { var p = typeof PAGE_INFO !== 'undefined' && PAGE_INFO[k]; return p && p.what ? p.what : 'افتح «' + label + '»'; }
@@ -1138,7 +1138,7 @@ SCREENS.today = {
         chip(m.segment) + (m.b2b_badge === 'نعم' ? chip('قناة B2B', 'owner') : '') + (extra || '') + '</div></div>';
     };
     var html = north(d.north) + '<h1>اليوم</h1>';
-    if (d.paused) html += '<div class="card" style="border-color:var(--bad)"><b style="color:var(--bad)">⏸ كل المهام التلقائية موقوفة</b> <button class="btn sm" data-go="flow">المخطط</button></div>';
+    if (d.paused) html += '<div class="card" style="border-color:var(--bad)"><b style="color:var(--bad)">⏸ كل الأوتوماتيك موقوف</b> <button class="btn sm" data-go="flow">المخطط</button></div>';
     if (!d.outbound_enabled) html += '<div class="muted small" style="margin-bottom:8px">المرحلة صفر: لا يُرسل شيء آلياً — تنسخ الرد المعتمد وترسله بنفسك.</div>';
     html += '<div class="row">' +
       '<div class="stat click" data-go="reply"><div class="v">' + d.counts.waiting + '</div><div class="k">بانتظار موافقتك</div></div>' +
@@ -1495,7 +1495,7 @@ function sysmapSvg_() {
     arr('M182 152 L216 152') + arr('M342 152 L376 152') + arr('M502 152 L536 152') + arr('M600 182 L600 208 L668 208 L668 6 L600 6 L600 16', true) +
     nodes +
     '<g class="smn" data-go="automap" style="cursor:pointer"><rect x="220" y="226" width="280" height="44" rx="6" fill="rgba(127,119,221,.14)" stroke="#7F77DD" stroke-width="0.8"/>' +
-    '<text x="360" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">🤖 المهام التلقائية تشغّل كل ما سبق</text></g>' +
+    '<text x="360" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">🤖 الأوتوماتيك يشغّل كل ما سبق</text></g>' +
     arr('M280 224 L280 184', true) + arr('M440 224 L440 184', true) + '</svg>';
 }
 SCREENS.sysmap = { render: function (d) {
@@ -1855,7 +1855,7 @@ SCREENS.modules = { render: function (d) {
   var u = d.usage;
   return north(d.north) + '<h1>الوحدات</h1><div class="card"><div class="row between small"><span>تشغيل اليوم ' + Math.round(u.sec / 6) / 10 + ' من ' + u.quota_min + ' دقيقة</span><span>' + u.pct + '%</span></div>' +
     '<div class="bar ' + (u.pct >= 70 ? 'bad' : u.pct >= 60 ? 'warn' : '') + '"><i style="width:' + Math.min(100, u.pct) + '%"></i></div>' +
-    (d.paused ? '<div style="color:var(--bad)">⏸ كل المهام التلقائية موقوفة — من شاشة المخطط</div>' : '') + '</div>' +
+    (d.paused ? '<div style="color:var(--bad)">⏸ كل الأوتوماتيك موقوف — من شاشة المخطط</div>' : '') + '</div>' +
     stripList_([
       ['تعمل', '50px', function (m) { return m.kind === 'human' ? chip('دائماً', 'owner') : switchHtml(m.enabled === 'مفعّل', 'modToggle', m.module_key); }],
       ['الوحدة', 'minmax(150px,1.6fr)', function (m) { return '<b>' + esc(m.module_name_ar) + '</b>' + (m.critical === 'نعم' ? ' ' + chip('حرجة', 'acc') : ''); }],
@@ -2477,7 +2477,7 @@ SCREENS.flow = {
       '<div class="lab"><span>الـ tick الخامل: ' + u.idle_avg_sec + ' ث</span><span>ticks: ' + u.ticks + '</span></div></div>' +
       '<div><div class="lab"><span>Claude اليوم: ' + c.spent + '$ من ' + c.budget + '$</span><span>' + cPct + '%</span></div>' +
       '<div class="bar ' + (cPct >= 100 ? 'bad' : cPct >= 70 ? 'warn' : '') + '"><i style="width:' + Math.min(100, cPct) + '%"></i></div></div>' +
-      '<div class="master ' + (d.paused ? 'paused' : '') + '"><b>' + (d.paused ? '⏸ المهام التلقائية موقوفة' : 'كل المهام التلقائية تعمل') + '</b>' +
+      '<div class="master ' + (d.paused ? 'paused' : '') + '"><b>' + (d.paused ? '⏸ الأوتوماتيك موقوف' : 'كل الأوتوماتيك تعمل') + '</b>' +
       switchHtml(!d.paused, 'flowMaster', 'all') + '</div></div>' +
       (d.raise_tick_hint ? '<div class="card small" style="border-color:var(--warn)">الاستهلاك تجاوز ٦٠٪ — ارفع tick_minutes إلى 15 من <a href="#" data-go="settings">الإعدادات</a>.</div>' : '') +
       (u.pct >= 70 ? '<div class="card small" style="border-color:var(--bad)">تجاوز ٧٠٪: الوحدات غير الحرجة مؤجّلة لليوم التالي.</div>' : '') +
@@ -2551,8 +2551,8 @@ window.addEventListener('resize', function () { if (S.screen === 'flow') drawEdg
 ACT.flowPresent = function () { FLOW.present = !FLOW.present; $('main').innerHTML = SCREENS.flow.render(FLOW.data); requestAnimationFrame(drawEdges); };
 ACT.flowMaster = function (el) {
   var paused = !el.checked;
-  if (paused && !confirm('إيقاف كل المهام التلقائية الآن؟ (موافقتك على الردود تبقى متاحة)')) { el.checked = true; return; }
-  act('pauseAll', { paused: paused }, paused ? '⏸ أُوقفت كل المهام التلقائية' : '▶ استُؤنفت المهام التلقائية');
+  if (paused && !confirm('إيقاف كل الأوتوماتيك الآن؟ (موافقتك على الردود تبقى متاحة)')) { el.checked = true; return; }
+  act('pauseAll', { paused: paused }, paused ? '⏸ أُوقف كل الأوتوماتيك' : '▶ استُؤنفت الأوتوماتيك');
 };
 
 /* ─── اللوحة الجانبية لعقدة ─── */
@@ -5577,11 +5577,11 @@ function tagChips_(k) {
   return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span class="chip ttag-' + c + '" title="' + TAG_INFO[c][1] + '">' + TAG_INFO[c][0] + ' ' + TAG_INFO[c][1].split(' —')[0].replace(' (مدفوع)', ' مدفوع') + '</span>' : ''; }).join('');
 }
 
-/* ═══════════ 🤖 المهام التلقائية: خريطة ما يعمله النظام وحده ═══════════ */
+/* ═══════════ 🤖 الأوتوماتيك: خريطة ما يعمله النظام وحده ═══════════ */
 var LIGHT = { green: ['#2a9d8f', 'تعمل'], red: ['#d64545', 'متوقفة/متأخرة'], amber: ['#e9a23b', 'مؤجّلة'], paid: ['#8d6cd8', 'تنتظر الرصيد'], off: ['#8a817c', 'مطفأة'], idle: ['#5b7a99', 'عند الحدث/يدوية'] };
 SCREENS.automap = { render: function (d) {
   var c = d.count;
-  var html = north(d.north) + '<h1>🤖 المهام التلقائية — ماذا يعمل النظام وحده</h1>';
+  var html = north(d.north) + '<h1>🤖 الأوتوماتيك — ماذا يعمل النظام وحده</h1>';
   html += '<div class="card small row" style="gap:10px"><span>' + dot_(d.tick_ok ? 'green' : 'red') + ' <b>المُشغِّل الآلي (كل ١٠ دقائق):</b> ' +
     (d.sandbox ? 'متوقف في التجريبي (بقصد)' : d.tick_ok ? 'يعمل — آخر تشغيل ' + fmtDate(d.last_tick, true) : 'لم يعمل منذ مدة — آخر تشغيل ' + fmtDate(d.last_tick, true)) + '</span>' +
     '<span>' + dot_(d.claude_on ? 'green' : 'paid') + ' <b>رصيد Claude:</b> ' + (d.claude_on ? 'متاح' : 'غير مشحون — الأدوات 💳 تنتظر') + '</span></div>';
@@ -5733,7 +5733,7 @@ var PAGE_INFO = {
       ['نشرته ✓', 'بعد النشر اليدوي تلصق الرابط.', 'يُقاس لاحقاً: أي منشور جلب عملاء.']] },
   flow: { t: 'المخطط', what: 'خريطة حية لكل أجزاء النظام وحالتها الآن (تعمل/متوقفة/خطأ) واستهلاك الحصة.', why: 'تطمئن أن الماكينة التسويقية تعمل وحدها، وتعرف أين الخلل فوراً.',
     btns: [['عرض للاجتماع', 'نسخة مبسطة للعرض على شريك أو مستثمر.', 'تشرح نظامك في دقيقة.'],
-      ['إيقاف كل المهام التلقائية', 'زر طوارئ يوقف كل شيء.', 'أمان عند أي خطأ.']] },
+      ['إيقاف كل الأوتوماتيك', 'زر طوارئ يوقف كل شيء.', 'أمان عند أي خطأ.']] },
   calendar: { t: 'تقويم الدورات', what: 'بداية ونهاية كل دفعة لكل دورة على تقويم شهري، مع التكرار وورقة طباعة لكل دفعة.', why: 'مواعيد حقيقية = إلحاح حقيقي في التسويق («تبدأ الدفعة ١٥ أكتوبر، بقي ٤ مقاعد») بدون اختراع.',
     btns: [['＋ دفعة جديدة', 'تحدد الدورة، البداية، النهاية، أيام الجلسات، المقاعد.', 'أقرب دفعة تُحدّث الدورة تلقائياً فتستخدمها الردود والمنشورات.'],
       ['🔁 تكرار', 'ينسخ الدفعة بتواريخ جديدة بعد الحالية.', 'تجدول السنة كاملة في دقائق.'],
@@ -5778,7 +5778,7 @@ var PAGE_INFO = {
   comptimeline: { t: '📈 خط زمني دورات المنافسين', what: 'كل دورة منافس خط رفيع على السنة (البداية ← النهاية) بالسعر والساعات والنوع، مع دوراتنا للمقارنة.', why: 'ترى من يبدأ قبلنا وأين الفراغ في التقويم.', btns: [] },
   inbox: { t: '💬 صندوق الرسائل', what: 'كل رسائل العملاء الواردة في مكان واحد مع حالتها والرد المقترح.', why: 'لا تبقى رسالة بلا رد.', btns: [] },
   reports: { t: '📊 التقارير', what: 'التقارير اليومية والأسبوعية: العملاء، التسجيلات، الإيراد، المنافسون.', why: 'صورة واحدة لأداء الأسبوع.', btns: [] },
-  automap: { t: '🤖 المهام التلقائية', what: 'خريطة كل ما يعمله النظام وحده: الوحدات، مواعيدها، وحالتها (تعمل / متوقفة / تنتظر الرصيد).', why: 'تعرف ما يعمل آلياً وما يحتاج تدخلك.', btns: [] },
+  automap: { t: '🤖 الأوتوماتيك', what: 'خريطة كل ما يعمله النظام وحده: الوحدات، مواعيدها، وحالتها (تعمل / متوقفة / تنتظر الرصيد).', why: 'تعرف ما يعمل آلياً وما يحتاج تدخلك.', btns: [] },
   register: { t: '🔗 نموذج التسجيل', what: 'رابط نموذج التسجيل العام للدورات — يدخل منه العميل بياناته مباشرة.', why: 'تسجيل بلا مراسلات.', btns: [] },
   payments: { t: '💰 المدفوعات', what: 'المدفوعات المسجّلة لكل دورة وعميل.', why: 'تعرف من دفع ومن ينتظر.', btns: [] },
   homeapps: { t: '📱 تطبيقات المدرب أونلاين', what: 'تطبيقات المدربين أونلاين وإلى مكانك في السعودية — يبحث عنها النظام أسبوعياً ويضيف الجديد لتراجعه.', why: 'منافسون غير مباشرين وشركاء محتملون.', btns: [] },
