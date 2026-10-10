@@ -551,7 +551,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2hbc9d";
+  var APP_BUILD = "mv2hgddf";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -816,7 +816,7 @@ function supaGet_(screen) {
   if (!window.crypto || !crypto.subtle || !window.fetch) return Promise.resolve(null);
   return supaInit_().then(function (c) {
     if (!c) return null;
-    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(UI_KEY + '|' + screen + '|{}')).then(function (b) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode((typeof opsKey_ === 'function' ? opsKey_() : UI_KEY) + '|' + screen + '|{}')).then(function (b) {
       var k = Array.prototype.map.call(new Uint8Array(b), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
       return fetch(c.url.replace(/\/$/, '') + '/rest/v1/rpc/get_screen', { method: 'POST', headers: { apikey: c.anon, Authorization: 'Bearer ' + c.anon, 'Content-Type': 'application/json' }, body: JSON.stringify({ key: k }) });
     }).then(function (r) { return r.ok ? r.json() : null; });
