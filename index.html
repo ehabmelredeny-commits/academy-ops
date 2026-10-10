@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2i20ny";
+  var APP_BUILD = "mv2j8fdb";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -6612,7 +6612,7 @@ SCREENS.members = { render: function (d) {
   html += '<div class="ct-bottom" style="margin:6px 0">' + [[st.members, 'أعضاء نشطون'], [st.candidates, 'بانتظار الدفع'], [st.referrals, 'إحالات'], [st.converted, 'دفعوا'], [pn(st.revenue) + ' ر.س', 'عائد'], [pn(d.cost) + ' ر.س', 'كلفة الخصومات'],
     [d.ratio === null ? '—' : d.ratio + '×', 'العائد لكل ريال خصم']].map(function (k) { return '<span class="ct-k"><b>' + esc(k[0]) + '</b> ' + k[1] + '</span>'; }).join('') + '</div>';
   var mem = (d.members || []).map(function (m) {
-    var act = m.status === 'نشط' ? '<button class="btn sm" data-act="memCard" data-mem="' + attr(m) + '" data-tip="ينسخ نص البطاقة (الاسم + رقم العضوية + الجملة) لترسله بنفسك — يُستبدل بصورة البطاقة بعد تصميمها">📤 أرسل البطاقة</button>' : '<span class="muted tiny">يصدر رقمه بعد «تسجيل ودفع»</span>';
+    var act = m.status === 'نشط' ? '<button class="btn sm" data-act="memCard" data-mem="' + attr(m) + '" data-tip="ينزّل صورة بطاقة العضوية (الاسم + رقم العضوية) وينسخ نص الرسالة لترسلهما بنفسك — الشعار واسم الأكاديمية مؤقتان حتى اكتمال الأوراق">🪪 البطاقة</button>' : '<span class="muted tiny">يصدر رقمه بعد «تسجيل ودفع»</span>';
     return '<div class="ct-ev"><span class="no">' + esc(m.member_no || '—') + '</span><span class="ct-tx"><b>' + esc(m.name) + '</b> <span class="muted">· ' + (m.issued_at ? 'منذ ' + Math.max(0, Math.round((Date.now() - new Date(m.issued_at)) / 864e5)) + ' يوماً' : 'وقّع الموافقة') + '</span></span>' +
       '<span class="tag ' + (m.status === 'نشط' ? 'auto' : m.status === 'مرشّح' ? 'warn' : '') + '">' + (m.status === 'نشط' ? '🟢 نشط' : m.status === 'مرشّح' ? '⏳ مرشّح' : esc(m.status)) + '</span>' +
       (m.status === 'نشط' ? '<span class="tag">' + (Number(m.referrals_paid) ? m.referrals_paid + ' إحالات · رصيد ' + m.credit_pct + '%' : 'لا إحالات بعد') + '</span>' : '') + act + '</div>';
@@ -6630,11 +6630,34 @@ SCREENS.members = { render: function (d) {
   return html;
 } };
 ACT.memCard = function (el) {
-  var m = JSON.parse(el.dataset.mem), d = (SCREENS.members.cur || {});
+  var m = JSON.parse(el.dataset.mem);
   var pitch = (S.data && S.data.pitch) || '';
   copyText('مبروك ' + (m.name || '') + '! رقم عضويتك في مجتمع الأكاديمية: ' + m.member_no + (pitch ? '\n' + pitch : ''));
-  toast('نُسخ نص البطاقة — أرسله بنفسك (واتساب مثلاً)');
+  memCardPng_(m).then(function (url) {
+    var a = document.createElement('a'); a.href = url; a.download = 'membership-' + m.member_no + '.png'; document.body.appendChild(a); a.click(); a.remove();
+    toast('نُزّلت صورة البطاقة ونُسخ نصها — أرسلهما للعضو بنفسك');
+  });
 };
+/** صورة بطاقة العضوية (1012×638 بمقاس البطاقة البنكية). الاسم والشعار مؤقتان حتى اكتمال الأوراق: إعداد academy_name */
+function memCardPng_(m) {
+  var W = 1012, H = 638, c = document.createElement('canvas'); c.width = W; c.height = H;
+  var x = c.getContext('2d'), name = (S.data && S.data.academy_name) || 'اسم الأكاديمية (مؤقت)';
+  var g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#0b2a3c'); g.addColorStop(1, '#14596e');
+  x.fillStyle = g; x.beginPath(); x.roundRect ? x.roundRect(0, 0, W, H, 36) : x.rect(0, 0, W, H); x.fill();
+  x.strokeStyle = 'rgba(241,194,27,.85)'; x.lineWidth = 3; x.beginPath(); x.roundRect ? x.roundRect(18, 18, W - 36, H - 36, 26) : x.rect(18, 18, W - 36, H - 36); x.stroke();
+  x.direction = 'rtl'; x.textAlign = 'right'; x.fillStyle = '#f1c21b';
+  x.beginPath(); x.arc(W - 110, 110, 56, 0, Math.PI * 2); x.fill(); // مكان الشعار (مؤقت)
+  x.fillStyle = '#0b2a3c'; x.font = '700 22px Tajawal, sans-serif'; x.textAlign = 'center'; x.fillText('الشعار', W - 110, 118);
+  x.textAlign = 'right'; x.fillStyle = '#fff'; x.font = '700 40px Tajawal, sans-serif'; x.fillText(name, W - 190, 105);
+  x.fillStyle = '#f1c21b'; x.font = '500 26px Tajawal, sans-serif'; x.fillText('بطاقة عضوية · مجتمع الأكاديمية', W - 190, 150);
+  x.fillStyle = '#fff'; x.font = '700 54px Tajawal, sans-serif'; x.fillText(String(m.name || ''), W - 70, 340);
+  x.fillStyle = 'rgba(255,255,255,.7)'; x.font = '400 24px Tajawal, sans-serif'; x.fillText('رقم العضوية', W - 70, 420);
+  x.direction = 'ltr'; x.textAlign = 'left'; x.fillStyle = '#f1c21b'; x.font = '700 64px monospace'; x.fillText(String(m.member_no || ''), 70, 430);
+  x.direction = 'rtl'; x.textAlign = 'right'; x.fillStyle = 'rgba(255,255,255,.75)'; x.font = '400 22px Tajawal, sans-serif';
+  x.fillText('شارك رقمك مع أصدقائك ليحصلوا على خصم عند التسجيل', W - 70, 540);
+  x.fillText('صادرة: ' + (m.issued_at ? String(m.issued_at).slice(0, 10) : ''), W - 70, 580);
+  return (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { return c.toDataURL('image/png'); });
+}
 </script>
 
   <script>
@@ -6674,7 +6697,9 @@ function stMarket_(d) {
   var sw = d.sweep ? '<div class="muted tiny" style="margin-top:4px">🔎 مسح السوق الأسبوعي: ' + esc(stAgo_(d.sweep.at)) + ' · وجد ' + d.sweep.added + ' جهة جديدة للمراجعة' + (d.sweep.names && d.sweep.names.length ? ': ' + d.sweep.names.map(esc).join('، ') : '') + ' <a href="#" data-go="discovery">الاكتشافات ←</a></div>' : '';
   return '<details class="card" style="margin-top:6px"' + (ST.open === '__m' ? ' open' : '') + '><summary><b>🧠 ما تعلّمه العقل من السوق</b> <span class="muted tiny">— من ' + m.n + ' دورة مقروءة في صفحات الدفع · يغذّي بناء متجرنا وتسويقنا</span></summary>' +
     '<div style="margin-top:6px"><b class="small">نطاقات الأسعار لكل فئة</b>' + bands + '</div><div class="small" style="margin-top:6px">طريقة التقديم: ' + mix + ' · نساء فقط ' + m.women + ' · رجال فقط ' + m.men + ' · باقات ' + m.bundles + '</div>' +
-    '<div style="margin-top:6px"><b class="small">💡 قرارات لمتجرنا (من الأرقام)</b>' + tips + '</div><div style="margin-top:6px"><b class="small">⚠️ أخطاء عند المنافسين لنتجنبها</b>' + mis + '</div>' + nar + sw + '</details>';
+    '<div style="margin-top:6px"><b class="small">💡 قرارات لمتجرنا (من الأرقام)</b>' + tips + '</div>' + (m.accred && m.accred.phrases && m.accred.phrases.length ? '<div style="margin-top:6px"><b class="small">🎓 كيف يكتب المنافسون الاعتماد</b> <span class="muted tiny">— يُذكر في ' + m.accred.pct + '% من دوراتهم، والجهة الحكومية في ' + m.accred.gov_pct + '% فقط · جملنا: «معتمدة من وزارة الرياضة ومعهد إعداد القادة (LDI)»</span>' +
+    m.accred.phrases.map(function (p) { return '<div class="small" style="margin:2px 0">«' + esc(p.text) + '» <span class="muted tiny">— ' + esc(p.who) + (p.n > 1 ? ' ×' + p.n : '') + '</span></div>'; }).join('') + '</div>' : '') +
+    '<div style="margin-top:6px"><b class="small">⚠️ أخطاء عند المنافسين لنتجنبها</b>' + mis + '</div>' + nar + sw + '</details>';
 }
 SCREENS.storecourses = { render: function (d) {
   ST.data = d;
