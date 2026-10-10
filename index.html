@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2ldd68";
+  var APP_BUILD = "mv2lmc10";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -4862,16 +4862,20 @@ ACT.askLink = function (el) { linkHelpModal_({ ask_id: el.dataset.id }); };
 function linkHelpModal_(ref) {
   api('action', 'engageLinkHelp', ref).then(function (h) {
     var accts = (h.accounts || []).map(function (a) { return '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(extUrl(a.url)) + '">' + esc(a.platform) + (a.handle ? ' ' + esc(a.handle) : '') + ' ↗</a>'; }).join(' ') || '<span class="muted">لا حسابات مسجّلة لهذا المنافس — أضفها من «ملفات المنافسين»</span>';
-    var offs = (h.offers || []).map(function (o) { return '<div class="muted tiny">• «' + esc(o.headline) + '» ' + esc(o.platform || '') + '</div>'; }).join('');
+    var offs = (h.offers || []).map(function (o) { var u = extUrl(o.url); return '<div class="muted tiny">• ' + (u ? '<a target="_blank" rel="noopener" href="' + esc(u) + '">«' + esc(o.headline) + '» ↗</a>' : '«' + esc(o.headline) + '»') + ' ' + esc(o.platform || '') + '</div>'; }).join('');
+    var posts = (h.posts || []).map(function (q) { return '<div class="ct-ev" style="padding:3px 6px"><span class="ct-tx tiny">' + esc(q.platform) + ' · ' + esc(q.at || '') + (q.note ? ' — «' + esc(q.note) + '»' : '') + '</span><a class="btn sm" target="_blank" rel="noopener" href="' + esc(q.url) + '">افتح ↗</a><button class="btn sm pri" data-act="lhPick" data-v="' + esc(q.url) + '">✓ هذا هو</button></div>'; }).join('');
     window.__lh = ref;
     openSheet('<h3 style="margin:0 0 6px">🔗 المنشور الذي كُتب عليه التعليق</h3>' +
       '<div class="small">' + (h.competitor ? 'التعليق عند <b>' + esc(h.competitor) + '</b>' : '') + (h.asker ? ' من <b>@' + esc(h.asker) + '</b>' : '') + '<br><span class="muted">«' + esc(h.question) + '»</span></div>' +
-      (offs ? '<div style="margin-top:4px"><b class="tiny">أحدث ما عرفناه عنهم (غالباً المنشور عنه):</b>' + offs + '</div>' : '') +
+      '<div class="muted tiny" style="margin-top:2px">🕒 التُقط التعليق: <b>' + esc(h.captured || '') + '</b> — المنشور غالباً قبله بأيام قليلة</div>' +
+      (posts ? '<div style="margin-top:6px"><b class="small">📌 منشوراتهم الأخيرة التي نعرف رابطها — افتح وتأكد ثم «هذا هو»:</b>' + posts + '</div>' : '<div class="muted tiny" style="margin-top:4px">لا روابط منشورات محفوظة لهذا المنافس بعد — التقط الرابط مع الصورة في المرة القادمة (خانة الرابط في «التفاعل»)</div>') +
+      (offs ? '<div style="margin-top:4px"><b class="tiny">أحدث عروضهم:</b>' + offs + '</div>' : '') +
       '<ol class="small" style="line-height:2"><li>افتح حساب المنافس: ' + accts + '</li><li>افتح المنشور الذي عليه التعليق</li><li>اضغط ⋯ ثم <b>«نسخ الرابط»</b></li><li>الصقه هنا:</li></ol>' +
       '<input id="lh_url" dir="ltr" placeholder="https://www.instagram.com/p/…" style="width:100%">' +
       '<div class="btns"><button class="btn pri" data-act="lhSave">💾 احفظ وافتح المنشور</button><button class="btn" data-act="closeSheet">لاحقاً</button></div>');
   }).catch(function (e) { toast(errMsg(e), true); });
 }
+ACT.lhPick = function (el) { var i = $('lh_url'); if (i) i.value = el.dataset.v; ACT.lhSave(el); };
 ACT.lhSave = function (el) {
   var u = val('lh_url').trim(); if (!u) return toast('الصق رابط المنشور', true);
   el.disabled = true;
@@ -6494,6 +6498,9 @@ ACT.egScreen = function (el) {
 ACT.egQuick = function (el) {
   var text = val('eg_text'), url = val('eg_url').trim();
   if (!text.trim() && !url && !ENG.pasted.length && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق لقطة (Ctrl+V) أو ارفع صوراً أو الصق رابط المنشور/النص أولاً', true);
+  // بلا رابط لا يمكن فتح المنشور لاحقاً (المنصات لا تسمح بالبحث في التعليقات) — تنبيه مرة قبل الحفظ
+  if (!url && !el.dataset.nourl) { var u = $('eg_url'); if (u) { u.style.outline = '2px solid #f1c21b'; u.focus(); } el.dataset.nourl = '1'; return toast('الصق رابط المنشور في الخانة الصفراء حتى تصل للمنشور لاحقاً — أو اضغط الزر مرة أخرى للمتابعة بدونه', true); }
+  delete el.dataset.nourl;
   var old = el.textContent; el.disabled = true; el.textContent = '⏳ يقرأ ويحلّل ويسجّل…';
   try { if (val('eg_ac')) localStorage.setItem('ops_eg_ac', val('eg_ac')); } catch (e) {}
   egReadFiles_().then(function (imgs) { return api('action', 'engageQuick', { text: text, images: imgs, url: url, ac_id: val('eg_ac') }); })
