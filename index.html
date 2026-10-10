@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2kcxtv";
+  var APP_BUILD = "mv2khfbp";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -660,12 +660,12 @@ var NAV_TREE = [
   ['watch', '👁 المراقبة', ['engage', 'supporters', 'compwatch', 'storecourses', 'comptimeline', 'radar', 'competitors', 'homeapps', 'exams']],
   ['reports', '📊 التقارير', ['reports', 'targets', 'kpis']],
   ['db', '🗂 قاعدة البيانات', ['sources', 'trainers', 'people', 'opps', 'b2b', 'alumni']],
-  ['mkt', '📣 التسويق', ['dailyPost', 'campaigns', 'content', 'register']],
+  ['mkt', '📣 التسويق', ['ads', 'dailyPost', 'campaigns', 'content', 'register']],
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'members', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['sysmap', 'health', 'automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
 NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '🤖 ماذا يعمل وحده'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
-NAV_MORE.push(['sysmap', '🗺 خريطة النظام والنواقص'], ['storecourses', '🛒 دورات المنافسين بمواقع الدفع'], ['members', '🪪 العضويات والإحالات'], ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
+NAV_MORE.push(['ads', '📣 الإعلانات الموجّهة'], ['sysmap', '🗺 خريطة النظام والنواقص'], ['storecourses', '🛒 دورات المنافسين بمواقع الدفع'], ['members', '🪪 العضويات والإحالات'], ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
 /* الشاشات المدمجة (موافقة المالك 2026-10-10): بند واحد في القائمة + تبويبات أعلى الشاشة. كل تبويب = الشاشة القديمة بكل وظائفها */
 var TAB_GROUPS = [
   ['control', '🎛 غرفة التحكم', [['control', 'اللوحة'], ['kpis', 'المؤشرات'], ['reports', 'التقارير'], ['health', 'فحص النظام']]],
@@ -1495,6 +1495,69 @@ SCREENS.sysmap = { render: function (d) {
 } };
 </script>
 <style>.smn:hover rect { stroke-width: 1.6; }</style>
+
+  <script>
+/* ═══════════ 📣 الإعلانات الموجّهة (التصميم المعتمد 2026-10-10) ═══════════
+   المقياس الأهم: تكلفة العميل الدافع لكل منصة. لا يُنشر أي إعلان آلياً. */
+function adLink_(platform, name, course) {
+  var p = ['utm_source=' + encodeURIComponent(platform), 'utm_medium=paid'];
+  if (name) p.push('utm_content=' + encodeURIComponent(name));
+  if (course) p.push('course=' + encodeURIComponent(course));
+  return regBase_() + '?' + p.join('&');
+}
+SCREENS.ads = { render: function (d, args) {
+  var pn = function (n) { return n === null || n === undefined ? '—' : Number(n).toLocaleString('en'); }, names = {};
+  d.platforms.forEach(function (p) { names[p[0]] = p[1]; });
+  var t = d.total;
+  var html = north(d.north) + '<div class="row between" style="align-items:center;flex-wrap:wrap;gap:6px"><h1 style="margin:0">📣 الإعلانات الموجّهة</h1>' +
+    '<span class="row" style="gap:4px">' + [7, 14, 30, 90].map(function (n) { return '<button class="btn sm' + (n === d.days ? ' pri' : '') + '" data-go="ads" data-args="' + attr({ days: n }) + '">' + n + ' يوماً</button>'; }).join('') + '</span></div>';
+  html += '<div class="ct-bottom" style="margin:6px 0">' + [[pn(t.spend) + ' ر.س', 'المصروف'], [t.regs, 'مسجّلون من الإعلانات'], [t.payers, 'دفعوا'], [t.cpp === null ? '—' : pn(t.cpp) + ' ر.س', 'تكلفة العميل الدافع']]
+    .map(function (k) { return '<span class="ct-k"><b>' + esc(k[0]) + '</b> ' + k[1] + '</span>'; }).join('') +
+    (d.pixels.meta || d.pixels.tiktok || d.pixels.ga4 ? '' : ' <span class="tag warn" data-tip="الصق أكواد التتبع في الإعدادات ← بيانات المنشأة">⚠️ لا أكواد تتبع بعد</span>') + '</div>';
+  var vcls = { 'زِد': 'auto', 'أوقف': 'bad', 'استمر': '' };
+  html += '<div class="card"><b>المنصات — من الأرخص للعميل الدافع</b><table class="tbl small" style="width:100%;margin-top:4px"><tr class="muted"><td>المنصة</td><td>المصروف</td><td>نقرات</td><td>سجّلوا</td><td>دفعوا</td><td>تكلفة المسجّل</td><td>تكلفة الدافع</td><td></td></tr>' +
+    d.rows.map(function (r) {
+      return '<tr><td><b>' + esc(names[r.key]) + '</b></td><td>' + pn(r.spend) + '</td><td>' + (r.clicks ? pn(r.clicks) : '—') + '</td><td>' + r.regs + '</td><td>' + r.payers + '</td><td>' + (r.cpr === null ? '—' : pn(r.cpr)) + '</td><td><b>' + (r.cpp === null ? (r.spend && !r.payers ? '<span style="color:var(--bad)">بلا دافع</span>' : '—') : pn(r.cpp)) + '</b></td>' +
+        '<td>' + (r.verdict ? '<span class="tag ' + vcls[r.verdict] + '">' + r.verdict + '</span>' : '') + '</td></tr>';
+    }).join('') + '</table>' +
+    '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap;align-items:flex-end"><b class="small">➕ مصروف الأسبوع:</b>' +
+    '<select id="ad_pl">' + d.platforms.map(function (p) { return '<option value="' + p[0] + '">' + esc(p[1]) + '</option>'; }).join('') + '</select>' +
+    '<input id="ad_wk" type="date" value="' + new Date().toISOString().slice(0, 10) + '" style="width:150px">' +
+    '<input id="ad_amt" type="number" min="0" placeholder="المبلغ ر.س" style="width:120px"><input id="ad_clk" type="number" min="0" placeholder="نقرات (اختياري)" style="width:130px">' +
+    '<button class="btn sm pri" data-act="adSpend">حفظ</button></div>' +
+    '<div class="muted tiny" style="margin-top:4px">المصروف تُدخله أنت أسبوعياً · التسجيل والدفع يحسبهما النظام من رابط كل إعلان</div></div>';
+  html += '<div class="ct-grid" style="grid-template-columns:1fr 1fr;margin-top:8px"><div class="card" style="border-color:var(--accent)"><b>🧠 توصية العقل</b>' +
+    (d.tips || []).map(function (x) { return '<div class="small" style="margin:3px 0">💡 ' + esc(x) + '</div>'; }).join('') +
+    (d.ads.length ? '<div class="small" style="margin-top:6px"><b>الإعلانات:</b> ' + d.ads.map(function (a) { return esc(a.name) + ' <span class="muted">(' + esc(names[a.platform]) + ': ' + a.regs + ' سجّل · ' + a.payers + ' دفع)</span>'; }).join(' · ') + '</div>' : '') + '</div>' +
+    '<div class="card"><b>🔗 روابط الإعلانات</b> <span class="muted tiny">— رابط خاص لكل منصة وكل إعلان يتتبّع العميل حتى الدفع</span>' +
+    '<div class="row" style="gap:6px;margin-top:4px;flex-wrap:wrap"><select id="al_pl">' + d.platforms.map(function (p) { return '<option value="' + p[0] + '">' + esc(p[1]) + '</option>'; }).join('') + '</select>' +
+    '<input id="al_name" placeholder="اسم الإعلان (مثل: اعتماد-اكتوبر)" style="flex:1;min-width:150px"><select id="al_course"><option value="">بدون دورة</option>' + d.courses.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select>' +
+    '<button class="btn sm pri" data-act="adLink">📋 انسخ الرابط</button></div><div id="al_out" dir="ltr" class="muted no-tr" style="overflow-wrap:anywhere;font-size:11.5px;margin-top:4px"></div></div></div>';
+  var copies = (d.copies || []).map(function (c) {
+    return '<div class="ct-ev"><span class="ct-tx">' + esc(c.text) + '</span><span class="tag">' + esc(names[c.platform] || c.platform) + '</span>' +
+      (c.status === 'معتمد' ? '<span class="tag auto">✓ معتمد</span>' : '<button class="btn sm" data-act="adCopySet" data-id="' + esc(c.copy_id) + '" data-st="معتمد">✓ اعتمد</button>') +
+      '<button class="btn sm" data-act="adCopyCopy" data-v="' + esc(c.text) + '">نسخ</button><button class="btn sm ghost" data-act="adCopySet" data-id="' + esc(c.copy_id) + '" data-st="مؤرشف" data-tip="إخفاء (لا يُحذف)">✕</button></div>';
+  }).join('');
+  html += '<div class="card" style="margin-top:8px"><div class="row between" style="align-items:center;flex-wrap:wrap;gap:6px"><b>✍️ نصوص إعلانات من العقل — بانتظار موافقتك</b>' +
+    '<span class="row" style="gap:4px"><select id="ac_pl">' + d.platforms.map(function (p) { return '<option value="' + p[0] + '">' + esc(p[1]) + '</option>'; }).join('') + '</select>' +
+    '<select id="ac_course">' + d.courses.map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select><button class="btn sm" data-act="adCopyGen">✨ اكتب نصوصاً</button></span></div>' +
+    (copies || empty('لا نصوص بعد — اختر المنصة والدورة واضغط «اكتب نصوصاً»')) +
+    '<div class="muted tiny" style="margin-top:4px">تُكتب من بيانات الدورة فقط (الاسم، الاعتماد، الموعد، الساعات) — لا أسعار أو وعود مخترعة · لا يُنشر شيء بدون موافقتك</div></div>';
+  return html;
+} };
+ACT.adSpend = function () {
+  var amt = val('ad_amt'); if (amt === '') return toast('اكتب المبلغ', true);
+  act('adSpendAdd', { platform: val('ad_pl'), week_start: val('ad_wk'), amount: amt, clicks: val('ad_clk') }, 'حُفظ المصروف');
+};
+ACT.adLink = function () {
+  var name = val('al_name').trim().replace(/\s+/g, '-');
+  if (!name) return toast('اكتب اسماً للإعلان حتى تعرف نتيجته', true);
+  var u = adLink_(val('al_pl'), name, val('al_course')); $('al_out').textContent = u; copyText(u);
+};
+ACT.adCopyGen = function () { act('adCopyGen', { platform: val('ac_pl'), course: val('ac_course') }, function (r) { return 'كُتبت ' + r.n + ' نصوص — راجعها واعتمد ما يناسبك'; }); };
+ACT.adCopySet = function (el) { act('adCopySet', { copy_id: el.dataset.id, status: el.dataset.st }, el.dataset.st === 'معتمد' ? 'اعتُمد' : 'أُخفي'); };
+ACT.adCopyCopy = function (el) { copyText(el.dataset.v); };
+</script>
 
   <script>
 /* ═══════════ اللغة: العربية / English لكل النظام ═══════════
