@@ -551,7 +551,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2hgddf";
+  var APP_BUILD = "mv2hmr6l";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -1414,6 +1414,10 @@ window.addEventListener('load', function () {
   poll();
   S.pollTimer = setInterval(poll, Math.max(20, POLL_SECONDS) * 1000);
   setInterval(liveCheck_, 20000);
+  setTimeout(function () { // كل الشاشات تدخل طبقة السرعة (مرة يومياً)
+    var d = new Date().toDateString(); try { if (localStorage.getItem('ops_supa_seed') === d) return; } catch (e) {}
+    supaInit_().then(function (c) { if (!c) return; api('action', 'supaSeed', { names: Object.keys(SCREENS).filter(function (s) { return /^[A-Za-z0-9_]+$/.test(s) && s !== 'more'; }) }).then(function () { try { localStorage.setItem('ops_supa_seed', d); } catch (e) {} }); });
+  }, 15000);
 });
 </script>
 
