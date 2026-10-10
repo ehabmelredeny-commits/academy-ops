@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2lmc10";
+  var APP_BUILD = "mv2loeyi";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -950,7 +950,7 @@ function stripList_(cols, rows, opts) {
   var tpl = cols.map(function (c) { return c[1] || '1fr'; }).join(' ');
   var head = '<div class="sl-head" style="grid-template-columns:' + tpl + '">' + cols.map(function (c) { return '<span>' + esc(c[0]) + '</span>'; }).join('') + '</div>';
   return '<div class="sl">' + head + rows.map(function (r) {
-    var id = opts.id ? opts.id(r) : '', open = opts.detail && STRIP_OPEN[opts.key || ''] === id;
+    var id = opts.id ? opts.id(r) : '', open = opts.detail && String(STRIP_OPEN[opts.key || '']) === String(id); // المعرّف قد يكون رقماً من الشيت ونصاً من الزر
     return '<div class="sl-row' + (opts.act || opts.detail ? ' click' : '') + (open ? ' open' : '') + (opts.cls ? ' ' + opts.cls(r) : '') + '" style="grid-template-columns:' + tpl + '"' +
       (opts.detail ? ' data-act="slToggle" data-k="' + esc(opts.key || '') + '" data-id="' + esc(id) + '"' : opts.act ? ' data-act="' + opts.act + '" data-id="' + esc(id) + '"' : '') + '>' +
       cols.map(function (c, i) { var v = c[2](r); return '<span class="sl-c' + (i === 0 ? ' sl-first' : '') + '" data-h="' + esc(c[0]) + '">' + (v === '' || v === null || v === undefined ? '<span class="muted">—</span>' : v) + '</span>'; }).join('') + '</div>' +
@@ -994,6 +994,8 @@ document.addEventListener('click', function (e) {
   var g = e.target.closest('[data-go]');
   if (g) { e.preventDefault(); closeSheet(); go(g.getAttribute('data-go'), g.dataset.args ? JSON.parse(g.dataset.args) : {}); return; }
   var a = e.target.closest('[data-act]');
+  // رابط عادي داخل شريط قابل للضغط (مثل «📢 إعلاناته»): يُفتح الرابط ولا يُطوى/يُفتح الشريط
+  var lnk = e.target.closest('a[href]'); if (lnk && a && a.contains(lnk) && !lnk.hasAttribute('data-act') && lnk.getAttribute('href') !== '#') return;
   if (a && a.tagName !== 'INPUT' && a.tagName !== 'SELECT' && a.tagName !== 'TEXTAREA') {
     e.preventDefault();
     var f = ACT[a.getAttribute('data-act')];
