@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2p8hi4";
+  var APP_BUILD = "mv2pdzez";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -691,7 +691,8 @@ var TAB_GROUPS = [
 function tabGroup_(k) { for (var i = 0; i < TAB_GROUPS.length; i++) { if (TAB_GROUPS[i][2].some(function (t) { return t[0] === k; })) return TAB_GROUPS[i]; } return null; }
 function tabsBar_(screen) {
   var g = tabGroup_(screen); if (!g) return '';
-  return '<div class="tabsbar">' + g[2].map(function (t) { return '<button class="tabb' + (t[0] === screen ? ' on' : '') + '" data-go="' + t[0] + '">' + esc(t[1]) + (BADGES[t[0]] ? ' <span class="dot">' + BADGES[t[0]] + '</span>' : '') + '</button>'; }).join('') + '</div>';
+  var sbx = location.pathname.indexOf('/sandbox/') > -1;
+  return '<div class="tabsbar">' + g[2].filter(function (t) { return t[0] !== 'sandbox' || sbx; }).map(function (t) { return '<button class="tabb' + (t[0] === screen ? ' on' : '') + '" data-go="' + t[0] + '">' + esc(t[1]) + (BADGES[t[0]] ? ' <span class="dot">' + BADGES[t[0]] + '</span>' : '') + '</button>'; }).join('') + '</div>';
 }
 function navLabel_(k) {
   var g = tabGroup_(k); if (g) return g[0] === k ? g[1] : ''; // عضو غير رئيسي في مجموعة: لا يظهر في القائمة
