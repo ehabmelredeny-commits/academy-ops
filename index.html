@@ -135,6 +135,10 @@ label.f { display: block; font-size: 12.5px; color: var(--muted); margin: 6px 0 
   box-shadow: 0 6px 20px rgba(0,0,0,.25); }
 .toast.err { background: var(--bad); color: #fff; }
 .loading { text-align: center; padding: 40px; color: var(--muted); }
+.tabsbar { display: flex; gap: 4px; flex-wrap: wrap; margin: 0 0 6px; border-bottom: 1px solid var(--line, #ddd); padding-bottom: 4px; }
+.tabsbar .tabb { background: transparent; border: 1px solid var(--line, #ccc); border-radius: 8px; padding: 3px 12px; font: inherit; font-size: 13px; color: inherit; cursor: pointer; }
+.tabsbar .tabb.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.tabsbar .tabb .dot { position: static; display: inline-block; }
 .newbadge { background: var(--bad); color: #fff; border-radius: 999px; padding: 2px 10px; font-size: 12px; cursor: pointer; border: 0; }
 details > summary { cursor: pointer; color: var(--accent); margin: 6px 0; }
 .bar { height: 10px; background: var(--soft); border-radius: 6px; overflow: hidden; }
@@ -551,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2hmr6l";
+  var APP_BUILD = "mv2i20ny";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -660,9 +664,23 @@ var NAV_TREE = [
   ['sales', '💰 المبيعات والدورات', ['pipeline', 'members', 'courses', 'calendar', 'payments']],
   ['sys', '⚙️ النظام', ['health', 'automap', 'settings', 'modules', 'flow', 'info', 'sandbox']]
 ];
-NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '⚙️ الأتمتة (Automated)'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
+NAV_MORE.unshift(['pipeline', '🧲 مراحل العملاء'], ['compwatch', '📡 ماذا تغيّر عند المنافسين'], ['inbox', '💬 صندوق الرسائل'], ['reports', '📊 التقارير'], ['automap', '🤖 ماذا يعمل وحده'], ['comptimeline', '📈 خط زمني دورات المنافسين'], ['homeapps', '📱 تطبيقات المدرب أونلاين']);
 NAV_MORE.push(['storecourses', '🛒 دورات المنافسين بمواقع الدفع'], ['members', '🪪 العضويات والإحالات'], ['exams', 'الاختبارات'], ['opps', 'الفرص'], ['people', 'صنّاع القرار']);
+/* الشاشات المدمجة (موافقة المالك 2026-10-10): بند واحد في القائمة + تبويبات أعلى الشاشة. كل تبويب = الشاشة القديمة بكل وظائفها */
+var TAB_GROUPS = [
+  ['control', '🎛 غرفة التحكم', [['control', 'اللوحة'], ['kpis', 'المؤشرات'], ['reports', 'التقارير'], ['health', 'فحص النظام']]],
+  ['inbox', '💬 الرسائل', [['inbox', 'صندوق الرسائل'], ['reply', 'الرد']]],
+  ['ask', '🎯 الفرص والسائلون', [['ask', 'من يسأل الآن'], ['radar', 'الرادار'], ['discovery', 'الاكتشاف'], ['opps', 'الفرص']]],
+  ['compwatch', '📡 المنافسون', [['compwatch', 'ماذا تغيّر'], ['competitors', 'ملفات المنافسين'], ['comptimeline', 'الخط الزمني'], ['storecourses', 'دوراتهم بمواقع الدفع']]],
+  ['automap', '🤖 المهام التلقائية', [['automap', 'ماذا يعمل وحده'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف']]]
+];
+function tabGroup_(k) { for (var i = 0; i < TAB_GROUPS.length; i++) { if (TAB_GROUPS[i][2].some(function (t) { return t[0] === k; })) return TAB_GROUPS[i]; } return null; }
+function tabsBar_(screen) {
+  var g = tabGroup_(screen); if (!g) return '';
+  return '<div class="tabsbar">' + g[2].map(function (t) { return '<button class="tabb' + (t[0] === screen ? ' on' : '') + '" data-go="' + t[0] + '">' + esc(t[1]) + (BADGES[t[0]] ? ' <span class="dot">' + BADGES[t[0]] + '</span>' : '') + '</button>'; }).join('') + '</div>';
+}
 function navLabel_(k) {
+  var g = tabGroup_(k); if (g) return g[0] === k ? g[1] : ''; // عضو غير رئيسي في مجموعة: لا يظهر في القائمة
   var all = NAV_MAIN.concat(NAV_MORE), f = all.filter(function (x) { return x[0] === k; })[0];
   return f ? f[1] : '';
 }
@@ -675,6 +693,7 @@ function navTreeHtml_(cur, cards) {
   return NAV_TREE.map(function (g) {
     var kids = g[2].filter(function (k) { return navLabel_(k); });
     if (!kids.length) return '';
+    var tg = tabGroup_(cur); if (tg) cur = tg[0]; // تبويب داخل مجموعة ← يُبرز رأس المجموعة
     var here = kids.indexOf(cur) > -1, open = cards ? (here || navOpen_(g[0]) === true || (navOpen_(g[0]) === undefined && g[0] === 'day')) : (here || (!cur && g[0] === 'day'));
     return '<details class="navg' + (here ? ' here' : '') + '" data-g="' + g[0] + '"' + (open ? ' open' : '') + '><summary><span class="navg-t">' + g[1] + '</span><span class="navg-n">' + kids.length + '</span></summary>' +
       (cards ? '' : '<div class="navg-kids">') +
@@ -692,7 +711,7 @@ document.addEventListener('toggle', function (e) {
 }, true);
 
 /** زر «↺ إلغاء كل الخيارات» في كل شاشة بحث/تصفية — يعيد الشاشة لحالتها الأولى */
-var CLEARABLE = ['clubs', 'homeapps', 'comptimeline', 'reports', 'inbox', 'pipeline', 'compwatch', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
+var CLEARABLE = ['homeapps', 'comptimeline', 'reports', 'inbox', 'pipeline', 'compwatch', 'sources', 'trainers', 'competitors', 'ask', 'opps', 'people', 'keywords', 'alumni', 'b2b', 'news', 'discovery', 'radar', 'exams', 'campaigns', 'content', 'payments', 'register', 'calendar'];
 function clearBtn_(screen) {
   if (CLEARABLE.indexOf(screen) < 0) return;
   var h = document.querySelector('#main h1'); if (!h || h.querySelector('.clr')) return;
@@ -771,7 +790,7 @@ function go(screen, args, keepScroll) {
     if (!stale && S.shownStale && typing) return; // لا نمسح ما يكتبه المستخدم فوق النسخة المحفوظة
     S.data = data; S.fresh = false;
     var sc = SCREENS[screen], sy = window.scrollY;
-    $('main').innerHTML = pageHead_(screen) + sc.render(data, S.args) + (stale ? '<div class="muted small" id="staleNote" style="text-align:center">يتحدّث…</div>' : '');
+    $('main').innerHTML = tabsBar_(screen) + pageHead_(screen) + sc.render(data, S.args) + (stale ? '<div class="muted small" id="staleNote" style="text-align:center">يتحدّث…</div>' : '');
     if (sc.after) sc.after(data, S.args);
     clearBtn_(screen);
     if (stale || !S.shownStale) window.scrollTo(0, keepScroll ? y : 0); else window.scrollTo(0, sy);
@@ -1101,7 +1120,7 @@ SCREENS.today = {
         chip(m.segment) + (m.b2b_badge === 'نعم' ? chip('قناة B2B', 'owner') : '') + (extra || '') + '</div></div>';
     };
     var html = north(d.north) + '<h1>اليوم</h1>';
-    if (d.paused) html += '<div class="card" style="border-color:var(--bad)"><b style="color:var(--bad)">⏸ كل الأتمتة موقوفة</b> <button class="btn sm" data-go="flow">المخطط</button></div>';
+    if (d.paused) html += '<div class="card" style="border-color:var(--bad)"><b style="color:var(--bad)">⏸ كل المهام التلقائية موقوفة</b> <button class="btn sm" data-go="flow">المخطط</button></div>';
     if (!d.outbound_enabled) html += '<div class="muted small" style="margin-bottom:8px">المرحلة صفر: لا يُرسل شيء آلياً — تنسخ الرد المعتمد وترسله بنفسك.</div>';
     html += '<div class="row">' +
       '<div class="stat click" data-go="reply"><div class="v">' + d.counts.waiting + '</div><div class="k">بانتظار موافقتك</div></div>' +
@@ -1661,7 +1680,7 @@ SCREENS.modules = { render: function (d) {
   var u = d.usage;
   return north(d.north) + '<h1>الوحدات</h1><div class="card"><div class="row between small"><span>تشغيل اليوم ' + Math.round(u.sec / 6) / 10 + ' من ' + u.quota_min + ' دقيقة</span><span>' + u.pct + '%</span></div>' +
     '<div class="bar ' + (u.pct >= 70 ? 'bad' : u.pct >= 60 ? 'warn' : '') + '"><i style="width:' + Math.min(100, u.pct) + '%"></i></div>' +
-    (d.paused ? '<div style="color:var(--bad)">⏸ كل الأتمتة موقوفة — من شاشة المخطط</div>' : '') + '</div>' +
+    (d.paused ? '<div style="color:var(--bad)">⏸ كل المهام التلقائية موقوفة — من شاشة المخطط</div>' : '') + '</div>' +
     stripList_([
       ['تعمل', '50px', function (m) { return m.kind === 'human' ? chip('دائماً', 'owner') : switchHtml(m.enabled === 'مفعّل', 'modToggle', m.module_key); }],
       ['الوحدة', 'minmax(150px,1.6fr)', function (m) { return '<b>' + esc(m.module_name_ar) + '</b>' + (m.critical === 'نعم' ? ' ' + chip('حرجة', 'acc') : ''); }],
@@ -2283,7 +2302,7 @@ SCREENS.flow = {
       '<div class="lab"><span>الـ tick الخامل: ' + u.idle_avg_sec + ' ث</span><span>ticks: ' + u.ticks + '</span></div></div>' +
       '<div><div class="lab"><span>Claude اليوم: ' + c.spent + '$ من ' + c.budget + '$</span><span>' + cPct + '%</span></div>' +
       '<div class="bar ' + (cPct >= 100 ? 'bad' : cPct >= 70 ? 'warn' : '') + '"><i style="width:' + Math.min(100, cPct) + '%"></i></div></div>' +
-      '<div class="master ' + (d.paused ? 'paused' : '') + '"><b>' + (d.paused ? '⏸ الأتمتة موقوفة' : 'كل الأتمتة تعمل') + '</b>' +
+      '<div class="master ' + (d.paused ? 'paused' : '') + '"><b>' + (d.paused ? '⏸ المهام التلقائية موقوفة' : 'كل المهام التلقائية تعمل') + '</b>' +
       switchHtml(!d.paused, 'flowMaster', 'all') + '</div></div>' +
       (d.raise_tick_hint ? '<div class="card small" style="border-color:var(--warn)">الاستهلاك تجاوز ٦٠٪ — ارفع tick_minutes إلى 15 من <a href="#" data-go="settings">الإعدادات</a>.</div>' : '') +
       (u.pct >= 70 ? '<div class="card small" style="border-color:var(--bad)">تجاوز ٧٠٪: الوحدات غير الحرجة مؤجّلة لليوم التالي.</div>' : '') +
@@ -2357,8 +2376,8 @@ window.addEventListener('resize', function () { if (S.screen === 'flow') drawEdg
 ACT.flowPresent = function () { FLOW.present = !FLOW.present; $('main').innerHTML = SCREENS.flow.render(FLOW.data); requestAnimationFrame(drawEdges); };
 ACT.flowMaster = function (el) {
   var paused = !el.checked;
-  if (paused && !confirm('إيقاف كل الأتمتة الآن؟ (موافقتك على الردود تبقى متاحة)')) { el.checked = true; return; }
-  act('pauseAll', { paused: paused }, paused ? '⏸ أُوقفت كل الأتمتة' : '▶ استُؤنفت الأتمتة');
+  if (paused && !confirm('إيقاف كل المهام التلقائية الآن؟ (موافقتك على الردود تبقى متاحة)')) { el.checked = true; return; }
+  act('pauseAll', { paused: paused }, paused ? '⏸ أُوقفت كل المهام التلقائية' : '▶ استُؤنفت المهام التلقائية');
 };
 
 /* ─── اللوحة الجانبية لعقدة ─── */
@@ -4957,7 +4976,6 @@ SCREENS.manual = { render: function (d) {
     }).join('') + '<div class="muted small" style="margin-top:6px">وجدت سعراً؟ سجّله من <a href="#" data-go="competitors" data-args="' + attr({ add: 1 }) + '">＋ إضافة دورة لمنافس (يدوي)</a> فيظهر هنا وفي <a href="#" data-go="comptimeline">الخط الزمني</a>.</div>' : empty('أضف دوراتك أولاً من «الدورات»')) + '</details>';
   // ٥) المدربون والأشخاص
   html += '<details class="card"><summary><b>٥) المدربون وصنّاع القرار</b></summary>' +
-    '<div class="card small" style="background:var(--accent-soft)">🏟 الطريقة الأفعل: <a href="#" data-go="clubs">خريطة الأندية</a> — كل نادٍ = مديره (صانع قرار) + مدربوه (عملاء)، وتُضاف بضغطة. البحث بالأسفل للبحث الحر.</div>' +
     [['مدرب شخصي', ['انستغرام', 'تيك توك', 'لينكدإن (أشخاص)', 'خرائط Google']], ['مدير نادي رياضي', ['لينكدإن (أشخاص)', 'Google آخر أسبوع']], ['افتتاح نادي رياضي جديد', ['Google آخر أسبوع', 'X (الأحدث)', 'انستغرام']], ['مطلوب مدرب لياقة', ['لينكدإن (منشورات)', 'X (الأحدث)', 'Google آخر ٢٤ ساعة']]].map(function (x) {
       return '<div class="small" style="margin-top:6px"><b>«' + x[0] + '»</b><div class="chips">' + msLinks_(x[0], MS.city, x[1]) + '</div></div>'; }).join('') +
     '<div class="muted small" style="margin-top:6px">وجدت شخصاً مناسباً؟ أضفه في <a href="#" data-go="trainers">المدربون</a> أو <a href="#" data-go="people">صنّاع القرار</a>.</div></details>';
@@ -5370,7 +5388,7 @@ var TOOL_TAGS = {
   today: 'a', inbox: 'a', reply: 'apm', dailyPost: 'amp', ask: 'amp', news: 'a', discovery: 'ap', manual: 'a', search: 'ap', keywords: 'amp',
   compwatch: 'am', radar: 'a', competitors: 'm', exams: 'ap', reports: 'a', targets: 'am', kpis: 'a', sources: 'amp', trainers: 'm',
   people: 'amp', opps: 'ap', b2b: 'am', alumni: 'am', campaigns: 'm', content: 'ap', register: 'm', pipeline: 'am', courses: 'm',
-  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', clubs: 'm', homeapps: 'am', monitor: 'a', calendar: 'am', engage: 'am', supporters: 'a', health: 'a'
+  payments: 'am', settings: 'm', modules: 'a', automap: 'a', comptimeline: 'am', homeapps: 'am', monitor: 'a', calendar: 'am', engage: 'am', supporters: 'a', health: 'a'
 };
 var TAG_INFO = { p: ['💳', 'يحتاج رصيد Claude (مدفوع)'], a: ['⚙️', 'يعمل آلياً'], m: ['✋', 'يدوي — تعمله أنت'] };
 function tagIcons_(k) { return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span title="' + TAG_INFO[c][1] + '" class="ttag">' + TAG_INFO[c][0] + '</span>' : ''; }).join(''); }
@@ -5378,11 +5396,11 @@ function tagChips_(k) {
   return (TOOL_TAGS[k] || '').split('').map(function (c) { return TAG_INFO[c] ? '<span class="chip ttag-' + c + '" title="' + TAG_INFO[c][1] + '">' + TAG_INFO[c][0] + ' ' + TAG_INFO[c][1].split(' —')[0].replace(' (مدفوع)', ' مدفوع') + '</span>' : ''; }).join('');
 }
 
-/* ═══════════ ⚙️ الأتمتة: خريطة ما يعمله النظام وحده ═══════════ */
+/* ═══════════ 🤖 المهام التلقائية: خريطة ما يعمله النظام وحده ═══════════ */
 var LIGHT = { green: ['#2a9d8f', 'تعمل'], red: ['#d64545', 'متوقفة/متأخرة'], amber: ['#e9a23b', 'مؤجّلة'], paid: ['#8d6cd8', 'تنتظر الرصيد'], off: ['#8a817c', 'مطفأة'], idle: ['#5b7a99', 'عند الحدث/يدوية'] };
 SCREENS.automap = { render: function (d) {
   var c = d.count;
-  var html = north(d.north) + '<h1>⚙️ الأتمتة — ماذا يعمل النظام وحده</h1>';
+  var html = north(d.north) + '<h1>🤖 المهام التلقائية — ماذا يعمل النظام وحده</h1>';
   html += '<div class="card small row" style="gap:10px"><span>' + dot_(d.tick_ok ? 'green' : 'red') + ' <b>المُشغِّل الآلي (كل ١٠ دقائق):</b> ' +
     (d.sandbox ? 'متوقف في التجريبي (بقصد)' : d.tick_ok ? 'يعمل — آخر تشغيل ' + fmtDate(d.last_tick, true) : 'لم يعمل منذ مدة — آخر تشغيل ' + fmtDate(d.last_tick, true)) + '</span>' +
     '<span>' + dot_(d.claude_on ? 'green' : 'paid') + ' <b>رصيد Claude:</b> ' + (d.claude_on ? 'متاح' : 'غير مشحون — الأدوات 💳 تنتظر') + '</span></div>';
@@ -5504,93 +5522,6 @@ ACT.ctlFilter = function () { go('comptimeline', { year: CTL.data.year, topic: v
 ACT.compOfferNewTl = function () { go('competitors', { tab: 'courses', add: 1 }); };
 </script>
 
-  <script>
-/* ═══════════ 🏟 خريطة الأندية (للمدربين وصنّاع القرار) ═══════════ */
-var CLB = { data: null };
-var CLB_CITIES = ['الرياض', 'جدة', 'الدمام', 'الخبر', 'مكة المكرمة', 'المدينة المنورة', 'الطائف', 'أبها', 'تبوك', 'بريدة', 'حائل', 'الأحساء', 'الجبيل', 'ينبع', 'جازان', 'نجران'];
-SCREENS.clubs = { render: function (d, args) {
-  CLB.data = d;
-  var city = args.city || d.city, gq = function (t) { return encodeURIComponent(t); };
-  var html = north(d.north) + '<h1>🏟 خريطة الأندية ' + chip(d.total) + '</h1>';
-  html += '<div class="card small">الفكرة: كل نادٍ/صالة = <b>مدير</b> (صانع قرار B2B) + <b>مدربون</b> (عملاء لدوراتنا). تفتح الخريطة، تضيف النادي بضغطة، ثم من بطاقته تصل لمديره ومدربيه. <b>«يوظّف مدربين»</b> = فرصة B2B ساخنة.</div>';
-  // ١) اكتشف من الخريطة
-  html += '<div class="card"><b>١) اكتشف الأندية في مدينة</b><div class="row" style="gap:6px;margin-top:6px"><select id="cl_city">' + CLB_CITIES.concat(d.cities.filter(function (c) { return CLB_CITIES.indexOf(c) < 0; })).map(function (c) { return '<option' + (c === city ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
-    d.types.map(function (t) { return '<a class="btn sm" target="_blank" rel="noopener" data-act="clMaps" data-t="' + esc(t) + '" href="https://www.google.com/maps/search/' + gq(t + ' ' + city) + '">🗺 ' + esc(t) + '</a>'; }).join('') +
-    '<a class="btn sm" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + gq('"مطلوب مدرب" ' + city) + '&tbs=qdr:m">📢 من يوظّف مدربين؟</a></div>' +
-    '<details class="small" style="margin-top:6px"' + (d.total ? '' : ' open') + '><summary>➕ أضف نادياً وجدته</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px">' +
-    '<input type="text" id="cl_name" placeholder="اسم النادي *"><select id="cl_type">' + opt(d.types, '') + '</select>' +
-    '<input type="text" id="cl_maps" dir="ltr" placeholder="رابط خرائط Google"><input type="text" id="cl_phone" dir="ltr" placeholder="الهاتف"><input type="text" id="cl_ig" dir="ltr" placeholder="انستغرام @">' +
-    '<label class="chip"><input type="checkbox" id="cl_hire"> يوظّف مدربين</label><button class="btn sm pri" data-act="clAdd">حفظ</button></div></details></div>';
-  // ٢) القائمة
-  html += '<div class="row" style="gap:6px;margin:6px 0"><select id="clf_city" data-act="clFilter"><option value="">كل المدن</option>' + opt(d.cities, args.city || '') + '</select>' +
-    '<select id="clf_type" data-act="clFilter"><option value="">كل الأنواع</option>' + opt(d.types, args.type || '') + '</select>' +
-    '<select id="clf_st" data-act="clFilter"><option value="">كل الحالات</option>' + opt(d.statuses, args.status || '') + '</select></div>';
-  html += d.rows.length ? '<div class="grid2">' + d.rows.map(function (c) {
-    var n = c.name + ' ' + (c.city || '');
-    return '<div class="card small" style="' + (c.hiring === 'نعم' ? 'border-inline-start:4px solid var(--bad)' : '') + '"><div class="row between"><b>' + esc(c.name) + '</b><span>' + chip(c.type) + chip(c.city) + (c.hiring === 'نعم' ? chip('🔥 يوظّف مدربين — فرصة B2B', 'bad') : '') + '</span></div>' +
-      '<div class="chips" style="margin-top:4px">' + (extUrl(c.maps_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.maps_url)) + '">🗺 الخريطة</a>' : '') +
-      (c.phone ? '<a class="chip" href="tel:' + esc(c.phone) + '">📞 ' + esc(c.phone) + '</a>' : '') +
-      (c.instagram ? '<a class="chip" target="_blank" rel="noopener" href="https://www.instagram.com/' + esc(String(c.instagram).replace(/^@/, '')) + '">📷 ' + esc(c.instagram) + '</a>' : '') + '</div>' +
-      '<div class="muted" style="margin-top:4px">👔 المدير (صانع القرار):</div><div class="chips">' +
-      (c.manager_name ? '<span class="chip acc">' + esc(c.manager_name) + '</span>' + (extUrl(c.manager_url) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(c.manager_url)) + '">لينكدإن ↗</a>' : '') : '') +
-      '<a class="chip" target="_blank" rel="noopener" href="https://www.linkedin.com/search/results/people/?keywords=' + gq('مدير ' + c.name) + '">🔎 ابحث عن المدير في لينكدإن</a>' +
-      '<a class="chip" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + gq('"' + c.name + '" مدير OR "general manager" site:linkedin.com') + '">🔎 Google</a></div>' +
-      '<div class="muted">🏋️ مدربوه (عملاء لدوراتنا):</div><div class="chips">' +
-      '<a class="chip" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + gq('site:instagram.com "' + c.name + '" مدرب') + '">انستغرام</a>' +
-      '<a class="chip" target="_blank" rel="noopener" href="https://www.tiktok.com/search?q=' + gq('مدرب ' + n) + '">تيك توك</a>' +
-      '<a class="chip" target="_blank" rel="noopener" href="https://www.linkedin.com/search/results/people/?keywords=' + gq('personal trainer ' + c.name) + '">لينكدإن</a>' +
-      '<a class="chip" href="#" data-go="trainers">＋ أضف مدرباً</a></div>' +
-      '<div class="row" style="gap:6px;margin-top:6px"><select data-act="clStatus" data-id="' + esc(c.club_id) + '">' + opt(d.statuses, c.status) + '</select>' +
-      '<input type="text" id="clm_' + esc(c.club_id) + '" placeholder="اسم المدير" value="' + esc(c.manager_name || '') + '"><input type="text" id="clu_' + esc(c.club_id) + '" dir="ltr" placeholder="رابط لينكدإن المدير" value="' + esc(c.manager_url || '') + '">' +
-      '<label class="chip"><input type="checkbox" id="clh_' + esc(c.club_id) + '"' + (c.hiring === 'نعم' ? ' checked' : '') + '> يوظّف</label><button class="btn sm" data-act="clSaveMgr" data-id="' + esc(c.club_id) + '">حفظ</button></div></div>';
-  }).join('') + '</div>' : empty(d.total ? 'لا نتائج لهذه التصفية' : 'لا أندية بعد — افتح الخريطة بالأعلى وأضف ما تجده');
-  return html;
-} };
-function clRow_(id) { return (CLB.data.rows || []).filter(function (x) { return x.club_id === id; })[0] || {}; }
-ACT.clMaps = function (el) { var c = val('cl_city'); window.open('https://www.google.com/maps/search/' + encodeURIComponent(el.dataset.t + ' ' + c), '_blank', 'noopener'); };
-ACT.clAdd = function () {
-  if (!val('cl_name').trim()) return toast('اكتب اسم النادي', true);
-  act('clubSave', { club: { name: val('cl_name'), city: val('cl_city'), type: val('cl_type'), maps_url: val('cl_maps'), phone: val('cl_phone'), instagram: val('cl_ig'), hiring: $('cl_hire').checked ? 'نعم' : 'لا' } }, 'أُضيف النادي');
-};
-ACT.clFilter = function () { go('clubs', { city: val('clf_city'), type: val('clf_type'), status: val('clf_st') }, true); };
-ACT.clStatus = function (el) { var c = clRow_(el.dataset.id); c.status = el.value; act('clubSave', { club: c }, 'حُدّثت الحالة', false); };
-ACT.clSaveMgr = function (el) { var id = el.dataset.id, c = clRow_(id); c.manager_name = val('clm_' + id); c.manager_url = val('clu_' + id); c.hiring = $('clh_' + id).checked ? 'نعم' : 'لا'; act('clubSave', { club: c }, 'حُفظ'); };
-
-/* ═══════════ 📱 تطبيقات المدرب أونلاين / إلى مكانك ═══════════ */
-SCREENS.homeapps = { render: function (d) {
-  var html = north(d.north) + '<h1>📱 تطبيقات المدرب أونلاين ' + chip(d.rows.length) + '</h1>';
-  html += '<div class="card small">تطبيقات المدربين أونلاين وإلى مكانك. ⚙️ <b>بحث آلي أسبوعي</b> في قوائم الصحة واللياقة بمتجر Apple السعودي يضيف الجديد «غير مؤكد» لتراجعه. لكل تطبيق: الاسم، الإدارة والتواصل، والتقييم. كل معلومة بمصدرها، وما لم يُتحقق منه مكتوب «غير مؤكد». <b>لماذا تهمك؟</b> هذه التطبيقات تحتاج مدربين معتمدين = قناة توظيف لخرّيجينا وشراكة محتملة.</div>';
-  html += d.rows.length ? '<div class="grid2">' + d.rows.map(function (a) {
-    var rate = [a.rating_ios ? '⭐ iOS ' + a.rating_ios : '', a.rating_android ? '⭐ Android ' + a.rating_android : ''].filter(String).join(' · ');
-    return '<div class="card small"><div class="row between"><b style="font-size:14px">' + esc(a.name) + '</b>' + chip(a.verified === 'نعم' ? '✓ متحقق' : 'غير مؤكد', a.verified === 'نعم' ? 'good' : 'warn') + '</div>' +
-      (a.company ? '<div>🏢 ' + esc(a.company) + '</div>' : '') + (a.management ? '<div>👔 الإدارة: ' + esc(a.management) + '</div>' : '') +
-      '<div class="chips" style="margin-top:4px">' + (extUrl(a.website) ? '<a class="chip" target="_blank" rel="noopener" href="' + esc(extUrl(a.website)) + '">🌐 الموقع</a>' : '') +
-      (a.email ? '<a class="chip" href="mailto:' + esc(a.email) + '">✉️ ' + esc(a.email) + '</a>' : '') + (a.phone ? '<a class="chip" href="tel:' + esc(a.phone) + '">📞 ' + esc(a.phone) + '</a>' : '') +
-      (a.social ? '<span class="chip">' + esc(a.social) + '</span>' : '') + '</div>' +
-      '<div style="margin-top:4px">' + (rate ? '<b>' + esc(rate) + '</b>' : '<span class="muted">التقييم غير متوفر</span>') + (a.rating_note ? ' <span class="muted">— ' + esc(a.rating_note) + '</span>' : '') + '</div>' +
-      (a.notes ? '<div class="muted">' + esc(a.notes) + '</div>' : '') +
-      '<div class="muted" style="margin-top:4px">' + (extUrl(a.source_url) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(a.source_url)) + '">المصدر ↗</a> · ' : '') + 'حُدّث ' + fmtDate(a.updated_at) +
-      ' · <a href="#" data-act="haEdit" data-id="' + esc(a.app_id) + '">تعديل</a></div></div>';
-  }).join('') + '</div>' : empty('لا تطبيقات بعد');
-  html += '<details class="card small" id="ha_form_box"><summary>➕ أضف / عدّل تطبيقاً</summary><input type="hidden" id="ha_id"><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">' +
-    [['name', 'اسم التطبيق *'], ['company', 'الشركة المالكة'], ['management', 'الإدارة (المؤسس/المدير)'], ['website', 'الموقع'], ['email', 'البريد'], ['phone', 'الهاتف'], ['social', 'حسابات التواصل'], ['rating_ios', 'تقييم App Store'], ['rating_android', 'تقييم Google Play'], ['rating_note', 'ملاحظة التقييم (عدد المقيّمين…)'], ['source_url', 'رابط المصدر'], ['notes', 'ملاحظات']]
-      .map(function (f) { return '<input type="text" id="ha_' + f[0] + '" placeholder="' + f[1] + '">'; }).join('') +
-    '<select id="ha_verified"><option value="غير مؤكد">غير مؤكد</option><option value="نعم">متحقق</option></select><button class="btn sm pri" data-act="haSave">حفظ</button></div></details>';
-  return html;
-} };
-var HA_FIELDS = ['name', 'company', 'management', 'website', 'email', 'phone', 'social', 'rating_ios', 'rating_android', 'rating_note', 'source_url', 'notes', 'verified'];
-ACT.haEdit = function (el) {
-  var a = (S.data.rows || []).filter(function (x) { return x.app_id === el.dataset.id; })[0]; if (!a) return;
-  $('ha_form_box').open = true; $('ha_id').value = a.app_id; HA_FIELDS.forEach(function (f) { if ($('ha_' + f)) $('ha_' + f).value = a[f] || ''; });
-  $('ha_form_box').scrollIntoView({ block: 'center' });
-};
-ACT.haSave = function () {
-  if (!val('ha_name').trim()) return toast('اكتب اسم التطبيق', true);
-  var x = { app_id: val('ha_id') }; HA_FIELDS.forEach(function (f) { x[f] = val('ha_' + f); });
-  act('homeAppSave', { app: x }, 'حُفظ');
-};
-</script>
-
   ﻿<script>
 /* ═══════════ دليل النظام: وصف كل صفحة وكل زر ووظيفته في التسويق والبيع ═══════════
  * مصدر واحد تستخدمه: (١) السطر التعريفي أعلى كل صفحة (٢) صفحة INFO كمخطط تفاعلي (٣) شرح الوحدات.
@@ -5618,7 +5549,7 @@ var PAGE_INFO = {
       ['نشرته ✓', 'بعد النشر اليدوي تلصق الرابط.', 'يُقاس لاحقاً: أي منشور جلب عملاء.']] },
   flow: { t: 'المخطط', what: 'خريطة حية لكل أجزاء النظام وحالتها الآن (تعمل/متوقفة/خطأ) واستهلاك الحصة.', why: 'تطمئن أن الماكينة التسويقية تعمل وحدها، وتعرف أين الخلل فوراً.',
     btns: [['عرض للاجتماع', 'نسخة مبسطة للعرض على شريك أو مستثمر.', 'تشرح نظامك في دقيقة.'],
-      ['إيقاف كل الأتمتة', 'زر طوارئ يوقف كل شيء.', 'أمان عند أي خطأ.']] },
+      ['إيقاف كل المهام التلقائية', 'زر طوارئ يوقف كل شيء.', 'أمان عند أي خطأ.']] },
   calendar: { t: 'تقويم الدورات', what: 'بداية ونهاية كل دفعة لكل دورة على تقويم شهري، مع التكرار وورقة طباعة لكل دفعة.', why: 'مواعيد حقيقية = إلحاح حقيقي في التسويق («تبدأ الدفعة ١٥ أكتوبر، بقي ٤ مقاعد») بدون اختراع.',
     btns: [['＋ دفعة جديدة', 'تحدد الدورة، البداية، النهاية، أيام الجلسات، المقاعد.', 'أقرب دفعة تُحدّث الدورة تلقائياً فتستخدمها الردود والمنشورات.'],
       ['🔁 تكرار', 'ينسخ الدفعة بتواريخ جديدة بعد الحالية.', 'تجدول السنة كاملة في دقائق.'],
@@ -5663,10 +5594,9 @@ var PAGE_INFO = {
   comptimeline: { t: '📈 خط زمني دورات المنافسين', what: 'كل دورة منافس خط رفيع على السنة (البداية ← النهاية) بالسعر والساعات والنوع، مع دوراتنا للمقارنة.', why: 'ترى من يبدأ قبلنا وأين الفراغ في التقويم.', btns: [] },
   inbox: { t: '💬 صندوق الرسائل', what: 'كل رسائل العملاء الواردة في مكان واحد مع حالتها والرد المقترح.', why: 'لا تبقى رسالة بلا رد.', btns: [] },
   reports: { t: '📊 التقارير', what: 'التقارير اليومية والأسبوعية: العملاء، التسجيلات، الإيراد، المنافسون.', why: 'صورة واحدة لأداء الأسبوع.', btns: [] },
-  automap: { t: '⚙️ الأتمتة', what: 'خريطة كل ما يعمله النظام وحده: الوحدات، مواعيدها، وحالتها (تعمل / متوقفة / تنتظر الرصيد).', why: 'تعرف ما يعمل آلياً وما يحتاج تدخلك.', btns: [] },
+  automap: { t: '🤖 المهام التلقائية', what: 'خريطة كل ما يعمله النظام وحده: الوحدات، مواعيدها، وحالتها (تعمل / متوقفة / تنتظر الرصيد).', why: 'تعرف ما يعمل آلياً وما يحتاج تدخلك.', btns: [] },
   register: { t: '🔗 نموذج التسجيل', what: 'رابط نموذج التسجيل العام للدورات — يدخل منه العميل بياناته مباشرة.', why: 'تسجيل بلا مراسلات.', btns: [] },
   payments: { t: '💰 المدفوعات', what: 'المدفوعات المسجّلة لكل دورة وعميل.', why: 'تعرف من دفع ومن ينتظر.', btns: [] },
-  clubs: { t: '🏟 خريطة الأندية', what: 'الأندية ومديروها (صنّاع قرار) ومدربوها (عملاء محتملون).', why: 'نادٍ واحد = عقد B2B + عدة متدربين.', btns: [] },
   homeapps: { t: '📱 تطبيقات المدرب أونلاين', what: 'تطبيقات المدربين أونلاين وإلى مكانك في السعودية — يبحث عنها النظام أسبوعياً ويضيف الجديد لتراجعه.', why: 'منافسون غير مباشرين وشركاء محتملون.', btns: [] },
   ask: { t: '🎯 من يسأل الآن', what: 'رادار الأسئلة: أشخاص يسألون علناً عن دورات التدريب على X وتيك توك وانستغرام وغيرها، مع رد مقترح جاهز لكل واحد.', why: 'من يسأل الآن هو أقرب عميل للشراء — أول من يرد عليه بإفادة يكسبه.',
     btns: [['افتح وردّ', 'ينسخ الرد المقترح ويفتح المنشور — تلصقه وتنشره من حساب الأكاديمية.', 'رد خلال دقائق بدل ساعات.'],
