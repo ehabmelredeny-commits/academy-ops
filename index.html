@@ -555,7 +555,7 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2loeyi";
+  var APP_BUILD = "mv2o20fp";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -1433,6 +1433,8 @@ window.addEventListener('load', function () {
   var startArgs = {}, startScreen = START_SCREEN || 'control';
   try { var qa = new URLSearchParams(location.search).get('a'); if (qa) startArgs = JSON.parse(qa) || {}; } catch (e) { startArgs = {}; }
   try { var rs = JSON.parse(sessionStorage.getItem('ops_resume') || 'null'); sessionStorage.removeItem('ops_resume'); if (rs && rs.s && SCREENS[rs.s]) { startScreen = rs.s; startArgs = rs.a || {}; } } catch (e) {}
+  // وصل من زر «📌 أرسل للنظام» (رابط المنشور + تعليقاته) ← صفحة التفاعل وتحليل تلقائي
+  try { var em = /[#&]eg=([^&]*)/.exec(location.hash); if (em) { sessionStorage.setItem('ops_eg_in', decodeURIComponent(em[1])); history.replaceState(null, '', location.pathname + location.search); startScreen = 'engage'; startArgs = {}; } } catch (e) {}
   go(startScreen, startArgs);
   setTimeout(prefetch_, 6000); // بعد اكتمال الشاشة الأولى
   setInterval(function () { if (!document.hidden) prefetch_(); }, 10 * 60000); // تبقى النسخ المحفوظة حديثة ما دام النظام مفتوحاً
@@ -4869,6 +4871,7 @@ function linkHelpModal_(ref) {
     window.__lh = ref;
     openSheet('<h3 style="margin:0 0 6px">🔗 المنشور الذي كُتب عليه التعليق</h3>' +
       '<div class="small">' + (h.competitor ? 'التعليق عند <b>' + esc(h.competitor) + '</b>' : '') + (h.asker ? ' من <b>@' + esc(h.asker) + '</b>' : '') + '<br><span class="muted">«' + esc(h.question) + '»</span></div>' +
+      (h.eng_id ? '<div class="row" style="gap:4px;margin-top:4px;align-items:center"><span class="tiny">ليس هذا المنافس؟</span><select id="lh_ac">' + (h.all || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (String(x.ac_id) === String(h.ac_id) ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select><button class="btn sm" data-act="lhReassign" data-id="' + esc(h.eng_id) + '">صحّح لكل تعليقات هذا الالتقاط</button></div>' : '') +
       '<div class="muted tiny" style="margin-top:2px">🕒 التُقط التعليق: <b>' + esc(h.captured || '') + '</b> — المنشور غالباً قبله بأيام قليلة</div>' +
       (posts ? '<div style="margin-top:6px"><b class="small">📌 منشوراتهم الأخيرة التي نعرف رابطها — افتح وتأكد ثم «هذا هو»:</b>' + posts + '</div>' : '<div class="muted tiny" style="margin-top:4px">لا روابط منشورات محفوظة لهذا المنافس بعد — التقط الرابط مع الصورة في المرة القادمة (خانة الرابط في «التفاعل»)</div>') +
       (offs ? '<div style="margin-top:4px"><b class="tiny">أحدث عروضهم:</b>' + offs + '</div>' : '') +
@@ -4877,6 +4880,7 @@ function linkHelpModal_(ref) {
       '<div class="btns"><button class="btn pri" data-act="lhSave">💾 احفظ وافتح المنشور</button><button class="btn" data-act="closeSheet">لاحقاً</button></div>');
   }).catch(function (e) { toast(errMsg(e), true); });
 }
+ACT.lhReassign = function (el) { el.disabled = true; api('action', 'engageReassign', { eng_id: el.dataset.id, ac_id: val('lh_ac') }).then(function (r) { toast('صُحّح ' + r.n + ' تعليقاً ← ' + r.competitor); linkHelpModal_(window.__lh); go(S.screen, S.args, true); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 ACT.lhPick = function (el) { var i = $('lh_url'); if (i) i.value = el.dataset.v; ACT.lhSave(el); };
 ACT.lhSave = function (el) {
   var u = val('lh_url').trim(); if (!u) return toast('الصق رابط المنشور', true);
@@ -6410,7 +6414,20 @@ document.addEventListener('change', function (e) { if (e.target && e.target.id =
   <script>
 /* ═══════════ 💬 التفاعل مع منشورات المنافسين (التصميم المعتمد 2026-10-05) ═══════════ */
 var ENG = { items: null, imgs: [], pasted: [] };
-SCREENS.engage = { render: function (d, args) {
+/** زر المتصفح «📌 أرسل للنظام»: تضغطه وأنت على منشور المنافس فيصل الرابط + التعليقات الظاهرة تلقائياً (أنت من يفتح الصفحة — لا زحف آلي) */
+function egBookmarklet_() {
+  var home = location.origin + location.pathname;
+  var js = "javascript:(function(){var t=(document.body&&document.body.innerText)||'';var d={u:location.href,t:t.slice(0,30000),h:document.title};window.open('" + home + "#eg='+encodeURIComponent(JSON.stringify(d)),'_blank');})();";
+  return '<div class="small" style="margin-top:6px;padding:6px 8px;border:1px dashed var(--accent);border-radius:8px">⭐ <b>الأسرع — بلا نسخ ولا بحث عن الرابط:</b> اسحب هذا الزر إلى شريط المفضّلة مرة واحدة ← <a class="btn sm pri" href="' + esc(js) + '" data-tip="اسحبه لشريط المفضّلة (Ctrl+Shift+B لإظهاره). بعدها: افتح منشور المنافس ووسّع التعليقات ثم اضغطه — يصل الرابط والتعليقات هنا ويُحلَّل وحده" data-act="egBmHint">📌 أرسل للنظام</a> <span class="muted tiny">ثم على أي منشور منافس: وسّع التعليقات واضغطه</span></div>';
+}
+SCREENS.engage = { after: function () {
+  if ($('staleNote')) return; // ننتظر النسخة الحية (لا نحلّل فوق لقطة مؤقتة)
+  var raw = null; try { raw = sessionStorage.getItem('ops_eg_in'); sessionStorage.removeItem('ops_eg_in'); } catch (e) {}
+  if (!raw) return; var d = null; try { d = JSON.parse(raw); } catch (e) {} if (!d) return;
+  if ($('eg_url')) $('eg_url').value = d.u || ''; if ($('eg_text')) $('eg_text').value = d.t || '';
+  if ($('eg_ac')) $('eg_ac').value = ''; // المنافس يُعرف من المنشور نفسه
+  var b = document.querySelector('[data-act="egQuick"]'); if (b) { toast('وصل المنشور ' + (d.u ? 'برابطه' : '') + ' — يحلّل الآن…'); ACT.egQuick(b); }
+}, render: function (d, args) {
   var c = d.counts || {};
   var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">💬 التفاعل مع منشورات المنافسين</h1>' +
     statMini_([[c.week || 0, 'سؤال هذا الأسبوع'], [c.waiting || 0, 'ينتظر ردك', 'warn'], [c.replied || 0, 'رُدّ عليه', 'good'], [c.leads || 0, 'صاروا عملاء']]) + '</div>';
@@ -6418,7 +6435,7 @@ SCREENS.engage = { render: function (d, args) {
   html += '<div class="card"><b>١) أدخل تعليقات منشور منافس</b> <span class="muted tiny">— بالطريقة الأسهل لك</span>' +
     '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><select id="eg_ac" style="max-width:260px"><option value="">— المنافس —</option>' +
       (d.competitors || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (String(x.ac_id) === String(d.pick || egLastAc_()) ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select>' +
-      '<input id="eg_url" dir="ltr" style="flex:1;min-width:220px" placeholder="رابط المنشور https://instagram.com/p/…"></div>' +
+      '<input id="eg_url" dir="ltr" style="flex:1;min-width:220px" placeholder="رابط المنشور https://instagram.com/p/…"></div>' + egBookmarklet_() +
     '<div class="eg-two"><div class="eg-in"><b>📷 ارفع صور الشاشة</b> <span class="chip good">الأسهل على الجوال</span>' +
       '<button class="btn sm" data-act="egClip" data-tip="خذ لقطة بـ Win+Shift+S (أو لقطة الجوال) ثم اضغط هنا — أو اضغط Ctrl+V في أي مكان بهذه الصفحة">📋 الصق لقطة من الحافظة</button> <span class="muted tiny">أو Ctrl+V</span>' +
       '<label class="eg-drop">⬆️ اسحب الصور هنا أو اضغط للاختيار<br><span class="muted tiny">عدة صور دفعة واحدة · يقرأ النظام النص منها مجاناً</span><input type="file" id="eg_imgs" accept="image/*" multiple hidden></label>' +
@@ -6562,6 +6579,9 @@ document.addEventListener('change', function (e) {
   var t = $('eg_thumbs'); if (!t) return;
   t.innerHTML = Array.prototype.map.call(e.target.files, function (f, i) { return '<span class="chip">📄 ' + (i + 1) + ' · ' + esc(f.name.slice(0, 18)) + '</span>'; }).join('') + '<span class="muted">' + e.target.files.length + ' صور</span>';
 });
+</script>
+<script>
+ACT.egBmHint = function () { toast('اسحب الزر إلى شريط المفضّلة (Ctrl+Shift+B) — ثم اضغطه وأنت على منشور المنافس'); };
 </script>
 
   <script>
