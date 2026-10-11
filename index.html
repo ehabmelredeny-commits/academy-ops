@@ -560,12 +560,13 @@ nav.side .navflat button.navi.navtop.on { background: var(--accent); color: #fff
 nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 .tabsbar { overflow-x: auto; flex-wrap: wrap; }
 </style>
+<style>.oppbar.patrol { background: #1d5f8a !important; }</style>
 
 </head>
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv3pnwfr";
+  var APP_BUILD = "mv3qea4q";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
   (function () {
@@ -1042,6 +1043,7 @@ function poll() {
     if (p.ask_hot > (S.askHot || 0) && S.askHot !== undefined) toast('🔥 فرصة جديدة: ' + p.ask_hot + ' شخص يسأل الآن بنية عالية — افتح «من يسأل الآن»');
     S.askHot = p.ask_hot || 0;
     oppBar_(p);
+    patrolBar_(p);
     claudePill_(p.claude);
     if (typeof healthBar_ === 'function') healthBar_(p);
     renderNav();
@@ -1117,6 +1119,25 @@ function claudePill_(c) {
   var col = c.light === 'green' ? '#2bb673' : c.light === 'red' ? '#e5484d' : '#f5a524';
   el.innerHTML = '<a href="#" data-go="settings" data-args=\'{"tab":"channels"}\' class="cpill" style="border-color:' + col + '" data-tip="' + esc((c.msg || '') + ' — اضغط لفتح مفتاح Claude') + '"><span class="d" style="background:' + col + '"></span>Claude: ' + esc(c.label) + '</a>';
 }
+/* 🚶 شريط جولة الصباح: يظهر من ٦ صباحاً حتى تُشغَّل الجولة اليوم (الإضافة تبلّغ النظام عند انتهائها) */
+function patrolBar_(p) {
+  var host = $('oppbar'); if (!host) return;
+  var el = $('patrolbar'); if (!el) { el = document.createElement('div'); el.id = 'patrolbar'; host.parentNode.insertBefore(el, host.nextSibling); }
+  var today = new Date().toDateString(), last = p.patrol_last && p.patrol_last.at ? new Date(p.patrol_last.at) : null;
+  var done = last && last.toDateString() === today, dis = ''; try { dis = localStorage.getItem('ops_patrol_x'); } catch (e) {}
+  if (done || dis === today || new Date().getHours() < 6 || S.screen === 'monitor') { el.innerHTML = ''; el.className = ''; return; }
+  el.className = 'oppbar soft patrol';
+  el.innerHTML = '<span>🚶 <b>جولة الصباح لم تُشغَّل بعد</b> — تفتح الإضافة آخر منشورات المنافسين في الخلفية وتجمع الأسئلة (٥ دقائق)' + (last ? ' · آخر جولة ' + fmtDate(last, true) : '') + '</span>' +
+    '<button class="btn sm pri" data-act="patrolRun" data-tip="يرسل أمر التشغيل لإضافة Chrome — تعمل في تبويبات خلفية وتُغلقها وحدها">▶ شغّل الجولة الآن</button><button class="btn sm ghost" data-act="patrolX" data-tip="إخفاء لليوم فقط">✕</button>';
+}
+ACT.patrolX = function () { try { localStorage.setItem('ops_patrol_x', new Date().toDateString()); } catch (e) {} var b = $('patrolbar'); if (b) { b.innerHTML = ''; b.className = ''; } };
+ACT.patrolRun = function (el) {
+  el.disabled = true; el.textContent = '⏳ تعمل في الخلفية…'; var got = false;
+  var onMsg = function (ev) { if (!ev.data || ev.source !== window) return; if (ev.data.type === 'aops_patrol_ack') { got = true; toast('بدأت الجولة — تعمل في تبويبات خلفية، وتختفي الرسالة وحدها عند الانتهاء'); } if (ev.data.type === 'aops_patrol_done') { toast('✓ انتهت الجولة: ' + (ev.data.accounts || 0) + ' حساب · ' + (ev.data.posts || 0) + ' منشور'); window.removeEventListener('message', onMsg); poll(); } };
+  window.addEventListener('message', onMsg);
+  window.postMessage({ type: 'aops_patrol' }, '*');
+  setTimeout(function () { if (!got) { el.disabled = false; el.textContent = '▶ شغّل الجولة الآن'; toast('الإضافة لم تردّ — تأكد أنها مثبّتة ومفعّلة في Chrome (chrome://extensions ← ↻ تحديث)', true); } }, 3000);
+};
 function oppBar_(p) {
   var el = $('oppbar'); if (!el) return;
   var n = p.ask_offers || 0, h = p.ask_hot || 0;
