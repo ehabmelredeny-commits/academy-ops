@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv3krjpx";
+  var APP_BUILD = "mv3lxpd5";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
   (function () {
@@ -1727,7 +1727,7 @@ ACT.psBackfill = function (el) { el.disabled = true; act('personBackfill', {}, f
 
   <script>
 /* ═══════════ 🕳 فجوات السوق (قرار المالك 2026-10-11): عدة فجوات بأدلة، وبالمناطق لا الرياض فقط ═══════════ */
-var GAP_TYPES = [['زمنية', '📆 متى ندخل'], ['جغرافية', '🗺 أين ندخل'], ['سعرية', '💰 بأي سعر'], ['صيغة', '🧩 بأي صيغة'], ['عرض ضعيف', '🎯 أين المنافسة أضعف']];
+var GAP_TYPES = [['زمنية', '📆 متى ندخل — القريبة أولاً (هذا الشهر والقادم)، والبعيدة خيار'], ['جغرافية', '🗺 أين ندخل'], ['سعرية', '💰 بأي سعر'], ['صيغة', '🧩 بأي صيغة'], ['عرض ضعيف', '🎯 أين المنافسة أضعف']];
 SCREENS.gaps = { render: function (d) {
   var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">🕳 فجوات السوق <span class="muted tiny">— من ' + (d.n ? d.n.store + ' دورة منافس و' + d.n.offers + ' عرض و' + d.n.demand.toLocaleString('en') + ' نقطة طلب' : '') + ' · ' + esc(stAgo_ ? stAgo_(d.at) : '') + '</span></h1>' +
     '<button class="btn sm" data-act="gapsRefresh" data-tip="يعيد الحساب الآن من كل البيانات (يُحدَّث وحده كل ساعة)">↻ أعد التحليل</button></div>';
@@ -2410,7 +2410,7 @@ SCREENS.courses = { render: function (d) {
   html += d.rows.map(function (c, i) {
     var off = c.active === 'لا';
     return '<details class="card"' + (off ? ' style="opacity:.55"' : '') + '><summary><b>' + esc(c.name_ar || c.course_id) + '</b> · ' + esc(c.price_sar || '—') + ' ر.س · هامش ' + esc(c.margin_pct) + '%' +
-      (c.margin_is_assumption === 'نعم' ? ' (افتراض)' : '') + (off ? ' ' + chip('⏸ موقوفة', 'warn') : '') + '</summary>' + courseForm(c, i) +
+      (c.margin_is_assumption === 'نعم' ? ' (افتراض)' : '') + (off ? ' ' + chip('⏸ موقوفة', 'warn') : '') + ' <span style="float:left" data-tip="تشغيل/إيقاف الدورة فوراً — الموقوفة تختفي من الردود والعروض ونموذج التسجيل وتبقى بياناتها">' + switchHtml(!off, 'courseToggle', c.course_id) + '</span></summary>' + courseForm(c, i) +
       '<div class="btns"><button class="btn pri" data-act="courseSave" data-i="' + i + '" data-id="' + esc(c.course_id) + '">حفظ</button>' +
       '<button class="btn" data-act="courseActive" data-id="' + esc(c.course_id) + '" data-on="' + (off ? 'نعم' : 'لا') + '">' + (off ? '▶ إعادة تفعيل' : '⏸ إيقاف الدورة') + '</button>' +
       '<button class="btn bad" data-act="courseDelete" data-id="' + esc(c.course_id) + '" data-n="' + esc(c.name_ar || '') + '">🗑 حذف</button></div>' +
@@ -2559,6 +2559,9 @@ ACT.leadGrad = function (el) {
   var d = prompt('تاريخ الشهادة (YYYY-MM-DD):', new Date().toISOString().slice(0, 10)); if (!d) return;
   act('alumniComplete', { lead_id: el.dataset.id, cert_date: d, cert_body: prompt('جهة الشهادة:') || '' }, 'أُضيف إلى الخرّيجين');
 };
+</script>
+<script>
+ACT.courseToggle = function (el) { act('courseActive', { course_id: el.dataset.id, active: el.checked ? 'نعم' : 'لا' }, el.checked ? '▶ فُعّلت الدورة' : '⏸ أُوقفت الدورة'); };
 </script>
 
   <style>
