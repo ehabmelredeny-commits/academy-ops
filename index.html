@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv3lxpd5";
+  var APP_BUILD = "mv3oi8gq";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
   (function () {
@@ -2409,8 +2409,9 @@ SCREENS.courses = { render: function (d) {
   var html = north(d.north) + '<h1>الدورات</h1><div class="muted small">هذا التبويب هو المصدر الوحيد للأسعار والمواعيد وعبارات الإلحاح.</div>';
   html += d.rows.map(function (c, i) {
     var off = c.active === 'لا';
-    return '<details class="card"' + (off ? ' style="opacity:.55"' : '') + '><summary><b>' + esc(c.name_ar || c.course_id) + '</b> · ' + esc(c.price_sar || '—') + ' ر.س · هامش ' + esc(c.margin_pct) + '%' +
+    return '<details class="card"' + (off ? ' style="opacity:.55"' : '') + '><summary>' + (c.image_url ? '<img src="' + esc(c.image_url) + '" alt="" style="height:30px;width:30px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-inline-end:6px">' : '<span style="display:inline-block;width:30px;height:30px;border-radius:8px;background:var(--soft);vertical-align:middle;margin-inline-end:6px;text-align:center;line-height:30px">🎓</span>') + '<b>' + esc(c.name_ar || c.course_id) + '</b> · ' + esc(c.price_sar || '—') + ' ر.س · هامش ' + esc(c.margin_pct) + '%' +
       (c.margin_is_assumption === 'نعم' ? ' (افتراض)' : '') + (off ? ' ' + chip('⏸ موقوفة', 'warn') : '') + ' <span style="float:left" data-tip="تشغيل/إيقاف الدورة فوراً — الموقوفة تختفي من الردود والعروض ونموذج التسجيل وتبقى بياناتها">' + switchHtml(!off, 'courseToggle', c.course_id) + '</span></summary>' + courseForm(c, i) +
+      '<div class="row" style="gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0"><b class="small">🖼 صورة الدورة:</b>' + (c.image_url ? '<img src="' + esc(c.image_url) + '" alt="" style="height:48px;border-radius:8px">' : '<span class="muted tiny">لا صورة</span>') + '<input type="file" id="cimg_' + i + '" accept="image/*" style="max-width:220px"><button class="btn sm" data-act="courseImg" data-i="' + i + '" data-id="' + esc(c.course_id) + '" data-tip="تُحفظ في Google Drive (مجلد «Academy OPS - صور الدورات») وتظهر كأيقونة بجانب الدورة">⬆️ ارفع</button>' + (c.image_url ? '<button class="btn sm ghost" data-act="courseImgClear" data-id="' + esc(c.course_id) + '">✕</button>' : '') + '</div>' +
       '<div class="btns"><button class="btn pri" data-act="courseSave" data-i="' + i + '" data-id="' + esc(c.course_id) + '">حفظ</button>' +
       '<button class="btn" data-act="courseActive" data-id="' + esc(c.course_id) + '" data-on="' + (off ? 'نعم' : 'لا') + '">' + (off ? '▶ إعادة تفعيل' : '⏸ إيقاف الدورة') + '</button>' +
       '<button class="btn bad" data-act="courseDelete" data-id="' + esc(c.course_id) + '" data-n="' + esc(c.name_ar || '') + '">🗑 حذف</button></div>' +
@@ -2471,7 +2472,9 @@ SCREENS.settings = { render: function (d, args) {
       key('WA_TEMPLATE', 'اسم القالب المعتمد', 'academy_intro' + (st.whatsapp_template ? ' — الحالي: ' + st.whatsapp_template : '')) + key('WA_TEMPLATE_LANG', 'لغة القالب', 'ar') +
       key('WA_TEMPLATE_IMAGE', 'للقالب رأس صورة؟ اكتب نعم', 'نعم / فارغ') + '</div>' +
       '<div class="card"><b>X ' + (st.x ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">رسائل X الخاصة تحتاج اشتراك X API المدفوع ورمز مستخدم بصلاحية dm.write من حساب الأكاديمية. تصل فقط لمن يسمح بالرسائل.</div>' +
-      key('X_TOKEN', 'رمز المستخدم (OAuth 2.0)', '…', true) + '</div>' +
+      key('X_TOKEN', 'رمز المستخدم (OAuth 2.0) — للرسائل الخاصة', '…', true) +
+      '<div class="small muted" style="margin-top:6px">📖 <b>قراءة ردود منشورات المنافسين (رسمي):</b> من developer.x.com بحساب الأكاديمية ← مشروع ← Keys ← <b>Bearer Token</b>. الدفع بالاستخدام (~0.005$ لكل منشور مقروء، سقف يومي في الإعداد x_reads_day).</div>' +
+      key('X_BEARER', 'Bearer Token (قراءة)', 'AAAA…', true) + '</div>' +
       '<div class="card"><b>انستغرام ' + (st.instagram ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">للرد الآلي فقط على من راسل الأكاديمية (سياسة Meta — لا رسائل باردة).</div>' +
       key('IG_TOKEN', 'رمز الوصول', '…', true) + key('IG_USER_ID', 'معرّف حساب انستغرام للأعمال', '1784…') + '</div>' +
       '<div class="card small"><b>تيك توك وسناب ولينكدإن:</b> لا تتيح للنشاطات التجارية بدء رسائل خاصة عبر برنامج. التواصل عليها يدوي من ملف كل عميل.</div>' +
@@ -2562,6 +2565,15 @@ ACT.leadGrad = function (el) {
 </script>
 <script>
 ACT.courseToggle = function (el) { act('courseActive', { course_id: el.dataset.id, active: el.checked ? 'نعم' : 'لا' }, el.checked ? '▶ فُعّلت الدورة' : '⏸ أُوقفت الدورة'); };
+</script>
+<script>
+ACT.courseImg = function (el) {
+  var inp = $('cimg_' + el.dataset.i), f = inp && inp.files && inp.files[0]; if (!f) return toast('اختر صورة أولاً', true);
+  if (f.size > 2.5e6) return toast('الصورة أكبر من ٢٫٥ ميغا — صغّرها', true);
+  el.disabled = true; el.textContent = '⏳ يرفع…';
+  var rd = new FileReader(); rd.onload = function () { act('courseImage', { course_id: el.dataset.id, data: rd.result, mime: f.type }, '✓ رُفعت الصورة إلى Drive'); }; rd.readAsDataURL(f);
+};
+ACT.courseImgClear = function (el) { act('courseImage', { course_id: el.dataset.id }, 'أُزيلت الصورة (الملف يبقى في Drive)'); };
 </script>
 
   <style>
