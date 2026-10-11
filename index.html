@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv3jn9c0";
+  var APP_BUILD = "mv3khimr";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
   (function () {
@@ -684,7 +684,7 @@ var TAB_GROUPS = [
   ['ask', '👥 العملاء', [['ask', '🎯 يسألون الآن'], ['persons', '👤 الأشخاص'], ['sources', '📂 للتواصل'], ['inbox', '💬 الرسائل'], ['reply', '✍️ الرد'], ['pipeline', '🧲 المراحل'], ['members', '🪪 مسجّلون وأعضاء'], ['alumni', '🎓 خرّيجون']]],
   ['targets', '🏢 الأندية والشركات', [['targets', 'مشغّلو الأندية'], ['opps', 'فرص الأندية'], ['people', 'صنّاع القرار'], ['b2b', 'B2B'], ['trainers', 'المدربون']]],
   ['compwatch', '📡 المنافسون', [['compwatch', 'ماذا تغيّر'], ['competitors', 'ملفاتهم'], ['comptimeline', 'الخط الزمني'], ['storecourses', 'دوراتهم بمواقع الدفع'], ['engage', 'التفاعل مع منشوراتهم'], ['supporters', 'مؤيدوهم'], ['radar', 'الفرص والتهديدات']]],
-  ['news', '📰 السوق والبحث', [['news', 'الأخبار'], ['discovery', 'الاكتشافات'], ['search', 'البحث الذكي'], ['keywords', 'الكلمات'], ['homeapps', 'تطبيقات المدرب'], ['exams', 'الاختبارات']]],
+  ['news', '📰 السوق والبحث', [['news', 'الأخبار'], ['gaps', '🕳 فجوات السوق'], ['discovery', 'الاكتشافات'], ['search', 'البحث الذكي'], ['keywords', 'الكلمات'], ['homeapps', 'تطبيقات المدرب'], ['exams', 'الاختبارات']]],
   ['dailyPost', '📣 التسويق', [['dailyPost', 'منشور اليوم'], ['ads', 'الإعلانات الموجّهة'], ['campaigns', 'الحملات'], ['content', 'بنك الأفكار'], ['register', 'نموذج التسجيل']]],
   ['courses', '🎓 الدورات والمبيعات', [['courses', 'الدورات'], ['calendar', 'التقويم'], ['payments', 'المدفوعات']]],
   ['sysmap', '⚙️ النظام', [['sysmap', 'خريطة النظام والنواقص'], ['automap', '🤖 الأوتوماتيك'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف'], ['settings', 'الإعدادات'], ['info', 'الدليل'], ['sandbox', 'التجريبي']]]
@@ -1723,6 +1723,38 @@ SCREENS.persons = { render: function (d) {
 ACT.psSearch = function () { go('persons', { q: val('ps_q') }); };
 ACT.psOpen = function (el) { go('person', { person_id: el.dataset.id }); };
 ACT.psBackfill = function (el) { el.disabled = true; act('personBackfill', {}, function (r) { return r.done ? '✓ اكتمل الربط' : 'رُبط ' + r.linked + ' · متبقٍ ' + r.remaining + ' (اضغط مرة أخرى)'; }); };
+</script>
+
+  <script>
+/* ═══════════ 🕳 فجوات السوق (قرار المالك 2026-10-11): عدة فجوات بأدلة، وبالمناطق لا الرياض فقط ═══════════ */
+var GAP_TYPES = [['زمنية', '📆 متى ندخل'], ['جغرافية', '🗺 أين ندخل'], ['سعرية', '💰 بأي سعر'], ['صيغة', '🧩 بأي صيغة'], ['عرض ضعيف', '🎯 أين المنافسة أضعف']];
+SCREENS.gaps = { render: function (d) {
+  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">🕳 فجوات السوق <span class="muted tiny">— من ' + (d.n ? d.n.store + ' دورة منافس و' + d.n.offers + ' عرض و' + d.n.demand.toLocaleString('en') + ' نقطة طلب' : '') + ' · ' + esc(stAgo_ ? stAgo_(d.at) : '') + '</span></h1>' +
+    '<button class="btn sm" data-act="gapsRefresh" data-tip="يعيد الحساب الآن من كل البيانات (يُحدَّث وحده كل ساعة)">↻ أعد التحليل</button></div>';
+  var gaps = d.gaps || [];
+  if (!gaps.length) html += '<div class="card">' + empty('لا فجوات مؤكدة بعد — تزداد مع كل دورة منافس تُقرأ وكل سائل يُلتقط') + '</div>';
+  GAP_TYPES.forEach(function (t) {
+    var rows = gaps.filter(function (g) { return g.type === t[0]; }); if (!rows.length) return;
+    html += '<div class="card"><b>' + t[1] + '</b> <span class="muted tiny">' + rows.length + '</span>' + rows.map(function (g) {
+      return '<div class="ct-ev" style="align-items:flex-start"><span class="tag ' + (g.score >= 5 ? 'bad' : g.score >= 4 ? 'warn' : '') + '" data-tip="قوة الفجوة من ١ إلى ٥ حسب حجم الدليل">' + '★'.repeat(g.score) + '</span>' +
+        '<span class="ct-tx"><b>' + esc(g.icon) + ' ' + esc(g.title) + '</b><div class="muted small">' + esc(g.evidence) + '</div></span>' +
+        (g.act ? '<button class="btn sm" data-go="' + esc(g.act.go) + '" data-args="' + attr(g.act.args || {}) + '">' + esc(g.act.label) + '</button>' : '') + '</div>';
+    }).join('') + '</div>';
+  });
+  html += '<div class="card"><b>🗺 المناطق: الطلب مقابل العرض الحضوري</b> <span class="muted tiny">— الطلب من قواعد المصادر والسائلين والعملاء (السائل والعميل = ٣ نقاط) · العرض = دورات حضورية/مدمجة مرصودة للمنافسين هناك</span>' +
+    stripList_([
+      ['المنطقة', 'minmax(140px,1.4fr)', function (r) { return '<b>' + esc(r.region) + '</b>'; }],
+      ['الطلب', '90px', function (r) { return r.demand.toLocaleString('en') + ' <span class="muted tiny">(' + r.demand_pct + '%)</span>'; }],
+      ['مصادره', 'minmax(120px,1.4fr)', function (r) { return '<span class="muted tiny">' + esc(r.sources) + '</span>'; }],
+      ['عرض المنافسين', '100px', function (r) { return r.supply ? String(r.supply) : '<b style="color:var(--bad)">0</b>'; }],
+      ['مقرّات منافسة', '90px', function (r) { return r.academies || '—'; }],
+      ['الفجوة', '80px', function (r) { return r.supply <= 2 && r.demand_pct >= 5 ? chip('فجوة', 'bad') : r.supply <= 2 && r.demand ? chip('صغيرة', 'warn') : ''; }]
+    ], d.regions || [], { key: 'gapreg', id: function (r) { return r.region; } }) +
+    '<div class="muted tiny" style="margin-top:4px">مقرّ المنافس (المدينة) غير مسجّل لأغلبهم في ملفاتهم — أضفه من «ملفاتهم» ليزداد التحليل دقة.</div></div>';
+  html += '<div class="card small"><b>دوراتنا الآن:</b> ' + (d.courses || []).map(function (c) { return esc(c.name) + ' ' + (c.price ? Number(c.price).toLocaleString('en') + ' ر.س' : '') + (c.start ? ' · ' + fmtDate(c.start) : ''); }).join(' · ') + '</div>';
+  return html;
+} };
+ACT.gapsRefresh = function (el) { el.disabled = true; act('gapsRefresh', {}, function (r) { return 'حُدّث: ' + r.gaps + ' فجوة'; }); };
 </script>
 
   <script>
