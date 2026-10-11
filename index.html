@@ -565,7 +565,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv2s6bnh";
+  var APP_BUILD = "mv3j288x";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   (function () {
     var m = /[#&]k=([^&]+)/.exec(location.hash);
@@ -1120,13 +1120,16 @@ function oppBar_(p) {
   var el = $('oppbar'); if (!el) return;
   var n = p.ask_offers || 0, h = p.ask_hot || 0;
   // لا أسئلة جديدة آخر ٣ أيام لكن هناك أسئلة تنتظر ردك ← شريط بلون أهدأ بدل الاختفاء
-  var w = Math.max(p.eng_waiting || 0, p.ask_stale || 0);
+  var w = Math.max(p.eng_waiting || 0, p.ask_stale || 0), sig = [n, h, w].join('|'), dis = '';
+  try { dis = localStorage.getItem('ops_oppbar_x') || ''; } catch (e) {}
+  if (dis === sig) { el.innerHTML = ''; el.className = ''; return; } // أُغلق يدوياً ولا جديد منذها
   if (S.screen === 'ask' || S.screen === 'monitor' || S.screen === 'engage' || (!n && !h && !w)) { el.innerHTML = ''; el.className = ''; return; }
-  if (!n && !h) { el.className = 'oppbar soft'; el.innerHTML = '<span>⏳ <b>' + w + '</b> سؤالاً ينتظر ردك · لم يُلتقط سؤال جديد منذ ٣ أيام — الناس يسألون عند المنافسين لكن النظام لا يرى تعليقاتهم إلا حين تلتقطها (📌 أرسل للنظام)</span><button class="btn sm pri" data-go="engage">التقط وردّ</button>'; return; }
+  if (!n && !h) { el.className = 'oppbar soft'; el.innerHTML = '<span>⏳ <b>' + w + '</b> سؤالاً ينتظر ردك · لم يُلتقط سؤال جديد منذ ٣ أيام — الناس يسألون عند المنافسين لكن النظام لا يرى تعليقاتهم إلا حين تلتقطها (📌 أرسل للنظام)</span><button class="btn sm pri" data-go="engage">التقط وردّ</button><button class="btn sm ghost" data-act="oppX" data-sig="' + esc(sig) + '" data-tip="يخفي الشريط — يعود فقط إذا تغيّر العدد أو جاء جديد">✕</button>'; return; }
   el.className = 'oppbar';
   el.innerHTML = '<span>🔥 ' + (n ? '<b>' + n + '</b> شخص يسأل عن السعر الآن — العرض والكود جاهزان' : '<b>' + h + '</b> فرصة بنية عالية تنتظر ردك') +
-    ' · الكود صالح ٢٤ ساعة</span><button class="btn sm pri" data-go="ask">افتح وردّ الآن</button>';
+    ' · الكود صالح ٢٤ ساعة</span><button class="btn sm pri" data-go="ask">افتح وردّ الآن</button><button class="btn sm ghost" data-act="oppX" data-sig="' + esc(sig) + '" data-tip="يخفي الشريط — يعود فقط إذا جاء جديد">✕</button>';
 }
+ACT.oppX = function (el) { try { localStorage.setItem('ops_oppbar_x', el.dataset.sig); } catch (e) {} var b = $('oppbar'); if (b) { b.innerHTML = ''; b.className = ''; } };
 
 /* ═══════════ اليوم ═══════════ */
 SCREENS.today = {
@@ -1145,11 +1148,14 @@ SCREENS.today = {
       '<div class="stat click" data-go="reply"><div class="v">' + d.counts.to_send + '</div><div class="k">معتمدة لم تُرسل</div></div>' +
       '<div class="stat"><div class="v">' + d.counts.followups_due + '</div><div class="k">متابعات مستحقة</div></div>' +
       '<div class="stat click" data-go="dailyPost"><div class="v">' + d.counts.posts_pending + '</div><div class="k">منشور بانتظارك</div></div></div>';
-    if (d.due && d.due.length) html += section('⏰ متابعات العملاء اليوم', d.due, function (l) {
-      return '<div class="card click" data-go="lead" data-args="' + attr({ lead_id: l.lead_id }) + '"><div class="row between"><b>' + esc(l.name) + '</b>' +
-        chip(l.late ? 'متأخرة' : fmtDate(l.due, true), l.late ? 'bad' : 'warn') + '</div><div class="small">➡️ ' + esc(l.next_action || 'متابعة') + '</div>' +
-        '<div class="chips">' + chip(l.status) + chip(l.psych_type ? '🧠 ' + l.psych_type : '', 'acc') + chip(l.objection ? '✋ ' + l.objection : '', 'warn') + '</div></div>';
-    });
+    if (d.due && d.due.length) html += '<h2>⏰ متابعات العملاء اليوم ' + chip(d.due.length) + '</h2>' + stripList_([
+      ['العميل', 'minmax(120px,1.2fr)', function (l) { return '<b>' + esc(l.name) + '</b>'; }],
+      ['الموعد', '90px', function (l) { return chip(l.late ? 'متأخرة' : fmtDate(l.due, true), l.late ? 'bad' : 'warn'); }],
+      ['الخطوة', 'minmax(160px,2fr)', function (l) { return '➡️ ' + esc(l.next_action || 'متابعة'); }],
+      ['المرحلة', '90px', function (l) { return chip(l.status); }],
+      ['النمط', 'minmax(90px,1fr)', function (l) { return (l.psych_type ? chip('🧠 ' + l.psych_type, 'acc') : '') + (l.objection ? chip('✋ ' + l.objection, 'warn') : ''); }],
+      ['', '70px', function (l) { return '<button class="btn sm" data-act="msgSheet" data-ref="' + attr({ lead_id: l.lead_id }) + '">✉️</button>'; }]
+    ], d.due, { key: 'due', id: function (l) { return l.lead_id; }, act: 'dueOpen' });
     html += section('١) رسائل تجاوزت ٣٠ دقيقة بلا رد', d.overdue, function (m) { return msgCard(m, chip(ago(m.age_min), m.age_min >= 60 ? 'bad' : 'warn')); });
     html += section('٢) شكاوى وتصعيدات', d.escalations, function (m) { return msgCard(m, chip(m.status === 'owner_handles' ? 'تتولاها' : 'مصعّدة', 'bad')); });
     html += section('٣) عملاء بنقاط عالية', d.hot_leads, function (l) {
@@ -1486,19 +1492,27 @@ ACT.lmSent = function (el) { act('leadMessageSent', { lead_id: el.dataset.id, vi
 ACT.msgSheet = function (el) {
   var ref = JSON.parse(el.dataset.ref || '{}'); window.__msgRef = ref;
   openSheet('<h3 style="margin:0 0 6px">✉️ راسله</h3><div id="ms_box" class="small muted">⏳ يجهّز الرسالة حسب منصته…</div>');
-  api('action', 'personMessage', ref).then(function (m) {
-    var b = $('ms_box'); if (!b) return; b.className = '';
-    b.innerHTML = '<div class="muted tiny">' + (m.platform ? 'منصته: <b>' + esc(m.platform) + '</b>' : 'المنصة غير معروفة') + (m.handle ? ' · @' + esc(m.handle) : '') + '</div>' +
-      (m.missing ? '<div class="small" style="color:var(--warn)">⚠️ ' + esc(m.missing) + '</div>' : '') +
-      '<textarea id="ms_text" style="min-height:150px;width:100%;margin-top:4px">' + esc(m.text) + '</textarea><div class="btns" style="flex-wrap:wrap">' +
-      m.channels.map(function (c) { return '<a class="btn sm' + (c.main ? ' pri' : '') + '" target="_blank" rel="noopener" href="' + esc(c.url) + '" data-mscopy="1">' + esc(c.label) + '</a>'; }).join('') +
-      '<button class="btn sm" data-act="msCopy">📋 انسخ</button><button class="btn sm good" data-act="msSent" data-via="' + esc(m.platform || 'يدوي') + '">✓ أرسلتُها</button></div>' +
-      '<div class="muted tiny">الزر ينسخ الرسالة ويفتح محادثته — الصقها واضغط إرسال. «أرسلتُها» تحدّث حالته في كل الجداول (السائل ← العميل ← المراحل).</div>';
-    Array.prototype.forEach.call(b.querySelectorAll('a[data-mscopy]'), function (a) { a.addEventListener('click', function () { copyText(val('ms_text')); }); });
-  }).catch(function (e) { var b = $('ms_box'); if (b) b.textContent = errMsg(e); });
+  api('action', 'personMessage', ref).then(renderMs_).catch(function (e) { var b = $('ms_box'); if (b) b.textContent = errMsg(e); });
 };
+/** القناة: واتساب هو المفضّل متى وُجد رقم، وإلا ما اكتشفه النظام — وتقدر تختار أي قناة أخرى وتكتب حسابه */
+function renderMs_(m) {
+  var b = $('ms_box'); if (!b) return; b.className = '';
+  b.innerHTML = '<div class="row" style="gap:6px;align-items:center;flex-wrap:wrap"><span class="tiny">القناة:</span><select id="ms_pl" data-act="msPlat">' + (m.platforms || []).map(function (p) { return '<option' + (p === m.platform ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>' +
+    '<input id="ms_handle" dir="ltr" placeholder="@حسابه على هذه المنصة" value="' + esc(m.handle || '') + '" style="width:170px"><button class="btn sm" data-act="msPlat" data-tip="يعيد تجهيز الرسالة والرابط للقناة المختارة">↻ جهّز</button>' +
+    '<span class="muted tiny">' + (m.phone ? 'له رقم ← واتساب هو المفضّل' : 'لا رقم — اختيرت المنصة التي ظهر عليها') + '</span></div>' +
+    (m.missing ? '<div class="small" style="color:var(--warn)">⚠️ ' + esc(m.missing) + '</div>' : '') +
+    '<textarea id="ms_text" style="min-height:150px;width:100%;margin-top:4px">' + esc(m.text) + '</textarea><div class="btns" style="flex-wrap:wrap">' +
+    m.channels.map(function (c) { return '<a class="btn sm' + (c.main ? ' pri' : '') + '" target="_blank" rel="noopener" href="' + esc(c.url) + '" data-mscopy="1">' + esc(c.label) + '</a>'; }).join('') +
+    '<button class="btn sm" data-act="msCopy">📋 انسخ</button><button class="btn sm good" data-act="msSent" data-via="' + esc(m.platform || 'يدوي') + '">✓ أرسلتُها</button></div>' +
+    '<div class="muted tiny">الزر ينسخ الرسالة ويفتح محادثته — الصقها واضغط إرسال. «أرسلتُها» تحدّث حالته في كل الجداول.</div>';
+  Array.prototype.forEach.call(b.querySelectorAll('a[data-mscopy]'), function (a) { a.addEventListener('click', function () { copyText(val('ms_text')); }); });
+}
+ACT.msPlat = function () { var ref = Object.assign({}, window.__msgRef, { platform: val('ms_pl'), handle: val('ms_handle').trim() }); var b = $('ms_box'); if (b) b.innerHTML = '⏳ يجهّز…'; api('action', 'personMessage', ref).then(renderMs_).catch(function (e) { toast(errMsg(e), true); }); };
 ACT.msCopy = function () { copyText(val('ms_text')); };
 ACT.msSent = function (el) { var p = Object.assign({}, window.__msgRef, { via: el.dataset.via }); act('leadMessageSent', p, '✓ سُجّل التواصل في كل الجداول').then(function () { var c = $('sheet'); if (c) c.remove(); }); };
+</script>
+<script>
+ACT.dueOpen = function (el) { go('lead', { lead_id: el.dataset.id }); };
 </script>
 
   <script>
@@ -1658,6 +1672,7 @@ ACT.haSave = function () {
 
   <script>
 /* ═══════════ 👤 الأشخاص: الملف الموحّد + القائمة واقتراحات الربط (التصميم المعتمد 2026-10-10) ═══════════ */
+var WHERE_AR = { Leads: 'عميل', Members: 'عضو', SourceContacts: 'قاعدة مصادر', AskOpps: 'سائل', CompEngage: 'تعليق عند منافس' };
 function personChip_(pid, label) { return pid ? '<a href="#" class="chip acc" data-go="person" data-args="' + attr({ person_id: pid }) + '" data-tip="الملف الموحّد: كل تاريخه من كل الجداول">👤 ' + esc(label || 'الملف الموحّد') + '</a>' : ''; }
 function pStatus_(p) { return p.opt_out === 'نعم' ? chip('⛔ لا تراسل', 'bad') : chip(p.status || '—', /دفع|عضو/.test(String(p.status)) ? 'good' : /تواصلنا|رد/.test(String(p.status)) ? 'acc' : ''); }
 SCREENS.person = { render: function (d) {
@@ -1666,12 +1681,14 @@ SCREENS.person = { render: function (d) {
     '<span class="row" style="gap:4px;flex-wrap:wrap">' + (p.opt_out !== 'نعم' ? '<button class="btn sm pri" data-act="msgSheet" data-ref="' + attr(ids.lead_id ? { lead_id: ids.lead_id } : ids.ask_id ? { ask_id: ids.ask_id } : ids.eng_id ? { eng_id: ids.eng_id } : { imp_id: ids.imp_id }) + '">✉️ راسله</button>' : '') +
     (ids.lead_id ? '<button class="btn sm" data-go="lead" data-args="' + attr({ lead_id: ids.lead_id }) + '">🧲 ملف العميل والمراحل</button>' : '') +
     (p.opt_out !== 'نعم' ? '<button class="btn sm bad" data-act="pOptOut" data-id="' + esc(p.person_id) + '" data-tip="يسري على كل الجداول فوراً: لن يُراسَل من أي مكان">⛔ لا تراسل</button>' : '') + '</span></div>';
+  var lastQ = (d.timeline || []).filter(function (e) { return /💬|🎯/.test(e.icon); })[0];
+  if (lastQ) html += '<div class="card small" style="border-color:var(--warn);margin-top:4px">❓ <b>آخر ما سأله:</b> ' + esc(lastQ.text) + ' <span class="muted tiny">(' + esc(fmtDate(lastQ.at, true)) + ')</span></div>';
   html += '<div class="ct-bottom" style="margin:6px 0">' + [[(d.where || []).map(function (w) { return w.label + (w.n > 1 ? ' ×' + w.n : ''); }).join(' · ') || '—', 'أين ظهر'], [[p.course_interest, p.segment, p.city].filter(String).join(' · ') || '—', 'اهتمامه'],
     [p.last_contact ? fmtDate(p.last_contact, true) : 'لم نراسله', 'آخر تواصل'], [(d.lead && d.lead.paid_amount ? Number(d.lead.paid_amount).toLocaleString('en') + ' ر.س' : '—') + ' · ' + (d.member && d.member.member_no ? '🪪 ' + d.member.member_no : '—'), 'الدفع والعضوية']]
     .map(function (k) { return '<span class="ct-k"><b>' + esc(k[0]) + '</b> ' + k[1] + '</span>'; }).join('') + '</div>';
   html += '<div class="card"><div class="row" style="gap:6px;flex-wrap:wrap;align-items:flex-end">' +
     [['name', 'الاسم', p.name], ['phone', 'الجوال', p.phone], ['email', 'البريد', p.email], ['handles', 'الحسابات (@…)', p.handles], ['city', 'المدينة', p.city]].map(function (f) { return '<label class="f" style="flex:1;min-width:140px">' + f[1] + '<input id="pf_' + f[0] + '" value="' + esc(f[2] || '') + '"' + (f[0] === 'phone' || f[0] === 'handles' || f[0] === 'email' ? ' dir="ltr"' : '') + '></label>'; }).join('') +
-    '<button class="btn sm" data-act="pSave" data-id="' + esc(p.person_id) + '" data-tip="يُكمل ما ينقص الملف — الرقم أو الحساب الجديد يربطه تلقائياً بأي ظهور آخر له">💾 حفظ</button></div><div class="muted tiny">person_id: ' + esc(p.person_id) + ' · أول ظهور: ' + esc(p.first_seen || '') + '</div></div>';
+    '<button class="btn sm" data-act="pSave" data-id="' + esc(p.person_id) + '" data-tip="يُكمل ما ينقص الملف — الرقم أو الحساب الجديد يربطه تلقائياً بأي ظهور آخر له">💾 حفظ</button></div><div class="muted tiny">person_id: ' + esc(p.person_id) + ' · أول ظهور: ' + esc(WHERE_AR[p.first_seen] || p.first_seen || '') + '</div></div>';
   var sug = (d.suggestions || []).map(function (s) { var o = s.a.person_id === p.person_id ? s.b : s.a;
     return '<div class="ct-ev"><span class="ct-tx">🔗 ' + esc(s.why) + ': <b>' + esc(o.name || o.handles || o.person_id) + '</b> <span class="muted tiny">(' + esc(o.first_seen || '') + (o.phone ? ' · جوال ' + esc(o.phone) : '') + ')</span></span>' +
       '<a class="btn sm" href="#" data-go="person" data-args="' + attr({ person_id: o.person_id }) + '">افتح</a><button class="btn sm pri" data-act="pMerge" data-keep="' + esc(p.person_id) + '" data-drop="' + esc(o.person_id) + '">✓ نفس الشخص</button><button class="btn sm" data-act="pReject" data-a="' + esc(p.person_id) + '" data-b="' + esc(o.person_id) + '">✕ شخص آخر</button></div>'; }).join('');
@@ -1697,12 +1714,13 @@ SCREENS.persons = { render: function (d) {
   if (sug) html += '<div class="card" style="border-color:var(--warn)"><b>🔗 اقتراحات ربط تنتظر تأكيدك</b> <span class="muted tiny">— نفس الحساب في مكانين؛ الرقم والبريد يُربطان آلياً بلا سؤال</span>' + sug + '</div>';
   html += '<div class="card"><b>الأشخاص</b> <span class="muted tiny">(' + d.total + (d.total > 200 ? ' — يظهر أول ٢٠٠، ابحث للباقي' : '') + ')</span>' +
     stripList_([
-      ['الاسم', 'minmax(140px,1.6fr)', function (p) { return '<b>' + esc(p.name || p.handles || '—') + '</b>'; }],
-      ['الحسابات', 'minmax(100px,1fr)', function (p) { return '<span class="muted tiny" dir="ltr">' + esc(p.handles || '') + '</span>'; }],
-      ['الجوال', '90px', function (p) { return p.phone ? '<span dir="ltr">' + esc(p.phone) + '</span>' : ''; }],
-      ['الحالة', '110px', function (p) { return pStatus_(p); }], ['أول ظهور', '110px', function (p) { return esc(p.first_seen || ''); }],
-      ['آخر تواصل', '110px', function (p) { return p.last_contact ? esc(fmtDate(p.last_contact)) : '<span class="muted">—</span>'; }]
-    ], d.rows || [], { key: 'persons', id: function (p) { return p.person_id; }, act: 'psOpen' }) + '</div>';
+      ['الاسم', 'minmax(120px,2fr)', function (p) { return '<b>' + esc(p.name || p.handles || '—') + '</b>'; }],
+      ['الجوال', 'minmax(110px,1fr)', function (p) { return p.phone ? '<span dir="ltr">' + esc(p.phone) + '</span>' : '<span class="muted">—</span>'; }],
+      ['الحسابات', 'minmax(90px,1.2fr)', function (p) { return p.handles ? '<span dir="ltr">' + esc(p.handles) + '</span>' : '<span class="muted">—</span>'; }],
+      ['المدينة', 'minmax(70px,.8fr)', function (p) { return esc(p.city || ''); }],
+      ['الحالة', 'minmax(80px,.9fr)', function (p) { return pStatus_(p); }], ['أين', 'minmax(80px,.9fr)', function (p) { return esc(WHERE_AR[p.first_seen] || p.first_seen || ''); }],
+      ['آخر تواصل', 'minmax(80px,.9fr)', function (p) { return p.last_contact ? esc(fmtDate(p.last_contact)) : '<span class="muted">—</span>'; }]
+    ], d.rows || [], { key: 'persons', id: function (p) { return p.person_id; }, act: 'psOpen', cls: function () { return 'tiny'; } }) + '</div>';
   return html;
 } };
 ACT.psSearch = function () { go('persons', { q: val('ps_q') }); };
