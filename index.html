@@ -566,7 +566,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4hvkti";
+  var APP_BUILD = "mv4ijvff";
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
   (function () {
@@ -1786,6 +1786,17 @@ SCREENS.finance = { render: function (d) {
     '<span class="row" style="gap:4px;align-items:center"><input type="month" id="fin_m" value="' + esc(d.month) + '" data-act="finMonth" style="width:150px"><button class="btn sm" data-act="finReport" data-tip="ينشئ ملف Excel للشهر في Google Drive (مجلد «Academy OPS - التقارير المالية») — يحدث وحده يوم ١ من كل شهر">📄 تقرير إلى Drive</button></span></div>';
   html += '<div class="ct-bottom" style="margin:6px 0">' + [[pn(d.revenue) + ' ر.س', 'الإيرادات (' + d.payments + ' دفعة)'], [pn(d.expenses_total) + ' ر.س', 'المصاريف'], ['<span style="color:' + (d.net >= 0 ? 'var(--good,#24a148)' : 'var(--bad)') + '">' + pn(d.net) + ' ر.س</span>', 'صافي الربح']]
     .map(function (k) { return '<span class="ct-k"><b>' + k[0] + '</b> ' + k[1] + '</span>'; }).join('') + '</div>';
+  var inb = d.inbox || [];
+  html += '<div class="card" style="border-color:' + (inb.length ? 'var(--warn)' : 'var(--line)') + '"><div class="row between" style="align-items:center"><b>📥 فواتير وصلت بريدك — بانتظار موافقتك ' + chip(inb.length, inb.length ? 'warn' : '') + '</b><button class="btn sm" data-act="invScan" data-tip="يقرأ بريدك الآن (يحدث وحده كل ٦ ساعات)">🔄 افحص البريد الآن</button></div>' +
+    (inb.length ? stripList_([
+      ['التاريخ', '90px', function (x) { return esc(fmtDate(x.at)); }],
+      ['الجهة', 'minmax(120px,1.3fr)', function (x) { return '<b>' + esc(x.vendor) + '</b><div class="muted tiny">' + esc(x.subject) + '</div>'; }],
+      ['المبلغ ر.س', '110px', function (x) { return '<input type="number" id="inv_a_' + esc(x.inbox_id) + '" value="' + esc(x.amount_sar) + '" style="width:95px">' + (x.currency !== 'SAR' ? '<div class="muted tiny">' + esc(x.amount + ' ' + x.currency) + '</div>' : ''); }],
+      ['البند', '150px', function (x) { return '<select id="inv_c_' + esc(x.inbox_id) + '">' + d.cats.map(function (c) { return '<option' + (c === x.category ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>'; }],
+      ['الفاتورة', '70px', function (x) { return x.file_url ? '<a href="' + esc(x.file_url) + '" target="_blank" rel="noopener">🧾 عرض</a>' : ''; }],
+      ['', '150px', function (x) { return '<button class="btn sm good" data-act="invOk" data-id="' + esc(x.inbox_id) + '">✓ أدخلها</button> <button class="btn sm ghost" data-act="invNo" data-id="' + esc(x.inbox_id) + '" data-tip="ليست مصروفاً للأكاديمية">✕</button>'; }]
+    ], inb, { key: 'inv', id: function (x) { return x.inbox_id; } }) : '<div class="muted small">لا فواتير جديدة. النظام يقرأ بريدك كل ٦ ساعات (قراءة فقط) ويضع هنا أي فاتورة أو إيصال بمبلغ — لا يدخل المصاريف إلا بموافقتك.</div>') +
+    '<div class="muted tiny" style="margin-top:4px">⚠️ فواتير الإعلانات: إن كنت تُدخل مصروفها في «الإعلانات الموجّهة» فاضغط ✕ هنا حتى لا تُحسب مرتين.</div></div>';
   var pct = Math.min(100, r.pct || 0), col = r.level === 'must' ? 'var(--bad)' : r.level === 'warn' ? '#e8a317' : 'var(--accent)';
   html += '<div class="card small"><b>🧾 حد التسجيل في ضريبة القيمة المضافة</b> — إيرادات آخر ١٢ شهراً: <b>' + pn(r.total) + '</b> من ' + pn(r.limit) + ' ر.س (' + (r.pct || 0) + '%)' +
     '<div style="height:8px;background:var(--soft);border-radius:4px;margin:6px 0;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:' + col + '"></div></div>' +
@@ -1808,6 +1819,9 @@ SCREENS.finance = { render: function (d) {
   html += '<div class="card small"><b>آخر ٦ أشهر</b>' + (d.trend || []).map(function (t) { return '<div class="row between"><span>' + esc(t.month) + '</span><span>إيرادات <b>' + pn(t.revenue) + '</b> · مصاريف ' + pn(t.expenses) + ' · صافٍ <b style="color:' + (t.net >= 0 ? 'inherit' : 'var(--bad)') + '">' + pn(t.net) + '</b></span></div>'; }).join('') + '</div>';
   return html;
 } };
+ACT.invScan = function (el) { el.disabled = true; el.textContent = '⏳ يقرأ البريد…'; act('invoiceScanNow', {}, function (r) { return r.message || 'تم'; }); };
+ACT.invOk = function (el) { var id = el.dataset.id; act('invoiceApprove', { inbox_id: id, amount: val('inv_a_' + id), category: val('inv_c_' + id) }, '✓ دخلت المصاريف بإيصالها'); };
+ACT.invNo = function (el) { act('invoiceReject', { inbox_id: el.dataset.id }, 'استُبعدت'); };
 ACT.finMonth = function () { go('finance', { month: val('fin_m') }); };
 function readFile_(f) { return new Promise(function (ok, bad) { if (!f) return ok(null); if (f.size > 8e6) return bad(new Error('الملف أكبر من ٨ ميغا')); var r = new FileReader(); r.onload = function () { ok({ data: r.result, mime: f.type }); }; r.onerror = bad; r.readAsDataURL(f); }); }
 ACT.expAdd = function (el) {
