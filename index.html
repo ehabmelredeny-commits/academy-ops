@@ -566,7 +566,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4tz1zb";
+  var APP_BUILD = "mv5480e0";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1007,7 +1007,8 @@ function openSheet(html) {
   var d = document.createElement('div');
   d.className = 'sheet'; d.id = 'sheet';
   d.innerHTML = '<div class="panel"><button class="btn sm close" data-act="closeSheet">✕</button>' + html + '</div>';
-  d.addEventListener('click', function (e) { if (e.target === d) closeSheet(); });
+  // الضغط خارج النافذة لا يمسح ما كتبته (كانت تُغلق فيضيع الإدخال — ملاحظة المالك 2026-10-12)
+  d.addEventListener('click', function (e) { if (e.target !== d) return; var typed = Array.prototype.some.call(d.querySelectorAll('input:not([type=checkbox]):not([type=file]),textarea'), function (x) { return x.value !== x.defaultValue; }); if (!typed || confirm('إغلاق النافذة؟ ما كتبته لن يُحفظ.')) closeSheet(); });
   closeSheet(); document.body.appendChild(d);
 }
 function closeSheet() { var s = $('sheet'); if (s) s.remove(); }
@@ -1920,7 +1921,7 @@ ACT.finReport = function (el) { el.disabled = true; el.textContent = '⏳ ينش
 .ac-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .ac-f { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 8px 0; }
 .ac-f label { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
-.ac-f input, .ac-f select { width: 100%; }
+.ac-f input, .ac-f select { width: 100%; color: var(--ink); background: var(--card); font-size: 14px; }
 .ac-note { font-size: 11.5px; color: var(--muted); }
 .ac-empty { text-align: center; padding: 24px 10px; color: var(--muted); }
 /* الجوال والآيباد العمودي: الجدول يتحول لبطاقات */
@@ -1955,7 +1956,7 @@ function acSiteBase_() {
   var b = AC.brand && AC.brand.site; if (b) return b.replace(/\/?$/, '/');
   return location.origin + location.pathname.replace(/[^/]*$/, '');
 }
-function acPortalUrl_(tok) { return acSiteBase_() + 'portal/#t=' + tok; }
+function acPortalUrl_(tok) { return acSiteBase_() + 'portal/'; } // الدخول دائماً بالجوال + رمز (ملاحظة المالك: الرابط كان يُدخل مباشرة)
 function acVerifyUrl_(code) { return acSiteBase_() + 'verify/?c=' + encodeURIComponent(code); }
 function acIntl_(p) { p = String(p || '').replace(/\D/g, ''); if (/^05\d{8}$/.test(p)) return '966' + p.slice(1); if (/^5\d{8}$/.test(p)) return '966' + p; return p; }
 function acIni_(n) { var w = String(n || '').trim().split(/\s+/); return esc((w[0] || '').charAt(0) + ' ' + (w[1] || '').charAt(0)); }
@@ -2256,7 +2257,7 @@ ACT.acTrainee = function (el) {
     '<label>طريقة الدفع<select id="acp_method"><option></option>' + ['سلة', 'تابي', 'تمارا', 'تحويل'].map(function (x) { return '<option' + (x === e.pay_method ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
     '<label>حالته<select id="acp_status">' + ['نشط', 'منسحب', 'خريج', 'لم يجتز'].map(function (x) { return '<option' + (x === e.status ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
     '<label class="row" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="acp_opt"' + (tt.opt_out ? ' checked' : '') + '> 🚫 لا تراسل</label></div>' +
-    '<div class="ac-row" style="margin:6px 0">' + chip('رابط دخول لمرة واحدة') + '<span class="ac-note">بعدها يدخل بجواله ورمز يصل بريده — جهاز واحد فقط</span>' +
+    '<div class="ac-row" style="margin:6px 0">' + chip('رابط البوابة') + '<span class="ac-note">يدخل بجواله ورمز يصل بريده — جهاز واحد فقط</span>' +
     '<button class="ac-ib" data-act="acCopy" data-v="' + esc(url) + '" data-tip="نسخ رابط بوابة المتدرب">📋</button>' +
     '<a class="ac-ib" href="' + esc(url) + '" target="_blank" rel="noopener" data-tip="فتح البوابة كما يراها المتدرب">👁</a>' +
     (tt.phone && !tt.opt_out ? '<a class="ac-ib" href="https://wa.me/' + acIntl_(tt.phone) + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-tip="يفتح واتساب برسالة جاهزة فيها رابط بوابته — أنت من يضغط إرسال">💬</a>' : '') +

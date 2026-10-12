@@ -226,7 +226,7 @@ function doScan(){var s=SCAN;SCAN=null;rpc('ac_qr_scan',{token:SESS,session_id:s
   var box='<div class="card" style="text-align:center;max-width:420px;margin:0 auto 11px">'+(r&&r.ok?'<div style="font-size:42px">✅</div><h3 style="justify-content:center">تم تسجيل حضورك</h3><div class="sm mut">جلسة '+r.n+' · '+new Date().toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'})+'</div><div class="share" style="margin-top:8px"><span class="chip '+(r.st==='L'?'cw':'cg')+'">'+(r.st==='L'?'متأخر (يُحسب حضوراً)':'حاضر')+'</span>'+(r.pct!=null?'<span class="chip">حضورك الآن '+Number(r.pct)+'%</span>':'')+'</div>':'<div style="font-size:42px">⚠️</div><h3 style="justify-content:center">لم يُسجَّل الحضور</h3><div class="sm mut">'+esc(why[r&&r.reason]||'حاول مرة أخرى')+'</div>')+'</div>';
   $('main').insertAdjacentHTML('afterbegin',box);if(r&&r.ok)setTimeout(function(){boot(true)},2500)})}
 function boot(quiet){
-  if(window.__LINK){var l=window.__LINK;window.__LINK='';return rpc('ac_link_login',{token:l,device:device()}).then(function(r){if(r&&r.ok){saveSess(r.token);boot()}else loginScreen('الرابط استُخدم من قبل — ادخل بجوالك')}).catch(function(){loginScreen('تعذّر الاتصال')})}
+  if(window.__LINK){window.__LINK='';if(!SESS)return loginScreen()} // الرابط لا يُدخل مباشرة: الدخول دائماً بالجوال + رمز
   if(!SESS)return loginScreen();
   rpc('ac_me',{token:SESS}).then(function(d){
     if(!d||!d.auth){if(d&&d.signed_out)return signedOutScreen(d);SESS='';try{localStorage.removeItem('ac_sess')}catch(e){};return loginScreen()}
