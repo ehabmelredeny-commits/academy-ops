@@ -202,7 +202,9 @@ try{SESS=localStorage.getItem('ac_sess')||''}catch(e){}
 function device(){var u=navigator.userAgent;return /iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1)?'آيباد':/iPhone/.test(u)?'آيفون':/Android/.test(u)?'أندرويد':/Windows/.test(u)?'كمبيوتر ويندوز':/Mac/.test(u)?'ماك':'جهاز'}
 function saveSess(t){SESS=t;try{localStorage.setItem('ac_sess',t);localStorage.removeItem('ac_tok')}catch(e){}}
 function hdr(title,sub){$('bt').innerHTML=logoHtml(B)+'<div><b>'+esc(B.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>';$('hi').innerHTML=esc(title)+(sub?'<small>'+esc(sub)+'</small>':'');$('nav').innerHTML=''}
-function getFT(){return FT?Promise.resolve(FT):fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{};FT=c.ft||'';return FT}).catch(function(){return ''})}
+// رمز النموذج صالح من ٤ ثوانٍ إلى ساعتين — نجدّده بعد ٩٠ دقيقة وننتظر حتى يبلغ ٥ ثوانٍ (صفحة مفتوحة طويلاً كانت تُتجاهل بصمت)
+var FTAT=0;function ftWait(){var age=Date.now()-FTAT;return new Promise(function(res){setTimeout(function(){res(FT)},Math.max(0,5000-age))})}
+function getFT(){if(FT&&Date.now()-FTAT<90*60e3)return ftWait();return fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{};FT=c.ft||'';FTAT=Date.now();return ftWait()}).catch(function(){return ''})}
 function loginScreen(msg){hdr('أهلاً بك 👋','ادخل برقم جوالك المسجّل لدينا');
   $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔐 الدخول</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
   '<input id="ph" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:17px;margin-top:4px;background:var(--card);color:var(--ink)">'+

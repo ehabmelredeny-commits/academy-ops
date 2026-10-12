@@ -30,7 +30,9 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function rpc(fn,b){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.message||'خطأ');return j})})}
 function dev(){var u=navigator.userAgent;return (/iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1)?'آيباد':/iPhone/.test(u)?'آيفون':/Android/.test(u)?'أندرويد':/Windows/.test(u)?'كمبيوتر ويندوز':/Mac/.test(u)?'ماك':'جهاز')}
 function when(t){if(!t)return '—';var d=new Date(t),m=Math.round((Date.now()-d)/60000);return m<2?'الآن':m<60?'قبل '+m+' د':m<1440?'قبل '+Math.round(m/60)+' س':d.toLocaleDateString('ar-SA-u-nu-latn',{day:'numeric',month:'short'})}
-function getFT(){return FT?Promise.resolve(FT):fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){FT=((j&&j.data)||{}).ft||'';return FT}).catch(function(){return ''})}
+// رمز النموذج صالح من ٤ ثوانٍ إلى ساعتين — صفحة مفتوحة طويلاً كانت تُرسل رمزاً منتهياً فيُتجاهل الطلب بصمت: نجدّده بعد ٩٠ دقيقة وننتظر حتى يبلغ ٥ ثوانٍ
+var FTAT=0;function ftWait(){var age=Date.now()-FTAT;return new Promise(function(res){setTimeout(function(){res(FT)},Math.max(0,5000-age))})}
+function getFT(){if(FT&&Date.now()-FTAT<90*60e3)return ftWait();return fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){FT=((j&&j.data)||{}).ft||'';FTAT=Date.now();return ftWait()}).catch(function(){return ''})}
 function shell(inner){return '<div class="hd"><div class="logo"></div><div><b>Academy OPS — ميزان التدريب</b><small>لوحة الإدارة · النظام الجديد</small></div></div>'+inner}
 var PALL=false,TAB='home',PQ='',PF='all',POFF=0,PROWS=[],PSEL='',PT=0;
 var ST={lead:'محتمل',trainee:'متدرب',grad:'خريج',optout:'لا تراسل'};
