@@ -566,7 +566,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4rlclx";
+  var APP_BUILD = "mv4sctoc";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1726,6 +1726,15 @@ SCREENS.person = { render: function (d) {
   html += '<div class="card"><div class="row" style="gap:6px;flex-wrap:wrap;align-items:flex-end">' +
     [['name', 'الاسم', p.name], ['phone', 'الجوال', p.phone], ['email', 'البريد', p.email], ['handles', 'الحسابات (@…)', p.handles], ['city', 'المدينة', p.city]].map(function (f) { return '<label class="f" style="flex:1;min-width:140px">' + f[1] + '<input id="pf_' + f[0] + '" value="' + esc(f[2] || '') + '"' + (f[0] === 'phone' || f[0] === 'handles' || f[0] === 'email' ? ' dir="ltr"' : '') + '></label>'; }).join('') +
     '<button class="btn sm" data-act="pSave" data-id="' + esc(p.person_id) + '" data-tip="يُكمل ما ينقص الملف — الرقم أو الحساب الجديد يربطه تلقائياً بأي ظهور آخر له">💾 حفظ</button></div><div class="muted tiny">person_id: ' + esc(p.person_id) + ' · أول ظهور: ' + esc(WHERE_AR[p.first_seen] || p.first_seen || '') + '</div></div>';
+  // 🎓 النظام الأكاديمي (Supabase) — مربوط بالجوال تلقائياً كل ٣٠ دقيقة
+  var acs = d.academic || [];
+  if (acs.length) html += '<div class="card"><div class="row between" style="align-items:center"><b>🎓 الأكاديمي</b>' + (acs[0].ref_code ? chip('رمز الترشيح: ' + acs[0].ref_code, 'warn') : '') + '</div>' +
+    acs.map(function (t) { return (t.enrollments || []).map(function (e) {
+      return '<div class="ct-ev" style="padding:3px 6px"><span class="ct-tx"><b>' + esc(e.cohort || '') + '</b> ' + chip(e.status) + ' ' + chip((e.pay_method ? e.pay_method + ' · ' : '') + e.pay_status, e.pay_status === 'مدفوع' ? 'good' : 'warn') +
+        (e.attendance_pct !== null && e.attendance_pct !== undefined ? ' · حضور ' + Number(e.attendance_pct) + '%' : '') + (e.score_now !== null && e.score_now !== undefined ? ' · معدل ' + Number(e.score_now) : '') +
+        (e.cert && e.cert.code ? ' · 🏅 ' + esc(e.cert.code) + (e.cert.status !== 'صالحة' ? ' (ملغاة)' : '') : '') + '</span>' +
+        (t.portal_token ? '<button class="btn sm ghost" data-act="acCopy" data-v="' + esc(acPortalUrl_(t.portal_token)) + '" data-tip="نسخ رابط بوابة المتدرب">📋 البوابة</button>' : '') + '</div>'; }).join(''); }).join('') +
+    '<div class="row" style="gap:6px;margin-top:4px"><button class="btn sm" data-go="academic">📚 الدفعات</button></div></div>';
   var sug = (d.suggestions || []).map(function (s) { var o = s.a.person_id === p.person_id ? s.b : s.a;
     return '<div class="ct-ev"><span class="ct-tx">🔗 ' + esc(s.why) + ': <b>' + esc(o.name || o.handles || o.person_id) + '</b> <span class="muted tiny">(' + esc(o.first_seen || '') + (o.phone ? ' · جوال ' + esc(o.phone) : '') + ')</span></span>' +
       '<a class="btn sm" href="#" data-go="person" data-args="' + attr({ person_id: o.person_id }) + '">افتح</a><button class="btn sm pri" data-act="pMerge" data-keep="' + esc(p.person_id) + '" data-drop="' + esc(o.person_id) + '">✓ نفس الشخص</button><button class="btn sm" data-act="pReject" data-a="' + esc(p.person_id) + '" data-b="' + esc(o.person_id) + '">✕ شخص آخر</button></div>'; }).join('');
