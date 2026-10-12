@@ -566,7 +566,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4pfler";
+  var APP_BUILD = "mv4ptoqy";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1835,6 +1835,17 @@ SCREENS.finance = { render: function (d) {
     ['الإيصال', '90px', function (e) { return e.auto ? '' : e.receipt_url ? '<a href="' + esc(e.receipt_url) + '" target="_blank" rel="noopener">🧾 عرض</a>' : '<label class="btn sm ghost" style="cursor:pointer" data-tip="أرفق صورة أو PDF">⬆️<input type="file" accept="image/*,application/pdf" data-act="expReceipt" data-id="' + esc(e.exp_id) + '" style="display:none"></label>'; }], ['ملاحظة', 'minmax(100px,1.2fr)', function (e) { return '<span class="muted tiny">' + esc(e.note || '') + '</span>'; }],
     ['', '50px', function (e) { return e.auto ? '' : '<button class="btn sm ghost" data-act="expDel" data-id="' + esc(e.exp_id) + '" data-tip="حذف هذا المصروف">✕</button>'; }]
   ], d.expenses, { key: 'fin', id: function (e) { return e.exp_id || e.category; } }) : empty('لا مصاريف بعد')) + '</div>';
+  var ac = d.academic || {};
+  html += '<div class="card"><div class="row between" style="align-items:center"><b>🎓 الأكاديمي — ' + esc(d.month) + '</b><span class="row" style="gap:4px"><button class="btn sm ghost" data-go="acRefs" data-tip="تفاصيل الترشيحات والخصومات والأرصدة">🤝 التفاصيل</button></span></div>' +
+    (!ac.linked ? '<div class="muted small">لم يُقرأ النظام الأكاديمي (Supabase غير مربوط من «الإعدادات ← القنوات») .</div>' :
+    '<div class="ct-bottom" style="margin:6px 0">' + [[pn(ac.discounts_sar) + ' ر.س', 'خصومات ترشيح (' + ac.discounts_n + ')', 'إيراد لم يُحصَّل — المدفوع بعد الخصم داخل في الإيرادات'],
+      [ac.credits_n + ' رصيد', 'جديد للخريجين (' + ac.credits_pct + '%)', 'التزام: خصم على دورة قادمة — لا يُصرف نقداً. المفتوح كله: ' + ac.credits_open_n],
+      [pn(ac.retake_due_sar) + ' ر.س', 'رسوم إعادة مستحقة (' + ac.retake_n + ')', 'تصبح إيراداً حين تُدفع وتُسجَّل في المدفوعات']]
+      .map(function (k) { return '<span class="ct-k" data-tip="' + esc(k[2]) + '"><b>' + k[0] + '</b> ' + esc(k[1]) + '</span>'; }).join('') + '</div>' +
+    (ac.rows && ac.rows.length ? stripList_([['التاريخ', '100px', function (x) { return esc(x.date); }], ['النوع', '130px', function (x) { return esc(x.kind.replace('_', ' ')); }],
+      ['المتدرب', 'minmax(110px,1fr)', function (x) { return esc(x.trainee); }], ['المبلغ', '100px', function (x) { return x.amount ? '<b>' + pn(x.amount) + '</b>' : (x.pct ? x.pct + '%' : ''); }],
+      ['الحالة', '90px', function (x) { return esc(x.status); }]], ac.rows, { key: 'facad', id: function (x) { return x.date + x.kind + x.trainee; } }) : '<div class="muted small">لا حركات أكاديمية هذا الشهر.</div>') +
+    '<div class="muted tiny" style="margin-top:4px">لا تُغيّر صافي الربح حتى لا يُحسب شيء مرتين — وتدخل التقرير الشهري في Drive (ورقة «الأكاديمي»).</div>') + '</div>';
   html += '<div class="card small"><b>آخر ٦ أشهر</b>' + (d.trend || []).map(function (t) { return '<div class="row between"><span>' + esc(t.month) + '</span><span>إيرادات <b>' + pn(t.revenue) + '</b> · مصاريف ' + pn(t.expenses) + ' · صافٍ <b style="color:' + (t.net >= 0 ? 'inherit' : 'var(--bad)') + '">' + pn(t.net) + '</b></span></div>'; }).join('') + '</div>';
   return html;
 } };
