@@ -206,7 +206,7 @@ function loginScreen(msg){hdr('أهلاً بك 👋','ادخل برقم جوال
   $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔐 الدخول</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
   '<input id="ph" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:17px;margin-top:4px;background:var(--card);color:var(--ink)">'+
   '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="sendCode()">أرسل رمز الدخول</button>'+
-  '<div class="share" style="margin-top:8px"><span class="chip">📧 على بريدك</span><span class="chip">💬 واتساب (بعد الربط)</span></div>'+
+  '<div class="sm mut" style="margin-top:8px;text-align:center">📧 سيصلك الرمز على بريدك المسجّل لدينا</div>'+
   '<div class="sm" id="err" style="color:var(--b);margin-top:8px;text-align:center">'+esc(msg||'')+'</div></div>'+
   '<div class="foot">لا كلمة سر تحفظها · الرمز يصل لبريدك المسجّل لدينا<br>ليس لديك حساب؟ تواصل مع الأكاديمية</div>';getFT()}
 function sendCode(){var v=$('ph').value.replace(/[^0-9+]/g,'');if(v.replace(/D/g,'').length<9){$('err').textContent='اكتب رقم جوال صحيح';return}PHONE=v;$('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
