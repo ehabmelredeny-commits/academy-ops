@@ -1,0 +1,48 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><meta name="theme-color" content="#0f1216">
+<title>Academy OPS — لوحة الإدارة (الجديدة)</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><style>:root{--bg:#0f1216;--card:#171b21;--ink:#e8ebef;--mut:#9aa4b2;--line:#2a303a;--a:#3fb6c8;--ai:#081418;--g:#4ade80;--b:#f87171;--gold:#D4A853}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tajawal,'Segoe UI',Tahoma,sans-serif;font-size:14.5px;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 14px 40px}
+.hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}.logo{width:42px;height:42px;border-radius:11px;background:url(../brand/logo-icon.png) center/cover}
+.hd b{display:block}.hd small{color:var(--mut)}.sp{flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:16px}.mut{color:var(--mut);font-size:12.5px}
+input{width:100%;padding:11px 12px;border:1.5px solid #3a4250;border-radius:11px;background:#0f1216;color:var(--ink);font:inherit;font-size:16px}
+input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 16px;border-radius:11px;border:1px solid var(--line);background:#1e232b;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.btn.p{background:var(--a);color:var(--ai);border-color:var(--a);width:100%;margin-top:12px}.btn.r{background:#3a1616;color:var(--b);border-color:#3a1616}.btn.s{min-height:30px;padding:3px 10px;font-size:12.5px;font-weight:500}
+.login{max-width:400px;margin:40px auto}.c{text-align:center}.err{color:var(--b);font-size:13px;min-height:1.2em;margin-top:8px;text-align:center}
+.otp{letter-spacing:12px;text-align:center;font-size:28px;font-weight:800;max-width:240px;margin:12px auto 4px;display:block}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px}.row:last-child{border:0}
+.chip{font-size:11.5px;padding:1px 9px;border-radius:99px;background:#1e232b;color:var(--mut)}.cg{background:#13301f;color:var(--g)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}.tb{background:#13171d;border-radius:10px;padding:7px 10px;font-size:12.5px;display:flex;justify-content:space-between}
+.kpi{display:flex;gap:8px;flex-wrap:wrap}.kpi span{background:#13171d;border-radius:10px;padding:8px 12px}.kpi b{display:block;font-size:20px}</style></head><body><div class="wrap" id="app"></div><script>
+var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"},EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",TOK='',EMAIL='',FT='';
+try{TOK=localStorage.getItem('v2_sess')||''}catch(e){}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function rpc(fn,b){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.message||'خطأ');return j})})}
+function dev(){var u=navigator.userAgent;return (/iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1)?'آيباد':/iPhone/.test(u)?'آيفون':/Android/.test(u)?'أندرويد':/Windows/.test(u)?'كمبيوتر ويندوز':/Mac/.test(u)?'ماك':'جهاز')}
+function when(t){if(!t)return '—';var d=new Date(t),m=Math.round((Date.now()-d)/60000);return m<2?'الآن':m<60?'قبل '+m+' د':m<1440?'قبل '+Math.round(m/60)+' س':d.toLocaleDateString('ar-SA-u-nu-latn',{day:'numeric',month:'short'})}
+function getFT(){return FT?Promise.resolve(FT):fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){FT=((j&&j.data)||{}).ft||'';return FT}).catch(function(){return ''})}
+function shell(inner){return '<div class="hd"><div class="logo"></div><div><b>Academy OPS — ميزان التدريب</b><small>لوحة الإدارة · النظام الجديد</small></div></div>'+inner}
+function loginScreen(msg){$('app').innerHTML=shell('<div class="card login c"><h3>🔐 الدخول</h3><div class="mut">بريدك المسموح فقط — يصلك رمز من ٦ أرقام</div><input id="em" type="email" dir="ltr" autocomplete="email" placeholder="you@example.com" value="'+esc(EMAIL)+'" style="margin-top:12px"><button class="btn p" id="go" onclick="send()">أرسل رمز الدخول</button><div class="err" id="err">'+esc(msg||'')+'</div></div>');getFT()}
+function send(){var e=$('em').value.trim();if(!/^[^@ ]+@[^@ ]+[.][a-z]{2,}$/i.test(e)){$('err').textContent='اكتب بريداً صحيحاً';return}EMAIL=e;$('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
+  getFT().then(function(ft){return fetch(EXEC+'?public=admin_otp',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({email:e,ft:ft})})}).then(function(r){return r.json()}).then(function(j){if(!j.ok){$('go').disabled=false;$('go').textContent='أرسل رمز الدخول';$('err').textContent=j.error||'تعذّر';return}codeScreen()}).catch(function(){$('go').disabled=false;$('go').textContent='أرسل رمز الدخول';$('err').textContent='تعذّر الاتصال'})}
+function codeScreen(msg){$('app').innerHTML=shell('<div class="card login c"><h3>أدخل الرمز</h3><div class="mut">إن كان بريدك مسموحاً سيصلك خلال دقيقة · صالح ١٠ دقائق</div><input id="otp" class="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" dir="ltr" oninput="if(this.value.replace(/[^0-9]/g,\'\').length===6)verify()"><label class="mut" style="display:flex;gap:6px;justify-content:center;align-items:center"><input type="checkbox" id="rem" checked style="width:auto"> تذكّر هذا الجهاز ٣٠ يوماً</label><button class="btn p" id="vb" onclick="verify()">دخول</button><div class="err" id="err">'+esc(msg||'')+'</div><div style="margin-top:6px"><a href="#" onclick="loginScreen();return false" class="mut">تغيير البريد / إعادة الإرسال</a></div></div>');setTimeout(function(){$('otp').focus()},150)}
+function verify(){var c=($('otp').value||'').replace(/[^0-9]/g,'');if(c.length!==6){$('err').textContent='الرمز ٦ أرقام';return}$('vb').disabled=true;
+  rpc('app_login_verify',{email:EMAIL,code:c,device:dev(),remember:$('rem').checked}).then(function(r){if(r&&r.ok){TOK=r.token;try{localStorage.setItem('v2_sess',TOK)}catch(e){}home();return}$('vb').disabled=false;$('err').textContent=r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':r.reason==='expired'?'انتهت صلاحية الرمز — اطلب رمزاً جديداً':'الرمز غير صحيح'+(r.left!=null?' (بقي '+r.left+')':'')}).catch(function(){$('vb').disabled=false;$('err').textContent='تعذّر الاتصال'})}
+function home(){if(!TOK)return loginScreen();
+  Promise.all([rpc('app_me',{token:TOK}),rpc('app_devices',{token:TOK}).catch(function(){return[]}),rpc('app_status',{token:TOK}).catch(function(){return null})]).then(function(r){var me=r[0],ds=r[1]||[],st=r[2];
+    if(!me||!me.ok){TOK='';try{localStorage.removeItem('v2_sess')}catch(e){}return loginScreen('انتهت الجلسة — ادخل من جديد')}
+    var tb=(st&&st.tables)||[],rows=tb.reduce(function(t,x){return t+(x.rows||0)},0);
+    $('app').innerHTML=shell('<div class="card"><h3>👋 أهلاً '+esc(me.name||'')+' <span class="chip">'+esc(me.email)+'</span></h3><div class="mut">هذه لوحة النظام الجديد على Supabase — قيد البناء. <b>نظامك الحالي يبقى كما هو</b> حتى يوم الانتقال، والشاشات تنتقل إلى هنا تباعاً.</div></div>'+
+      (st?'<div class="card"><h3>🗄 حالة النظام الجديد</h3><div class="kpi"><span><b>'+tb.length+'</b>جدولاً منسوخاً</span><span><b>'+rows.toLocaleString('en')+'</b>صفاً</span><span><b>'+st.mb+'</b>ميغا من 500</span><span><b>'+when(st.last_sync)+'</b>آخر نسخ</span><span><b>'+st.academic.cohorts+' · '+st.academic.trainees+'</b>دفعات · متدربون</span></div>'+
+        '<details style="margin-top:10px"><summary class="mut">الجداول ('+tb.length+')</summary><div class="grid" style="margin-top:8px">'+tb.map(function(x){return '<div class="tb"><span>'+esc(x.tab)+'</span><b>'+x.rows+'</b></div>'}).join('')+'</div></details></div>':'')+
+      '<div class="card"><h3>🔒 أجهزتك</h3>'+ds.map(function(d){return '<div class="row"><span>'+(d.current?'💻':'📱')+' '+esc(d.device||'جهاز')+' <span class="mut">· دخل '+when(d.created_at)+'</span></span>'+(d.current?'<span class="chip cg">الآن</span>':'<span><span class="mut">'+when(d.last_seen)+'</span> <button class="btn s r" onclick="out(\''+d.id+'\')">⏏ إخراج</button></span>')+'</div>'}).join('')+
+        (ds.length>1?'<button class="btn r" style="width:100%;margin-top:10px" onclick="out()">⏏ إخراج كل الأجهزة الأخرى</button>':'')+'</div>'+
+      '<div class="c"><button class="btn s" onclick="logout()">تسجيل الخروج من هذا الجهاز</button></div>')
+  }).catch(function(){$('app').innerHTML=shell('<div class="card c">تعذّر الاتصال — <a href="#" onclick="home();return false">أعد المحاولة</a></div>')})}
+function out(id){if(!confirm(id?'إخراج هذا الجهاز؟':'إخراج كل الأجهزة الأخرى؟'))return;rpc('app_device_out',{token:TOK,id:id||null}).then(home)}
+function logout(){rpc('app_logout',{token:TOK}).catch(function(){}).then(function(){TOK='';try{localStorage.removeItem('v2_sess')}catch(e){}loginScreen()})}
+home();
+</script></body></html>
