@@ -93,9 +93,6 @@ function hide(){clearTimeout(tm);t.style.display='none'}
 document.addEventListener('mouseover',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(!el)return hide();var r=el.getBoundingClientRect();clearTimeout(tm);tm=setTimeout(function(){show(el,r.left+r.width/2,r.top)},300)});
 document.addEventListener('touchstart',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(!el)return;var r=el.getBoundingClientRect();clearTimeout(tm);tm=setTimeout(function(){show(el,r.left+r.width/2,r.top);setTimeout(hide,3000)},450)},{passive:true});
 document.addEventListener('touchend',function(){clearTimeout(tm)},{passive:true});document.addEventListener('scroll',hide,{passive:true})})();
-var TOK=(/[#&]t=([a-f0-9]+)/.exec(location.hash)||[])[1]||'';
-try{if(TOK)localStorage.setItem('ac_tok',TOK);else TOK=localStorage.getItem('ac_tok')||''}catch(e){}
-if(TOK&&!/t=/.test(location.hash))history.replaceState(null,'','#t='+TOK); // يبقى في الرابط لإضافته للشاشة الرئيسية في الآيفون
 var D=null,B={},PANE='home',E=null,TXT={};
 var NAV=[['home','🏠','الرئيسية'],['sch','🗓','الجدول'],['study','📚','المذاكرة'],['cert','🏅','شهادتي'],['acc','👤','حسابي']];
 function nav(){ $('nav').innerHTML=NAV.map(function(n){return '<button class="'+(PANE===n[0]?'on':'')+'" onclick="go(\''+n[0]+'\')" aria-label="'+n[2]+'"><span>'+n[1]+'</span>'+n[2]+'</button>'}).join('') }
@@ -133,7 +130,7 @@ function render(){
     html+='<div class="pane on cols"><div><div class="card"><h3>👤 حسابي</h3><div class="row"><span>الاسم</span><b>'+esc(D.name)+'</b></div><div class="row"><span>البرنامج</span><span>'+esc(p.name)+'</span></div><div class="row"><span>الدفعة</span><span>'+esc(c.name)+'</span></div>'+
       '<div class="row"><span>الدفع</span>'+(E.pay_status==='مدفوع'?'<span class="chip cg">مكتمل'+(E.pay_method?' · '+esc(E.pay_method):'')+'</span>':'<span class="chip cw">'+esc(E.pay_status)+'</span>')+'</div>'+
       '<div class="row"><span>حالتك</span><span class="chip">'+esc(E.status)+'</span></div>'+(D.ref_code?'<div class="row"><span>🪪 رقم العضوية / الترشيح</span><b dir="ltr">'+esc(D.ref_code)+'</b></div>':'')+'</div></div><div>'+refCard()+
-      '<div class="card"><h3>📌 روابط</h3><div class="row"><span>سياسة الخصوصية</span><a href="../privacy/">قراءة ‹</a></div><div class="row"><span>أضف البوابة لشاشة جوالك</span><span class="xs mut">آيفون: زر المشاركة ← «إضافة إلى الشاشة الرئيسية»</span></div>'+
+      '<div class="card"><h3>📌 روابط</h3><div class="row"><span>📲 تسجيل الحضور بمسح رمز الجلسة</span><a href="#" onclick="scanHelp();return false">كيف؟</a></div><div class="row"><span>🔒 تسجيل الخروج من هذا الجهاز</span><a href="#" onclick="logout();return false">خروج</a></div><div class="row"><span>سياسة الخصوصية</span><a href="../privacy/">قراءة ‹</a></div><div class="row"><span>أضف البوابة لشاشة جوالك</span><span class="xs mut">آيفون: زر المشاركة ← «إضافة إلى الشاشة الرئيسية»</span></div>'+
       (B.phone?'<div class="row"><span>تواصل معنا</span><a href="tel:'+esc(B.phone)+'">'+esc(B.phone)+'</a></div>':'')+'</div></div></div>';
   }
   if(D.enrollments.length>1)html+='<div class="card noprint"><h3>🎓 برامجي</h3>'+D.enrollments.map(function(x,i){return '<div class="row"><span>'+esc(x.program.name)+' <span class="xs mut">'+esc(x.cohort.name)+'</span></span><button class="btn" onclick="E=D.enrollments['+i+'];render()">'+(x===E?'✓ معروض':'عرض')+'</button></div>'}).join('')+'</div>';
@@ -183,17 +180,66 @@ function ics(){var c=E.cohort,p=function(n){return('0'+n).slice(-2)},lines=['BEG
   (E.sessions||[]).forEach(function(s){var d=s.day.replace(/-/g,''),f=(c.time_from||'17:00').replace(':',''),t=(c.time_to||'20:00').replace(':','');
     lines.push('BEGIN:VEVENT','UID:'+d+'-'+s.n+'@academy','DTSTAMP:'+d+'T000000Z','DTSTART;TZID=Asia/Riyadh:'+d+'T'+f+'00','DTEND;TZID=Asia/Riyadh:'+d+'T'+t+'00','SUMMARY:'+(E.program.name+' — جلسة '+s.n).replace(/[,;]/g,' '),'LOCATION:'+String(c.place||'').replace(/[,;]/g,' '),'END:VEVENT')});
   lines.push('END:VCALENDAR');var a=document.createElement('a');a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(lines.join('\r\n'));a.download='schedule.ics';document.body.appendChild(a);a.click();a.remove()}
-if(!TOK){$('hi').textContent='افتح الرابط الشخصي الذي وصلك من الأكاديمية';$('main').innerHTML='<div class="card empty">🔒 هذه البوابة تفتح برابطك الشخصي فقط (وصلك على واتساب أو البريد).</div>'}
-else rpc('ac_portal',{token:TOK}).then(function(d){
-  if(!d){$('hi').textContent='الرابط غير صحيح أو قديم';$('main').innerHTML='<div class="card empty">🔒 تواصل مع الأكاديمية لإرسال رابطك من جديد.</div>';try{localStorage.removeItem('ac_tok')}catch(e){}return}
-  D=d;E=(d.enrollments||[]).filter(function(x){return x.status!=='منسحب'})[0]||(d.enrollments||[])[0]||null;
-  // يُعرض فوراً بهوية الأكاديمي، ثم تُكمَّل بيانات المنشأة من النظام الأساسي حين تصل (لا ننتظر جوجل)
-  function apply(b){B=b;document.title='بوابة المتدرب'+(b.name?' — '+b.name:'');
-    $('bt').innerHTML=logoHtml(b)+'<div><b>'+esc(b.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>'}
-  var b0={};Object.keys(d.brand||{}).forEach(function(k){b0[k]=pub(d.brand[k])});apply(b0);
-  var first=esc(String(d.name).split(' ')[0]);
-  $('hi').innerHTML=(E&&E.cert&&E.cert.status==='صالحة'?'مبروك يا '+first+' 🎉':'أهلاً، '+first+' 👋')+(E?'<small>'+esc(E.program.cert_title||E.program.name)+' · '+esc(E.cohort.name)+'</small>':'');
-  if(E&&E.cert)PANE='cert';nav();render();
-  brandMerge(d.brand).then(function(b){apply(b);render()})
-}).catch(function(){$('hi').textContent='تعذّر الاتصال';$('main').innerHTML='<div class="card empty">تحقق من الإنترنت ثم <a href="#" onclick="location.reload();return false">أعد المحاولة</a></div>'});
+/* ── الدخول (التصميم المعتمد 2026-10-12): جوال + رمز لمرة واحدة · جهاز واحد · الرابط الشخصي = دخول لمرة واحدة ── */
+var SESS='',PHONE='',FT='',SCAN=null;
+try{SESS=localStorage.getItem('ac_sess')||''}catch(e){}
+(function(){var h=location.hash,m=/[#&]t=([a-f0-9]{24,})/.exec(h),s=/[#&]scan=([0-9a-f-]{36}).([0-9a-f]{10})/.exec(h);
+  if(m)window.__LINK=m[1];if(s)SCAN={sid:s[1],code:s[2]};if(m||s)history.replaceState(null,'',location.pathname);})();
+function device(){var u=navigator.userAgent;return /iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1)?'آيباد':/iPhone/.test(u)?'آيفون':/Android/.test(u)?'أندرويد':/Windows/.test(u)?'كمبيوتر ويندوز':/Mac/.test(u)?'ماك':'جهاز'}
+function saveSess(t){SESS=t;try{localStorage.setItem('ac_sess',t);localStorage.removeItem('ac_tok')}catch(e){}}
+function hdr(title,sub){$('bt').innerHTML=logoHtml(B)+'<div><b>'+esc(B.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>';$('hi').innerHTML=esc(title)+(sub?'<small>'+esc(sub)+'</small>':'');$('nav').innerHTML=''}
+function getFT(){return FT?Promise.resolve(FT):fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{};FT=c.ft||'';return FT}).catch(function(){return ''})}
+function loginScreen(msg){hdr('أهلاً بك 👋','ادخل برقم جوالك المسجّل لدينا');
+  $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔐 الدخول</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
+  '<input id="ph" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:17px;margin-top:4px;background:var(--card);color:var(--ink)">'+
+  '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="sendCode()">أرسل رمز الدخول</button>'+
+  '<div class="share" style="margin-top:8px"><span class="chip">📧 على بريدك</span><span class="chip">💬 واتساب (بعد الربط)</span></div>'+
+  '<div class="sm" id="err" style="color:var(--b);margin-top:8px;text-align:center">'+esc(msg||'')+'</div></div>'+
+  '<div class="foot">لا كلمة سر تحفظها · الرمز يصل لبريدك المسجّل لدينا<br>ليس لديك حساب؟ تواصل مع الأكاديمية</div>';getFT()}
+function sendCode(){var v=$('ph').value.replace(/[^0-9+]/g,'');if(v.replace(/D/g,'').length<9){$('err').textContent='اكتب رقم جوال صحيح';return}PHONE=v;$('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
+  getFT().then(function(ft){return fetch(EXEC+'?public=otp',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({phone:v,ft:ft})})}).then(function(r){return r.json()}).then(function(j){
+    if(!j.ok){$('go').disabled=false;$('go').textContent='أرسل رمز الدخول';$('err').textContent=j.error||'تعذّر الإرسال';return}codeScreen(j.mask)}).catch(function(){$('go').disabled=false;$('go').textContent='أرسل رمز الدخول';$('err').textContent='تعذّر الاتصال — حاول مرة أخرى'})}
+var RESEND=0;
+function codeScreen(mask,msg){hdr('أدخل الرمز','أرسلناه إلى '+(mask||'بريدك المسجّل'));RESEND=Date.now()+45000;
+  $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto;text-align:center"><h3 style="justify-content:center">🔢 الرمز من 6 أرقام</h3><div class="sm mut">إن كان رقمك مسجّلاً سيصلك خلال دقيقة · صالح ١٠ دقائق</div>'+
+  '<input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" dir="ltr" oninput="if(this.value.replace(/[^0-9]/g,\'\').length===6)verify()" style="width:220px;letter-spacing:12px;text-align:center;font-size:28px;font-weight:800;padding:10px;border:1.5px solid var(--line);border-radius:12px;margin:12px auto 4px;display:block;background:var(--card);color:var(--ink)">'+
+  '<label class="sm" style="display:flex;gap:6px;justify-content:center;align-items:center;margin:6px 0"><input type="checkbox" id="rem" checked> تذكّر هذا الجهاز ٣٠ يوماً</label>'+
+  '<button class="btn p" id="vb" style="width:100%;min-height:46px;font-size:15px" onclick="verify()">دخول</button>'+
+  '<div class="sm" id="err" style="color:var(--b);margin-top:8px">'+esc(msg||'')+'</div><div class="xs mut" id="rs" style="margin-top:6px"></div>'+
+  '<div style="margin-top:8px"><a href="#" onclick="loginScreen();return false" class="sm">تغيير الرقم</a></div></div>';
+  setTimeout(function(){var o=$('otp');if(o)o.focus()},200);tick()}
+function tick(){var el=$('rs');if(!el)return;var s=Math.ceil((RESEND-Date.now())/1000);el.innerHTML=s>0?'لم يصلك؟ إعادة الإرسال بعد 0:'+('0'+s).slice(-2):'<a href="#" onclick="loginScreen();return false">أعد إرسال الرمز</a>';if(s>0)setTimeout(tick,1000)}
+function verify(){var c=($('otp').value||'').replace(/[^0-9]/g,'');if(c.length!==6){$('err').textContent='الرمز 6 أرقام';return}$('vb').disabled=true;
+  rpc('ac_login_verify',{phone:PHONE,code:c,device:device(),remember:$('rem').checked}).then(function(r){
+    if(r&&r.ok){saveSess(r.token);boot();return}$('vb').disabled=false;
+    $('err').textContent=r&&r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':r&&r.reason==='expired'?'انتهت صلاحية الرمز — اطلب رمزاً جديداً':'الرمز غير صحيح'+(r&&r.left!=null?' (بقي '+r.left+' محاولات)':'')}).catch(function(){$('vb').disabled=false;$('err').textContent='تعذّر الاتصال'})}
+function signedOutScreen(r){hdr('تم تسجيل الخروج من هذا الجهاز','');var d=r.at?new Date(r.at):null;
+  $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto;text-align:center"><div style="font-size:42px">📱</div><h3 style="justify-content:center">دخلت إلى حسابك من جهاز آخر</h3>'+
+  '<div class="sm mut" style="line-height:1.9">('+esc(r.device||'جهاز آخر')+(d?' · '+d.toLocaleString('ar-SA-u-nu-latn',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'')+')<br>الحساب يعمل على جهاز واحد في نفس الوقت حمايةً لمحتوى دورتك.</div>'+
+  '<button class="btn p" style="width:100%;margin-top:12px;min-height:44px" onclick="SESS=\'\';try{localStorage.removeItem(\'ac_sess\')}catch(e){};loginScreen()">ادخل هنا من جديد</button>'+
+  '<a class="btn" style="width:100%;margin-top:8px;min-height:44px" href="'+esc(B.phone?'https://wa.me/'+String(B.phone).replace(/\D/g,'').replace(/^0/,'966')+'?text='+encodeURIComponent('دخل أحد إلى حسابي في البوابة ولم أكن أنا'):'#')+'" target="_blank" rel="noopener">لم أكن أنا — أبلغ الأكاديمية</a>'+
+  '<div class="xs mut" style="margin-top:8px">الدخول هنا يُخرج الجهاز الآخر تلقائياً</div></div>'}
+function logout(){if(!confirm('تسجيل الخروج من هذا الجهاز؟'))return;rpc('ac_logout',{token:SESS}).catch(function(){}).then(function(){SESS='';try{localStorage.removeItem('ac_sess')}catch(e){};loginScreen()})}
+function scanHelp(){alert('افتح كاميرا جوالك ووجّهها إلى رمز الجلسة المعروض عند الباب، ثم اضغط الرابط الذي يظهر — يُسجَّل حضورك تلقائياً.')}
+function doScan(){var s=SCAN;SCAN=null;rpc('ac_qr_scan',{token:SESS,session_id:s.sid,code:s.code}).then(function(r){
+  var why={code:'انتهت صلاحية الرمز — امسحه من جديد (يتغيّر كل 30 ثانية)',day:'هذا الرمز ليس لجلسة اليوم',time:'خارج وقت الجلسة',not_enrolled:'لست مسجّلاً في هذه الدفعة',auth:'سجّل الدخول أولاً'};
+  var box='<div class="card" style="text-align:center;max-width:420px;margin:0 auto 11px">'+(r&&r.ok?'<div style="font-size:42px">✅</div><h3 style="justify-content:center">تم تسجيل حضورك</h3><div class="sm mut">جلسة '+r.n+' · '+new Date().toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'})+'</div><div class="share" style="margin-top:8px"><span class="chip '+(r.st==='L'?'cw':'cg')+'">'+(r.st==='L'?'متأخر (يُحسب حضوراً)':'حاضر')+'</span>'+(r.pct!=null?'<span class="chip">حضورك الآن '+Number(r.pct)+'%</span>':'')+'</div>':'<div style="font-size:42px">⚠️</div><h3 style="justify-content:center">لم يُسجَّل الحضور</h3><div class="sm mut">'+esc(why[r&&r.reason]||'حاول مرة أخرى')+'</div>')+'</div>';
+  $('main').insertAdjacentHTML('afterbegin',box);if(r&&r.ok)setTimeout(function(){boot(true)},2500)})}
+function boot(quiet){
+  if(window.__LINK){var l=window.__LINK;window.__LINK='';return rpc('ac_link_login',{token:l,device:device()}).then(function(r){if(r&&r.ok){saveSess(r.token);boot()}else loginScreen('الرابط استُخدم من قبل — ادخل بجوالك')}).catch(function(){loginScreen('تعذّر الاتصال')})}
+  if(!SESS)return loginScreen();
+  rpc('ac_me',{token:SESS}).then(function(d){
+    if(!d||!d.auth){if(d&&d.signed_out)return signedOutScreen(d);SESS='';try{localStorage.removeItem('ac_sess')}catch(e){};return loginScreen()}
+    D=d;E=(d.enrollments||[]).filter(function(x){return x.status!=='منسحب'})[0]||(d.enrollments||[])[0]||null;
+    function apply(b){B=b;document.title='بوابة المتدرب'+(b.name?' — '+b.name:'');$('bt').innerHTML=logoHtml(b)+'<div><b>'+esc(b.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>'}
+    var b0={};Object.keys(d.brand||{}).forEach(function(k){b0[k]=pub(d.brand[k])});apply(b0);
+    var first=esc(String(d.name).split(' ')[0]);
+    $('hi').innerHTML=(E&&E.cert&&E.cert.status==='صالحة'?'مبروك يا '+first+' 🎉':'أهلاً، '+first+' 👋')+(E?'<small>'+esc(E.program.cert_title||E.program.name)+' · '+esc(E.cohort.name)+'</small>':'');
+    if(!quiet&&E&&E.cert)PANE='cert';nav();render();if(SCAN)doScan();
+    brandMerge(d.brand).then(function(b){apply(b);render()})
+  }).catch(function(){$('hi').textContent='تعذّر الاتصال';$('main').innerHTML='<div class="card empty">تحقق من الإنترنت ثم <a href="#" onclick="location.reload();return false">أعد المحاولة</a></div>'});
+}
+B={};rpc('ac_verify',{code:''}).then(function(v){return brandMerge((v&&v.brand)||{})}).catch(function(){return brandMerge({})}).then(function(b){if(!D){B=b;if($('ph'))hdr('أهلاً بك 👋','ادخل برقم جوالك المسجّل لدينا');else if($('otp'))$('bt').innerHTML=logoHtml(B)+'<div><b>'+esc(B.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>'}});
+boot();
+
 </script></body></html>

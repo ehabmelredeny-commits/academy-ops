@@ -566,7 +566,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4t5y6g";
+  var APP_BUILD = "mv4tz1zb";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1946,7 +1946,7 @@ function acCall(op, a, quiet, fn) {
   if (!c || !c.url) return Promise.reject(new Error('Supabase غير مربوط'));
   if (!quiet) busy_(1);
   return fetch(c.url.replace(/\/$/, '') + '/rest/v1/rpc/' + (fn || 'ac_admin'), { method: 'POST', headers: { apikey: c.anon, Authorization: 'Bearer ' + c.anon, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ k: acKey_(), op: op, a: a || {} }) })
+    body: JSON.stringify(fn === 'ac_qr' ? { k: acKey_(), session_id: AC_QR.sid } : { k: acKey_(), op: op, a: a || {} }) })
     .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(/unauthorized/.test(j.message || '') ? 'المفتاح غير مصرّح للنظام الأكاديمي' : (j.message || 'خطأ')); return j; }); })
     .then(function (j) { if (!quiet) busy_(-1); return j; }, function (e) { if (!quiet) busy_(-1); if (/Failed to fetch|NetworkError/.test(e.message)) e = new Error('تعذّر الاتصال — تحقق من الإنترنت'); throw e; });
 }
@@ -2085,7 +2085,7 @@ function acAttHtml_(co, amin) {
   var html = '<div class="ac-sess">' + acIb_('→', 'acSess', 'الجلسة السابقة', ' data-d="-1"' + (idx ? '' : ' disabled')) +
     '<b>جلسة ' + s.n + ' · ' + esc(AC_DAYS[new Date(s.day + 'T12:00:00').getDay()]) + ' ' + acFmtD_(s.day) + '</b>' + (s.topic ? chip(s.topic) : '') + chip(s.kind || 'نظري') +
     (s.day === today ? chip('اليوم', 'good') : '') + acIb_('←', 'acSess', 'الجلسة التالية', ' data-d="1"' + (idx < ss.length - 1 ? '' : ' disabled')) + '<span class="ac-sp"></span>' +
-    acIb_('✓✓', 'acAllP', 'الكل حاضر — ثم عدّل الاستثناءات', ' data-s="' + s.id + '"') + acIb_('⌫', 'acAllClear', 'مسح تحضير هذه الجلسة', ' data-s="' + s.id + '"') + '</div>';
+    acIb_('📲 <small>QR</small>', 'acQr', 'اعرض رمز التحضير عند الباب — يمسحه المتدرب من جواله فيُسجَّل حضوره (يتغيّر كل 30 ثانية، بعد 15 دقيقة = متأخر)', ' data-s="' + s.id + '"', 'pri') + acIb_('✓✓', 'acAllP', 'الكل حاضر — ثم عدّل الاستثناءات', ' data-s="' + s.id + '"') + acIb_('⌫', 'acAllClear', 'مسح تحضير هذه الجلسة', ' data-s="' + s.id + '"') + '</div>';
   if (!tr.length) return html + '<div class="ac-empty">لا متدربين في الدفعة</div>';
   html += '<table class="ac-tbl"><tbody>' + tr.map(function (t) {
     var e = t.enrollment, cur = A[s.id + ':' + e.id] || '';
@@ -2130,6 +2130,32 @@ function acSchHtml_(co) {
       '</td><td data-h="النوع"><select data-act="acSessEdit" data-id="' + s.id + '" data-f="kind">' + ['نظري', 'عملي', 'اختبار', 'مراجعة'].map(function (k) { return '<option' + (k === s.kind ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></td>' +
       '<td data-h="الموضوع">' + ch('topic', '100%', 'text', s.topic) + '</td></tr>';
   }).join('') + '</tbody></table>';
+}
+
+/* ───────── 📲 التحضير بمسح QR (التصميم المعتمد 2026-10-12) ───────── */
+var AC_QR = { t: null, sid: '' };
+function acQrLib_() { return window.QRCode ? Promise.resolve() : new Promise(function (ok, bad) { var x = document.createElement('script'); x.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'; x.onload = ok; x.onerror = bad; document.head.appendChild(x); }); }
+ACT.acQr = function (el) {
+  AC_QR.sid = el.dataset.s;
+  openSheet('<div id="acqr" style="text-align:center;min-height:420px;background:#0c1f2c;color:#e8ebef;border-radius:14px;padding:14px"><b style="font-size:17px">✅ تحضير الجلسة</b><div id="acqr_t" class="ac-note" style="color:#9fb2c0"></div>' +
+    '<div style="background:#fff;border-radius:16px;padding:12px;width:min(74vw,300px);height:min(74vw,300px);margin:10px auto"><div id="acqr_c" style="width:100%;height:100%"></div></div>' +
+    '<div style="height:6px;background:#2a3d4d;border-radius:9px;overflow:hidden;margin:6px 30px"><i id="acqr_b" style="display:block;height:100%;width:100%;background:#D4A853;transition:width 1s linear"></i></div>' +
+    '<div class="ac-note" style="color:#9fb2c0">يتغيّر الرمز كل 30 ثانية · بعد 15 دقيقة من البداية = «متأخر» (يُحسب حضوراً)</div>' +
+    '<div id="acqr_n" style="display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap"></div></div>');
+  acQrLib_().then(acQrTick_).catch(function () { toast('تعذّر تحميل مولّد الرمز — تحقق من الإنترنت', true); });
+};
+function acQrTick_() {
+  clearTimeout(AC_QR.t); if (!$('acqr')) { acReload_(); return; } // أُغلقت النافذة ← حدّث التحضير
+  acCall('qr', null, true, 'ac_qr').then(function (r) {
+    if (!$('acqr')) return;
+    var url = acSiteBase_() + 'portal/#scan=' + AC_QR.sid + '.' + r.code;
+    if (AC_QR.code !== r.code) { AC_QR.code = r.code; $('acqr_c').innerHTML = ''; new QRCode($('acqr_c'), { text: url, width: 600, height: 600, colorDark: '#0B2D4B', correctLevel: QRCode.CorrectLevel.M }); var im = $('acqr_c').querySelector('img,canvas'); if (im) { im.style.width = '100%'; im.style.height = '100%'; } }
+    var s = r.session || {}, c = r.counts || {}, done = (c.P || 0) + (c.L || 0);
+    $('acqr_t').textContent = (s.cohort_name || '') + ' · جلسة ' + (s.n || '') + ' · ' + (s.day || '') + (s.time_from ? ' · ' + s.time_from : '');
+    $('acqr_b').style.width = Math.round(100 * r.valid_sec / 30) + '%';
+    $('acqr_n').innerHTML = [['حضر', c.P || 0, '#4ade80'], ['متأخر', c.L || 0, '#f5b454'], ['لم يسجّل', Math.max(0, (r.expected || 0) - done - (c.A || 0) - (c.E || 0)), '#e8ebef']].map(function (x) { return '<span style="background:#13293a;border-radius:10px;padding:6px 12px">' + x[0] + ' <b style="color:' + x[2] + '">' + x[1] + '</b></span>'; }).join('');
+    AC_QR.t = setTimeout(acQrTick_, Math.min(5000, r.valid_sec * 1000 + 300));
+  }).catch(function (e) { acErr_(e); });
 }
 
 /* ───────── الإجراءات ───────── */
@@ -2230,7 +2256,7 @@ ACT.acTrainee = function (el) {
     '<label>طريقة الدفع<select id="acp_method"><option></option>' + ['سلة', 'تابي', 'تمارا', 'تحويل'].map(function (x) { return '<option' + (x === e.pay_method ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
     '<label>حالته<select id="acp_status">' + ['نشط', 'منسحب', 'خريج', 'لم يجتز'].map(function (x) { return '<option' + (x === e.status ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
     '<label class="row" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="acp_opt"' + (tt.opt_out ? ' checked' : '') + '> 🚫 لا تراسل</label></div>' +
-    '<div class="ac-row" style="margin:6px 0">' + chip('رابط البوابة الشخصي') +
+    '<div class="ac-row" style="margin:6px 0">' + chip('رابط دخول لمرة واحدة') + '<span class="ac-note">بعدها يدخل بجواله ورمز يصل بريده — جهاز واحد فقط</span>' +
     '<button class="ac-ib" data-act="acCopy" data-v="' + esc(url) + '" data-tip="نسخ رابط بوابة المتدرب">📋</button>' +
     '<a class="ac-ib" href="' + esc(url) + '" target="_blank" rel="noopener" data-tip="فتح البوابة كما يراها المتدرب">👁</a>' +
     (tt.phone && !tt.opt_out ? '<a class="ac-ib" href="https://wa.me/' + acIntl_(tt.phone) + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-tip="يفتح واتساب برسالة جاهزة فيها رابط بوابته — أنت من يضغط إرسال">💬</a>' : '') +
