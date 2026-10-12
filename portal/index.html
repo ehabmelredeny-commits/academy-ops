@@ -103,7 +103,8 @@ function go(p){PANE=p;nav();render();scrollTo(0,0)}
 function pct(v){return v==null?null:Number(v)}
 function bar(v,min,label,okText){var c=v==null?'var(--mut)':v<min?'var(--b)':v<min+5&&label==='حضورك'?'var(--w)':'var(--g)';
   return '<div class="st"><span class="sm mut">'+label+'</span><b style="color:'+c+'">'+(v==null?'—':v+(label==='حضورك'?'%':''))+'</b><div class="m"><i style="width:'+Math.min(100,v||0)+'%;background:'+c+'"></i><u style="right:'+min+'%"></u></div><div class="xs" style="color:'+c+'">'+(v==null?'لم يبدأ بعد':v>=min?'✓ '+okText:'⚠️ المطلوب '+min+(label==='حضورك'?'%':''))+'</div></div>'}
-function nextSess(e){var t=new Date().toISOString().slice(0,10);return (e.sessions||[]).filter(function(s){return s.day>=t})[0]}
+function today(){try{return new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Riyadh'})}catch(e){return new Date(Date.now()+108e5).toISOString().slice(0,10)}}
+function nextSess(e){var t=today();return (e.sessions||[]).filter(function(s){return s.day>=t})[0]}
 function render(){
   if(!D)return; var r=D.rules||{}, html='';
   if(!E){ $('main').innerHTML='<div class="card empty">لا يوجد تسجيل نشط بعد. سيظهر برنامجك هنا عند إضافتك لدفعة.</div>'+footHtml(B); return; }
@@ -116,7 +117,7 @@ function render(){
     html+='<div>'+(E.cert?certTeaser():'')+'<div class="card"><h3>🗓 الجلسة القادمة <a class="r" href="#" onclick="go(\'sch\');return false">الجدول كاملاً ‹</a></h3>'+(ns?'<div class="next"><div class="date">'+DAYS[new Date(ns.day+'T12:00:00').getDay()]+'<small>'+dAr(ns.day,{day:'numeric',month:'short'})+'</small></div><div><b>جلسة '+ns.n+(ns.topic?' — '+esc(ns.topic):'')+'</b><div class="sm mut">'+esc([(c.time_from||'')+(c.time_to?' – '+c.time_to:''),c.place,c.trainer?'المدرب: '+c.trainer:'',ns.kind].filter(function(x){return x&&x.trim()}).join(' · '))+'</div></div></div>':'<div class="sm mut">'+(ss.length?'انتهت الجلسات':'يُعلن الجدول قريباً')+'</div>')+'</div>';
     html+=studyCard(true)+'</div></div>';
   } else if(PANE==='sch'){
-    var t=new Date().toISOString().slice(0,10);
+    var t=today();
     html+='<div class="card"><h3>🗓 جدول '+esc(c.name)+' <span class="r">'+(ss.length?'<a class="btn" href="#" onclick="ics();return false" data-tip="يضيف كل الجلسات لتقويم جوالك (آيفون/أندرويد/أوتلوك)">📅 أضف للتقويم</a>':'')+'</span></h3>'+
       (ss.length?ss.map(function(s){var st=s.st;return '<div class="row"'+(s.day===t?' style="background:var(--as);border-radius:8px;padding:6px"':'')+'><span><b>'+s.n+'</b> · '+DAYS[new Date(s.day+'T12:00:00').getDay()]+' '+dAr(s.day,{day:'numeric',month:'short'})+(s.topic?' · '+esc(s.topic):'')+' <span class="xs mut">'+esc(s.kind||'')+'</span></span>'+
         (st?'<span class="dots"><span class="s'+st+'">'+({P:'✓',L:'⏱',A:'✗',E:'ع'})[st]+'</span></span>':s.day<t?'<span class="xs mut">—</span>':'<span class="xs mut">قادمة</span>')+'</div>'}).join(''):'<div class="empty">يُعلن الجدول قريباً</div>')+

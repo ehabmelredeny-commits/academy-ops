@@ -566,7 +566,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4sctoc";
+  var APP_BUILD = "mv4slsdh";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1980,6 +1980,8 @@ function acState_(t, amin, pmin) {
 function acStatusOf_(c) { return c.status || 'قادمة'; }
 function acStCls_(s) { return s === 'جارية' ? 'good' : s === 'منتهية' ? '' : s === 'ملغاة' ? 'bad' : 'warn'; }
 function acFmtD_(d) { return d ? fmtDate(d) : '—'; }
+/** تاريخ اليوم بتوقيت الرياض (لا UTC) — بين ١٢ و٣ فجراً كان يختار جلسة الأمس */
+function acToday_() { try { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' }); } catch (e) { var d = new Date(Date.now() + 3 * 3600e3); return d.toISOString().slice(0, 10); } }
 var AC_DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
 /* ───────── الشاشة الرئيسية: الدفعات + ملف الدفعة ───────── */
@@ -2077,7 +2079,7 @@ function acTrHtml_(co, amin, pmin) {
 function acAttHtml_(co, amin) {
   var ss = co.sessions || [], tr = (co.trainees || []).filter(function (t) { return t.enrollment.status !== 'منسحب'; });
   if (!ss.length) return '<div class="ac-empty">لا جلسات بعد — افتح تبويب <b>الجدول</b> وولّد الجلسات من أيام الدفعة</div>';
-  var cid = co.cohort.id, today = new Date().toISOString().slice(0, 10), idx = AC.sess[cid];
+  var cid = co.cohort.id, today = acToday_(), idx = AC.sess[cid];
   if (idx === undefined) { idx = ss.findIndex(function (s) { return s.day >= today; }); if (idx < 0) idx = ss.length - 1; if (ss[idx].day > today && idx > 0) idx--; AC.sess[cid] = idx; }
   var s = ss[idx], A = co.attendance || {};
   var html = '<div class="ac-sess">' + acIb_('→', 'acSess', 'الجلسة السابقة', ' data-d="-1"' + (idx ? '' : ' disabled')) +
@@ -2121,7 +2123,7 @@ function acSchHtml_(co) {
   var html = '<div class="ac-sess"><b>' + ss.length + ' جلسة</b>' + (c.days ? chip(c.days) : chip('لم تُحدَّد أيام الأسبوع', 'warn')) + '<span class="ac-sp"></span>' +
     acIb_('⚙️ <small>ولّد</small>', 'acGen', 'يولّد الجلسات من تاريخ البدء وأيام الأسبوع (لا يكرر الموجود)', ' data-id="' + c.id + '"', ss.length ? '' : 'pri') + '</div>';
   if (!ss.length) return html + '<div class="ac-empty">حدّد تاريخ البدء وأيام الأسبوع من ✏️ ثم اضغط «ولّد»</div>';
-  var today = new Date().toISOString().slice(0, 10);
+  var today = acToday_();
   return html + '<table class="ac-tbl"><thead><tr><th>#</th><th>التاريخ</th><th>الساعات</th><th>النوع</th><th>الموضوع</th></tr></thead><tbody>' + ss.map(function (s) {
     var ch = function (f, w, type, val) { return '<input type="' + type + '" value="' + esc(val || '') + '" data-act="acSessEdit" data-id="' + s.id + '" data-f="' + f + '" style="width:' + w + '">'; };
     return '<tr' + (s.day === today ? ' style="background:var(--accent-soft)"' : '') + '><td class="ac-first"><b>' + s.n + '</b> <span class="ac-note">' + esc(AC_DAYS[new Date(s.day + 'T12:00:00').getDay()]) + '</span></td><td data-h="التاريخ">' + ch('day', '140px', 'date', s.day) + '</td><td data-h="الساعات">' + ch('hours', '60px', 'number', s.hours) +
