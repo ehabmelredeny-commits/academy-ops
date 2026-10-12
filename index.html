@@ -566,7 +566,8 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4izb2i";
+  var APP_BUILD = "mv4pfler";
+  var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
   (function () {
@@ -687,7 +688,9 @@ var TAB_GROUPS = [
   ['compwatch', '📡 المنافسون', [['compwatch', 'ماذا تغيّر'], ['competitors', 'ملفاتهم'], ['comptimeline', 'الخط الزمني'], ['storecourses', 'دوراتهم بمواقع الدفع'], ['engage', 'التفاعل مع منشوراتهم'], ['supporters', 'مؤيدوهم'], ['radar', 'الفرص والتهديدات']]],
   ['news', '📰 السوق والبحث', [['news', 'الأخبار'], ['gaps', '🕳 فجوات السوق'], ['discovery', 'الاكتشافات'], ['search', 'البحث الذكي'], ['keywords', 'الكلمات'], ['homeapps', 'تطبيقات المدرب'], ['exams', 'الاختبارات']]],
   ['dailyPost', '📣 التسويق', [['dailyPost', 'منشور اليوم'], ['ads', 'الإعلانات الموجّهة'], ['campaigns', 'الحملات'], ['content', 'بنك الأفكار'], ['register', 'نموذج التسجيل']]],
-  ['courses', '🎓 الدورات والمبيعات', [['courses', 'الدورات'], ['calendar', 'التقويم'], ['payments', 'المدفوعات'], ['finance', '💵 المالية']]],
+  /* النظام الأكاديمي (معتمد 2026-10-12) — بياناته في Supabase مباشرة */
+  ['academic', '🎓 الأكاديمي', [['academic', '📚 الدفعات'], ['acCerts', '🏅 الشهادات'], ['acRefs', '🤝 ترشيحات الخريجين'], ['acRules', '⚙️ القواعد والهوية']]],
+  ['courses', '💰 الدورات والمبيعات', [['courses', 'الدورات'], ['calendar', 'التقويم'], ['payments', 'المدفوعات'], ['finance', '💵 المالية']]],
   ['sysmap', '⚙️ النظام', [['sysmap', 'خريطة النظام والنواقص'], ['automap', '🤖 الأوتوماتيك'], ['flow', 'خطوات العمل'], ['modules', 'تشغيل/إيقاف'], ['settings', 'الإعدادات'], ['info', 'الدليل'], ['sandbox', 'التجريبي']]]
 ];
 function tabGroup_(k) { for (var i = 0; i < TAB_GROUPS.length; i++) { if (TAB_GROUPS[i][2].some(function (t) { return t[0] === k; })) return TAB_GROUPS[i]; } return null; }
@@ -809,6 +812,16 @@ function go(screen, args, keepScroll) {
     if (data && data.poll) S.sig = data.poll.sig;
     if (!stale && S.args && S.args.focus) focusItem_(S.args.focus);
   };
+  // شاشات Supabase المباشرة (النظام الأكاديمي): تُحمَّل من load() لا من جوجل
+  if (SCREENS[screen] && SCREENS[screen].load) {
+    var cc = keepScroll ? null : cacheGet_(ck);
+    if (cc) draw(cc, true); else if (!keepScroll) $('main').innerHTML = '<div class="loading">جارٍ التحميل…</div>';
+    SCREENS[screen].load(S.args).then(function (data) { cachePut_(ck, data); draw(data, false); }).catch(function (e) {
+      if (token !== S.token) return;
+      $('main').innerHTML = '<div class="card"><b>تعذّر التحميل</b><div class="muted">' + esc(errMsg(e)) + '</div><div class="btns"><button class="btn" data-go="' + esc(screen) + '">إعادة المحاولة</button></div></div>';
+    });
+    return;
+  }
   // عرض فوري من آخر نسخة محفوظة، ثم التحديث من النظام (ثوانٍ في Google)
   var cached = keepScroll ? null : cacheGet_(ck); // بعد إجراء: لا نعرض نسخة قديمة قبل التغيير
   S.shownStale = false;
@@ -1059,6 +1072,12 @@ ACT.reload = function () { go(S.screen, S.args); };
 /* تحديث حي: كل ٢٠ ثانية تُقارن لقطة Supabase للشاشة الحالية (طلب سريع مجاني)؛ إن تغيّرت تُعاد الشاشة من جوجل بهدوء دون تحريك الصفحة.
    لا يحدث أثناء الكتابة أو مع نافذة مفتوحة أو أثناء طلب جارٍ. */
 function liveCheck_() {
+  // الشاشات الأكاديمية: تحديث هادئ كل ٤٠ ثانية (تحضير من جهاز آخر يظهر وحده) — لا أثناء الكتابة أو نافذة مفتوحة
+  if (S.screen && SCREENS[S.screen] && SCREENS[S.screen].load) {
+    var ae0 = document.activeElement;
+    if (!document.hidden && !BUSY && !$('sheet') && !(ae0 && /^(TEXTAREA|INPUT|SELECT)$/.test(ae0.tagName)) && (S.acTick = (S.acTick || 0) + 1) % 2 === 0) go(S.screen, S.args, true);
+    return;
+  }
   if (document.hidden || !SUPA || BUSY || !S.screen || Object.keys(S.args || {}).length) return;
   var ae = document.activeElement;
   if (ae && /^(TEXTAREA|INPUT|SELECT)$/.test(ae.tagName)) return;
@@ -1832,6 +1851,478 @@ ACT.expAdd = function (el) {
 ACT.expReceipt = function (el) { var f = el.files && el.files[0]; if (!f) return; readFile_(f).then(function (x) { return act('expenseReceipt', { exp_id: el.dataset.id, file: x.data, mime: x.mime }, '🧾 أُرفق الإيصال'); }).catch(function (e) { toast(errMsg(e), true); }); };
 ACT.expDel = function (el) { if (!confirm('حذف هذا المصروف؟')) return; act('expenseDelete', { exp_id: el.dataset.id }, 'حُذف'); };
 ACT.finReport = function (el) { el.disabled = true; el.textContent = '⏳ ينشئ…'; api('action', 'financeReport', { month: val('fin_m') }).then(function (r) { el.disabled = false; el.textContent = '📄 تقرير إلى Drive'; toast('✓ التقرير في Drive'); window.open(r.url, '_blank', 'noopener'); }).catch(function (e) { el.disabled = false; el.textContent = '📄 تقرير إلى Drive'; toast(errMsg(e), true); }); };
+</script>
+
+  <style>
+/* ─── النظام الأكاديمي (التصميم المعتمد 2026-10-12): أزرار أيقونات صغيرة + شرح عند الوقوف/الضغط المطوّل ─── */
+.ac-ib { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; padding: 0 8px; border-radius: 9px; border: 1px solid var(--line);
+  background: var(--card); color: var(--ink); font: inherit; font-size: 15px; cursor: pointer; gap: 4px; -webkit-tap-highlight-color: transparent; }
+.ac-ib:hover { border-color: var(--accent); }
+.ac-ib.pri { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.ac-ib.gold { background: #b8932f; color: #fff; border-color: #b8932f; }
+.ac-ib[disabled] { opacity: .4; cursor: not-allowed; }
+.ac-ib small { font-size: 12px; }
+.ac-bar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 2px 0 10px; }
+.ac-bar h1 { margin: 0; font-size: 20px; }
+.ac-sp { flex: 1; }
+.ac-rules { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 10px; }
+.ac-co { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 11px 12px; cursor: pointer; position: relative; transition: border-color .15s, transform .1s; }
+.ac-co:hover { border-color: var(--accent); transform: translateY(-1px); }
+.ac-co b { display: block; font-size: 14.5px; padding-inline-end: 64px; }
+.ac-co .tag { position: absolute; top: 10px; left: 10px; }
+.ac-sub { color: var(--muted); font-size: 12.5px; }
+.ac-m { height: 7px; background: var(--soft); border-radius: 9px; position: relative; margin: 7px 0 2px; }
+.ac-m i { position: absolute; inset-inline-start: 0; top: 0; bottom: 0; border-radius: 9px; background: var(--accent); }
+.ac-m u { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); opacity: .5; }
+.ac-mr { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); }
+.ac-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: 4px 0 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ac-tabs button { background: none; border: 0; padding: 7px 11px; font: inherit; font-size: 13.5px; color: var(--muted); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; }
+.ac-tabs button.on { color: var(--accent); font-weight: 700; border-bottom-color: var(--accent); }
+.ac-tbl { width: 100%; border-collapse: collapse; }
+.ac-tbl th { font-size: 12px; color: var(--muted); font-weight: 500; text-align: start; padding: 6px 5px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.ac-tbl td { padding: 7px 5px; border-bottom: 1px solid var(--soft); font-size: 13.5px; vertical-align: middle; }
+.ac-tbl tr.click { cursor: pointer; } .ac-tbl tr.click:hover td { background: var(--soft); }
+.ac-av { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11.5px; margin-inline-end: 6px; flex: none; }
+.ac-nm { display: flex; align-items: center; }
+.ac-th { display: inline-block; position: relative; width: 84px; height: 7px; background: var(--soft); border-radius: 9px; vertical-align: middle; margin-inline-end: 5px; }
+.ac-th i { position: absolute; inset-inline-start: 0; top: 0; bottom: 0; border-radius: 9px; }
+.ac-th u { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); opacity: .5; }
+.ac-dots { display: inline-flex; gap: 2px; }
+.ac-dots span { width: 18px; height: 18px; border-radius: 5px; font-size: 10.5px; text-align: center; line-height: 18px; background: var(--soft); }
+.st-P { background: var(--good-soft) !important; color: var(--good); } .st-L { background: var(--warn-soft) !important; color: var(--warn); }
+.st-A { background: var(--bad-soft) !important; color: var(--bad); } .st-E { background: var(--owner-soft) !important; color: var(--owner); }
+.ac-mark { display: inline-flex; gap: 4px; }
+.ac-mark button { width: 38px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--card); font: inherit; font-size: 14px; cursor: pointer; color: var(--muted); }
+.ac-mark button.on { border-color: transparent; font-weight: 700; }
+.ac-sess { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.ac-sc { width: 64px; text-align: center; padding: 4px; }
+.ac-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ac-f { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 8px 0; }
+.ac-f label { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.ac-f input, .ac-f select { width: 100%; }
+.ac-note { font-size: 11.5px; color: var(--muted); }
+.ac-empty { text-align: center; padding: 24px 10px; color: var(--muted); }
+/* الجوال والآيباد العمودي: الجدول يتحول لبطاقات */
+@media (max-width: 760px) {
+  .ac-tbl thead { display: none; }
+  .ac-tbl, .ac-tbl tbody, .ac-tbl tr, .ac-tbl td { display: block; width: 100%; }
+  .ac-tbl tr { border: 1px solid var(--line); border-radius: 12px; margin-bottom: 7px; padding: 6px 8px; background: var(--card); }
+  .ac-tbl td { border: 0; padding: 3px 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .ac-tbl td[data-h]:before { content: attr(data-h); font-size: 11.5px; color: var(--muted); }
+  .ac-tbl td.ac-first:before { display: none; }
+  .ac-mark button { width: 44px; height: 40px; }
+  .ac-ib { min-width: 36px; height: 36px; }
+}
+</style>
+<script>
+/* ═══════════ النظام الأكاديمي — المصدر: Supabase مباشرة (لا جوجل) ═══════════
+   كل العمليات عبر دالة واحدة ac_admin(k, op, a) تتحقق من بصمة مفتاح الدخول. */
+var AC = { f: {}, tab: {}, sess: {} };
+function acCfg_() { return (typeof ACAD_SUPA !== 'undefined' && ACAD_SUPA && ACAD_SUPA.url) ? ACAD_SUPA : SUPA; }
+function acKey_() { return typeof opsKey_ === 'function' ? opsKey_() : UI_KEY; }
+function acCall(op, a, quiet) {
+  var c = acCfg_();
+  if (!c || !c.url) return Promise.reject(new Error('Supabase غير مربوط'));
+  if (!quiet) busy_(1);
+  return fetch(c.url.replace(/\/$/, '') + '/rest/v1/rpc/ac_admin', { method: 'POST', headers: { apikey: c.anon, Authorization: 'Bearer ' + c.anon, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ k: acKey_(), op: op, a: a || {} }) })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(/unauthorized/.test(j.message || '') ? 'المفتاح غير مصرّح للنظام الأكاديمي' : (j.message || 'خطأ')); return j; }); })
+    .then(function (j) { if (!quiet) busy_(-1); return j; }, function (e) { if (!quiet) busy_(-1); if (/Failed to fetch|NetworkError/.test(e.message)) e = new Error('تعذّر الاتصال — تحقق من الإنترنت'); throw e; });
+}
+function acSet_(d, k, def) { var v = d && d.settings ? d.settings[k] : undefined; return v === undefined || v === null ? def : v; }
+function acSiteBase_() {
+  var b = AC.brand && AC.brand.site; if (b) return b.replace(/\/?$/, '/');
+  return location.origin + location.pathname.replace(/[^/]*$/, '');
+}
+function acPortalUrl_(tok) { return acSiteBase_() + 'portal/#t=' + tok; }
+function acVerifyUrl_(code) { return acSiteBase_() + 'verify/?c=' + encodeURIComponent(code); }
+function acIntl_(p) { p = String(p || '').replace(/\D/g, ''); if (/^05\d{8}$/.test(p)) return '966' + p.slice(1); if (/^5\d{8}$/.test(p)) return '966' + p; return p; }
+function acIni_(n) { var w = String(n || '').trim().split(/\s+/); return esc((w[0] || '').charAt(0) + ' ' + (w[1] || '').charAt(0)); }
+function acNum_(v) { return v === null || v === undefined || v === '' ? null : Number(v); }
+function acIb_(icon, act, tip, attrs, cls) { return '<button class="ac-ib' + (cls ? ' ' + cls : '') + '" data-act="' + act + '" data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '"' + (attrs || '') + '>' + icon + '</button>'; }
+function acTh_(v, min, warnBand) {
+  if (v === null) return '<span class="muted">—</span>';
+  var col = v < min ? 'var(--bad)' : v < min + (warnBand || 0) ? 'var(--warn)' : 'var(--good)';
+  return '<span class="ac-th"><i style="width:' + Math.min(100, v) + '%;background:' + col + '"></i><u style="right:' + min + '%"></u></span><b style="color:' + col + '">' + v + (warnBand ? '%' : '') + '</b>';
+}
+/** حالة المتدرب: الحضور والمعدل مقابل القواعد */
+function acState_(t, amin, pmin) {
+  var g = t.progress || {}, a = acNum_(g.attendance_pct), s = acNum_(g.score_now), e = t.enrollment;
+  if (t.cert) return t.cert.status === 'ملغاة' ? chip('🚫 شهادة ملغاة', 'bad') : chip('🏅 ' + t.cert.code, 'good');
+  if (e.status === 'منسحب') return chip('منسحب', '');
+  if (a === null && s === null) return chip('لم يبدأ', '');
+  if ((a !== null && a < amin) || (s !== null && s < pmin)) return chip('🔴 تحت الحد', 'bad');
+  if (a !== null && a < amin + 5) return chip('⚠️ قريب من حد الحضور', 'warn');
+  var fin = acNum_(g.final_score); if (fin !== null && fin >= pmin && a >= amin) return chip('✅ مستحق الشهادة', 'good');
+  return chip('في الطريق للشهادة', 'good');
+}
+function acStatusOf_(c) { return c.status || 'قادمة'; }
+function acStCls_(s) { return s === 'جارية' ? 'good' : s === 'منتهية' ? '' : s === 'ملغاة' ? 'bad' : 'warn'; }
+function acFmtD_(d) { return d ? fmtDate(d) : '—'; }
+var AC_DAYS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+/* ───────── الشاشة الرئيسية: الدفعات + ملف الدفعة ───────── */
+SCREENS.academic = {
+  load: function (args) {
+    return Promise.all([acCall('dashboard', {}, true), args && args.c ? acCall('cohort', { id: args.c }, true) : null])
+      .then(function (r) { var d = r[0]; d.co = r[1]; AC.brand = (d.settings || {}).brand || {}; return d; });
+  },
+  render: function (d, args) {
+    var amin = Number(acSet_(d, 'attendance_min', 80)), pmin = Number(acSet_(d, 'pass_min', 70));
+    AC.d = d;
+    return d.co ? acCohortHtml_(d, d.co, amin, pmin) : acHomeHtml_(d, amin, pmin);
+  }
+};
+function acRulesChips_(d, amin, pmin) {
+  var w = acSet_(d, 'weights_default', []) || [];
+  return '<div class="ac-rules">' + chip('✅ الحضور ≥ ' + amin + '% · التأخير = حضور · العذر لا يُحسب', 'good') +
+    chip('📝 النجاح ≥ ' + pmin + '% (' + w.map(function (x) { return x.weight; }).join('/') + ')', 'good') +
+    chip('🔁 ' + acSet_(d, 'retake_free', 2) + ' إعادة مجاناً · بعدها ' + acSet_(d, 'retake_fee_pct', 10) + '% من سعر الدورة', 'warn') +
+    '<span class="chip" data-go="acRules" data-tip="تعديل القواعد والأوزان وبيانات الأكاديمية" style="cursor:pointer">⚙️</span></div>';
+}
+function acHomeHtml_(d, amin, pmin) {
+  var k = d.kpi || {}, f = AC.f;
+  var list = (d.cohorts || []).filter(function (x) {
+    return (!f.st || acStatusOf_(x.c) === f.st) && (!f.g || x.c.gender === f.g);
+  });
+  var fchip = function (key, val, label) { var on = f[key] === val; return '<span class="chip' + (on ? ' good' : '') + '" data-act="acFilter" data-k="' + key + '" data-v="' + esc(val) + '" style="cursor:pointer">' + esc(label) + '</span>'; };
+  var html = '<div class="ac-bar"><h1>🎓 الدفعات والمتدربون</h1><span class="ac-sp"></span>' +
+    acIb_('↺', 'acClear', 'إلغاء كل الخيارات (التصفية)') + acIb_('⟳', 'acRefresh', 'تحديث الآن') +
+    acIb_('＋ <small>دفعة</small>', 'acNewCohort', 'إنشاء دفعة جديدة لبرنامج — تُنشأ تقييماتها تلقائياً من أوزان البرنامج', '', 'pri') + '</div>';
+  html += acRulesChips_(d, amin, pmin);
+  html += statMini_([
+    [(d.cohorts || []).filter(function (x) { return x.c.status === 'جارية'; }).length + ' / ' + (d.cohorts || []).filter(function (x) { return x.c.status === 'قادمة'; }).length, 'جارية / قادمة'],
+    [k.trainees || 0, 'متدرب · ' + (k.paid || 0) + ' مدفوع · ' + (k.bnpl || 0) + ' تابي/تمارا'],
+    [(k.avg_att === null || k.avg_att === undefined ? '—' : k.avg_att + '%'), 'متوسط الحضور', k.avg_att >= amin ? 'good' : ''],
+    [k.below || 0, 'تحت الحد', k.below ? 'bad' : ''],
+    [k.eligible || 0, 'مستحق للشهادة', k.eligible ? 'warn' : ''],
+    [k.certs || 0, 'شهادة صادرة'],
+    [(k.refs || 0) + ' / ' + (k.refs_paid || 0), 'ترشيحات / دفعوا']
+  ]);
+  html += '<div class="ac-rules">' + fchip('st', '', 'الكل ' + (d.cohorts || []).length) + fchip('st', 'جارية', 'جارية') + fchip('st', 'قادمة', 'قادمة') + fchip('st', 'منتهية', 'منتهية') +
+    ' · ' + fchip('g', 'رجال', 'رجال') + fchip('g', 'نساء', 'نساء') + '</div>';
+  if (!list.length) return html + '<div class="card ac-empty">' + ((d.cohorts || []).length ? 'لا دفعات بهذه التصفية' : 'لا توجد دفعات بعد — اضغط <b>＋ دفعة</b> لإنشاء أول دفعة') + '</div>';
+  html += '<div class="ac-grid">' + list.map(function (x) {
+    var c = x.c, st = acStatusOf_(c), days = c.start_date ? Math.round((new Date(c.start_date) - new Date()) / 864e5) : null;
+    var prog = x.sessions ? Math.round(100 * x.held / x.sessions) : 0, seats = Math.round(100 * x.enrolled / Math.max(1, c.capacity || 1));
+    return '<div class="ac-co" data-go="academic" data-args="' + attr({ c: c.id }) + '">' + '<span class="tag">' + chip(st, acStCls_(st)) + '</span>' +
+      '<b>' + esc(c.name) + '</b><div class="ac-sub">' + esc([c.gender, c.days ? c.days.split(',').length + '×/أسبوع' : '', acFmtD_(c.start_date)].filter(Boolean).join(' · ')) + '</div>' +
+      '<div class="ac-m"><i style="width:' + prog + '%"></i></div><div class="ac-mr"><span>' + (x.sessions ? 'جلسة ' + x.held + '/' + x.sessions : 'لا جدول بعد') + '</span><span>' +
+      (st === 'قادمة' && days !== null && days >= 0 ? 'بعد ' + days + ' يوماً' : (x.hours ? Math.round(x.hours_done) + '/' + x.hours + ' ساعة' : '')) + '</span></div>' +
+      '<div class="ac-m"><i style="width:' + Math.min(100, seats) + '%;background:#b8932f"></i></div><div class="ac-mr"><span>👥 ' + x.enrolled + '/' + (c.capacity || '—') + '</span><span>' +
+      (x.avg_att !== null && x.avg_att !== undefined ? 'حضور ' + x.avg_att + '%' : '') + (x.below ? ' · <b style="color:var(--bad)">' + x.below + ' تحت الحد</b>' : '') +
+      (c.classroom_url ? '' : ' · Classroom ⏳') + '</span></div></div>';
+  }).join('') + '</div>';
+  return html;
+}
+function acCohortHtml_(d, co, amin, pmin) {
+  var c = co.cohort, p = c.program || {}, tr = co.trainees || [], ss = co.sessions || [], tab = AC.tab[c.id] || 'tr';
+  var held = {}; Object.keys(co.attendance || {}).forEach(function (k) { held[k.split(':')[0]] = 1; });
+  var nHeld = ss.filter(function (s) { return held[s.id]; }).length, hrs = ss.filter(function (s) { return held[s.id]; }).reduce(function (t, s) { return t + Number(s.hours || 0); }, 0);
+  var week = c.start_date ? Math.max(0, Math.floor((new Date() - new Date(c.start_date)) / 6048e5) + 1) : 0;
+  var elig = tr.filter(function (t) { var g = t.progress || {}; return !t.cert && acNum_(g.attendance_pct) >= amin && acNum_(g.final_score) >= pmin; }).length;
+  var html = '<div class="ac-bar">' + acIb_('→', 'acBack', 'رجوع لكل الدفعات') + '<h1>' + esc(c.name) + '</h1>' + chip(acStatusOf_(c), acStCls_(acStatusOf_(c))) +
+    (c.status === 'جارية' && p.weeks ? chip('الأسبوع ' + Math.min(week, p.weeks) + ' من ' + p.weeks, 'good') : '') +
+    chip('الجلسات ' + nHeld + '/' + ss.length) + (p.hours ? chip('الساعات ' + Math.round(hrs) + '/' + p.hours) : '') + '<span class="ac-sp"></span>' +
+    acIb_('✅', 'acTab', 'تحضير اليوم — ضغطة واحدة لكل متدرب وتُحفظ فوراً', ' data-t="att"', tab === 'att' ? 'pri' : '') +
+    acIb_('📝', 'acTab', 'إدخال الدرجات — المعدل الموزون يُحسب وحده', ' data-t="sc"', tab === 'sc' ? 'pri' : '') +
+    acIb_('🗓', 'acTab', 'الجدول والجلسات', ' data-t="sch"', tab === 'sch' ? 'pri' : '') +
+    (c.classroom_url ? '<a class="ac-ib" href="' + esc(extUrl(c.classroom_url)) + '" target="_blank" rel="noopener" data-tip="فتح فصل Google Classroom (الكتب والاختبارات)">🔗</a>' : acIb_('🔗', 'acEditCohort', 'لم يُربط Classroom بعد — أضف رابط الفصل', ' data-id="' + c.id + '"')) +
+    acIb_('✏️', 'acEditCohort', 'تعديل بيانات الدفعة (المواعيد، المكان، المدرب، Classroom، الحالة)', ' data-id="' + c.id + '"') +
+    acIb_('＋👤', 'acAddTrainee', 'إضافة متدرب لهذه الدفعة (يُربط بنفس الشخص إن كان جواله موجوداً)', ' data-id="' + c.id + '"') +
+    acIb_('🏅 <small>' + elig + '</small>', 'acIssue', elig ? 'اعتماد وإصدار الشهادات لـ ' + elig + ' مستحق (حضور ≥ ' + amin + '% ومعدل نهائي ≥ ' + pmin + '%)' : 'لا يوجد مستحق للشهادة بعد', ' data-id="' + c.id + '"' + (elig ? '' : ' disabled'), elig ? 'gold' : '') + '</div>';
+  html += '<div class="ac-sub" style="margin:-4px 0 6px">' + esc([p.name_ar, c.gender, c.days, (c.time_from || '') + (c.time_to ? '–' + c.time_to : ''), c.place, c.trainer ? 'المدرب: ' + c.trainer : '', acFmtD_(c.start_date) + (c.end_date ? ' ← ' + acFmtD_(c.end_date) : '')].filter(function (x) { return x && x.trim(); }).join(' · ')) + '</div>';
+  html += '<div class="ac-tabs">' + [['tr', 'المتدربون ' + tr.length], ['att', 'التحضير'], ['sc', 'الدرجات والإعادات'], ['sch', 'الجدول ' + ss.length]].map(function (t) {
+    return '<button class="' + (tab === t[0] ? 'on' : '') + '" data-act="acTab" data-t="' + t[0] + '">' + esc(t[1]) + '</button>'; }).join('') + '</div>';
+  html += '<div class="card">' + (tab === 'att' ? acAttHtml_(co, amin) : tab === 'sc' ? acScHtml_(co, pmin) : tab === 'sch' ? acSchHtml_(co) : acTrHtml_(co, amin, pmin)) + '</div>';
+  return html;
+}
+function acTrHtml_(co, amin, pmin) {
+  var tr = co.trainees || [];
+  if (!tr.length) return '<div class="ac-empty">لا متدربين بعد — اضغط <b>＋👤</b> لإضافة أول متدرب</div>';
+  return '<table class="ac-tbl"><thead><tr><th>المتدرب</th><th>الدفع</th><th>الحضور (الخط = ' + amin + '%)</th><th>آخر 6 جلسات</th><th>المعدل (الخط = ' + pmin + '%)</th><th>الحالة</th></tr></thead><tbody>' +
+    tr.map(function (t) {
+      var g = t.progress || {}, e = t.enrollment, last = (t.last || []).slice().reverse();
+      var pay = e.pay_status === 'مدفوع' ? chip((e.pay_method ? e.pay_method + ' · ' : '') + 'مدفوع', 'good') : chip((e.pay_method ? e.pay_method + ' · ' : '') + e.pay_status, 'warn');
+      return '<tr class="click" data-act="acTrainee" data-id="' + e.id + '"><td class="ac-first"><span class="ac-nm"><span class="ac-av">' + acIni_(t.trainee.name) + '</span><b>' + esc(t.trainee.name) + '</b>' +
+        (t.trainee.opt_out ? ' ' + chip('لا تراسل', 'bad') : '') + (e.discount_pct > 0 ? ' ' + chip('ترشيح −' + Number(e.discount_pct) + '%', 'warn') : '') + '</span></td>' +
+        '<td data-h="الدفع">' + pay + '</td><td data-h="الحضور">' + acTh_(acNum_(g.attendance_pct), amin, 5) + '</td>' +
+        '<td data-h="آخر الجلسات"><span class="ac-dots">' + (last.length ? last.map(function (s) { return '<span class="st-' + s + '">' + ({ P: '✓', L: '⏱', A: '✗', E: 'ع' })[s] + '</span>'; }).join('') : '<span class="muted">—</span>') + '</span></td>' +
+        '<td data-h="المعدل">' + acTh_(acNum_(g.score_now), pmin, 0) + (g.n_assess ? ' <span class="ac-note">' + g.n_graded + '/' + g.n_assess + '</span>' : '') + '</td>' +
+        '<td data-h="الحالة">' + acState_(t, amin, pmin) + '</td></tr>';
+    }).join('') + '</tbody></table><div class="ac-note" style="margin-top:6px">✓ حاضر · ⏱ متأخر = حضور · ع عذر مقبول (لا يُحسب) · ✗ غائب — اضغط على أي متدرب لملفه: الدفع، رابط بوابته، حساباته، «لا تراسل»</div>';
+}
+/** التحضير: جلسة واحدة، أربعة أزرار لكل متدرب، الحفظ فوري عند كل ضغطة */
+function acAttHtml_(co, amin) {
+  var ss = co.sessions || [], tr = (co.trainees || []).filter(function (t) { return t.enrollment.status !== 'منسحب'; });
+  if (!ss.length) return '<div class="ac-empty">لا جلسات بعد — افتح تبويب <b>الجدول</b> وولّد الجلسات من أيام الدفعة</div>';
+  var cid = co.cohort.id, today = new Date().toISOString().slice(0, 10), idx = AC.sess[cid];
+  if (idx === undefined) { idx = ss.findIndex(function (s) { return s.day >= today; }); if (idx < 0) idx = ss.length - 1; if (ss[idx].day > today && idx > 0) idx--; AC.sess[cid] = idx; }
+  var s = ss[idx], A = co.attendance || {};
+  var html = '<div class="ac-sess">' + acIb_('→', 'acSess', 'الجلسة السابقة', ' data-d="-1"' + (idx ? '' : ' disabled')) +
+    '<b>جلسة ' + s.n + ' · ' + esc(AC_DAYS[new Date(s.day + 'T12:00:00').getDay()]) + ' ' + acFmtD_(s.day) + '</b>' + (s.topic ? chip(s.topic) : '') + chip(s.kind || 'نظري') +
+    (s.day === today ? chip('اليوم', 'good') : '') + acIb_('←', 'acSess', 'الجلسة التالية', ' data-d="1"' + (idx < ss.length - 1 ? '' : ' disabled')) + '<span class="ac-sp"></span>' +
+    acIb_('✓✓', 'acAllP', 'الكل حاضر — ثم عدّل الاستثناءات', ' data-s="' + s.id + '"') + acIb_('⌫', 'acAllClear', 'مسح تحضير هذه الجلسة', ' data-s="' + s.id + '"') + '</div>';
+  if (!tr.length) return html + '<div class="ac-empty">لا متدربين في الدفعة</div>';
+  html += '<table class="ac-tbl"><tbody>' + tr.map(function (t) {
+    var e = t.enrollment, cur = A[s.id + ':' + e.id] || '';
+    return '<tr><td class="ac-first"><span class="ac-nm"><span class="ac-av">' + acIni_(t.trainee.name) + '</span><b>' + esc(t.trainee.name) + '</b></span></td><td data-h="' + esc(acNum_((t.progress || {}).attendance_pct) === null ? '' : 'حضوره ' + t.progress.attendance_pct + '%') + '"><span class="ac-mark">' +
+      [['P', '✓', 'حاضر'], ['L', '⏱', 'متأخر — يُحسب حضوراً'], ['A', '✗', 'غائب'], ['E', 'ع', 'عذر مقبول — لا يُحسب ضده']].map(function (m) {
+        return '<button class="' + (cur === m[0] ? 'on st-' + m[0] : '') + '" data-act="acMark" data-s="' + s.id + '" data-e="' + e.id + '" data-v="' + m[0] + '" data-tip="' + esc(m[2]) + '" aria-label="' + esc(m[2]) + '">' + m[1] + '</button>';
+      }).join('') + '</span></td></tr>';
+  }).join('') + '</tbody></table><div class="ac-note" style="margin-top:6px">يُحفظ فوراً مع كل ضغطة · الضغط مرة ثانية على نفس الزر يلغيه</div>';
+  return html;
+}
+/** الدرجات: خانة لكل تقييم، الحفظ عند الخروج من الخانة. الإعادات بزر 🔁 */
+function acScHtml_(co, pmin) {
+  var xs = co.assessments || [], tr = co.trainees || [];
+  if (!xs.length) return '<div class="ac-empty">لا تقييمات — ' + acIb_('⚖️', 'acWeights', 'ضبط التقييمات والأوزان لهذه الدفعة', ' data-id="' + co.cohort.id + '"') + '</div>';
+  var sum = xs.reduce(function (t, x) { return t + Number(x.weight); }, 0);
+  var html = '<div class="ac-sess"><b>التقييمات:</b> ' + xs.map(function (x) { return chip(x.name + ' ' + Number(x.weight) + '%' + (x.source === 'Classroom' ? ' · Classroom' : ''), x.source === 'Classroom' ? 'owner' : ''); }).join('') +
+    (sum !== 100 ? chip('⚠️ المجموع ' + sum + '%', 'bad') : '') + '<span class="ac-sp"></span>' + acIb_('⚖️', 'acWeights', 'تعديل التقييمات والأوزان لهذه الدفعة', ' data-id="' + co.cohort.id + '"') + '</div>';
+  if (!tr.length) return html + '<div class="ac-empty">لا متدربين</div>';
+  html += '<table class="ac-tbl"><thead><tr><th>المتدرب</th>' + xs.map(function (x) { return '<th>' + esc(x.name) + ' <span class="ac-note">/' + Number(x.max_score) + '</span></th>'; }).join('') + '<th>المعدل</th></tr></thead><tbody>' +
+    tr.map(function (t) {
+      var e = t.enrollment, sc = t.scores || {}, g = t.progress || {};
+      return '<tr><td class="ac-first"><span class="ac-nm"><span class="ac-av">' + acIni_(t.trainee.name) + '</span><b>' + esc(t.trainee.name) + '</b></span></td>' + xs.map(function (x) {
+        var att = 1; while (sc[x.id + ':' + (att + 1)] !== undefined) att++;
+        var v = sc[x.id + ':1'], best = null; for (var i = 1; i <= att; i++) if (sc[x.id + ':' + i] !== undefined) best = Math.max(best === null ? -1 : best, Number(sc[x.id + ':' + i]));
+        return '<td data-h="' + esc(x.name) + '"><span class="ac-row" style="gap:3px;flex-wrap:nowrap"><input class="ac-sc" type="number" inputmode="decimal" min="0" max="' + Number(x.max_score) + '" value="' + (v === undefined ? '' : esc(v)) +
+          '" data-act="acScore" data-x="' + x.id + '" data-e="' + e.id + '" data-a="1" aria-label="درجة ' + esc(x.name) + '">' +
+          (att > 1 ? '<span class="ac-note" data-tip="أفضل محاولة من ' + att + ' تُحتسب">★' + best + '</span>' : '') +
+          acIb_('🔁', 'acRetake', 'إعادة اختبار (' + (att > 1 ? 'المحاولات حتى الآن: ' + att : 'لا إعادات بعد') + ') — إعادتان مجاناً، بعدها رسوم تُسجَّل في المالية', ' data-x="' + x.id + '" data-e="' + e.id + '" data-n="' + (att + 1) + '" data-nm="' + esc(t.trainee.name) + '" data-xn="' + esc(x.name) + '"') + '</span></td>';
+      }).join('') + '<td data-h="المعدل">' + acTh_(acNum_(g.score_now), pmin, 0) + '</td></tr>';
+    }).join('') + '</tbody></table><div class="ac-note" style="margin-top:6px">الحفظ تلقائي عند الخروج من الخانة · المعدل = مجموع (الدرجة × الوزن) — تُحتسب أفضل محاولة · خانة فارغة = لم يُختبر</div>';
+  return html;
+}
+function acSchHtml_(co) {
+  var ss = co.sessions || [], c = co.cohort;
+  var html = '<div class="ac-sess"><b>' + ss.length + ' جلسة</b>' + (c.days ? chip(c.days) : chip('لم تُحدَّد أيام الأسبوع', 'warn')) + '<span class="ac-sp"></span>' +
+    acIb_('⚙️ <small>ولّد</small>', 'acGen', 'يولّد الجلسات من تاريخ البدء وأيام الأسبوع (لا يكرر الموجود)', ' data-id="' + c.id + '"', ss.length ? '' : 'pri') + '</div>';
+  if (!ss.length) return html + '<div class="ac-empty">حدّد تاريخ البدء وأيام الأسبوع من ✏️ ثم اضغط «ولّد»</div>';
+  var today = new Date().toISOString().slice(0, 10);
+  return html + '<table class="ac-tbl"><thead><tr><th>#</th><th>التاريخ</th><th>الساعات</th><th>النوع</th><th>الموضوع</th></tr></thead><tbody>' + ss.map(function (s) {
+    var ch = function (f, w, type, val) { return '<input type="' + type + '" value="' + esc(val || '') + '" data-act="acSessEdit" data-id="' + s.id + '" data-f="' + f + '" style="width:' + w + '">'; };
+    return '<tr' + (s.day === today ? ' style="background:var(--accent-soft)"' : '') + '><td class="ac-first"><b>' + s.n + '</b> <span class="ac-note">' + esc(AC_DAYS[new Date(s.day + 'T12:00:00').getDay()]) + '</span></td><td data-h="التاريخ">' + ch('day', '140px', 'date', s.day) + '</td><td data-h="الساعات">' + ch('hours', '60px', 'number', s.hours) +
+      '</td><td data-h="النوع"><select data-act="acSessEdit" data-id="' + s.id + '" data-f="kind">' + ['نظري', 'عملي', 'اختبار', 'مراجعة'].map(function (k) { return '<option' + (k === s.kind ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></td>' +
+      '<td data-h="الموضوع">' + ch('topic', '100%', 'text', s.topic) + '</td></tr>';
+  }).join('') + '</tbody></table>';
+}
+
+/* ───────── الإجراءات ───────── */
+function acReload_(keep) { go(S.screen, S.args, keep !== false); }
+function acErr_(e) { toast(errMsg(e), true); }
+ACT.acRefresh = function () { acReload_(); };
+ACT.acBack = function () { go('academic', {}); };
+ACT.acFilter = function (el) { AC.f[el.dataset.k] = AC.f[el.dataset.k] === el.dataset.v ? '' : el.dataset.v; acReload_(); };
+ACT.acClear = function () { AC.f = {}; acReload_(); };
+ACT.acTab = function (el) { AC.tab[S.args.c] = el.dataset.t; acReload_(); };
+ACT.acSess = function (el) { AC.sess[S.args.c] = (AC.sess[S.args.c] || 0) + Number(el.dataset.d); acReload_(); };
+ACT.acMark = function (el) {
+  var on = el.classList.contains('on'), v = on ? '' : el.dataset.v, m = {}; m[el.dataset.e] = v;
+  // استجابة فورية قبل رد الخادم
+  el.parentNode.querySelectorAll('button').forEach(function (b) { b.className = ''; }); if (v) el.className = 'on st-' + v;
+  acCall('attendance', { session_id: el.dataset.s, marks: m }, true).then(function () { acReload_(); }).catch(function (e) { acErr_(e); acReload_(); });
+};
+function acBulk_(sid, v) {
+  var m = {}; (AC.d.co.trainees || []).forEach(function (t) { if (t.enrollment.status !== 'منسحب') m[t.enrollment.id] = v; });
+  acCall('attendance', { session_id: sid, marks: m }).then(function (r) { toast('✓ ' + r.saved); acReload_(); }).catch(acErr_);
+}
+ACT.acAllP = function (el) { acBulk_(el.dataset.s, 'P'); };
+ACT.acAllClear = function (el) { if (confirm('مسح تحضير هذه الجلسة؟')) acBulk_(el.dataset.s, ''); };
+document.addEventListener('change', function (e) {
+  var el = e.target;
+  if (el.matches && el.matches('input[data-act="acScore"]')) {
+    var max = Number(el.max || 100), v = el.value === '' ? '' : Number(el.value);
+    if (v !== '' && (isNaN(v) || v < 0 || v > max)) { toast('الدرجة بين 0 و ' + max, true); return; }
+    el.style.outline = '2px solid var(--warn)';
+    acCall('score', { assessment_id: el.dataset.x, enrollment_id: el.dataset.e, attempt: el.dataset.a, score: v }, true)
+      .then(function () { el.style.outline = '2px solid var(--good)'; setTimeout(function () { acReload_(); }, 400); }).catch(function (er) { el.style.outline = '2px solid var(--bad)'; acErr_(er); });
+  }
+  if (el.matches && el.matches('[data-act="acSessEdit"]')) {
+    var a = { id: el.dataset.id }; a[el.dataset.f] = el.value;
+    acCall('save_session', a, true).then(function () { toast('✓ حُفظ'); }).catch(acErr_);
+  }
+});
+ACT.acScore = function () {}; ACT.acSessEdit = function () {}; // الحفظ عند change (أعلاه)
+ACT.acRetake = function (el) {
+  var n = Number(el.dataset.n), free = Number(acSet_(AC.d, 'retake_free', 2)), fee = n > 1 + free;
+  var v = prompt('إعادة رقم ' + (n - 1) + ' — ' + el.dataset.xn + ' — ' + el.dataset.nm + (fee ? '\n⚠️ بعد الإعادات المجانية: تُسجَّل رسوم ' + acSet_(AC.d, 'retake_fee_pct', 10) + '% من سعر الدورة في المالية' : '\n(مجانية)') + '\nاكتب الدرجة:');
+  if (v === null || v === '') return;
+  acCall('score', { assessment_id: el.dataset.x, enrollment_id: el.dataset.e, attempt: n, score: Number(v) }).then(function () { toast(fee ? '✓ حُفظت — والرسوم في المالية' : '✓ حُفظت'); acReload_(); }).catch(acErr_);
+};
+ACT.acGen = function (el) { acCall('gen_sessions', { id: el.dataset.id, count: Number(prompt('عدد الجلسات؟', '36') || 0) || 36 }).then(function (r) { toast('✓ أُضيفت ' + r.added + ' جلسة'); acReload_(); }).catch(acErr_); };
+ACT.acIssue = function (el) {
+  var n = el.textContent.replace(/\D/g, '');
+  if (!confirm('اعتماد وإصدار ' + n + ' شهادة؟\nبعدها تفتح شاشة الشهادات للإرسال (واتساب/بريد) بضغطة لكل متدرب.')) return;
+  acCall('issue_certs', { cohort_id: el.dataset.id }).then(function (r) { toast('🏅 صدرت ' + r.issued + ' شهادة'); go('acCerts', {}); }).catch(acErr_);
+};
+function acCohortForm_(c) {
+  c = c || {}; var progs = (AC.d.programs || []).filter(function (p) { return p.active !== false || p.id === c.program_id; });
+  var f = function (k, lab, type, extra) { return '<label>' + lab + '<input id="acf_' + k + '" type="' + (type || 'text') + '" value="' + esc(c[k] || '') + '"' + (extra || '') + '></label>'; };
+  return '<h2 style="margin:0 0 4px">' + (c.id ? '✏️ تعديل الدفعة' : '＋ دفعة جديدة') + '</h2><div class="ac-f">' +
+    '<label>البرنامج<select id="acf_program_id">' + progs.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === c.program_id ? ' selected' : '') + '>' + esc(p.name_ar) + '</option>'; }).join('') + '</select></label>' +
+    f('name', 'اسم الدفعة', 'text', ' placeholder="مثال: CPT عربي — د1"') +
+    '<label>الفئة<select id="acf_gender">' + ['رجال', 'نساء', 'مختلط'].map(function (g) { return '<option' + (g === c.gender ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label>' +
+    '<label>اللغة<select id="acf_lang">' + ['AR', 'EN-AR'].map(function (g) { return '<option' + (g === c.lang ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label>' +
+    f('start_date', 'تاريخ البدء', 'date') + f('end_date', 'تاريخ النهاية', 'date') + f('capacity', 'المقاعد', 'number') +
+    f('time_from', 'من الساعة', 'time') + f('time_to', 'إلى الساعة', 'time') + f('place', 'المكان') + f('trainer', 'المدرب/المدربة') + f('classroom_url', 'رابط Google Classroom', 'url', ' dir="ltr"') +
+    (c.id ? '<label>الحالة<select id="acf_status">' + ['قادمة', 'جارية', 'منتهية', 'ملغاة'].map(function (g) { return '<option' + (g === c.status ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label>' : '') +
+    '</div><div class="ac-f" style="grid-template-columns:1fr"><label>أيام الأسبوع<span class="ac-row">' + AC_DAYS.map(function (d) {
+      return '<label class="chip" style="cursor:pointer"><input type="checkbox" class="acf_day" value="' + d + '"' + ((c.days || '').split(',').indexOf(d) > -1 ? ' checked' : '') + '> ' + d + '</label>'; }).join('') + '</span></label></div>' +
+    '<div class="btns"><button class="btn pri" data-act="acSaveCohort" data-id="' + esc(c.id || '') + '">💾 حفظ</button></div>';
+}
+ACT.acNewCohort = function () { openSheet(acCohortForm_({ capacity: 20 })); };
+ACT.acEditCohort = function () { openSheet(acCohortForm_(AC.d.co.cohort)); };
+ACT.acSaveCohort = function (el) {
+  var a = {}; ['program_id', 'name', 'gender', 'lang', 'start_date', 'end_date', 'capacity', 'time_from', 'time_to', 'place', 'trainer', 'classroom_url', 'status'].forEach(function (k) { var x = $('acf_' + k); if (x) a[k] = x.value.trim(); });
+  a.days = Array.prototype.filter.call(document.querySelectorAll('.acf_day'), function (x) { return x.checked; }).map(function (x) { return x.value; }).join(',');
+  if (!a.name) return toast('اكتب اسم الدفعة', true);
+  if (el.dataset.id) a.id = el.dataset.id;
+  acCall('save_cohort', a).then(function (r) { closeSheet(); toast('✓ حُفظت الدفعة'); go('academic', { c: r.id }); }).catch(acErr_);
+};
+ACT.acAddTrainee = function (el) {
+  openSheet('<h2 style="margin:0 0 4px">＋👤 إضافة متدرب</h2><div class="ac-f">' +
+    '<label>الاسم الكامل<input id="act_name"></label><label>الجوال<input id="act_phone" type="tel" dir="ltr" placeholder="05xxxxxxxx"></label><label>البريد<input id="act_email" type="email" dir="ltr"></label>' +
+    '<label>الدفع<select id="act_pay">' + ['بانتظار', 'مدفوع', 'جزئي'].map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select></label>' +
+    '<label>طريقة الدفع<select id="act_method"><option></option>' + ['سلة', 'تابي', 'تمارا', 'تحويل'].map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select></label>' +
+    '<label>رمز ترشيح (إن وُجد)<input id="act_ref" dir="ltr" style="text-transform:uppercase"></label></div>' +
+    '<div class="ac-note">تابي وتمارا: شركة التقسيط تتحمل الأقساط وتستلم الأكاديمية المبلغ كاملاً — يُسجَّل «مدفوع». رمز الترشيح يعطيه خصماً (لا ينزل عن الحد الأدنى) ويُسجَّل في المالية.</div>' +
+    '<div class="btns"><button class="btn pri" data-act="acSaveTrainee" data-id="' + el.dataset.id + '">💾 إضافة</button></div>');
+};
+ACT.acSaveTrainee = function (el) {
+  var a = { cohort_id: el.dataset.id, name: $('act_name').value.trim(), phone: $('act_phone').value.trim(), email: $('act_email').value.trim(), pay_status: $('act_pay').value, pay_method: $('act_method').value, ref_code: $('act_ref').value.trim() };
+  if (!a.name) return toast('اكتب الاسم', true);
+  acCall('enroll', a).then(function () { closeSheet(); toast('✓ أُضيف'); acReload_(); }).catch(acErr_);
+};
+ACT.acTrainee = function (el) {
+  var t = (AC.d.co.trainees || []).filter(function (x) { return x.enrollment.id === el.dataset.id; })[0]; if (!t) return;
+  var tt = t.trainee, e = t.enrollment, h = tt.handles || {}, url = acPortalUrl_(t.portal_token);
+  var msg = 'أهلاً ' + tt.name.split(' ')[0] + '، هذا رابط بوابتك الشخصية في ' + (AC.brand.name || 'الأكاديمية') + ' (الجدول، الحضور، الدرجات، المذاكرة):\n' + url;
+  openSheet('<h2 style="margin:0 0 6px"><span class="ac-av">' + acIni_(tt.name) + '</span>' + esc(tt.name) + '</h2>' +
+    '<div class="ac-f"><label>الاسم<input id="acp_name" value="' + esc(tt.name) + '"></label><label>الجوال<input id="acp_phone" dir="ltr" value="' + esc(tt.phone || '') + '"></label><label>البريد<input id="acp_email" dir="ltr" value="' + esc(tt.email || '') + '"></label>' +
+    '<label>انستغرام<input id="acp_ig" dir="ltr" value="' + esc(h.instagram || '') + '"></label><label>X<input id="acp_x" dir="ltr" value="' + esc(h.x || '') + '"></label><label>LinkedIn<input id="acp_li" dir="ltr" value="' + esc(h.linkedin || '') + '"></label>' +
+    '<label>الدفع<select id="acp_pay">' + ['بانتظار', 'مدفوع', 'جزئي', 'مسترد'].map(function (x) { return '<option' + (x === e.pay_status ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
+    '<label>طريقة الدفع<select id="acp_method"><option></option>' + ['سلة', 'تابي', 'تمارا', 'تحويل'].map(function (x) { return '<option' + (x === e.pay_method ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
+    '<label>حالته<select id="acp_status">' + ['نشط', 'منسحب', 'خريج', 'لم يجتز'].map(function (x) { return '<option' + (x === e.status ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
+    '<label class="row" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="acp_opt"' + (tt.opt_out ? ' checked' : '') + '> 🚫 لا تراسل</label></div>' +
+    '<div class="ac-row" style="margin:6px 0">' + chip('رابط البوابة الشخصي') +
+    '<button class="ac-ib" data-act="acCopy" data-v="' + esc(url) + '" data-tip="نسخ رابط بوابة المتدرب">📋</button>' +
+    '<a class="ac-ib" href="' + esc(url) + '" target="_blank" rel="noopener" data-tip="فتح البوابة كما يراها المتدرب">👁</a>' +
+    (tt.phone && !tt.opt_out ? '<a class="ac-ib" href="https://wa.me/' + acIntl_(tt.phone) + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-tip="يفتح واتساب برسالة جاهزة فيها رابط بوابته — أنت من يضغط إرسال">💬</a>' : '') +
+    (tt.ref_code ? chip('رمز ترشيحه: ' + tt.ref_code, 'warn') : '') + '</div>' +
+    '<div class="btns"><button class="btn pri" data-act="acSaveP" data-id="' + tt.id + '" data-e="' + e.id + '">💾 حفظ</button></div>');
+};
+ACT.acCopy = function (el) { copyText(el.dataset.v); };
+ACT.acSaveP = function (el) {
+  var a = { id: el.dataset.id, enrollment_id: el.dataset.e, name: $('acp_name').value.trim(), phone: $('acp_phone').value.trim(), email: $('acp_email').value.trim(),
+    handles: { instagram: $('acp_ig').value.trim(), x: $('acp_x').value.trim(), linkedin: $('acp_li').value.trim() }, opt_out: $('acp_opt').checked, status: $('acp_status').value };
+  acCall('trainee', a).then(function () { return acCall('pay', { enrollment_id: el.dataset.e, pay_status: $('acp_pay').value, pay_method: $('acp_method').value }); })
+    .then(function () { closeSheet(); toast('✓ حُفظ'); acReload_(); }).catch(acErr_);
+};
+ACT.acWeights = function (el) {
+  var xs = (AC.d.co.assessments || []).map(function (x) { return { id: x.id, name: x.name, weight: Number(x.weight), source: x.source, max_score: Number(x.max_score) }; });
+  if (!xs.length) xs = (acSet_(AC.d, 'weights_default', []) || []).map(function (x) { return { name: x.name, weight: x.weight, source: x.source, max_score: 100 }; });
+  AC.wx = xs; openSheet(acWeightsHtml_(el.dataset.id));
+};
+function acWeightsHtml_(cid) {
+  var sum = AC.wx.reduce(function (t, x) { return t + Number(x.weight || 0); }, 0);
+  return '<h2 style="margin:0 0 4px">⚖️ تقييمات الدفعة وأوزانها</h2><table class="ac-tbl"><tbody>' + AC.wx.map(function (x, i) {
+    return '<tr><td><input value="' + esc(x.name) + '" data-wi="' + i + '" data-wf="name" style="width:100%"></td><td data-h="الوزن %"><input type="number" value="' + esc(x.weight) + '" data-wi="' + i + '" data-wf="weight" style="width:64px"></td>' +
+      '<td data-h="من"><input type="number" value="' + esc(x.max_score) + '" data-wi="' + i + '" data-wf="max_score" style="width:64px"></td><td data-h="المصدر"><select data-wi="' + i + '" data-wf="source">' + ['Classroom', 'يدوي'].map(function (s) { return '<option' + (s === x.source ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></td>' +
+      '<td>' + acIb_('🗑', 'acWDel', 'حذف هذا التقييم', ' data-i="' + i + '" data-c="' + cid + '"') + '</td></tr>'; }).join('') + '</tbody></table>' +
+    '<div class="ac-row" style="margin:6px 0">' + acIb_('＋', 'acWAdd', 'إضافة تقييم', ' data-c="' + cid + '"') + chip('المجموع ' + sum + '%', sum === 100 ? 'good' : 'bad') + '</div>' +
+    '<div class="btns"><button class="btn pri" data-act="acWSave" data-c="' + cid + '"' + (sum === 100 ? '' : ' disabled') + '>💾 حفظ</button></div>';
+}
+document.addEventListener('input', function (e) {
+  var el = e.target; if (!el.dataset || el.dataset.wi === undefined || !AC.wx) return;
+  AC.wx[el.dataset.wi][el.dataset.wf] = el.dataset.wf === 'weight' || el.dataset.wf === 'max_score' ? Number(el.value) : el.value;
+  if (el.dataset.wf === 'weight') { var sum = AC.wx.reduce(function (t, x) { return t + Number(x.weight || 0); }, 0), b = document.querySelector('[data-act="acWSave"]'); if (b) b.disabled = sum !== 100; }
+});
+ACT.acWAdd = function (el) { AC.wx.push({ name: 'تقييم', weight: 0, source: 'يدوي', max_score: 100 }); openSheet(acWeightsHtml_(el.dataset.c)); };
+ACT.acWDel = function (el) { AC.wx.splice(Number(el.dataset.i), 1); openSheet(acWeightsHtml_(el.dataset.c)); };
+ACT.acWSave = function (el) { acCall('save_assessments', { cohort_id: el.dataset.c, items: AC.wx }).then(function () { closeSheet(); toast('✓ حُفظت الأوزان'); acReload_(); }).catch(acErr_); };
+
+/* ───────── الشهادات: الإرسال بضغطة (أنت من يضغط إرسال = موافقتك) ───────── */
+SCREENS.acCerts = {
+  load: function () { return Promise.all([acCall('certs', {}, true), acCall('dashboard', {}, true)]).then(function (r) { AC.d = r[1]; AC.brand = (r[1].settings || {}).brand || {}; return r[0]; }); },
+  render: function (d) {
+    var rows = d.rows || [], b = AC.brand || {};
+    var html = '<div class="ac-bar"><h1>🏅 الشهادات</h1>' + chip(rows.length) + '<span class="ac-sp"></span>' + acIb_('⟳', 'acRefresh', 'تحديث') + '</div>' +
+      '<div class="ac-note" style="margin-bottom:8px">كل شهادة: رابط تحقق عام (QR) + رابط بوابة المتدرب (تحميل PDF، النشر على LinkedIn وX، رابط الترشيح). الإرسال يفتح واتساب/البريد برسالة جاهزة وأنت من يضغط إرسال — ثم يُسجَّل «أُرسلت».</div>';
+    if (!rows.length) return html + '<div class="card ac-empty">لا شهادات بعد — تُصدر من ملف الدفعة بزر 🏅 عند وجود مستحقين</div>';
+    return html + '<div class="card"><table class="ac-tbl"><thead><tr><th>المتدرب</th><th>الرقم</th><th>البرنامج</th><th>الإصدار</th><th>أُرسلت</th><th></th></tr></thead><tbody>' + rows.map(function (r) {
+      var c = r.c, s = c.sent || {}, portal = acPortalUrl_(r.token), ver = acVerifyUrl_(c.code), first = String(r.name || '').split(' ')[0];
+      var msg = 'مبروك يا ' + first + ' 🎉\nاجتزت برنامج «' + r.program + '» بنجاح في ' + (b.name || 'الأكاديمية') + '.\n\n🏅 شهادتك (تحميل PDF ونشرها على LinkedIn): ' + portal +
+        '\n✅ رابط التحقق الرسمي: ' + ver + '\n\n🤝 رشّح أصدقاءك من بوابتك: صديقك يحصل على خصم ' + acSet_(AC.d, 'ref_discount_pct', 5) + '% وأنت رصيد ' + acSet_(AC.d, 'ref_credit_pct', 5) + '% على دورتك القادمة.';
+      var off = r.opt_out, rev = c.status === 'ملغاة';
+      return '<tr' + (rev ? ' style="opacity:.55"' : '') + '><td class="ac-first"><span class="ac-nm"><span class="ac-av">' + acIni_(r.name) + '</span><b>' + esc(r.name) + '</b>' + (off ? ' ' + chip('لا تراسل', 'bad') : '') + '</span></td>' +
+        '<td data-h="الرقم"><b dir="ltr">' + esc(c.code) + '</b>' + (rev ? ' ' + chip('ملغاة', 'bad') : '') + '</td><td data-h="البرنامج">' + esc(r.program) + ' <span class="ac-note">' + esc(r.cohort) + '</span></td>' +
+        '<td data-h="الإصدار">' + acFmtD_(c.issued_at) + ' <span class="ac-note">' + Number(c.attendance_pct) + '% · ' + Number(c.final_score) + '</span></td>' +
+        '<td data-h="أُرسلت">' + (s.whatsapp ? chip('💬 ' + fmtDate(s.whatsapp), 'good') : '') + (s.email ? chip('📧 ' + fmtDate(s.email), 'good') : '') + (!s.whatsapp && !s.email ? chip('لم تُرسل', 'warn') : '') + '</td>' +
+        '<td><span class="ac-row" style="gap:4px;flex-wrap:nowrap">' +
+        (r.phone && !off && !rev ? '<a class="ac-ib pri" href="https://wa.me/' + acIntl_(r.phone) + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener" data-act="acSent" data-id="' + c.id + '" data-ch="whatsapp" data-tip="واتساب: تهنئة + الشهادة + رابط الترشيح — أنت من يضغط إرسال">💬</a>' : '<button class="ac-ib" disabled data-tip="' + (off ? 'لا تراسل' : rev ? 'ملغاة' : 'لا يوجد جوال') + '">💬</button>') +
+        (r.email && !off && !rev ? '<a class="ac-ib" href="mailto:' + esc(r.email) + '?subject=' + encodeURIComponent('شهادتك — ' + r.program) + '&body=' + encodeURIComponent(msg) + '" data-act="acSent" data-id="' + c.id + '" data-ch="email" data-tip="البريد: نفس الرسالة من بريدك">📧</a>' : '<button class="ac-ib" disabled data-tip="' + (off ? 'لا تراسل' : 'لا يوجد بريد') + '">📧</button>') +
+        '<button class="ac-ib" data-act="acCopy" data-v="' + esc(msg) + '" data-tip="نسخ الرسالة لإرسالها على انستغرام/X يدوياً">📋</button>' +
+        '<a class="ac-ib" href="' + esc(ver) + '" target="_blank" rel="noopener" data-tip="فتح صفحة التحقق العامة (ما يراه من يمسح QR)">✅</a>' +
+        acIb_(rev ? '↩' : '🚫', 'acRevoke', rev ? 'استرجاع الشهادة' : 'إلغاء الشهادة (غش/تزوير) — تظهر «ملغاة» في التحقق', ' data-id="' + c.id + '" data-r="' + (rev ? 1 : 0) + '"') + '</span></td></tr>';
+    }).join('') + '</tbody></table></div>';
+  }
+};
+ACT.acSent = function (el) { window.open(el.href, el.target === '_blank' ? '_blank' : '_self'); acCall('cert_sent', { id: el.dataset.id, channel: el.dataset.ch }, true).then(function () { setTimeout(acReload_, 800); }); };
+ACT.acRevoke = function (el) { if (!confirm(el.dataset.r === '1' ? 'استرجاع الشهادة؟' : 'إلغاء هذه الشهادة؟ ستظهر «ملغاة» لكل من يتحقق منها.')) return; acCall('cert_revoke', { id: el.dataset.id, restore: el.dataset.r === '1' ? 'true' : '' }).then(function () { acReload_(); }).catch(acErr_); };
+
+/* ───────── ترشيحات الخريجين + أثرها المالي ───────── */
+SCREENS.acRefs = {
+  load: function () { return Promise.all([acCall('referrals', {}, true), acCall('finance', {}, true)]).then(function (r) { return { refs: r[0].rows || [], fin: r[1].rows || [] }; }); },
+  render: function (d) {
+    var sum = function (k) { return d.fin.filter(function (r) { return r.kind === k && r.status !== 'ملغى'; }).reduce(function (t, r) { return t + Number(r.amount_sar || 0); }, 0); };
+    var cr = d.fin.filter(function (r) { return r.kind === 'رصيد_مرشِّح'; });
+    var html = '<div class="ac-bar"><h1>🤝 ترشيحات الخريجين</h1><span class="ac-sp"></span>' + acIb_('⟳', 'acRefresh', 'تحديث') + '</div>' +
+      statMini_([[d.refs.length, 'ترشيح'], [d.refs.filter(function (r) { return r.r.status === 'دفع'; }).length, 'دفعوا', 'good'], [sum('خصم_ترشيح').toLocaleString('en') + ' ر.س', 'خصومات للمرشَّحين'],
+        [cr.length, 'رصيد للخريجين (يُستخدم على دورة لاحقة)'], [sum('رسوم_إعادة').toLocaleString('en') + ' ر.س', 'رسوم إعادة مستحقة', 'warn']]) +
+      '<div class="ac-note" style="margin-bottom:8px">الرابط شخصي يرسله الخريج بنفسه — لا نطلب بيانات أي شخص لم يوافق (PDPL). الخصم لا ينزل عن الحد الأدنى للدورة. كل الأرقام هنا تدخل التقارير المالية.</div>';
+    html += '<div class="card"><h3 style="margin:0 0 6px">الترشيحات</h3>' + (d.refs.length ? '<table class="ac-tbl"><thead><tr><th>المرشِّح (الخريج)</th><th>المسجَّل</th><th>الدفعة</th><th>الحالة</th><th>رصيده</th></tr></thead><tbody>' + d.refs.map(function (x) {
+      return '<tr><td class="ac-first"><b>' + esc(x.referrer) + '</b> <span class="ac-note" dir="ltr">' + esc(x.r.ref_code) + '</span></td><td data-h="المسجَّل">' + esc(x.referred) + '</td><td data-h="الدفعة">' + esc(x.cohort) + '</td><td data-h="الحالة">' + chip(x.r.status, x.r.status === 'دفع' ? 'good' : x.r.status === 'ملغى' ? 'bad' : 'warn') + '</td><td data-h="رصيده">' + (Number(x.r.credit_pct) ? '+' + Number(x.r.credit_pct) + '%' : '—') + '</td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="ac-empty">لا ترشيحات بعد — يحصل كل خريج على رابطه مع شهادته</div>') + '</div>';
+    html += '<div class="card"><h3 style="margin:0 0 6px">💵 الأثر المالي (خصومات · أرصدة · رسوم إعادة)</h3>' + (d.fin.length ? '<table class="ac-tbl"><thead><tr><th>النوع</th><th>المتدرب</th><th>النسبة</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody>' + d.fin.map(function (r) {
+      return '<tr><td class="ac-first">' + chip(r.kind.replace('_', ' '), r.kind === 'رسوم_إعادة' ? 'warn' : r.kind === 'خصم_ترشيح' ? '' : 'good') + '</td><td data-h="المتدرب">' + esc(r.trainee || '') + '</td><td data-h="النسبة">' + (r.pct ? Number(r.pct) + '%' : '—') + '</td><td data-h="المبلغ">' + (r.amount_sar ? Number(r.amount_sar).toLocaleString('en') + ' ر.س' : '—') + '</td><td data-h="الحالة">' + esc(r.status) + '</td><td data-h="التاريخ">' + fmtDate(r.created_at) + '</td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="ac-empty">لا حركات بعد</div>') + '</div>';
+    return html;
+  }
+};
+
+/* ───────── القواعد + هوية الأكاديمية (الشعار وبيانات المنشأة لكل الصفحات العامة) ───────── */
+SCREENS.acRules = {
+  load: function () { return acCall('dashboard', {}, true).then(function (d) { AC.d = d; AC.brand = (d.settings || {}).brand || {}; return d; }); },
+  render: function (d) {
+    var s = d.settings || {}, b = s.brand || {};
+    var n = function (k, lab, tip) { return '<label data-tip="' + esc(tip) + '">' + lab + '<input type="number" id="acr_' + k + '" value="' + esc(s[k]) + '"></label>'; };
+    var t = function (k, lab, dir) { return '<label>' + lab + '<input id="acb_' + k + '" value="' + esc(b[k] || '') + '"' + (dir ? ' dir="ltr"' : '') + '></label>'; };
+    return '<div class="ac-bar"><h1>⚙️ القواعد والهوية</h1></div>' +
+      '<div class="card"><h3 style="margin:0">📏 القواعد الأكاديمية</h3><div class="ac-f">' +
+      n('attendance_min', 'حد الحضور %', 'التأخير يُحسب حضوراً والعذر المقبول لا يُحسب') + n('pass_min', 'حد النجاح %', 'المعدل الموزون النهائي') +
+      n('retake_free', 'إعادات مجانية', 'بعد المحاولة الأساسية') + n('retake_fee_pct', 'رسوم الإعادة % من سعر الدورة', 'تُسجَّل في المالية تلقائياً') +
+      n('ref_discount_pct', 'خصم المرشَّح %', 'لا ينزل عن الحد الأدنى للدورة') + n('ref_credit_pct', 'رصيد الخريج % لكل صديق يدفع', 'على دورة لاحقة — لا يُصرف نقداً') + n('ref_credit_cap', 'سقف رصيد الخريج %', 'الإعلان: «خصومات تصل إلى 10%» فقط') +
+      '</div><div class="ac-note">الأوزان الافتراضية للدفعات الجديدة: ' + (s.weights_default || []).map(function (x) { return esc(x.name) + ' ' + x.weight + '%'; }).join(' · ') + ' — تُعدَّل لكل دفعة من ⚖️ في تبويب الدرجات.</div>' +
+      '<div class="btns"><button class="btn pri" data-act="acSaveRules">💾 حفظ القواعد</button></div></div>' +
+      '<div class="card"><h3 style="margin:0">🏛 هوية الأكاديمية — تظهر في بوابة المتدرب والشهادة وصفحة التحقق</h3><div class="ac-f">' +
+      t('name', 'اسم الأكاديمية') + t('legal_name', 'الاسم النظامي') + t('logo_url', 'رابط الشعار (صورة)', 1) + t('cr', 'السجل التجاري') + t('vat', 'الرقم الضريبي') + t('license', 'ترخيص التدريب') +
+      t('address', 'العنوان الوطني') + t('phone', 'الهاتف', 1) + t('email', 'البريد', 1) + t('accreditation', 'نص الاعتماد') + t('site', 'رابط الموقع (للروابط)', 1) + '</div>' +
+      (b.logo_url ? '<img src="' + esc(extUrl(b.logo_url)) + '" alt="" style="height:48px;border-radius:10px">' : '<div class="ac-note">لا شعار بعد — ضع رابط صورة الشعار عند جاهزيته</div>') +
+      '<div class="btns"><button class="btn pri" data-act="acSaveBrand">💾 حفظ الهوية</button></div></div>';
+  }
+};
+ACT.acSaveRules = function () {
+  var a = {}; ['attendance_min', 'pass_min', 'retake_free', 'retake_fee_pct', 'ref_discount_pct', 'ref_credit_pct', 'ref_credit_cap'].forEach(function (k) { var v = Number($('acr_' + k).value); if (!isNaN(v)) a[k] = v; });
+  if (a.ref_discount_pct > 10 || a.ref_credit_cap > 10) return toast('قاعدة المالك: لا تتجاوز الخصومات 10%', true);
+  acCall('settings', a).then(function () { toast('✓ حُفظت القواعد'); acReload_(); }).catch(acErr_);
+};
+ACT.acSaveBrand = function () {
+  var b = {}; ['name', 'legal_name', 'logo_url', 'cr', 'vat', 'license', 'address', 'phone', 'email', 'accreditation', 'site'].forEach(function (k) { b[k] = $('acb_' + k).value.trim(); });
+  acCall('settings', { brand: b }).then(function () { toast('✓ حُفظت الهوية — تظهر في كل الصفحات العامة'); acReload_(); }).catch(acErr_);
+};
 </script>
 
   <script>

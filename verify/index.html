@@ -1,0 +1,90 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex"><meta name="theme-color" content="#0c1f2c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="format-detection" content="telephone=no"><title>التحقق من الشهادة</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet"><style>:root{--ink:#101828;--mut:#667085;--line:#e4e7ec;--soft:#f2f4f7;--bg:#f4f6f8;--card:#fff;--a:#0b6e7f;--as:#e2f1f3;--g:#15803d;--gs:#e3f5e8;--w:#b45309;--ws:#fdf1dc;--b:#c62828;--bs:#fde6e6;--gold:#b8932f;--goldS:#faf3e0;--navy:#0c1f2c}
+@media (prefers-color-scheme:dark){:root{--ink:#e8ebef;--mut:#9aa4b2;--line:#2a303a;--soft:#1e232b;--bg:#0f1216;--card:#171b21;--as:#123138;--gs:#13301f;--ws:#3a2a10;--bs:#3a1616;--goldS:#2e2610}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:Tajawal,'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.6}
+a{color:var(--a)}button{font:inherit;color:inherit}
+.hd{background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 14px) 16px 46px}
+.hdi{max-width:1100px;margin:0 auto}.bt{display:flex;align-items:center;gap:10px}
+.logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--gold),#e6c76a);display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:800;font-size:15px;overflow:hidden;flex:none}
+.logo img{width:100%;height:100%;object-fit:contain;background:#fff}
+.bt b{display:block;font-size:14.5px}.bt small{color:#9fb2c0;font-size:11.5px}
+.hi{margin-top:12px;font-size:20px;font-weight:800}.hi small{display:block;font-size:13px;color:#9fb2c0;font-weight:400}
+.wrap{max-width:1100px;margin:-32px auto 0;padding:0 12px calc(env(safe-area-inset-bottom) + 84px);position:relative;z-index:2}
+.card{background:var(--card);border-radius:16px;padding:13px 14px;margin-bottom:11px;box-shadow:0 1px 3px rgba(16,24,40,.08)}
+.card h3{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:6px}.card h3 .r{margin-inline-start:auto;font-size:12.5px;font-weight:500}
+.mut{color:var(--mut)}.sm{font-size:12.5px}.xs{font-size:11.5px}
+.m{height:8px;background:var(--soft);border-radius:9px;position:relative;margin:5px 0}.m i{position:absolute;inset-inline-start:0;top:0;bottom:0;border-radius:9px}
+.m u{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.st{border:1px solid var(--line);border-radius:12px;padding:9px}.st b{display:block;font-size:23px;font-weight:800}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--soft);font-size:13.5px}.row:last-child{border:0}
+.chip{display:inline-block;font-size:11.5px;padding:1px 9px;border-radius:99px;background:var(--soft);white-space:nowrap}.cg{background:var(--gs);color:var(--g)}.cw{background:var(--ws);color:var(--w)}.cb{background:var(--bs);color:var(--b)}.co{background:var(--goldS);color:#8a6a16}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:6px 13px;border-radius:11px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:500;text-decoration:none;color:var(--ink);cursor:pointer}
+.btn.p{background:var(--a);color:#fff;border-color:var(--a)}.btn.g{background:var(--gold);color:#fff;border-color:var(--gold)}
+.ib{width:40px;height:40px;padding:0;font-size:17px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.grid3 .btn{flex-direction:column;padding:10px 4px;min-height:70px}.grid3 .btn span{font-size:21px}
+.next{display:flex;gap:10px;align-items:center}.date{min-width:54px;text-align:center;background:var(--as);color:var(--a);border-radius:12px;padding:5px 4px;font-weight:800;line-height:1.2}.date small{display:block;font-size:10.5px;font-weight:500}
+.dots{display:flex;gap:3px;flex-wrap:wrap}.dots span{width:22px;height:22px;border-radius:6px;font-size:11px;text-align:center;line-height:22px;background:var(--soft)}
+.sP{background:var(--gs)!important;color:var(--g)}.sL{background:var(--ws)!important;color:var(--w)}.sA{background:var(--bs)!important;color:var(--b)}.sE{background:var(--soft)}
+.share{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.ref{background:var(--as);border-radius:11px;padding:9px 10px;font-size:13px;direction:ltr;text-align:center;font-weight:700;color:var(--a);margin:7px 0;word-break:break-all}
+.foot{font-size:11px;color:var(--mut);text-align:center;padding:10px 14px;line-height:1.8}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 0 calc(env(safe-area-inset-bottom) + 6px);z-index:9}
+.nav button{background:none;border:0;font-size:11px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:56px;cursor:pointer}.nav button span{font-size:19px}.nav button.on{color:var(--a);font-weight:700}
+.pane{display:none}.pane.on{display:block}
+.tip{position:fixed;z-index:20;background:#fff3b0;color:#3a2e00;border:1px solid #e6c84f;border-radius:10px;padding:6px 10px;font-size:12.5px;box-shadow:0 6px 18px rgba(0,0,0,.2);display:none;max-width:260px}
+.empty{text-align:center;padding:26px 10px;color:var(--mut)}
+/* لابتوب وآيباد أفقي: قائمة جانبية + عمودان */
+@media (min-width:900px){
+  .nav{position:sticky;top:12px;bottom:auto;left:auto;right:auto;flex-direction:column;justify-content:flex-start;gap:4px;width:180px;border:0;border-radius:16px;padding:10px;box-shadow:0 1px 3px rgba(16,24,40,.08);height:max-content}
+  .nav button{flex-direction:row;justify-content:flex-start;gap:8px;font-size:14px;padding:8px 10px;border-radius:10px;width:100%}.nav button.on{background:var(--as)}
+  .lay{display:flex;gap:14px;align-items:flex-start}.main{flex:1;min-width:0}.wrap{padding-bottom:30px}
+  .pane.on.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:start}
+}
+@media (min-width:600px) and (max-width:899px){.pane.on.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 11px;align-items:start}}
+/* الشهادة */
+.cert{border:1px solid #e8d9a8;border-radius:14px;background:linear-gradient(160deg,#fffdf7,#fbf4e2);color:#1d1d1d;padding:18px 16px;text-align:center;position:relative;margin:8px 0}
+.cert:before{content:"";position:absolute;inset:6px;border:1px solid #d9c27f;border-radius:10px;pointer-events:none}
+.cert .logo{margin:0 auto 4px;width:46px;height:46px}.cert h4{margin:4px 0;color:#6b5210;font-size:17px}.cert .nm{font-size:21px;font-weight:800;margin:6px 0}
+.cert .x{font-size:12px;color:#6b6b6b}.cert .ft{display:flex;justify-content:space-between;align-items:flex-end;font-size:11px;color:#6b6b6b;margin-top:12px;gap:8px;text-align:start}
+.qr{width:74px;height:74px;background:#fff;padding:3px;border-radius:4px}.qr img,.qr canvas{width:100%!important;height:100%!important}
+@media print{body{background:#fff}.hd,.nav,.noprint,.foot{display:none!important}.wrap{margin:0;padding:0;max-width:none}.card{box-shadow:none;padding:0}
+  .pane{display:none!important}.pane.printme{display:block!important}.cert{margin:0;padding:40px;min-height:90vh;display:flex;flex-direction:column;justify-content:center;border-width:2px}
+  .cert h4{font-size:28px}.cert .nm{font-size:36px}.cert .x{font-size:15px}@page{size:A4 landscape;margin:12mm}}</style></head><body>
+<div class="hd" style="padding-bottom:20px"><div class="hdi"><div class="bt" id="bt"><div class="logo">✓</div><div><b>التحقق من الشهادات</b><small>صفحة عامة</small></div></div></div></div>
+<div class="wrap" style="margin-top:14px;max-width:560px;padding-bottom:30px"><div id="main"><div class="card empty">جارٍ التحقق…</div></div>
+<div class="card"><h3>🔎 تحقق من شهادة أخرى</h3><form onsubmit="chk(this.c.value);return false" style="display:flex;gap:6px"><input name="c" dir="ltr" placeholder="CPT-27-001" style="flex:1;padding:9px 11px;border:1px solid var(--line);border-radius:10px;font:inherit;text-transform:uppercase;background:var(--card);color:var(--ink)"><button class="btn p">تحقق</button></form></div><div id="ft"></div></div>
+<script>var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"},EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function rpc(fn,body){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('تعذّر الاتصال');return r.json()})}
+function pub(v){return v&&!/قيد الإصدار/.test(v)?v:''}
+/** الهوية: إعدادات الأكاديمي أولاً، والفارغ يُكمَّل من بيانات المنشأة في النظام الأساسي */
+function brandMerge(b){b=b||{};var ctl=window.AbortController?new AbortController():null;if(ctl)setTimeout(function(){ctl.abort()},8000);return fetch(EXEC+'?public=config',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{},z=c.biz||{};
+  return {name:pub(b.name)||c.academy||'',legal_name:pub(b.legal_name)||z.legal_name||'',cr:pub(b.cr)||z.cr||'',vat:pub(b.vat)||z.vat||'',license:pub(b.license),address:pub(b.address)||z.address||'',phone:pub(b.phone)||z.phone||'',email:pub(b.email)||z.email||'',logo_url:b.logo_url||'',accreditation:b.accreditation||'',site:b.site||''}}).catch(function(){return b})}
+function logoHtml(b){return '<div class="logo">'+(b.logo_url?'<img src="'+esc(b.logo_url)+'" alt="">':esc((b.name||'A').trim().charAt(0)))+'</div>'}
+function footHtml(b){var x=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.vat?'الرقم الضريبي '+b.vat:'',b.license?'ترخيص '+b.license:''].filter(Boolean).join(' · ');
+  return '<div class="foot">'+(x?esc(x)+'<br>':'')+(b.accreditation?esc(b.accreditation)+'<br>':'')+esc([b.address,b.phone,b.email].filter(Boolean).join(' · '))+(b.site?'<br><a href="'+esc(b.site)+'privacy/">سياسة الخصوصية</a>':'')+'</div>'}
+function dAr(d,o){if(!d)return'—';var x=new Date(String(d).length===10?d+'T12:00:00':d);return isNaN(x)?d:x.toLocaleDateString('ar-SA-u-nu-latn',o||{day:'numeric',month:'long',year:'numeric'})}
+var DAYS=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+/* شرح الأزرار: وقوف الماوس، أو ضغطة مطوّلة على الآيفون/الآيباد */
+(function(){var t=document.createElement('div');t.className='tip';document.addEventListener('DOMContentLoaded',function(){document.body.appendChild(t)});var tm;
+function show(el,x,y){var s=el.getAttribute('data-tip');if(!s)return;t.textContent=s;t.style.display='block';var w=t.offsetWidth;t.style.left=Math.max(8,Math.min(innerWidth-w-8,x-w/2))+'px';t.style.top=Math.max(8,y-t.offsetHeight-12)+'px'}
+function hide(){clearTimeout(tm);t.style.display='none'}
+document.addEventListener('mouseover',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(!el)return hide();var r=el.getBoundingClientRect();clearTimeout(tm);tm=setTimeout(function(){show(el,r.left+r.width/2,r.top)},300)});
+document.addEventListener('touchstart',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(!el)return;var r=el.getBoundingClientRect();clearTimeout(tm);tm=setTimeout(function(){show(el,r.left+r.width/2,r.top);setTimeout(hide,3000)},450)},{passive:true});
+document.addEventListener('touchend',function(){clearTimeout(tm)},{passive:true});document.addEventListener('scroll',hide,{passive:true})})();
+function chk(code){code=String(code||'').trim();if(!code){$('main').innerHTML='<div class="card empty">اكتب رقم الشهادة أو امسح رمز QR</div>';return}
+  history.replaceState(null,'','?c='+encodeURIComponent(code.toUpperCase()));$('main').innerHTML='<div class="card empty">جارٍ التحقق…</div>';
+  rpc('ac_verify',{code:code}).then(function(v){var b0={};Object.keys(v.brand||{}).forEach(function(k){b0[k]=pub(v.brand[k])});show(v,b0);brandMerge(v.brand).then(function(b){show(v,b)})}).catch(function(){$('main').innerHTML='<div class="card empty">تعذّر الاتصال — أعد المحاولة</div>'})}
+function show(v,b){
+    $('bt').innerHTML=logoHtml(b)+'<div><b>'+esc(b.name||'الأكاديمية')+'</b><small>التحقق من الشهادات</small></div>';$('ft').innerHTML=footHtml(b);
+    if(!v.found){$('main').innerHTML='<div class="card" style="text-align:center"><div style="font-size:40px">❌</div><b style="font-size:18px;color:var(--b)">لا توجد شهادة بهذا الرقم</b><div class="sm mut">تأكد من الرقم أو تواصل مع الأكاديمية</div></div>';return}
+    var ok=v.status==='صالحة';
+    $('main').innerHTML='<div class="card" style="text-align:center"><div style="font-size:44px">'+(ok?'✅':'🚫')+'</div><b style="font-size:19px;color:'+(ok?'var(--g)':'var(--b)')+'">'+(ok?'شهادة صالحة':'شهادة ملغاة')+'</b>'+
+      '<div style="text-align:start;margin-top:8px"><div class="row"><span>الاسم</span><b>'+esc(v.name)+'</b></div><div class="row"><span>البرنامج</span><b>'+esc(v.program)+'</b></div>'+(v.hours?'<div class="row"><span>الساعات</span><b>'+v.hours+'</b></div>':'')+
+      '<div class="row"><span>تاريخ الإصدار</span><b>'+dAr(v.issued_at)+'</b></div><div class="row"><span>رقم الشهادة</span><b dir="ltr">'+esc(v.code)+'</b></div></div>'+
+      (b.accreditation?'<div class="xs mut" style="margin-top:8px">'+esc(b.accreditation)+'</div>':'')+'<div class="xs mut">لا تُعرض أي بيانات شخصية أخرى</div></div>'}
+chk(new URLSearchParams(location.search).get('c'));
+</script></body></html>

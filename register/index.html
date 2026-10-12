@@ -22,6 +22,7 @@ button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-
 <label for="persona">وضعك الحالي</label><select id="persona"><option value="">اختر</option><option>أبدأ في المجال من الصفر</option><option>مدرب حالياً وأريد التطوير</option>
 <option>أحتاج رخصة أو شهادة لعملي</option><option>أقارن بين الشهادات</option></select>
 <label for="note">سؤالك أو ملاحظتك (اختياري)</label><textarea id="note"></textarea>
+<div id="refbox" style="display:none;background:#e3f5e8;color:#15803d;border-radius:10px;padding:8px 10px;margin-top:12px;font-size:14px"></div>
 <label for="member_no">رقم عضوية صديق (اختياري)</label><input id="member_no" dir="ltr" placeholder="مثال: M-23456" autocomplete="off" maxlength="30">
 <label class="chk"><input type="checkbox" id="member_consent"> أوافق (اختيارياً) على عضويتي في مجتمع الأكاديمية بعد إتمام دورتي، وأن يُستخدم رقم عضويتي لمنح أصدقائي خصومات تساعد الأكاديمية في التسويق. يمكنني الانسحاب في أي وقت.</label>
 <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
@@ -45,6 +46,11 @@ fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j)
   (CFG.cities||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c;$('city').appendChild(o)});
   (CFG.courses||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c.name;$('course').appendChild(o)});
   var pre=P.get('course');if(pre)$('course').value=pre;
+  // رابط ترشيح خريج (?ref=CODE): يُملأ تلقائياً ويُعرض الخصم — الخصم يُطبَّق عند التسجيل ولا ينزل عن الحد الأدنى
+  var ref=(P.get('ref')||'').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,20);
+  if(ref){$('member_no').value=ref;var AC={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
+    if(AC)fetch(AC.url+'/rest/v1/rpc/ac_ref_info',{method:'POST',headers:{apikey:AC.anon,Authorization:'Bearer '+AC.anon,'Content-Type':'application/json'},body:JSON.stringify({code:ref})}).then(function(r){return r.json()}).then(function(x){
+      if(x&&x.valid){$('refbox').style.display='block';$('refbox').textContent='🎁 رشّحك '+(x.by||'صديقك')+' — خصم '+x.discount_pct+'% يُطبَّق عند تسجيلك';}}).catch(function(){});}
   var b=CFG.biz||{},bits=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.phone].filter(Boolean);if(bits.length)$('foot').insertAdjacentHTML('afterbegin',bits.join(' · ')+'<br>');
   loadTrackers(CFG);
 }).catch(function(){});
