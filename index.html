@@ -531,7 +531,9 @@ input[type="url"],input[id$="_url"],input[id*="url"]{color:#000!important;-webki
 .ct-grid{display:grid;grid-template-columns:1fr 300px;gap:10px}@media(max-width:900px){.ct-grid{grid-template-columns:1fr}}
 .ct-ev{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;margin-top:5px;background:var(--soft);font-size:12.5px;white-space:nowrap;overflow:hidden}
 .ct-ev.u{border-color:#e5484d}.ct-ev.open{display:block;white-space:normal;border-color:#5aa9e6}.ct-ev .ct-tx{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}.ct-ev .t{font-size:11px}.ct-ev .btn.sm{padding:2px 8px;font-size:11.5px}
-.ct-head{display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden}.ct-rw{position:relative;margin-top:4px}.ct-reply{width:100%;min-height:34px;max-height:60px;margin:0;font-size:12px;line-height:1.5;padding:4px 150px 4px 8px;padding-inline-start:150px;padding-inline-end:8px;resize:none}.ct-rb{position:absolute;inset-inline-start:6px;top:50%;transform:translateY(-50%);display:flex;gap:4px;align-items:center}.ct-rb .tag{display:none}
+.ct-head{display:flex;align-items:center;gap:7px;white-space:nowrap;overflow:hidden}.ct-rw{position:relative;margin-top:4px}.ct-reply{width:100%;min-height:34px;max-height:60px;margin:0;font-size:12px;line-height:1.5;padding:4px 150px 4px 8px;padding-inline-start:150px;padding-inline-end:8px;resize:none}.ct-ics{display:inline-flex;gap:3px;flex:0 0 auto}.ct-ev .btn.ct-ib{width:26px;height:24px;padding:0;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+.ct-reply.ct-full{padding:4px 8px;padding-inline-start:8px;padding-inline-end:8px;max-height:90px}
+.ct-rb{position:absolute;inset-inline-start:6px;top:50%;transform:translateY(-50%);display:flex;gap:4px;align-items:center}.ct-rb .tag{display:none}
 .ct-auto{display:flex;align-items:center;gap:8px;background:#b3261e;color:#fff;border-radius:8px;padding:3px 10px;font-size:11.5px;white-space:nowrap;overflow:hidden;margin-bottom:6px}.ct-auto-l{font-weight:700;flex:0 0 auto}.ct-auto-t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.ct-auto i{opacity:.75;font-style:normal;font-size:10.5px}.ct-auto .btn{background:#fff;color:#b3261e;border-color:#fff;padding:0 7px;font-size:12px;flex:0 0 auto}
 .tag{font-size:11px;border-radius:6px;padding:1px 6px;background:var(--card);border:1px solid var(--line);white-space:nowrap}.tag.auto{background:#13261c;color:#7ee2a8;border-color:transparent}.tag.warn{background:#3a2a05;color:#ffd166;border-color:transparent}.tag.bad{background:#3a1212;color:#ff8f8f;border-color:transparent}
 :root[data-theme=light] .tag.auto,:root:not([data-theme=dark]) .tag.auto{background:#e6f7ec;color:#1f7a45}:root:not([data-theme=dark]) .tag.warn{background:#fff3d6;color:#8a5a00}:root:not([data-theme=dark]) .tag.bad{background:#fdecea;color:#8a1c14}
@@ -566,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv5480e0";
+  var APP_BUILD = "mv54z5xk";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1562,38 +1564,44 @@ var MEMBER_CARD_BG = "data:image/webp;base64,UklGRvyzAQBXRUJQVlA4WAoAAAAgAAAAKQY
 /* ═══════════ 🗺 خريطة النظام + ما ينقصه ليعمل وحده (التصميم المعتمد 2026-10-10) ═══════════
    دليل تدريب مرئي: أسهم رفيعة لمسار العمل، وكل مربع يفتح شاشته. القائمة تُفحص آلياً ويختفي البند عند اكتماله. */
 var SYSMAP_NODES = [
-  // [x, y, w, عنوان, وصف, الشاشة, اللون]
+  // [x, y, w, عنوان, وصف, الشاشة, اللون] — حُدّثت 2026-10-12: النظام الأكاديمي + المالية + الملف الموحّد (كل شيء مربوط)
   [540, 20, 120, 'المصادر', 'أخبار، منافسون، متاجر', 'news', 'g'],
   [380, 20, 120, 'الرصد', 'من يسأل، التفاعل', 'ask', 't'],
-  [220, 20, 120, 'العقل', 'تحليل وردود', 'storecourses', 'p'],
+  [220, 20, 120, 'العقل', 'تحليل وردود ونصائح', 'control', 'p'],
   [40, 20, 140, 'الرد والإرسال', 'واتساب بموافقتك', 'inbox', 't'],
   [40, 124, 140, 'مراحل العميل', 'مهتم ثم مسجّل', 'pipeline', 't'],
-  [220, 124, 120, 'الدفع', 'رابط الدفع', 'payments', 't'],
+  [220, 124, 120, 'الدفع', 'سلة · تابي · تمارا', 'payments', 't'],
   [380, 124, 120, 'العضوية', 'رقم وبطاقة', 'members', 't'],
-  [540, 124, 120, 'الإحالات', 'عملاء جدد', 'members', 'g']
+  [540, 124, 120, 'الإحالات', 'عملاء جدد', 'members', 'g'],
+  [220, 228, 120, '🎓 الدفعات', 'جدول · حضور QR · درجات', 'academic', 'a'],
+  [380, 228, 120, '🏅 الشهادة', 'اعتماد · تحقق QR', 'acCerts', 'a'],
+  [540, 228, 120, '📱 بوابة المتدرب', 'دخول برمز · بطاقة · جروب', 'academic', 'a'],
+  [40, 228, 140, '💵 المالية', 'إيراد · خصومات · رسوم', 'finance', 'p']
 ];
 function sysmapSvg_() {
-  var col = { g: ['var(--soft)', 'var(--muted)'], t: ['rgba(29,158,117,.12)', '#1D9E75'], p: ['rgba(127,119,221,.14)', '#7F77DD'] };
+  var col = { g: ['var(--soft)', 'var(--muted)'], t: ['rgba(29,158,117,.12)', '#1D9E75'], p: ['rgba(127,119,221,.14)', '#7F77DD'], a: ['rgba(212,168,83,.16)', '#B8932F'] };
   var ln = 'stroke="currentColor" stroke-width="0.8" opacity=".65" fill="none"';
   var nodes = SYSMAP_NODES.map(function (n) {
     var c = col[n[6]];
     return '<g class="smn" data-go="' + n[5] + '" style="cursor:pointer"><rect x="' + n[0] + '" y="' + n[1] + '" width="' + n[2] + '" height="56" rx="6" fill="' + c[0] + '" stroke="' + c[1] + '" stroke-width="0.8"/>' +
       '<text x="' + (n[0] + n[2] / 2) + '" y="' + (n[1] + 22) + '" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">' + esc(n[3]) + '</text>' +
-      '<text x="' + (n[0] + n[2] / 2) + '" y="' + (n[1] + 41) + '" text-anchor="middle" font-size="11.5" fill="currentColor" opacity=".7">' + esc(n[4]) + '</text></g>';
+      '<text x="' + (n[0] + n[2] / 2) + '" y="' + (n[1] + 41) + '" text-anchor="middle" font-size="11" fill="currentColor" opacity=".7">' + esc(n[4]) + '</text></g>';
   }).join('');
   var arr = function (d, dash) { return '<path d="' + d + '" ' + ln + (dash ? ' stroke-dasharray="3 3"' : '') + ' marker-end="url(#smarr)"/>'; };
-  return '<svg viewBox="0 0 680 290" style="width:100%;max-width:900px;display:block;margin:0 auto;color:var(--ink)" role="img" aria-label="خريطة مسار العمل في النظام">' +
+  var wide = function (x, w, y, t, go, c) { return '<g class="smn" data-go="' + go + '" style="cursor:pointer"><rect x="' + x + '" y="' + y + '" width="' + w + '" height="44" rx="6" fill="' + col[c][0] + '" stroke="' + col[c][1] + '" stroke-width="0.8"/><text x="' + (x + w / 2) + '" y="' + (y + 27) + '" text-anchor="middle" font-size="13.5" font-weight="700" fill="currentColor">' + t + '</text></g>'; };
+  return '<svg viewBox="0 0 680 400" style="width:100%;max-width:900px;display:block;margin:0 auto;color:var(--ink)" role="img" aria-label="خريطة مسار العمل في النظام">' +
     '<defs><marker id="smarr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></marker></defs>' +
     arr('M538 48 L504 48') + arr('M378 48 L344 48') + arr('M218 48 L184 48') + arr('M110 78 L110 120') +
-    arr('M182 152 L216 152') + arr('M342 152 L376 152') + arr('M502 152 L536 152') + arr('M600 182 L600 208 L668 208 L668 6 L600 6 L600 16', true) +
+    arr('M182 152 L216 152') + arr('M342 152 L376 152') + arr('M502 152 L536 152') + arr('M600 182 L600 196 L672 196 L672 6 L600 6 L600 16', true) +
+    arr('M280 182 L280 224') + arr('M342 256 L376 256') + arr('M502 256 L536 256') + arr('M600 226 L600 184') + arr('M218 256 L184 256') + arr('M250 182 L150 224', true) +
     nodes +
-    '<g class="smn" data-go="automap" style="cursor:pointer"><rect x="220" y="226" width="280" height="44" rx="6" fill="rgba(127,119,221,.14)" stroke="#7F77DD" stroke-width="0.8"/>' +
-    '<text x="360" y="253" text-anchor="middle" font-size="14" font-weight="700" fill="currentColor">🤖 الأوتوماتيك يشغّل كل ما سبق</text></g>' +
-    arr('M280 224 L280 184', true) + arr('M440 224 L440 184', true) + '</svg>';
+    wide(40, 300, 316, '👤 الملف الموحّد: نفس الشخص في كل الجداول', 'persons', 't') +
+    wide(360, 300, 316, '🤖 الأوتوماتيك + 🩺 الفحص يشغّلان كل ما سبق', 'automap', 'p') +
+    arr('M190 314 L190 288', true) + arr('M510 314 L510 288', true) + '</svg>';
 }
 SCREENS.sysmap = { render: function (d) {
   var html = north(d.north) + '<h1>🗺 خريطة النظام <span class="muted tiny">— دليل تدريب: كيف يعمل النظام من أول خبر حتى العميل الدافع · اضغط أي مربع لتفتح شاشته</span></h1>';
-  html += '<div class="card" style="padding:10px">' + sysmapSvg_() + '<div class="muted tiny" style="text-align:center;margin-top:4px">الخط المنقّط = يعمل وحده في الخلفية · الإحالات تعود فتغذّي المصادر بعملاء جدد</div></div>';
+  html += '<div class="card" style="padding:10px">' + sysmapSvg_() + '<div class="muted tiny" style="text-align:center;margin-top:4px">الخط المنقّط = يعمل وحده في الخلفية · الإحالات تعود فتغذّي المصادر · 🟨 النظام الأكاديمي (Supabase) مربوط بالدفع والعضوية والمالية والملف الموحّد</div></div>';
   var rows = (d.open || []).map(function (i) {
     var tag = i.waiting ? '<span class="tag">⏳ بعد: ' + esc(i.waiting) + '</span>' : (i.level === 'block' ? '<span class="tag bad">يوقف العمل</span>' : '<span class="tag warn">يحسّن الأداء</span>');
     return '<div class="ct-ev" style="align-items:flex-start' + (i.waiting ? ';opacity:.6' : '') + '"><span class="ct-tx"><b>' + esc(i.title) + '</b> <span class="muted small">— ' + esc(i.why) + '</span>' +
@@ -2052,6 +2060,7 @@ function acCohortHtml_(d, co, amin, pmin) {
     acIb_('📝', 'acTab', 'إدخال الدرجات — المعدل الموزون يُحسب وحده', ' data-t="sc"', tab === 'sc' ? 'pri' : '') +
     acIb_('🗓', 'acTab', 'الجدول والجلسات', ' data-t="sch"', tab === 'sch' ? 'pri' : '') +
     (c.classroom_url ? '<a class="ac-ib" href="' + esc(extUrl(c.classroom_url)) + '" target="_blank" rel="noopener" data-tip="فتح فصل Google Classroom (الكتب والاختبارات)">🔗</a>' : acIb_('🔗', 'acEditCohort', 'لم يُربط Classroom بعد — أضف رابط الفصل', ' data-id="' + c.id + '"')) +
+    acIb_('💬', 'acGroup', c.wa_group_url ? 'جروب واتساب الدفعة مربوط — يظهر للمتدربين في بوابتهم' : 'جروب واتساب للدفعة: اسم مقترح + أرقام المتدربين + رابط الدعوة', ' data-id="' + c.id + '"', c.wa_group_url ? '' : 'gold') +
     acIb_('✏️', 'acEditCohort', 'تعديل بيانات الدفعة (المواعيد، المكان، المدرب، Classroom، الحالة)', ' data-id="' + c.id + '"') +
     acIb_('＋👤', 'acAddTrainee', 'إضافة متدرب لهذه الدفعة (يُربط بنفس الشخص إن كان جواله موجوداً)', ' data-id="' + c.id + '"') +
     acIb_('🏅 <small>' + elig + '</small>', 'acIssue', elig ? 'اعتماد وإصدار الشهادات لـ ' + elig + ' مستحق (حضور ≥ ' + amin + '% ومعدل نهائي ≥ ' + pmin + '%)' : 'لا يوجد مستحق للشهادة بعد', ' data-id="' + c.id + '"' + (elig ? '' : ' disabled'), elig ? 'gold' : '') + '</div>';
@@ -2231,9 +2240,40 @@ ACT.acSaveCohort = function (el) {
   if (el.dataset.id) a.id = el.dataset.id;
   acCall('save_cohort', a).then(function (r) { closeSheet(); toast('✓ حُفظت الدفعة'); go('academic', { c: r.id }); }).catch(acErr_);
 };
+/* 💬 جروب واتساب الدفعة (معتمد 2026-10-12): إنشاء الجروب آلياً غير متاح قبل ربط واتساب للأعمال — النظام يجهّز الاسم والأرقام، وأنت تلصق رابط الدعوة */
+ACT.acGroup = function () {
+  var co = AC.d.co, c = co.cohort, d = c.start_date ? new Date(c.start_date + 'T12:00:00') : null;
+  var name = c.name + (d ? ' · ' + d.toLocaleDateString('ar-SA-u-nu-latn', { month: 'long', year: 'numeric' }) : '');
+  var phones = (co.trainees || []).filter(function (t) { return t.enrollment.status !== 'منسحب' && t.trainee.phone && !t.trainee.opt_out; }).map(function (t) { return '+' + acIntl_(t.trainee.phone); });
+  openSheet('<h2 style="margin:0 0 6px">💬 جروب واتساب الدفعة</h2><div class="ac-f" style="grid-template-columns:1fr">' +
+    '<label>١) اسم الجروب المقترح<span class="ac-row"><input value="' + esc(name) + '" readonly style="flex:1">' + acIb_('📋', 'acCopy', 'نسخ الاسم', ' data-v="' + esc(name) + '"') + '</span></label>' +
+    '<label>٢) أرقام المتدربين (' + phones.length + ') — لإضافتهم دفعة واحدة<span class="ac-row"><input value="' + esc(phones.join(', ')) + '" readonly dir="ltr" style="flex:1">' + acIb_('📋', 'acCopy', 'نسخ كل الأرقام', ' data-v="' + esc(phones.join('\n')) + '"') + '</span></label>' +
+    '<label>٣) رابط دعوة الجروب (من واتساب: معلومات الجروب ← الدعوة عبر رابط)<input id="acg_url" dir="ltr" placeholder="https://chat.whatsapp.com/…" value="' + esc(c.wa_group_url || '') + '"></label></div>' +
+    '<div class="ac-note">يظهر زر «انضم لجروب الدفعة» في بوابة كل متدرب · «لا تراسل» مستثنى من الأرقام · بعد ربط واتساب للأعمال يُرسل الرابط تلقائياً لكل مسجّل جديد.</div>' +
+    '<div class="btns"><button class="btn pri" data-act="acGroupSave" data-id="' + c.id + '">💾 حفظ الرابط</button></div>');
+};
+ACT.acGroupSave = function (el) { acCall('cohort_wa', { id: el.dataset.id, url: $('acg_url').value.trim() }, false, 'ac_extra').then(function () { closeSheet(); toast('✓ الجروب مربوط — يظهر للمتدربين'); acReload_(); }).catch(acErr_); };
+/* إضافة متدرب: ابحث أولاً في النظام (عميل/عضو/سائل) — يُملأ ويُربط بملفه الموحّد فلا يتكرر (معتمد 2026-10-12) */
+var AC_PS = { t: null, rows: [] };
+document.addEventListener('input', function (e) {
+  if (!e.target || e.target.id !== 'act_q') return;
+  clearTimeout(AC_PS.t); var q = e.target.value.trim(), box = $('act_res'); if (!box) return;
+  if (q.length < 2) { box.innerHTML = ''; return; }
+  AC_PS.t = setTimeout(function () { box.innerHTML = '<div class="ac-note" style="padding:6px">يبحث…</div>';
+    api('screen', 'persons', { q: q }, true).then(function (d) { AC_PS.rows = (d.rows || []).slice(0, 6);
+      box.innerHTML = AC_PS.rows.map(function (p, i) { return '<div class="ac-row ac-pick" data-act="acPick" data-i="' + i + '" style="padding:7px 8px;border-bottom:1px solid var(--soft);cursor:pointer">👤 <b>' + esc(p.name || p.handles || '—') + '</b>' + (p.phone ? chip('•••• ' + String(p.phone).slice(-4)) : '') + (p.status ? chip(p.status) : '') + (p.opt_out === 'نعم' ? chip('لا تراسل', 'bad') : '') + '</div>'; }).join('') +
+        '<div class="ac-row" data-act="acPick" data-i="-1" style="padding:7px 8px;cursor:pointer;color:var(--accent)">＋ شخص جديد غير موجود في النظام</div>'; }).catch(function () { box.innerHTML = ''; }); }, 350);
+});
+ACT.acPick = function (el) {
+  var i = Number(el.dataset.i), p = i >= 0 ? AC_PS.rows[i] : null; $('act_res').innerHTML = '';
+  if (p) { $('act_name').value = p.name || ''; $('act_phone').value = p.phone || ''; if (p.email) $('act_email').value = p.email; $('act_pid').value = p.person_id; $('act_q').value = p.name || p.phone; toast('✓ اختير من النظام — سيُربط بملفه الموحّد'); }
+  else { $('act_pid').value = ''; $('act_name').focus(); }
+};
 ACT.acAddTrainee = function (el) {
-  openSheet('<h2 style="margin:0 0 4px">＋👤 إضافة متدرب</h2><div class="ac-f">' +
-    '<label>الاسم الكامل<input id="act_name"></label><label>الجوال<input id="act_phone" type="tel" dir="ltr" placeholder="05xxxxxxxx"></label><label>البريد<input id="act_email" type="email" dir="ltr"></label>' +
+  openSheet('<h2 style="margin:0 0 4px">＋👤 إضافة متدرب</h2>' +
+    '<div class="ac-f" style="grid-template-columns:1fr"><label>ابحث أولاً بالاسم أو الجوال (عميل، عضو، سائل…)<input id="act_q" autocomplete="off" placeholder="مثال: سلطان أو 0551…"></label><div id="act_res"></div></div><input type="hidden" id="act_pid">' +
+    '<div class="ac-f">' +
+    '<label>الاسم الكامل<input id="act_name"></label><label>الجوال (أي صيغة)<input id="act_phone" type="tel" dir="ltr" placeholder="05xxxxxxxx"></label><label>البريد (للدخول للبوابة)<input id="act_email" type="email" dir="ltr"></label>' +
     '<label>الدفع<select id="act_pay">' + ['بانتظار', 'مدفوع', 'جزئي'].map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select></label>' +
     '<label>طريقة الدفع<select id="act_method"><option></option>' + ['سلة', 'تابي', 'تمارا', 'تحويل'].map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</select></label>' +
     '<label>رمز ترشيح (إن وُجد)<input id="act_ref" dir="ltr" style="text-transform:uppercase"></label></div>' +
@@ -2241,7 +2281,8 @@ ACT.acAddTrainee = function (el) {
     '<div class="btns"><button class="btn pri" data-act="acSaveTrainee" data-id="' + el.dataset.id + '">💾 إضافة</button></div>');
 };
 ACT.acSaveTrainee = function (el) {
-  var a = { cohort_id: el.dataset.id, name: $('act_name').value.trim(), phone: $('act_phone').value.trim(), email: $('act_email').value.trim(), pay_status: $('act_pay').value, pay_method: $('act_method').value, ref_code: $('act_ref').value.trim() };
+  var a = { cohort_id: el.dataset.id, name: $('act_name').value.trim(), phone: $('act_phone').value.trim(), email: $('act_email').value.trim(), pay_status: $('act_pay').value, pay_method: $('act_method').value, ref_code: $('act_ref').value.trim(), person_id: $('act_pid').value };
+  if (!a.email && !confirm('بلا بريد لن يستطيع الدخول لبوابته (حتى ربط واتساب). تكمل؟')) return;
   if (!a.name) return toast('اكتب الاسم', true);
   acCall('enroll', a).then(function () { closeSheet(); toast('✓ أُضيف'); acReload_(); }).catch(acErr_);
 };
@@ -7495,13 +7536,23 @@ function ctBtn_(b, ev) {
   if (b.go) return '<button class="btn sm' + (b.p ? ' pri' : '') + '" data-go="' + esc(b.go) + '"' + (b.args ? ' data-args="' + attr(b.args) + '"' : '') + '>' + esc(b.l) + '</button>';
   return '<button class="btn sm' + (b.p ? ' pri' : '') + '" data-act="' + esc(b.a) + '" data-id="' + esc(ev.ref) + '" data-url="' + esc(ev.url || '') + '">' + esc(b.l) + '</button>';
 }
+/** زر أيقونة صغير (الرمز فقط) + شرح عند الوقوف — لصف العنوان في البطاقات المفتوحة */
+function ctIco_(b, ev) {
+  var l = String(b.l || ''), m = l.match(/^\s*([^\s\w؀-ۿ]+)\s*(.*)$/), ic = m ? m[1] : l.charAt(0), tip = (b.tip || '') + (m ? m[2] : l);
+  if (l.indexOf('✓') > -1) ic = '✓'; if (/ليست فرصة/.test(l)) ic = '✕'; if (!tip.trim()) tip = /↗/.test(l) ? 'افتح المنشور' : 'افتح';
+  var at = b.go ? ' data-go="' + esc(b.go) + '"' + (b.args ? ' data-args="' + attr(b.args) + '"' : '') : ' data-act="' + esc(b.a) + '" data-id="' + esc(ev.ref) + '" data-url="' + esc(ev.url || '') + '"';
+  return '<button class="btn sm ct-ib' + (b.p ? ' pri' : '') + '"' + at + ' data-tip="' + esc(tip) + '" aria-label="' + esc(tip) + '">' + esc(ic) + '</button>';
+}
 function ctEvent_(ev) {
   var open = !!ev.reply;
   var head = '<span class="ct-dot ' + ev.level + '"></span><span class="ct-tx"' + (ev.sub ? ' data-tip="' + esc(ev.sub) + '"' : '') + '><b>' + esc(ev.title) + '</b>' + (ev.sub ? ' <span class="muted">' + esc(ev.sub) + '</span>' : '') + '</span><span class="t muted">' + ctAgo_(ev.at) + '</span>';
   var tail = (ev.auto ? '<span class="tag auto">' + esc(ev.auto) + '</span>' : '') + (ev.tag ? '<span class="tag warn">' + esc(ev.tag) + '</span>' : '') + (ev.acts || []).map(function (b) { return ctBtn_(b, ev); }).join('');
   if (!open) return '<div class="ct-ev ' + ev.level + '" data-evid="' + esc(ev.id) + '">' + head + tail + '</div>';
-  return '<div class="ct-ev open ' + ev.level + '" data-evid="' + esc(ev.id) + '"><div class="ct-head">' + head + '</div>' +
-    '<div class="ct-rw"><textarea class="ct-reply" id="ctr_' + esc(ev.ref) + '" data-tip="الرد المقترح — عدّله كما تحب ثم «📤 أرسل الرد»">' + esc(ev.reply) + '</textarea><span class="ct-rb">' + tail + '</span></div></div>';
+  var ics = (ev.acts || []).map(function (b) { return ctIco_(b, ev); }).join('');
+  var headO = '<span class="ct-dot ' + ev.level + '"></span><span class="ct-tx"' + (ev.sub ? ' data-tip="' + esc(ev.sub) + '"' : '') + '><b>' + esc(ev.title) + '</b>' + (ev.sub ? ' <span class="muted">' + esc(ev.sub) + '</span>' : '') + '</span>' +
+    (ev.tag ? '<span class="tag warn">' + esc(ev.tag) + '</span>' : '') + '<span class="ct-ics">' + ics + '</span><span class="t muted">' + ctAgo_(ev.at) + '</span>';
+  return '<div class="ct-ev open ' + ev.level + '" data-evid="' + esc(ev.id) + '"><div class="ct-head">' + headO + '</div>' +
+    '<div class="ct-rw"><textarea class="ct-reply ct-full" id="ctr_' + esc(ev.ref) + '" data-tip="الرد المقترح — عدّله كما تحب ثم 📤">' + esc(ev.reply) + '</textarea></div></div>';
 }
 SCREENS.control = { render: function (d) {
   CT.data = d;
