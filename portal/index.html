@@ -77,10 +77,11 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function rpc(fn,body){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('تعذّر الاتصال');return r.json()})}
+var BDEF={name:'ميزان التدريب',icon_url:'../brand/logo-icon.png'};
 function pub(v){return v&&!/قيد الإصدار/.test(v)?v:''}
 /** الهوية: إعدادات الأكاديمي أولاً، والفارغ يُكمَّل من بيانات المنشأة في النظام الأساسي */
 function brandMerge(b){b=b||{};var ctl=window.AbortController?new AbortController():null;if(ctl)setTimeout(function(){ctl.abort()},8000);return fetch(EXEC+'?public=config',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{},z=c.biz||{};
-  return Object.assign({},b,{name:pub(b.name)||c.academy||'',legal_name:pub(b.legal_name)||z.legal_name||'',cr:pub(b.cr)||z.cr||'',vat:pub(b.vat)||z.vat||'',license:pub(b.license),address:pub(b.address)||z.address||'',phone:pub(b.phone)||z.phone||'',email:pub(b.email)||z.email||'',logo_url:b.logo_url||'',accreditation:b.accreditation||'',site:b.site||''})}).catch(function(){return b})}
+  return Object.assign({},b,{name:pub(b.name)||c.academy||BDEF.name,legal_name:pub(b.legal_name)||z.legal_name||'',cr:pub(b.cr)||z.cr||'',vat:pub(b.vat)||z.vat||'',license:pub(b.license),address:pub(b.address)||z.address||'',phone:pub(b.phone)||z.phone||'',email:pub(b.email)||z.email||'',logo_url:b.logo_url||'',icon_url:b.icon_url||BDEF.icon_url,accreditation:b.accreditation||'',site:b.site||''})}).catch(function(){return Object.assign({},BDEF,b)})}
 function logoHtml(b){var u=b.icon_url||b.logo_url;return '<div class="logo">'+(u?'<img src="'+esc(u)+'" alt="">':esc((b.name||'A').trim().charAt(0)))+'</div>'}
 function footHtml(b){var x=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.vat?'الرقم الضريبي '+b.vat:'',b.license?'ترخيص '+b.license:''].filter(Boolean).join(' · ');
   return '<div class="foot">'+(x?esc(x)+'<br>':'')+(b.accreditation?esc(b.accreditation)+'<br>':'')+esc([b.address,b.phone,b.email].filter(Boolean).join(' · '))+(b.site?'<br><a href="'+esc(b.site)+'privacy/">سياسة الخصوصية</a>':'')+'</div>'}
@@ -93,7 +94,7 @@ function hide(){clearTimeout(tm);t.style.display='none'}
 document.addEventListener('mouseover',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(!el)return hide();var r=el.getBoundingClientRect();clearTimeout(tm);tm=setTimeout(function(){show(el,r.left+r.width/2,r.top)},300)});
 document.addEventListener('touchstart',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(!el)return;var r=el.getBoundingClientRect();clearTimeout(tm);tm=setTimeout(function(){show(el,r.left+r.width/2,r.top);setTimeout(hide,3000)},450)},{passive:true});
 document.addEventListener('touchend',function(){clearTimeout(tm)},{passive:true});document.addEventListener('scroll',hide,{passive:true})})();
-var D=null,B={},PANE='home',E=null,TXT={};
+var D=null,B=Object.assign({},BDEF),PANE='home',E=null,TXT={};
 var NAV=[['home','🏠','الرئيسية'],['sch','🗓','الجدول'],['study','📚','المذاكرة'],['cert','🏅','شهادتي'],['acc','👤','حسابي']];
 function nav(){ $('nav').innerHTML=NAV.map(function(n){return '<button class="'+(PANE===n[0]?'on':'')+'" onclick="go(\''+n[0]+'\')" aria-label="'+n[2]+'"><span>'+n[1]+'</span>'+n[2]+'</button>'}).join('') }
 function go(p){PANE=p;nav();render();scrollTo(0,0)}
@@ -252,7 +253,7 @@ function boot(quiet){
     brandMerge(d.brand).then(function(b){apply(b);render()})
   }).catch(function(){$('hi').textContent='تعذّر الاتصال';$('main').innerHTML='<div class="card empty">تحقق من الإنترنت ثم <a href="#" onclick="location.reload();return false">أعد المحاولة</a></div>'});
 }
-B={};rpc('ac_verify',{code:''}).then(function(v){return brandMerge((v&&v.brand)||{})}).catch(function(){return brandMerge({})}).then(function(b){if(!D){B=b;if($('ph'))hdr('أهلاً بك 👋','ادخل برقم جوالك المسجّل لدينا');else if($('otp'))$('bt').innerHTML=logoHtml(B)+'<div><b>'+esc(B.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>'}});
+B=Object.assign({},BDEF);rpc('ac_verify',{code:''}).then(function(v){return brandMerge((v&&v.brand)||{})}).catch(function(){return brandMerge({})}).then(function(b){if(!D){B=b;if($('ph'))hdr('أهلاً بك 👋','ادخل برقم جوالك المسجّل لدينا');else if($('otp'))$('bt').innerHTML=logoHtml(B)+'<div><b>'+esc(B.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>'}});
 boot();
 
 </script></body></html>
