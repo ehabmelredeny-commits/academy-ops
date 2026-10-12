@@ -566,7 +566,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv4ptoqy";
+  var APP_BUILD = "mv4rlclx";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1932,11 +1932,11 @@ ACT.finReport = function (el) { el.disabled = true; el.textContent = '⏳ ينش
 var AC = { f: {}, tab: {}, sess: {} };
 function acCfg_() { return (typeof ACAD_SUPA !== 'undefined' && ACAD_SUPA && ACAD_SUPA.url) ? ACAD_SUPA : SUPA; }
 function acKey_() { return typeof opsKey_ === 'function' ? opsKey_() : UI_KEY; }
-function acCall(op, a, quiet) {
+function acCall(op, a, quiet, fn) {
   var c = acCfg_();
   if (!c || !c.url) return Promise.reject(new Error('Supabase غير مربوط'));
   if (!quiet) busy_(1);
-  return fetch(c.url.replace(/\/$/, '') + '/rest/v1/rpc/ac_admin', { method: 'POST', headers: { apikey: c.anon, Authorization: 'Bearer ' + c.anon, 'Content-Type': 'application/json' },
+  return fetch(c.url.replace(/\/$/, '') + '/rest/v1/rpc/' + (fn || 'ac_admin'), { method: 'POST', headers: { apikey: c.anon, Authorization: 'Bearer ' + c.anon, 'Content-Type': 'application/json' },
     body: JSON.stringify({ k: acKey_(), op: op, a: a || {} }) })
     .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(/unauthorized/.test(j.message || '') ? 'المفتاح غير مصرّح للنظام الأكاديمي' : (j.message || 'خطأ')); return j; }); })
     .then(function (j) { if (!quiet) busy_(-1); return j; }, function (e) { if (!quiet) busy_(-1); if (/Failed to fetch|NetworkError/.test(e.message)) e = new Error('تعذّر الاتصال — تحقق من الإنترنت'); throw e; });
@@ -2212,7 +2212,8 @@ ACT.acTrainee = function (el) {
   var tt = t.trainee, e = t.enrollment, h = tt.handles || {}, url = acPortalUrl_(t.portal_token);
   var msg = 'أهلاً ' + tt.name.split(' ')[0] + '، هذا رابط بوابتك الشخصية في ' + (AC.brand.name || 'الأكاديمية') + ' (الجدول، الحضور، الدرجات، المذاكرة):\n' + url;
   openSheet('<h2 style="margin:0 0 6px"><span class="ac-av">' + acIni_(tt.name) + '</span>' + esc(tt.name) + '</h2>' +
-    '<div class="ac-f"><label>الاسم<input id="acp_name" value="' + esc(tt.name) + '"></label><label>الجوال<input id="acp_phone" dir="ltr" value="' + esc(tt.phone || '') + '"></label><label>البريد<input id="acp_email" dir="ltr" value="' + esc(tt.email || '') + '"></label>' +
+    '<div class="ac-f"><label>الاسم<input id="acp_name" value="' + esc(tt.name) + '"></label><label data-tip="يظهر تحت الاسم العربي في الشهادة — اتركه فارغاً إن لم يُرد">الاسم بالإنجليزي (للشهادة)<input id="acp_name_en" dir="ltr" value="' + esc(tt.name_en || '') + '"></label>' +
+    '<label data-tip="لصيغة الشهادة: «أتمّت»، «المتدربة»">الجنس<select id="acp_gender"><option value=""></option>' + ['ذكر', 'أنثى'].map(function (x) { return '<option' + (x === tt.gender ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label><label>الجوال<input id="acp_phone" dir="ltr" value="' + esc(tt.phone || '') + '"></label><label>البريد<input id="acp_email" dir="ltr" value="' + esc(tt.email || '') + '"></label>' +
     '<label>انستغرام<input id="acp_ig" dir="ltr" value="' + esc(h.instagram || '') + '"></label><label>X<input id="acp_x" dir="ltr" value="' + esc(h.x || '') + '"></label><label>LinkedIn<input id="acp_li" dir="ltr" value="' + esc(h.linkedin || '') + '"></label>' +
     '<label>الدفع<select id="acp_pay">' + ['بانتظار', 'مدفوع', 'جزئي', 'مسترد'].map(function (x) { return '<option' + (x === e.pay_status ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
     '<label>طريقة الدفع<select id="acp_method"><option></option>' + ['سلة', 'تابي', 'تمارا', 'تحويل'].map(function (x) { return '<option' + (x === e.pay_method ? ' selected' : '') + '>' + x + '</option>'; }).join('') + '</select></label>' +
@@ -2229,7 +2230,7 @@ ACT.acCopy = function (el) { copyText(el.dataset.v); };
 ACT.acSaveP = function (el) {
   var a = { id: el.dataset.id, enrollment_id: el.dataset.e, name: $('acp_name').value.trim(), phone: $('acp_phone').value.trim(), email: $('acp_email').value.trim(),
     handles: { instagram: $('acp_ig').value.trim(), x: $('acp_x').value.trim(), linkedin: $('acp_li').value.trim() }, opt_out: $('acp_opt').checked, status: $('acp_status').value };
-  acCall('trainee', a).then(function () { return acCall('pay', { enrollment_id: el.dataset.e, pay_status: $('acp_pay').value, pay_method: $('acp_method').value }); })
+  acCall('trainee', a).then(function () { return acCall('trainee', { id: el.dataset.id, name_en: $('acp_name_en').value.trim(), gender: $('acp_gender').value }, true, 'ac_extra'); }).then(function () { return acCall('pay', { enrollment_id: el.dataset.e, pay_status: $('acp_pay').value, pay_method: $('acp_method').value }); })
     .then(function () { closeSheet(); toast('✓ حُفظ'); acReload_(); }).catch(acErr_);
 };
 ACT.acWeights = function (el) {
@@ -2322,9 +2323,13 @@ SCREENS.acRules = {
       t('name', 'اسم الأكاديمية') + t('legal_name', 'الاسم النظامي') + t('logo_url', 'رابط الشعار (صورة)', 1) + t('cr', 'السجل التجاري') + t('vat', 'الرقم الضريبي') + t('license', 'ترخيص التدريب') +
       t('address', 'العنوان الوطني') + t('phone', 'الهاتف', 1) + t('email', 'البريد', 1) + t('accreditation', 'نص الاعتماد') + t('site', 'رابط الموقع (للروابط)', 1) + '</div>' +
       (b.logo_url ? '<img src="' + esc(extUrl(b.logo_url)) + '" alt="" style="height:48px;border-radius:10px">' : '<div class="ac-note">لا شعار بعد — ضع رابط صورة الشعار عند جاهزيته</div>') +
-      '<div class="btns"><button class="btn pri" data-act="acSaveBrand">💾 حفظ الهوية</button></div></div>';
+      '<div class="btns"><button class="btn pri" data-act="acSaveBrand">💾 حفظ الهوية</button></div></div>' +
+      '<div class="card"><h3 style="margin:0 0 6px">🏅 اعتماد البرامج على الشهادة</h3><div class="ac-note" style="margin-bottom:6px">المعتمد من LDI: تظهر شعارات معهد إعداد القادة ووزارة الرياضة ونص الاعتماد · غير المعتمد: «شهادة صادرة ومعتمدة من الأكاديمية» فقط. الشهادة بلا نسب حضور أو درجات.</div>' +
+      (d.programs || []).map(function (p) { return '<div class="ac-row" style="justify-content:space-between;border-bottom:1px solid var(--soft);padding:6px 0"><span><b>' + esc(p.name_ar) + '</b> <span class="ac-note">' + esc(p.cert_title || '') + (p.hours ? ' · ' + p.hours + ' ساعة' : '') + '</span></span>' +
+        '<label class="ac-row" style="gap:6px" data-tip="تشغيل/إيقاف شعارات LDI ووزارة الرياضة على شهادات هذا البرنامج">' + (p.accredited ? chip('معتمد LDI', 'good') : chip('الأكاديمية فقط')) + switchHtml(!!p.accredited, 'acAccr', p.id) + '</label></div>'; }).join('') + '</div>';
   }
 };
+ACT.acAccr = function (el) { acCall('program', { id: el.dataset.id, accredited: el.checked }, false, 'ac_extra').then(function () { toast(el.checked ? '✓ معتمد من LDI — الشعارات تظهر على شهاداته' : '✓ اعتماد الأكاديمية فقط'); acReload_(); }).catch(acErr_); };
 ACT.acSaveRules = function () {
   var a = {}; ['attendance_min', 'pass_min', 'retake_free', 'retake_fee_pct', 'ref_discount_pct', 'ref_credit_pct', 'ref_credit_cap'].forEach(function (k) { var v = Number($('acr_' + k).value); if (!isNaN(v)) a[k] = v; });
   if (a.ref_discount_pct > 10 || a.ref_credit_cap > 10) return toast('قاعدة المالك: لا تتجاوز الخصومات 10%', true);
