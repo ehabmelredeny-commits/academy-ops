@@ -137,5 +137,8 @@ function todayCard(t){if(!t)return '';function k(n,l,fn){return '<span'+(fn?' st
   return '<div class="card"><h3>📌 اليوم</h3><div class="kpi">'+k(t.msgs_waiting,'رسائل بانتظارك','inbox')+k(t.new_leads_7d,'عملاء جدد (٧ أيام)','persons')+k(t.unpaid,'مسجّلون لم يدفعوا','finance')+k(sar(t.rev_month),'إيراد الشهر','finance')+k(t.members+' · '+t.certs,'أعضاء · شهادات','persons')+'</div>'+
     ((t.cohorts||[]).length?'<div class="mut" style="margin-top:10px">الدفعات القادمة والجارية</div>'+t.cohorts.map(function(h){return '<div class="row" style="cursor:pointer" onclick="courses()"><span>🎓 '+esc(h.name)+' <span class="mut">· '+esc(h.status)+' · '+dd(h.start)+'</span></span><span class="mut">'+h.n+'/'+(h.cap||'—')+'</span></div>'}).join(''):'')+
     ((t.next_sessions||[]).length?'<div class="mut" style="margin-top:8px">الجلسات القادمة</div>'+t.next_sessions.map(function(x){return '<div class="row"><span>🗓 '+esc(x.cohort)+' · جلسة '+x.n+(x.title?' — '+esc(x.title):'')+'</span><span class="mut">'+dd(x.day)+'</span></div>'}).join(''):'')+'</div>'}
+/** جسر النظام الحالي: نفس شاشات وإجراءات Apps Script بجلسة v2 (لا مفتاح في الرابط للإجراءات) */
+function gapi(fn,name,args){var k='v2:'+TOK;if(fn==='screen')return fetch(EXEC+'?api=1&fn=screen&name='+encodeURIComponent(name)+'&k='+encodeURIComponent(k)+'&args='+encodeURIComponent(JSON.stringify(args||{}))).then(function(r){return r.json()});
+  return fetch(EXEC+'?api=1',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({name:name,args:args||{},k:k})}).then(function(r){return r.json()})}
 home();
 </script></body></html>
