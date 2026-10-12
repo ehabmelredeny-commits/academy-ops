@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv5k1odx";
+  var APP_BUILD = "mv5lsudz";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -577,7 +577,56 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
     if (m) { opsPut_(decodeURIComponent(m[1]).trim()); history.replaceState(null, '', location.pathname + location.search); }
   })();
   /** إدخال/تغيير المفتاح يدوياً — يقبل المفتاح نفسه أو الرابط الكامل (#k=...) ويحذف المسافات */
+  /** الدخول الموحّد (2026-10-12): بريد مسموح + رمز ٦ أرقام (نفس جلسة ‎/v2/‎ في Supabase) — المفتاح القديم يبقى خياراً احتياطياً */
+  var OPS_FT = '', OPS_FTAT = 0, OPS_EM = '';
+  function opsFt_() {
+    var wait = function () { var age = Date.now() - OPS_FTAT; return new Promise(function (res) { setTimeout(function () { res(OPS_FT); }, Math.max(0, 5000 - age)); }); };
+    if (OPS_FT && Date.now() - OPS_FTAT < 90 * 60e3) return wait();
+    return fetch(EXEC_URL + '?public=config').then(function (r) { return r.json(); }).then(function (j) { OPS_FT = ((j && j.data) || {}).ft || ''; OPS_FTAT = Date.now(); return wait(); }).catch(function () { return ''; });
+  }
+  function opsDev_() { var u = navigator.userAgent; return /iPad/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1) ? 'آيباد' : /iPhone/.test(u) ? 'آيفون' : /Android/.test(u) ? 'أندرويد' : /Windows/.test(u) ? 'كمبيوتر ويندوز' : /Mac/.test(u) ? 'ماك' : 'جهاز'; }
   function opsAskKey_(bad) {
+    var box = document.getElementById('main'); if (!box) return;
+    box.innerHTML = '<div class="card" style="margin:30px auto;max-width:420px;text-align:center"><b>' + (bad ? '🔐 انتهت الجلسة — ادخل من جديد' : '🔐 الدخول') + '</b>' +
+      '<div class="muted small" style="margin:6px 0">بريدك المسموح — يصلك رمز من ٦ أرقام</div>' +
+      '<input id="ops_em" type="email" dir="ltr" autocomplete="email" placeholder="you@example.com" style="width:100%" value="' + OPS_EM + '">' +
+      '<div class="btns" style="justify-content:center"><button class="btn pri" id="ops_go" onclick="opsSendCode_()">أرسل رمز الدخول</button></div>' +
+      '<div class="small" id="ops_err" style="color:var(--bad,#f87171);min-height:1.2em"></div>' +
+      '<div class="muted tiny" style="margin-top:8px"><a href="#" onclick="opsOldKey_(' + (bad ? 1 : 0) + ');return false">عندي مفتاح دخول قديم</a></div></div>';
+    opsFt_();
+  }
+  function opsSendCode_() {
+    var e = String(document.getElementById('ops_em').value || '').trim().toLowerCase(), go = document.getElementById('ops_go'), err = document.getElementById('ops_err');
+    if (!/^[^@ ]+@[^@ ]+[.][a-z]{2,}$/.test(e)) { err.textContent = 'اكتب بريداً صحيحاً'; return; }
+    OPS_EM = e; go.disabled = true; go.textContent = 'جارٍ الإرسال…'; err.textContent = '';
+    opsFt_().then(function (ft) { return fetch(EXEC_URL + '?public=admin_otp', { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ email: e, ft: ft }) }); })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (!j.ok) { go.disabled = false; go.textContent = 'أرسل رمز الدخول'; err.textContent = j.error || 'تعذّر'; return; } opsCodeBox_(); })
+      .catch(function () { go.disabled = false; go.textContent = 'أرسل رمز الدخول'; err.textContent = 'تعذّر الاتصال — حاول مرة أخرى'; });
+  }
+  function opsCodeBox_(msg) {
+    document.getElementById('main').innerHTML = '<div class="card" style="margin:30px auto;max-width:420px;text-align:center"><b>📧 افتح بريدك</b>' +
+      '<div class="muted small" style="margin:6px 0">أرسلنا رمزاً من ٦ أرقام إلى <b dir="ltr">' + OPS_EM + '</b> · يعمل ١٠ دقائق</div>' +
+      '<input id="ops_code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" dir="ltr" style="width:200px;text-align:center;font-size:26px;letter-spacing:10px" oninput="if(this.value.replace(/[^0-9]/g,String()).length===6)opsVerify_()">' +
+      '<div class="small" style="margin-top:6px"><label><input type="checkbox" id="ops_rem" checked> تذكّر هذا الجهاز ٣٠ يوماً</label></div>' +
+      '<div class="btns" style="justify-content:center"><button class="btn pri" id="ops_vb" onclick="opsVerify_()">دخول</button></div>' +
+      '<div class="small" id="ops_err" style="color:var(--bad,#f87171);min-height:1.2em">' + (msg || '') + '</div>' +
+      '<div class="muted tiny"><a href="#" onclick="opsAskKey_(0);return false">تغيير البريد / إعادة الإرسال</a> · افحص «غير المرغوب» إن لم يصل</div></div>';
+    setTimeout(function () { var c = document.getElementById('ops_code'); if (c) c.focus(); }, 150);
+  }
+  function opsVerify_() {
+    var c = String(document.getElementById('ops_code').value || '').replace(/[^0-9]/g, ''), vb = document.getElementById('ops_vb'), err = document.getElementById('ops_err');
+    if (c.length !== 6) { err.textContent = 'الرمز ٦ أرقام'; return; }
+    vb.disabled = true;
+    fetch(ACAD_SUPA.url + '/rest/v1/rpc/app_login_verify', { method: 'POST', headers: { apikey: ACAD_SUPA.anon, Authorization: 'Bearer ' + ACAD_SUPA.anon, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: OPS_EM, code: c, device: opsDev_(), remember: document.getElementById('ops_rem').checked }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.ok && j.token) { try { localStorage.setItem('v2_sess', j.token); } catch (x) {} opsPut_('v2:' + j.token); location.reload(); return; }
+        vb.disabled = false; err.textContent = j && j.reason === 'locked' ? 'محاولات كثيرة — حاول بعد ١٥ دقيقة' : j && j.reason === 'expired' ? 'انتهت صلاحية الرمز — اطلب رمزاً جديداً' : 'الرمز غير صحيح' + (j && j.left != null ? ' (بقي ' + j.left + ')' : '');
+      }).catch(function () { vb.disabled = false; err.textContent = 'تعذّر الاتصال'; });
+  }
+  function opsOldKey_(bad) {
     var box = document.getElementById('main'); if (!box) return;
     box.innerHTML = '<div class="card" style="margin:30px auto;max-width:480px"><b>' + (bad ? '🔑 المفتاح المحفوظ في هذا الجهاز غير صحيح' : '🔑 أدخل مفتاح الدخول') + '</b>' +
       '<div class="muted small" style="margin:6px 0">الصق المفتاح أو رابطك الخاص كاملاً (الذي ينتهي بـ #k=...). يُحفظ في هذا الجهاز فقط.</div>' +
