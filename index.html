@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv75o7mu";
+  var APP_BUILD = "mv76dqcu";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1890,7 +1890,7 @@ SCREENS.finance = { render: function (d) {
     '<span class="muted tiny">' + (r.level === 'must' ? '⚠️ تجاوزت الحد — التسجيل إلزامي خلال ٣٠ يوماً وتحتاج برنامج فوترة إلكترونية معتمداً' : r.level === 'warn' ? '⚠️ اقتربت — جهّز التسجيل وبرنامج الفوترة الآن' : 'تحت الحد — لا يلزم تسجيل ولا فوترة إلكترونية. تنبيه آلي عند 300 ألف') + '</span></div>';
   html += '<div class="ct-grid" style="grid-template-columns:1fr 1fr;margin-top:8px"><div class="card"><b>➕ مصروف جديد</b><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px">' +
     '<select id="ex_cat">' + d.cats.filter(function (c) { return c !== 'إعلانات' && c !== 'Claude / ذكاء اصطناعي'; }).concat(['Claude / ذكاء اصطناعي']).map(function (c) { return '<option>' + esc(c) + '</option>'; }).join('') + '</select>' +
-    '<input id="ex_amt" type="number" min="0" placeholder="المبلغ ر.س" style="width:110px"><input id="ex_date" type="date" value="' + new Date().toISOString().slice(0, 10) + '" style="width:145px">' +
+    '<input id="ex_amt" type="number" min="0" placeholder="المبلغ" style="width:100px"><select id="ex_cur" title="العملة — غير الريال يُحوَّل تلقائياً ويُحفظ الأصل في الملاحظة"><option>SAR</option><option>USD</option><option>AED</option><option>EUR</option><option>GBP</option></select><input id="ex_date" type="date" value="' + new Date().toISOString().slice(0, 10) + '" style="width:145px">' +
     '<input id="ex_vendor" placeholder="الجهة (مثل: فندق…)" style="flex:1;min-width:120px"><input id="ex_note" placeholder="ملاحظة" style="flex:1;min-width:120px"></div>' +
     '<div class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px;align-items:center"><label class="small" data-tip="صورة الإيصال أو الفاتورة الضريبية (PDF) — تُحفظ في Google Drive">🧾 الإيصال: <input type="file" id="ex_file" accept="image/*,application/pdf" style="max-width:200px"></label>' +
     '<input id="ex_vat" type="number" min="0" placeholder="منه ضريبة (اختياري)" style="width:140px"><input id="ex_vatno" placeholder="الرقم الضريبي للمورّد (اختياري)" style="width:190px" dir="ltr"><button class="btn sm pri" data-act="expAdd">حفظ</button></div>' +
@@ -1925,7 +1925,7 @@ function readFile_(f) { return new Promise(function (ok, bad) { if (!f) return o
 ACT.expAdd = function (el) {
   if (!(Number(val('ex_amt')) > 0)) return toast('اكتب المبلغ', true);
   var f = $('ex_file') && $('ex_file').files[0]; el.disabled = true;
-  readFile_(f).then(function (x) { return act('expenseAdd', { category: val('ex_cat'), amount: val('ex_amt'), date: val('ex_date'), vendor: val('ex_vendor'), note: val('ex_note'), vat_amount: val('ex_vat'), vendor_vat_no: val('ex_vatno'), file: x && x.data, mime: x && x.mime }, x ? 'حُفظ المصروف والإيصال في Drive' : 'حُفظ المصروف'); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+  readFile_(f).then(function (x) { return act('expenseAdd', { category: val('ex_cat'), amount: val('ex_amt'), currency: val('ex_cur'), date: val('ex_date'), vendor: val('ex_vendor'), note: val('ex_note'), vat_amount: val('ex_vat'), vendor_vat_no: val('ex_vatno'), file: x && x.data, mime: x && x.mime }, x ? 'حُفظ المصروف والإيصال في Drive' : 'حُفظ المصروف'); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
 };
 ACT.expReceipt = function (el) { var f = el.files && el.files[0]; if (!f) return; readFile_(f).then(function (x) { return act('expenseReceipt', { exp_id: el.dataset.id, file: x.data, mime: x.mime }, '🧾 أُرفق الإيصال'); }).catch(function (e) { toast(errMsg(e), true); }); };
 ACT.expDel = function (el) { if (!confirm('حذف هذا المصروف؟')) return; act('expenseDelete', { exp_id: el.dataset.id }, 'حُذف'); };
