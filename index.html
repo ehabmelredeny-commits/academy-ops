@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv76dqcu";
+  var APP_BUILD = "mv77l2er";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1816,8 +1816,10 @@ SCREENS.persons = { render: function (d) {
   var sug = (d.suggestions || []).map(function (s) {
     return '<div class="ct-ev"><span class="ct-tx">🔗 ' + esc(s.why) + ': <b>' + esc(s.a.name || s.a.handles) + '</b> <span class="muted tiny">(' + esc(s.a.first_seen || '') + ')</span> ⇄ <b>' + esc(s.b.name || s.b.handles) + '</b> <span class="muted tiny">(' + esc(s.b.first_seen || '') + ')</span></span>' +
       '<a class="btn sm" href="#" data-go="person" data-args="' + attr({ person_id: s.a.person_id }) + '">افتح</a><button class="btn sm pri" data-act="pMerge" data-keep="' + esc(s.a.person_id) + '" data-drop="' + esc(s.b.person_id) + '">✓ نفس الشخص</button><button class="btn sm" data-act="pReject" data-a="' + esc(s.a.person_id) + '" data-b="' + esc(s.b.person_id) + '">✕ شخص آخر</button></div>'; }).join('');
-  if (sug) html += '<div class="card" style="border-color:var(--warn)"><b>🔗 اقتراحات ربط تنتظر تأكيدك</b> <span class="muted tiny">— نفس الحساب في مكانين؛ الرقم والبريد يُربطان آلياً بلا سؤال</span>' + sug + '</div>';
-  html += '<div class="card"><b>الأشخاص</b> <span class="muted tiny">(' + d.total + (d.total > 200 ? ' — يظهر أول ٢٠٠، ابحث للباقي' : '') + ')</span>' +
+  var sugHtml = sug ? '<div class="card" style="border-color:var(--warn)"><b>🔗 اقتراحات ربط تنتظر تأكيدك</b> <span class="muted tiny">— نفس الحساب في مكانين؛ الرقم والبريد يُربطان آلياً بلا سؤال</span>' + sug + '</div>' : '';
+  if (!d.q) html += sugHtml; // بلا بحث: الاقتراحات أولاً · مع البحث: النتائج أولاً ثم الاقتراحات
+  if (d.q && !d.total) html += '<div class="card" style="border-color:var(--warn)"><b>لا يوجد شخص باسم «' + esc(d.q) + '»</b><div class="muted small" style="margin-top:4px">جرّب جزءاً من الاسم، أو الجوال (آخر ٩ أرقام)، أو @الحساب. الشخص يُنشأ تلقائياً عند أول تواصل أو تسجيل أو دفع — لا حاجة لإضافته يدوياً.</div></div>';
+  else html += '<div class="card"><b>' + (d.q ? 'نتائج «' + esc(d.q) + '» — الأقرب أولاً' : 'الأشخاص') + '</b> <span class="muted tiny">(' + d.total + (d.total > 200 ? ' — يظهر أول ٢٠٠، ابحث للباقي' : '') + ')</span>' +
     stripList_([
       ['الاسم', 'minmax(120px,2fr)', function (p) { return '<b>' + esc(p.name || p.handles || '—') + '</b>'; }],
       ['الجوال', 'minmax(110px,1fr)', function (p) { return p.phone ? '<span dir="ltr">' + esc(p.phone) + '</span>' : '<span class="muted">—</span>'; }],
@@ -1826,6 +1828,7 @@ SCREENS.persons = { render: function (d) {
       ['الحالة', 'minmax(80px,.9fr)', function (p) { return pStatus_(p); }], ['أين', 'minmax(80px,.9fr)', function (p) { return esc(WHERE_AR[p.first_seen] || p.first_seen || ''); }],
       ['آخر تواصل', 'minmax(80px,.9fr)', function (p) { return p.last_contact ? esc(fmtDate(p.last_contact)) : '<span class="muted">—</span>'; }]
     ], d.rows || [], { key: 'persons', id: function (p) { return p.person_id; }, act: 'psOpen', cls: function () { return 'tiny'; } }) + '</div>';
+  if (d.q) html += sugHtml;
   return html;
 } };
 ACT.psSearch = function () { go('persons', { q: val('ps_q') }); };
