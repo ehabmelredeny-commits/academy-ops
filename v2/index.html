@@ -259,6 +259,12 @@ function b2bScreen(){TAB='b2b';if(!TOK)return loginScreen();
   rpc('app_b2b',{token:TOK}).then(function(d){BB.d=d;bbRender()}).catch(function(e){$('bbb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
 function bbSub(s){BB.sub=s;bbRender()}
 function bbSt(s){BB.st=BB.st===s?'':s;bbRender()}
+function bbOp(id){return (BB.d.ops||[]).filter(function(o){return String(o.id)===String(id)})[0]}
+function bbNext(id){var o=bbOp(id);if(!o)return;var v=prompt('الخطوة التالية مع '+(o.co||'')+':',o.next||'');if(v===null)return;bbSave(id,{next_step:v})}
+function bbSave(id,p){var o=bbOp(id);if(!o)return;var el=$('bbo_'+id);if(el)el.style.opacity=.4;
+  var op={op_id:o.id,company:o.co,b2b_blocker:o.blocker||'',notes:o.notes||''};Object.keys(p).forEach(function(k){op[k]=p[k]});
+  gapi('action','operatorSave',{op:op}).then(function(x){if(x&&x.ok===false)throw new Error(x.error||'خطأ');if(p.pipeline_stage)o.stage=p.pipeline_stage;if('next_step' in p)o.next=p.next_step;bbRender()})
+  .catch(function(e){if(el)el.style.opacity=1;alert('تعذّر الحفظ: '+(e&&e.message||e));bbRender()})}
 function bbRender(){var d=BB.d||{},O=d.ops||[],C=d.clubs||[],T=d.trainers||[],stages={};
   O.forEach(function(o){var s=o.stage||'بلا مرحلة';stages[s]=(stages[s]||0)+1});
   var val=O.reduce(function(t,o){return t+Number(o.value||0)*Number(o.prob||0)},0);
@@ -272,7 +278,7 @@ function bbRender(){var d=BB.d||{},O=d.ops||[],C=d.clubs||[],T=d.trainers||[],st
       '<div class="row"><span>صانع القرار</span><b>'+(o.dm?esc(o.dm)+(o.dm_t?' — '+esc(o.dm_t):''):'—')+'</b></div>'+
       '<div class="row"><span>المدربون (تقدير)</span><b>'+esc(o.tr||'—')+'</b></div><div class="row"><span>الاحتمال</span><b>'+(Number(o.prob)?Math.round(Number(o.prob)*100)+'%':'—')+'</b></div>'+
       (o.next?'<div style="font-size:13px">➡️ '+esc(o.next)+'</div>':'')+(o.blocker?'<div style="font-size:12px;color:var(--b)">⛔ '+esc(o.blocker)+'</div>':'')+(o.angle?'<div style="font-size:12px">💡 '+esc(o.angle)+'</div>':'')+
-      '<div class="cx-acts" style="margin-top:6px">'+mkLink(o.web,'🌐 الموقع')+mkLink(o.dm_li,'LinkedIn')+'</div></div>'}).join('')+'</div>';
+      '<div class="cx-acts" style="margin-top:6px;align-items:center" id="bbo_'+esc(o.id)+'"><select title="المرحلة" onchange="bbSave(\''+esc(o.id)+'\',{pipeline_stage:this.value})" style="width:auto;font-size:12px">'+(d.stages||[]).map(function(s){return '<option'+(s===o.stage?' selected':'')+'>'+esc(s)+'</option>'}).join('')+'</select><button class="btn" title="تعديل الخطوة التالية" onclick="bbNext(\''+esc(o.id)+'\')">✏️ الخطوة التالية</button>'+mkLink(o.web,'🌐 الموقع')+mkLink(o.dm_li,'LinkedIn')+'</div></div>'}).join('')+'</div>';
   } else if(BB.sub==='c') h=C.length?'<div class="card">'+C.map(function(c){return '<div class="row"><span><b>'+esc(c.name||'')+'</b><br><span class="mut" style="font-size:12px">'+esc([c.type,c.city,c.mgr,c.hiring?'يوظّف: '+c.hiring:''].filter(Boolean).join(' · '))+'</span></span><span>'+mkLink(c.maps,'📍')+' '+mkLink(c.ig,'IG')+'</span></div>'}).join('')+'</div>':'<div class="card mut">لا أندية مسجّلة بعد</div>';
   else h=T.length?'<div class="card">'+T.map(function(t){return '<div class="row"><span><b>'+esc(t.name||'')+'</b><br><span class="mut" style="font-size:12px">'+esc([t.where,t.city,t.spec,t.role,t.out].filter(Boolean).join(' · '))+'</span></span><span>'+mkLink(t.url)+'</span></div>'}).join('')+'</div>':'<div class="card mut">لا مدربين مسجّلين بعد</div>';
   $('bbb').innerHTML=h;
