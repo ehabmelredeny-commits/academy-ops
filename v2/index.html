@@ -28,7 +28,7 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
 .cx-q{white-space:pre-wrap;font-size:13px;background:#1e232b;border-radius:8px;padding:8px;margin:6px 0}
 .cx-th{font-size:11px;border-radius:99px;padding:1px 8px;background:#1e232b;color:var(--mut)}.cx-th.h{background:#3a1d1f;color:var(--b)}.cx-th.m{background:#3a2f17;color:var(--gold)}
-#cxb a:not(.btn),#mkb a:not(.btn),#mtb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
+#cxb a:not(.btn),#mkb a:not(.btn),#mtb a:not(.btn),#bbb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
 </style></head><body><div class="wrap" id="app"></div><script>
 var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"},EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",TOK='',EMAIL='',FT='';
 try{TOK=localStorage.getItem('v2_sess')||''}catch(e){}
@@ -251,5 +251,30 @@ function mtRender(){var d=MT.d||{},P=d.posts||[],C=d.campaigns||[],A=d.copies||[
       '<div class="card"><h3>💸 الإنفاق الأسبوعي</h3>'+(S.length?S.map(function(s){return '<div class="row"><span>'+esc(String(s.week||'').slice(0,10))+' · '+esc(s.pf||'')+'</span><b>'+sar(s.sar)+(Number(s.clicks)?' · '+s.clicks+' نقرة':'')+'</b></div>'}).join(''):'<div class="mut">لا إنفاق مسجّل بعد</div>')+'</div>';
   else h='<div class="card">'+(T.length?T.map(function(t){return '<div class="row" style="align-items:flex-start"><span><b>'+esc(String(t.date||'').slice(0,10))+'</b> <span class="mut" style="font-size:12px">'+esc([t.pf,t.pillar].filter(Boolean).join(' · '))+'</span><br>'+esc(t.hook||String(t.body||'').slice(0,140))+'</span><span class="chip">'+esc(t.status||'—')+'</span></div>'}).join(''):'<div class="mut">لا خطة محتوى</div>')+'</div>';
   $('mtb').innerHTML=h;
+}
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'b2b',label:'الأندية والشركات',fn:'b2bScreen',tip:'مشغّلو الأندية ومسار B2B، الأندية، المدربون'}]);
+var BB={sub:'o',d:null,st:''};
+function b2bScreen(){TAB='b2b';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">الأندية والشركات</b><span class="sp"></span><button class="ib" title="تحديث" onclick="b2bScreen()">⟳</button></div><div class="kpi" id="bbk" style="margin:8px 0"></div><div class="cx-tabs" id="bbt"></div><div id="bbb"><div class="mut">جارٍ التحميل…</div></div>');
+  rpc('app_b2b',{token:TOK}).then(function(d){BB.d=d;bbRender()}).catch(function(e){$('bbb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function bbSub(s){BB.sub=s;bbRender()}
+function bbSt(s){BB.st=BB.st===s?'':s;bbRender()}
+function bbRender(){var d=BB.d||{},O=d.ops||[],C=d.clubs||[],T=d.trainers||[],stages={};
+  O.forEach(function(o){var s=o.stage||'بلا مرحلة';stages[s]=(stages[s]||0)+1});
+  var val=O.reduce(function(t,o){return t+Number(o.value||0)*Number(o.prob||0)},0);
+  $('bbk').innerHTML='<span><b>'+O.length+'</b>مشغّل</span><span><b>'+O.filter(function(o){return o.dm}).length+'</b>صانع قرار معروف</span><span><b>'+(val?sar(Math.round(val)):'—')+'</b>القيمة المرجّحة</span><span><b>'+C.length+' / '+T.length+'</b>أندية / مدربون</span>';
+  $('bbt').innerHTML=[['o','🏢 المشغّلون'],['c','🏟 الأندية'],['t','🧑‍🏫 المدربون']].map(function(t){return '<button class="'+(BB.sub===t[0]?'on':'')+'" onclick="bbSub(\''+t[0]+'\')">'+t[1]+'</button>'}).join('');
+  var h='';
+  if(BB.sub==='o'){
+    h='<div class="cx-tabs">'+Object.keys(stages).map(function(s){return '<button class="'+(BB.st===s?'on':'')+'" onclick="bbSt(\''+esc(s).replace(/'/g,'')+'\')">'+esc(s)+' ('+stages[s]+')</button>'}).join('')+'</div>';
+    h+='<div class="cx-grid">'+O.filter(function(o){return !BB.st||(o.stage||'بلا مرحلة')===BB.st}).map(function(o){return '<div class="card"><div style="display:flex;gap:6px;align-items:center"><b>'+esc(o.co||'')+'</b><span class="sp"></span><span class="chip">'+esc(o.stage||'—')+'</span></div>'+
+      '<div class="mut" style="font-size:12px">'+esc([o.brands,o.city,o.br?o.br+' فرع':''].filter(Boolean).join(' · '))+'</div>'+
+      '<div class="row"><span>صانع القرار</span><b>'+(o.dm?esc(o.dm)+(o.dm_t?' — '+esc(o.dm_t):''):'—')+'</b></div>'+
+      '<div class="row"><span>المدربون (تقدير)</span><b>'+esc(o.tr||'—')+'</b></div><div class="row"><span>الاحتمال</span><b>'+(Number(o.prob)?Math.round(Number(o.prob)*100)+'%':'—')+'</b></div>'+
+      (o.next?'<div style="font-size:13px">➡️ '+esc(o.next)+'</div>':'')+(o.blocker?'<div style="font-size:12px;color:var(--b)">⛔ '+esc(o.blocker)+'</div>':'')+(o.angle?'<div style="font-size:12px">💡 '+esc(o.angle)+'</div>':'')+
+      '<div class="cx-acts" style="margin-top:6px">'+mkLink(o.web,'🌐 الموقع')+mkLink(o.dm_li,'LinkedIn')+'</div></div>'}).join('')+'</div>';
+  } else if(BB.sub==='c') h=C.length?'<div class="card">'+C.map(function(c){return '<div class="row"><span><b>'+esc(c.name||'')+'</b><br><span class="mut" style="font-size:12px">'+esc([c.type,c.city,c.mgr,c.hiring?'يوظّف: '+c.hiring:''].filter(Boolean).join(' · '))+'</span></span><span>'+mkLink(c.maps,'📍')+' '+mkLink(c.ig,'IG')+'</span></div>'}).join('')+'</div>':'<div class="card mut">لا أندية مسجّلة بعد</div>';
+  else h=T.length?'<div class="card">'+T.map(function(t){return '<div class="row"><span><b>'+esc(t.name||'')+'</b><br><span class="mut" style="font-size:12px">'+esc([t.where,t.city,t.spec,t.role,t.out].filter(Boolean).join(' · '))+'</span></span><span>'+mkLink(t.url)+'</span></div>'}).join('')+'</div>':'<div class="card mut">لا مدربين مسجّلين بعد</div>';
+  $('bbb').innerHTML=h;
 }
 </script></body></html>
