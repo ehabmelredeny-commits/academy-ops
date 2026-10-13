@@ -123,7 +123,7 @@ function render(){
   } else if(PANE==='study'){
     html+=studyCard(false);
     html+='<div class="card"><h3>🧾 درجاتي</h3>'+((E.assessments||[]).length?E.assessments.map(function(x){return '<div class="row"><span>'+esc(x.name)+' <span class="xs mut">('+Number(x.weight)+'%)</span>'+(x.attempts>1?' <span class="chip cw">'+x.attempts+' محاولات</span>':'')+'</span>'+(x.best==null?'<span class="chip">لم يُجرَ</span>':'<b>'+Number(x.best)+' / '+Number(x.max)+'</b>')+'</div>'}).join(''):'<div class="sm mut">تُعلن التقييمات مع بداية البرنامج</div>')+
-      '<div class="xs mut" style="margin-top:6px">النجاح '+r.pass_min+'% · تُحتسب أفضل محاولة · لك '+r.retake_free+' إعادة مجاناً بعد المحاولة الأساسية، بعدها '+r.retake_fee_pct+'% من سعر الدورة لكل إعادة</div></div>';
+      '<div class="xs mut" style="margin-top:6px">النجاح '+r.pass_min+'% · تُحتسب أفضل محاولة · لك '+r.retake_free+' إعادة مجاناً بعد المحاولة الأساسية، بعدها '+r.retake_fee_pct+'% من سعر الدورة لكل إعادة</div></div><div id="rtk"></div>';
   } else if(PANE==='cert'){
     html+=E.cert?certFull():'<div class="card empty">🏅<br><b>شهادتك تظهر هنا بعد الاختبار النهائي</b><div class="sm" style="margin-top:6px">الشروط: حضور '+r.attendance_min+'% على الأقل ومعدل نهائي '+r.pass_min+'% على الأقل</div><div class="two" style="margin-top:10px;text-align:start">'+bar(pct(g.attendance_pct),r.attendance_min,'حضورك','محقق')+bar(pct(g.final_score==null?g.score_now:g.final_score),r.pass_min,'معدلك','محقق')+'</div></div>';
     html+=refCard();
@@ -137,7 +137,17 @@ function render(){
   if(D.enrollments.length>1)html+='<div class="card noprint"><h3>🎓 برامجي</h3>'+D.enrollments.map(function(x,i){return '<div class="row"><span>'+esc(x.program.name)+' <span class="xs mut">'+esc(x.cohort.name)+'</span></span><button class="btn" onclick="E=D.enrollments['+i+'];render()">'+(x===E?'✓ معروض':'عرض')+'</button></div>'}).join('')+'</div>';
   $('main').innerHTML=html+footHtml(B);
   if(PANE==='cert'&&E.cert)qr();
+  if(PANE==='study')retakes();
 }
+function retakes(){var el=$('rtk');if(!el||!SESS)return;rpc('ac_retakes',{token:SESS}).then(function(r){var it=(r.items||[]).filter(function(x){return x.cohort===E.cohort.name});if(!it.length){el.innerHTML='';return}RTU=r.pay_url||'';
+  el.innerHTML='<div class="card"><h3>🔁 إعادة الاختبار</h3><div class="xs mut">تقييمات لم تصل فيها لدرجة النجاح — احجز إعادتها من هنا</div>'+it.map(function(x){var b=x.booking;
+    return '<div class="row"><span>'+esc(x.name)+' <span class="xs mut">أفضل درجة '+Number(x.best)+'/'+Number(x.max)+' · المحاولة '+(b?b.attempt:x.next_attempt)+'</span></span>'+
+      (b?(b.status==='بانتظار الدفع'?'<span><span class="chip cw">بانتظار دفع '+Number(b.fee)+' ر.س</span>'+(RTU?' <a class="btn p" target="_blank" rel="noopener" href="'+esc(RTU)+'">ادفع</a>':'')+'</span>':'<span class="chip cg">'+esc(b.status==='مدفوع'?'مدفوع — سنحدد موعدك':'محجوز — سنحدد موعدك')+'</span>')
+        :'<button class="btn p" data-id="'+esc(x.assessment_id)+'" data-fee="'+Number(x.fee)+'" onclick="rtBook(this)">'+(x.fee>0?'احجز ('+Number(x.fee)+' ر.س)':'احجز مجاناً')+'</button>')+'</div>'}).join('')+'</div>'}).catch(function(){el.innerHTML=''})}
+var RTU='';
+function rtBook(b){var fee=Number(b.dataset.fee);if(!confirm(fee>0?'حجز إعادة برسوم '+fee+' ر.س؟ يتأكد الحجز بعد الدفع.':'حجز إعادة مجانية؟'))return;b.disabled=true;
+  rpc('ac_retake_book',{token:SESS,assessment_id:b.dataset.id}).then(function(r){if(!r.ok){alert(r.error||'تعذّر الحجز');b.disabled=false;return}
+    alert(r.fee>0?(r.pay_url?'✓ حُجز — أكمل الدفع من زر «ادفع»':'✓ حُجز — سيتواصل معك فريقنا برابط الدفع'):'✓ حُجزت الإعادة — سنتواصل معك بالموعد');retakes()}).catch(function(){alert('تعذّر الاتصال');b.disabled=false})}
 function groupCard(){var u=E&&E.cohort.wa_group_url;if(!u)return '';return '<div class="card"><h3>💬 جروب دفعتك</h3><div class="sm mut">'+esc(E.cohort.name)+'</div><a class="btn" style="width:100%;margin-top:8px;background:#25d366;color:#fff;border-color:#25d366;min-height:42px" target="_blank" rel="noopener" href="'+esc(u)+'">انضم لجروب الدفعة</a></div>'}
 /* 🪪 بطاقة العضوية (التصميم المعتمد) — تُرسم بالاسم ورقم العضوية وتاريخ الإصدار والشعار */
 function memberCard(){if(!D.member_no)return '<div class="card"><h3>🪪 بطاقة العضوية</h3><div class="sm mut">تصدر بعد أول دفعة مع موافقتك على العضوية — وتظهر هنا تلقائياً.</div></div>';
