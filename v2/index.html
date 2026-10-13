@@ -28,7 +28,7 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
 .cx-q{white-space:pre-wrap;font-size:13px;background:#1e232b;border-radius:8px;padding:8px;margin:6px 0}
 .cx-th{font-size:11px;border-radius:99px;padding:1px 8px;background:#1e232b;color:var(--mut)}.cx-th.h{background:#3a1d1f;color:var(--b)}.cx-th.m{background:#3a2f17;color:var(--gold)}
-#cxb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
+#cxb a:not(.btn),#mkb a:not(.btn),#mtb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
 </style></head><body><div class="wrap" id="app"></div><script>
 var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"},EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",TOK='',EMAIL='',FT='';
 try{TOK=localStorage.getItem('v2_sess')||''}catch(e){}
@@ -203,4 +203,48 @@ function cxCopy(id){var q=(CX.d.questions||[]).filter(function(x){return x.id===
 function cxSet(id,st){var el=$('cxq_'+id);if(el)el.style.opacity=.4;
   gapi('action','engageStatus',{eng_id:id,status:st}).then(function(r){if(r&&r.ok===false)throw new Error(r.error||'خطأ');CX.d.questions=(CX.d.questions||[]).filter(function(x){return x.id!==id});cxRender()})
   .catch(function(e){if(el)el.style.opacity=1;alert('تعذّر الحفظ: '+(e&&e.message||e))})}
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'market',label:'السوق',fn:'marketScreen',tip:'السوق والبحث: الأخبار، الاكتشافات، الكلمات، تطبيقات المدرب، مواعيد الاختبارات'}]);
+var MK={sub:'n',d:null,q:''};
+function marketScreen(){TAB='market';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">السوق والبحث</b><span class="sp"></span><button class="ib" title="تحديث" onclick="marketScreen()">⟳</button></div><div class="kpi" id="mkk" style="margin:8px 0"></div><div class="cx-tabs" id="mkt"></div><input id="mkq" placeholder="بحث…" oninput="MK.q=this.value;mkRender()" style="margin-bottom:8px"><div id="mkb"><div class="mut">جارٍ التحميل…</div></div>');
+  rpc('app_market',{token:TOK}).then(function(d){MK.d=d;mkRender()}).catch(function(e){$('mkb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function mkSub(s){MK.sub=s;mkRender()}
+function mkHit(o){var q=String(MK.q||'').trim();return !q||JSON.stringify(o).indexOf(q)>-1}
+function mkLink(u,t){return u?'<a target="_blank" rel="noopener" href="'+esc(u)+'">'+(t||'المصدر ↗')+'</a>':''}
+function mkRender(){var d=MK.d||{},N=d.news||[],X=d.exams||[],D=d.discovery||[],K=d.keywords||[],P=d.apps||[];
+  $('mkk').innerHTML='<span><b>'+N.length+'</b>خبر</span><span><b>'+N.filter(function(n){return /عال|مرتفع/.test(n.impact||'')}).length+'</b>أثر عالٍ</span><span><b>'+D.length+'</b>اكتشاف للمراجعة</span><span><b>'+X.length+'</b>موعد اختبار</span>';
+  $('mkt').innerHTML=[['n','📰 الأخبار'],['d','🔎 الاكتشافات'],['k','🔑 الكلمات'],['a','📱 تطبيقات المدرب'],['x','📝 الاختبارات']].map(function(t){return '<button class="'+(MK.sub===t[0]?'on':'')+'" onclick="mkSub(\''+t[0]+'\')">'+t[1]+'</button>'}).join('');
+  var h='';
+  if(MK.sub==='n') h=N.filter(mkHit).map(function(n){return '<div class="card"><div style="display:flex;gap:6px;align-items:center"><b>'+esc(n.title||'')+'</b></div><div class="mut" style="font-size:12px">'+esc([n.src,n.cat].filter(Boolean).join(' · '))+' · '+when(n.at)+' '+cxTh(n.impact)+(String(n.official)==='نعم'?' <span class="chip">رسمي</span>':'')+'</div>'+
+      (n.sum?'<div class="cx-q">'+esc(String(n.sum).slice(0,400))+'</div>':'')+(n.why?'<div style="font-size:13px">💡 '+esc(n.why)+'</div>':'')+(n.angle?'<div style="font-size:13px">✍️ زاوية محتوى: '+esc(n.angle)+'</div>':'')+'<div class="cx-acts" style="margin-top:6px">'+mkLink(n.url)+'</div></div>'}).join('');
+  else if(MK.sub==='d') h='<div class="card">'+D.filter(mkHit).map(function(x){return '<div class="row" style="align-items:flex-start"><span><b>'+esc(x.name||'')+'</b><br><span class="mut" style="font-size:12px">'+esc([x.kind,x.city].filter(Boolean).join(' · '))+' · '+when(x.at)+'</span>'+(x.why?'<br><span style="font-size:12px">'+esc(x.why)+'</span>':'')+'</span><span style="white-space:nowrap">'+mkLink(x.url)+'</span></div>'}).join('')+'</div>';
+  else if(MK.sub==='k') h='<div class="card">'+K.filter(mkHit).map(function(k){return '<div class="row"><span><b>'+esc(k.kw||'')+'</b>'+(String(k.neg)==='نعم'?' <span class="chip">سلبية</span>':'')+'<br><span class="mut" style="font-size:12px">'+esc([k.pf,k.tier,k.status].filter(Boolean).join(' · '))+(k.act?' · '+esc(k.act):'')+'</span></span><span style="white-space:nowrap;font-size:12px">'+(Number(k.clicks)?k.clicks+' نقرة':'')+(Number(k.leads)?' · '+k.leads+' عميل':'')+(Number(k.cpa)?' · '+sar(k.cpa):'')+'</span></div>'}).join('')+'</div>';
+  else if(MK.sub==='a') h='<div class="cx-grid">'+P.filter(mkHit).map(function(a){return '<div class="card"><b>'+esc(a.name||'')+'</b><div class="mut" style="font-size:12px">'+esc(a.co||'')+'</div><div class="row"><span>iOS</span><b>'+esc(a.ios||'—')+'</b></div><div class="row"><span>Android</span><b>'+esc(a.and||'—')+'</b></div>'+(a.note?'<div style="font-size:12px">'+esc(a.note)+'</div>':'')+'<div class="cx-acts">'+mkLink(a.web,'🌐 الموقع')+'</div></div>'}).join('')+'</div>';
+  else h='<div class="card">'+(X.length?X.filter(mkHit).map(function(x){return '<div class="row" style="align-items:flex-start"><span><b>'+esc(x.cycle||x.type||'')+'</b><br><span class="mut" style="font-size:12px">التسجيل: '+esc(x.open||'—')+' ← '+esc(x.close||'—')+(x.where?' · '+esc(x.where):'')+'</span></span><span style="white-space:nowrap"><b>'+esc(String(x.date||'—').slice(0,10))+'</b><br>'+mkLink(x.url)+'</span></div>'}).join(''):'<div class="mut">لا مواعيد اختبارات قادمة مرصودة</div>')+'</div>';
+  $('mkb').innerHTML=h||'<div class="card mut">لا نتائج</div>';
+}
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'mkt',label:'التسويق',fn:'mktScreen',tip:'التسويق: منشورات اليوم، الحملات، الإعلانات، خطة المحتوى'}]);
+var MT={sub:'p',d:null};
+function mktScreen(){TAB='mkt';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">التسويق</b><span class="sp"></span><button class="ib" title="تحديث" onclick="mktScreen()">⟳</button></div><div class="kpi" id="mtk" style="margin:8px 0"></div><div class="cx-tabs" id="mtt"></div><div id="mtb"><div class="mut">جارٍ التحميل…</div></div>');
+  rpc('app_mkt',{token:TOK}).then(function(d){MT.d=d;mtRender()}).catch(function(e){$('mtb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function mtSub(s){MT.sub=s;mtRender()}
+function mtCopy(i){var p=(MT.d.posts||[])[i];if(!p)return;try{navigator.clipboard.writeText([p.hook,p.body,p.cta].filter(Boolean).join('\n\n'))}catch(e){}}
+function mtRender(){var d=MT.d||{},P=d.posts||[],C=d.campaigns||[],A=d.copies||[],S=d.spend||[],T=d.content||[];
+  var sp=S.reduce(function(t,s){return t+Number(s.sar||0)},0);
+  $('mtk').innerHTML='<span><b>'+P.filter(function(p){return /بانتظار|مسودة|جديد/.test(p.status||'')}).length+'</b>منشور ينتظر موافقتك</span><span><b>'+P.filter(function(p){return /نُشر|منشور/.test(p.status||'')}).length+'</b>منشور</span><span><b>'+C.filter(function(c){return /نشط|جارية/.test(c.status||'')}).length+'</b>حملة نشطة</span><span><b>'+sar(sp)+'</b>إنفاق إعلاني (آخر الأسابيع)</span>';
+  $('mtt').innerHTML=[['p','📝 المنشورات'],['c','🎯 الحملات'],['a','📢 الإعلانات'],['t','🗓 خطة المحتوى']].map(function(t){return '<button class="'+(MT.sub===t[0]?'on':'')+'" onclick="mtSub(\''+t[0]+'\')">'+t[1]+'</button>'}).join('');
+  var h='';
+  if(MT.sub==='p') h=P.length?'<div class="cx-grid">'+P.map(function(p,i){return '<div class="card"><div style="display:flex;gap:6px;align-items:center"><b>'+esc(String(p.date||'').slice(0,10))+'</b><span class="mut" style="font-size:12px">'+esc([p.pf,p.type,p.pillar].filter(Boolean).join(' · '))+'</span><span class="sp"></span><span class="chip">'+esc(p.status||'—')+'</span></div>'+
+      (p.hook?'<div style="margin-top:6px"><b>'+esc(p.hook)+'</b></div>':'')+'<div class="cx-q">'+esc(String(p.body||'').slice(0,500))+(String(p.body||'').length>500?'…':'')+'</div>'+
+      (p.media&&/^https?:/.test(p.media)?'<div class="cx-acts"><a class="btn" target="_blank" rel="noopener" href="'+esc(p.media)+'">🖼 الصورة</a></div>':'')+
+      '<div class="row"><span class="mut" style="font-size:12px">تعليقات '+(Number(p.comments)||0)+' · عملاء '+(Number(p.leads)||0)+' · سجّلوا '+(Number(p.enrolled)||0)+'</span><button class="btn" onclick="mtCopy('+i+')">📋 نسخ النص</button></div></div>'}).join('')+'</div>':'<div class="card mut">لا منشورات بعد</div>';
+  else if(MT.sub==='c') h=C.length?'<div class="cx-grid">'+C.map(function(c){return '<div class="card"><div style="display:flex;gap:6px"><b>'+esc(c.name||'')+'</b><span class="sp"></span><span class="chip">'+esc(c.status||'—')+'</span></div><div class="mut" style="font-size:12px">'+esc([c.obj,c.ch,c.course].filter(Boolean).join(' · '))+'</div>'+
+      '<div class="row"><span>الفترة</span><b>'+esc(String(c.start||'—').slice(0,10))+' ← '+esc(String(c.end||'—').slice(0,10))+'</b></div><div class="row"><span>الميزانية / المصروف</span><b>'+(Number(c.budget)?sar(c.budget):'—')+' / '+(Number(c.spend)?sar(c.spend):'—')+'</b></div>'+
+      '<div class="row"><span>عملاء · سجّلوا</span><b>'+(Number(c.leads)||0)+' · '+(Number(c.enrolled)||0)+'</b></div><div class="row"><span>الإيراد · ROAS</span><b>'+(Number(c.rev)?sar(c.rev):'—')+' · '+esc(c.roas||'—')+'</b></div>'+(c.learn?'<div style="font-size:12px">💡 '+esc(c.learn)+'</div>':'')+'</div>'}).join('')+'</div>':'<div class="card mut">لا حملات بعد</div>';
+  else if(MT.sub==='a') h='<div class="card"><h3>📢 نصوص الإعلانات</h3>'+(A.length?A.map(function(a){return '<div class="row" style="align-items:flex-start"><span><span class="mut" style="font-size:12px">'+esc([a.pf,a.course].filter(Boolean).join(' · '))+' · '+when(a.at)+'</span><br>'+esc(a.text||'')+'</span><span class="chip">'+esc(a.status||'—')+'</span></div>'}).join(''):'<div class="mut">لا نصوص</div>')+'</div>'+
+      '<div class="card"><h3>💸 الإنفاق الأسبوعي</h3>'+(S.length?S.map(function(s){return '<div class="row"><span>'+esc(String(s.week||'').slice(0,10))+' · '+esc(s.pf||'')+'</span><b>'+sar(s.sar)+(Number(s.clicks)?' · '+s.clicks+' نقرة':'')+'</b></div>'}).join(''):'<div class="mut">لا إنفاق مسجّل بعد</div>')+'</div>';
+  else h='<div class="card">'+(T.length?T.map(function(t){return '<div class="row" style="align-items:flex-start"><span><b>'+esc(String(t.date||'').slice(0,10))+'</b> <span class="mut" style="font-size:12px">'+esc([t.pf,t.pillar].filter(Boolean).join(' · '))+'</span><br>'+esc(t.hook||String(t.body||'').slice(0,140))+'</span><span class="chip">'+esc(t.status||'—')+'</span></div>'}).join(''):'<div class="mut">لا خطة محتوى</div>')+'</div>';
+  $('mtb').innerHTML=h;
+}
 </script></body></html>
