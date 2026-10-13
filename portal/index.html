@@ -130,7 +130,7 @@ function render(){
   } else if(PANE==='acc'){
     html+='<div class="pane on cols"><div><div class="card"><h3>👤 حسابي</h3><div class="row"><span>الاسم</span><b>'+esc(D.name)+'</b></div><div class="row"><span>البرنامج</span><span>'+esc(p.name)+'</span></div><div class="row"><span>الدفعة</span><span>'+esc(c.name)+'</span></div>'+
       '<div class="row"><span>الدفع</span>'+(E.pay_status==='مدفوع'?'<span class="chip cg">مكتمل'+(E.pay_method?' · '+esc(E.pay_method):'')+'</span>':'<span class="chip cw">'+esc(E.pay_status)+'</span>')+'</div>'+
-      '<div class="row"><span>حالتك</span><span class="chip">'+esc(E.status)+'</span></div>'+(D.ref_code?'<div class="row"><span>🪪 رقم العضوية / الترشيح</span><b dir="ltr">'+esc(D.ref_code)+'</b></div>':'')+'</div>'+memberCard()+'</div><div>'+refCard()+
+      '<div class="row"><span>حالتك</span><span class="chip">'+esc(E.status)+'</span></div>'+(D.ref_code?'<div class="row"><span>🪪 رقم العضوية / الترشيح</span><b dir="ltr">'+esc(D.ref_code)+'</b></div>':'')+'</div>'+memberCard()+'<div id="rfd"></div></div><div>'+refCard()+
       '<div class="card"><h3>📌 روابط</h3><div class="row"><span>📲 تسجيل الحضور بمسح رمز الجلسة</span><a href="#" onclick="scanHelp();return false">كيف؟</a></div><div class="row"><span>🔒 تسجيل الخروج من هذا الجهاز</span><a href="#" onclick="logout();return false">خروج</a></div><div class="row"><span>سياسة الخصوصية</span><a href="../privacy/">قراءة ‹</a></div><div class="row"><span>أضف البوابة لشاشة جوالك</span><span class="xs mut">آيفون: زر المشاركة ← «إضافة إلى الشاشة الرئيسية»</span></div>'+
       (B.phone?'<div class="row"><span>تواصل معنا</span><a href="tel:'+esc(B.phone)+'">'+esc(B.phone)+'</a></div>':'')+'</div></div></div>';
   }
@@ -138,6 +138,7 @@ function render(){
   $('main').innerHTML=html+footHtml(B);
   if(PANE==='cert'&&E.cert)qr();
   if(PANE==='study')retakes();
+  if(PANE==='acc')refundCard();
 }
 function retakes(){var el=$('rtk');if(!el||!SESS)return;rpc('ac_retakes',{token:SESS}).then(function(r){var it=(r.items||[]).filter(function(x){return x.cohort===E.cohort.name});if(!it.length){el.innerHTML='';return}RTU=r.pay_url||'';
   el.innerHTML='<div class="card"><h3>🔁 إعادة الاختبار</h3><div class="xs mut">تقييمات لم تصل فيها لدرجة النجاح — احجز إعادتها من هنا</div>'+it.map(function(x){var b=x.booking;
@@ -145,6 +146,17 @@ function retakes(){var el=$('rtk');if(!el||!SESS)return;rpc('ac_retakes',{token:
       (b?(b.status==='بانتظار الدفع'?'<span><span class="chip cw">بانتظار دفع '+Number(b.fee)+' ر.س</span>'+(RTU?' <a class="btn p" target="_blank" rel="noopener" href="'+esc(RTU)+'">ادفع</a>':'')+'</span>':'<span class="chip cg">'+esc(b.status==='مدفوع'?'مدفوع — سنحدد موعدك':'محجوز — سنحدد موعدك')+'</span>')
         :'<button class="btn p" data-id="'+esc(x.assessment_id)+'" data-fee="'+Number(x.fee)+'" onclick="rtBook(this)">'+(x.fee>0?'احجز ('+Number(x.fee)+' ر.س)':'احجز مجاناً')+'</button>')+'</div>'}).join('')+'</div>'}).catch(function(){el.innerHTML=''})}
 var RTU='';
+var RFO=null;
+function refundCard(){var el=$('rfd');if(!el||!SESS)return;rpc('ac_refund_options',{token:SESS}).then(function(o){RFO=(o||[]).filter(function(x){return x.cohort===E.cohort.name})[0];if(!RFO){el.innerHTML='';return}
+  el.innerHTML='<div class="card"><h3>↩️ إلغاء أو نقل التسجيل</h3>'+(RFO.open?'<div class="sm"><span class="chip cw">طلبك قيد المراجعة</span> سنتواصل معك قريباً</div>':
+    '<div class="xs mut">حسب سياسة الإلغاء والاسترداد في الشروط والأحكام</div><div class="row"><button class="btn" data-k="نقل" onclick="rfAsk(this.dataset.k)">🔀 نقل لدفعة أخرى</button><button class="btn" style="color:var(--b)" data-k="استرداد" onclick="rfAsk(this.dataset.k)">إلغاء واسترداد</button></div>')+'</div>'}).catch(function(){el.innerHTML=''})}
+function rfAsk(kind){var q=RFO.quote,to=null,msg;
+  if(kind==='نقل'){var cs=RFO.cohorts||[];if(!cs.length){alert('لا توجد دفعات قادمة متاحة للنقل الآن — تواصل معنا');return}
+    var pick=prompt('اكتب رقم الدفعة التي تريد النقل إليها:\n'+cs.map(function(c,i){return (i+1)+') '+c.program+' — '+c.name+' · '+(c.start||'')}).join('\n'));var i=Number(pick)-1;if(!(i>=0&&cs[i]))return;to=cs[i].id;
+    msg='⚠️ تنبيه مهم قبل النقل\n\nسيُنقل تسجيلك إلى: '+cs[i].name+'\nالمبلغ الذي دفعته يُنقل كاملاً، وإن اختلف السعر يُضاف لك رصيد أو تدفع الفرق.\nالنقل بعد بدء الدفعة متاح مرة واحدة فقط.\n\nهل تريد إرسال طلب النقل؟';}
+  else msg='⚠️ تنبيه مهم قبل الإلغاء\n\nإلغاء التسجيل يعني خروجك من الدفعة وفقدان مقعدك، ولا يمكن التراجع بعد التنفيذ.\n\nالمبلغ المتوقع استرداده: '+q.amount+' ر.س ('+q.pct+'% من '+q.paid+')\nالسبب: '+q.rule+'\n'+q.note+'\n\nبديل أفضل: يمكنك النقل لدفعة لاحقة دون خسارة.\n\nهل أنت متأكد من طلب الإلغاء؟';
+  if(!confirm(msg))return;var why=prompt('سبب الطلب (اختياري):')||'';
+  rpc('ac_refund_request',{token:SESS,enrollment_id:RFO.enrollment_id,kind:kind,to_cohort_id:to,reason:why}).then(function(r){alert(r.ok?'✓ وصل طلبك وسيُراجع خلال يومي عمل':(r.error||'تعذّر الإرسال'));refundCard()}).catch(function(){alert('تعذّر الاتصال')})}
 function rtBook(b){var fee=Number(b.dataset.fee);if(!confirm(fee>0?'حجز إعادة برسوم '+fee+' ر.س؟ يتأكد الحجز بعد الدفع.':'حجز إعادة مجانية؟'))return;b.disabled=true;
   rpc('ac_retake_book',{token:SESS,assessment_id:b.dataset.id}).then(function(r){if(!r.ok){alert(r.error||'تعذّر الحجز');b.disabled=false;return}
     alert(r.fee>0?(r.pay_url?'✓ حُجز — أكمل الدفع من زر «ادفع»':'✓ حُجز — سيتواصل معك فريقنا برابط الدفع'):'✓ حُجزت الإعادة — سنتواصل معك بالموعد');retakes()}).catch(function(){alert('تعذّر الاتصال');b.disabled=false})}
