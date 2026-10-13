@@ -25,10 +25,11 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .s-lead{color:var(--a)}.s-trainee{color:var(--g)}.s-grad{color:var(--gold)}.s-optout{color:var(--b)}.ib{background:none;border:0;color:var(--mut);font-size:18px;cursor:pointer;padding:4px;text-decoration:none}.ib:hover{color:var(--ink)}
 .cx-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.cx-tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 12px;font:inherit;cursor:pointer}
 .cx-tabs button.on{background:var(--a);color:var(--ai);border-color:var(--a)}
+#app select{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font:inherit}
 .cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
 .cx-q{white-space:pre-wrap;font-size:13px;background:#1e232b;border-radius:8px;padding:8px;margin:6px 0}
 .cx-th{font-size:11px;border-radius:99px;padding:1px 8px;background:#1e232b;color:var(--mut)}.cx-th.h{background:#3a1d1f;color:var(--b)}.cx-th.m{background:#3a2f17;color:var(--gold)}
-#cxb a:not(.btn),#mkb a:not(.btn),#mtb a:not(.btn),#bbb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
+#cxb a:not(.btn),#mkb a:not(.btn),#mtb a:not(.btn),#bbb a:not(.btn),#clb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
 </style></head><body><div class="wrap" id="app"></div><script>
 var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"},EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",TOK='',EMAIL='',FT='';
 try{TOK=localStorage.getItem('v2_sess')||''}catch(e){}
@@ -282,5 +283,36 @@ function bbRender(){var d=BB.d||{},O=d.ops||[],C=d.clubs||[],T=d.trainers||[],st
   } else if(BB.sub==='c') h=C.length?'<div class="card">'+C.map(function(c){return '<div class="row"><span><b>'+esc(c.name||'')+'</b><br><span class="mut" style="font-size:12px">'+esc([c.type,c.city,c.mgr,c.hiring?'يوظّف: '+c.hiring:''].filter(Boolean).join(' · '))+'</span></span><span>'+mkLink(c.maps,'📍')+' '+mkLink(c.ig,'IG')+'</span></div>'}).join('')+'</div>':'<div class="card mut">لا أندية مسجّلة بعد</div>';
   else h=T.length?'<div class="card">'+T.map(function(t){return '<div class="row"><span><b>'+esc(t.name||'')+'</b><br><span class="mut" style="font-size:12px">'+esc([t.where,t.city,t.spec,t.role,t.out].filter(Boolean).join(' · '))+'</span></span><span>'+mkLink(t.url)+'</span></div>'}).join('')+'</div>':'<div class="card mut">لا مدربين مسجّلين بعد</div>';
   $('bbb').innerHTML=h;
+}
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'pays',label:'المدفوعات',fn:'paysScreen',tip:'كل المدفوعات: بحث وفلترة وربط بالشخص'}]);
+var PY={q:'',st:'',d:null,t:null};
+function paysScreen(){TAB='pays';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">المدفوعات</b><span class="sp"></span><button class="ib" title="تحديث" onclick="paysScreen()">⟳</button></div><div class="kpi" id="pyk" style="margin:8px 0"></div><div style="display:flex;gap:6px"><input id="pyq" placeholder="بحث بالاسم أو الجوال أو رقم الطلب أو الدورة…" value="'+esc(PY.q)+'" oninput="PY.q=this.value;clearTimeout(PY.t);PY.t=setTimeout(pyLoad,350)"></div><div class="cx-tabs" id="pyt"></div><div id="pyb"><div class="mut">جارٍ التحميل…</div></div>');
+  pyLoad()}
+function pyLoad(){rpc('app_payments',{token:TOK,q:PY.q,st:PY.st,lim:200}).then(function(d){PY.d=d;pyRender()}).catch(function(e){$('pyb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function pySt(s){PY.st=PY.st===s?'':s;pyLoad()}
+function pyRender(){var d=PY.d||{},t=d.totals||{},R=d.rows||[];
+  $('pyk').innerHTML='<span><b>'+(t.n||0)+'</b>دفعة</span><span><b>'+sar(t.sum)+'</b>الإجمالي</span><span><b>'+sar(t.month)+'</b>هذا الشهر</span><span><b>'+(t.refunds||0)+'</b>مسترد</span>';
+  $('pyt').innerHTML=['الكل'].concat(d.statuses||[]).map(function(s){var v=s==='الكل'?'':s;return '<button class="'+(PY.st===v?'on':'')+'" onclick="pySt(\''+esc(v).replace(/'/g,'')+'\')">'+esc(s)+'</button>'}).join('');
+  $('pyb').innerHTML=R.length?'<div class="card">'+R.map(function(y){var bad=/مسترد|refund|fail|فشل/i.test(y.status||'');
+    return '<div class="row" style="align-items:flex-start"><span><b>'+esc(y.name||'—')+'</b> <span class="mut" style="font-size:12px">'+(y.phone?mask(y.phone):'')+'</span><br><span class="mut" style="font-size:12px">'+esc([y.items||y.course,y.prov,y.method,y.order?'#'+y.order:''].filter(Boolean).join(' · '))+' · '+when(y.at)+'</span>'+(y.note?'<br><span style="font-size:12px">'+esc(y.note)+'</span>':'')+'</span>'+
+      '<span style="text-align:left;white-space:nowrap"><b style="'+(bad?'color:var(--b);text-decoration:line-through':'')+'">'+sar(y.amount)+'</b><br><span class="chip">'+esc(y.status||'—')+'</span>'+(y.person_id?'<br><a href="#" onclick="goPerson(\''+esc(y.person_id)+'\');return false" style="color:var(--a);font-size:12px">👤 الشخص</a>':'')+'</span></div>'}).join('')+'</div>'
+    :'<div class="card mut">'+(PY.q||PY.st?'لا نتائج':'لا مدفوعات مسجّلة بعد — تظهر هنا تلقائياً عند أول دفع من سلة')+'</div>';
+}
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'cal',label:'التقويم',fn:'calScreen',tip:'التقويم: جلسات الدفعات، بدايات الدورات، مواعيد الاختبارات، المنشورات المجدولة، نهاية عروض المنافسين'}]);
+var CL={days:60,k:'',d:null},CLK={session:['🎓','جلسة'],cohort:['🚀','بداية دفعة'],course:['📚','دورة'],exam:['📝','اختبار'],post:['📣','منشور'],comp:['📡','منافس']};
+function calScreen(){TAB='cal';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">التقويم</b><span class="sp"></span><select onchange="CL.days=+this.value;calScreen()" style="width:auto">'+[30,60,90,180].map(function(n){return '<option value="'+n+'"'+(CL.days===n?' selected':'')+'>'+n+' يوماً</option>'}).join('')+'</select><button class="ib" title="تحديث" onclick="calScreen()">⟳</button></div><div class="cx-tabs" id="clt"></div><div id="clb"><div class="mut">جارٍ التحميل…</div></div>');
+  rpc('app_calendar',{token:TOK,days:CL.days}).then(function(d){CL.d=d||[];clRender()}).catch(function(e){$('clb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function clK(k){CL.k=CL.k===k?'':k;clRender()}
+function clRender(){var E=CL.d||[],n={};E.forEach(function(e){n[e.k]=(n[e.k]||0)+1});
+  $('clt').innerHTML=Object.keys(CLK).filter(function(k){return n[k]}).map(function(k){return '<button class="'+(CL.k===k?'on':'')+'" onclick="clK(\''+k+'\')">'+CLK[k][0]+' '+CLK[k][1]+' ('+n[k]+')</button>'}).join('');
+  var today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Riyadh'}),by={};
+  E.filter(function(e){return !CL.k||e.k===CL.k}).forEach(function(e){(by[e.d]=by[e.d]||[]).push(e)});
+  var ds=Object.keys(by).sort();
+  $('clb').innerHTML=ds.length?ds.map(function(d){var dt=new Date(d+'T12:00:00');
+    return '<div class="card" style="'+(d===today?'border-color:var(--a)':'')+'"><h3>'+(d===today?'اليوم · ':'')+dt.toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',day:'numeric',month:'long'})+'</h3>'+by[d].map(function(e){var k=CLK[e.k]||['•',''];
+      return '<div class="row" style="align-items:flex-start"><span>'+k[0]+' <b>'+esc(e.t||'')+'</b>'+(e.sub?'<br><span class="mut" style="font-size:12px">'+esc(e.sub)+'</span>':'')+'</span>'+(e.url?mkLink(e.url):'')+'</div>'}).join('')+'</div>'}).join('')
+    :'<div class="card mut">لا مواعيد في هذه الفترة</div>';
 }
 </script></body></html>
