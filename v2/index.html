@@ -342,4 +342,21 @@ function ctRender(){var d=CT.d||{},K=d.kpis||[],R=d.reports||[];
   else h=d.weekly?'<div class="card"><h3>🗞 آخر تقرير أسبوعي <span class="mut" style="font-size:12px">'+esc(d.weekly.week||'')+'</span></h3><iframe sandbox="" style="width:100%;height:70vh;border:0;background:#fff;border-radius:10px" srcdoc="'+esc(d.weekly.html||'')+'"></iframe></div>':'<div class="card mut">لا تقرير أسبوعي بعد</div>';
   $('ctb').innerHTML=h;
 }
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'gaps',label:'فجوات السوق',fn:'gapsScreen',tip:'فجوات السوق: زمنية، جغرافية، سعرية، صيغة التقديم، عرض ضعيف — من بياناتنا الحقيقية'}]);
+var GP={t:'',d:null},GPGO={comptimeline:'compScreen',storecourses:'compScreen',ads:'mktScreen'};
+function gapsScreen(){TAB='gaps';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">فجوات السوق</b><span class="mut" id="gpat" style="font-size:12px"></span><span class="sp"></span><button class="ib" title="تحديث" onclick="gapsScreen()">⟳</button></div><div class="kpi" id="gpk" style="margin:8px 0"></div><div class="cx-tabs" id="gpt"></div><div id="gpb"><div class="mut">جارٍ التحميل…</div></div>');
+  rpc('app_gaps',{token:TOK}).then(function(d){GP.d=d||{};gpRender()}).catch(function(e){$('gpb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function gpT(t){GP.t=GP.t===t?'':t;gpRender()}
+function gpRender(){var d=GP.d||{},G=d.gaps||[],R=d.regions||[],n=d.n||{},by={};
+  if(!G.length&&!R.length){$('gpb').innerHTML='<div class="card mut">لم تُحسب الفجوات بعد — تُحدَّث كل ساعة</div>';return}
+  G.forEach(function(g){by[g.type]=(by[g.type]||0)+1});
+  $('gpat').textContent=d.cached_at?'· حُسبت '+when(d.cached_at):'';
+  $('gpk').innerHTML='<span><b>'+G.length+'</b>فجوة</span><span><b>'+G.filter(function(g){return g.score>=4}).length+'</b>قوية (٤–٥)</span><span><b>'+(n.store||0)+'</b>دورة منافس مرصودة</span><span><b>'+Number(n.demand||0).toLocaleString('en')+'</b>نقطة طلب</span>';
+  $('gpt').innerHTML=Object.keys(by).map(function(t){return '<button class="'+(GP.t===t?'on':'')+'" onclick="gpT(\''+esc(t)+'\')">'+esc(t)+' ('+by[t]+')</button>'}).join('')+'<button class="'+(GP.t==='_r'?'on':'')+'" onclick="gpT(\'_r\')">🗺 الطلب حسب المنطقة</button>';
+  if(GP.t==='_r'){$('gpb').innerHTML='<div class="card"><h3>🗺 الطلب مقابل العرض الحضوري</h3>'+R.map(function(r){return '<div class="row" style="align-items:flex-start"><span><b>'+esc(r.region)+'</b><br><span class="mut" style="font-size:12px">'+esc(r.sources||'')+'</span><div style="height:6px;background:var(--line);border-radius:9px;margin-top:4px;width:160px"><div style="height:6px;width:'+Math.min(r.demand_pct,100)+'%;background:var(--a);border-radius:9px"></div></div></span><span style="text-align:left;white-space:nowrap;font-size:13px"><b>'+r.demand_pct+'%</b> من الطلب<br>'+r.supply+' عرض حضوري · '+r.academies+' منافس</span></div>'}).join('')+'</div>';return}
+  $('gpb').innerHTML='<div class="cx-grid">'+G.filter(function(g){return !GP.t||g.type===GP.t}).map(function(g){var go=g.act&&GPGO[g.act.go];
+    return '<div class="card"><div style="display:flex;gap:6px;align-items:center"><span>'+esc(g.icon||'')+'</span><span class="chip">'+esc(g.type)+'</span><span class="sp"></span><span title="قوة الفجوة" style="color:var(--gold);letter-spacing:1px">'+'★★★★★'.slice(0,g.score)+'<span style="color:var(--line)">'+'★★★★★'.slice(0,5-g.score)+'</span></span></div>'+
+      '<div style="margin:6px 0"><b>'+esc(g.title||'')+'</b></div><div class="mut" style="font-size:12.5px">'+esc(g.evidence||'')+'</div>'+(go?'<div class="cx-acts" style="margin-top:6px"><button class="btn" onclick="'+go+'()">'+esc(g.act.label)+'</button></div>':'')+'</div>'}).join('')+'</div>';
+}
 </script></body></html>
