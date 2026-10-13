@@ -23,12 +23,12 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .pd{position:sticky;top:10px}.av{width:40px;height:40px;border-radius:50%;background:#123138;color:var(--a);display:flex;align-items:center;justify-content:center;font-weight:800}
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}.mini div{background:#13171d;border-radius:10px;padding:6px 9px;font-size:12px;color:var(--mut)}.mini b{display:block;color:var(--ink);font-size:14px}
 .s-lead{color:var(--a)}.s-trainee{color:var(--g)}.s-grad{color:var(--gold)}.s-optout{color:var(--b)}.ib{background:none;border:0;color:var(--mut);font-size:18px;cursor:pointer;padding:4px;text-decoration:none}.ib:hover{color:var(--ink)}
-.cx-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.cx-tabs button{border:1px solid #d9e1ea;background:#fff;border-radius:99px;padding:5px 12px;font:inherit;cursor:pointer}
-.cx-tabs button.on{background:#0B2D4B;color:#fff;border-color:#0B2D4B}
+.cx-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.cx-tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 12px;font:inherit;cursor:pointer}
+.cx-tabs button.on{background:var(--a);color:var(--ai);border-color:var(--a)}
 .cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
-.cx-q{white-space:pre-wrap;font-size:13px;background:#f6f8fb;border-radius:8px;padding:8px;margin:6px 0}
-.cx-th{font-size:11px;border-radius:99px;padding:1px 8px;background:#eef2f6}.cx-th.h{background:#fde2e2;color:#a11}.cx-th.m{background:#fff2d6;color:#8a5a00}
-.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
+.cx-q{white-space:pre-wrap;font-size:13px;background:#1e232b;border-radius:8px;padding:8px;margin:6px 0}
+.cx-th{font-size:11px;border-radius:99px;padding:1px 8px;background:#1e232b;color:var(--mut)}.cx-th.h{background:#3a1d1f;color:var(--b)}.cx-th.m{background:#3a2f17;color:var(--gold)}
+#cxb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
 </style></head><body><div class="wrap" id="app"></div><script>
 var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"},EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",TOK='',EMAIL='',FT='';
 try{TOK=localStorage.getItem('v2_sess')||''}catch(e){}
@@ -190,12 +190,12 @@ function cxRender(){var d=CX.d||{},A=d.academies||[],O=d.offers||[],Q=d.question
   if(CX.sub==='a') $('cxb').innerHTML='<div class="cx-grid">'+A.map(function(a){return '<div class="card"><div style="display:flex;gap:6px;align-items:center"><b>'+esc(a.name)+'</b><span class="sp"></span>'+cxTh(a.threat)+'</div>'+
       '<div class="mut" style="font-size:12px">'+esc([a.type,a.city].filter(Boolean).join(' · '))+'</div>'+
       '<div class="row"><span>العروض المرصودة</span><b>'+a.offers+'</b></div><div class="row"><span>أقل سعر</span><b>'+(a.min_price?sar(a.min_price):'—')+'</b></div>'+
-      '<div class="row"><span>آخر رصد</span><b>'+when(a.last_offer)+'</b></div>'+(a.waiting?'<div class="row"><span>أسئلة تنتظر</span><b style="color:#a11">'+a.waiting+'</b></div>':'')+
+      '<div class="row"><span>آخر رصد</span><b>'+when(a.last_offer)+'</b></div>'+(a.waiting?'<div class="row"><span>أسئلة تنتظر</span><b style="color:var(--b)">'+a.waiting+'</b></div>':'')+
       '<div class="cx-acts" style="margin-top:6px">'+(a.website?'<a class="btn" target="_blank" rel="noopener" href="'+esc(a.website)+'">🌐 الموقع</a>':'')+(a.accounts||[]).map(function(c){return c.u?'<a class="btn" target="_blank" rel="noopener" href="'+esc(c.u)+'" title="'+esc(c.h||'')+'">'+esc(c.p||'حساب')+'</a>':''}).join('')+'</div></div>'}).join('')+'</div>';
   else if(CX.sub==='o') $('cxb').innerHTML='<div class="card">'+(O.length?O.map(function(o){var p=Number(o.disc)>0?'<s class="mut">'+sar(o.price)+'</s> '+sar(o.disc):Number(o.price)>0?sar(o.price):'—';
-      return '<div class="row" style="align-items:flex-start"><span><b>'+esc(o.name||'—')+'</b><br><span class="mut" style="font-size:12px">'+esc(nm[o.ac]||o.who||'')+(o.mode?' · '+esc(o.mode):'')+(o.start?' · يبدأ '+esc(String(o.start).slice(0,10)):'')+' · '+when(o.at)+'</span></span><span style="text-align:left">'+p+(o.url?'<br><a target="_blank" rel="noopener" href="'+esc(o.url)+'">المصدر ↗</a>':'')+'</span></div>'}).join(''):'<div class="mut">لا عروض بعد</div>')+'</div>';
+      return '<div class="row" style="align-items:flex-start"><span><b>'+esc(o.name||'—')+'</b><br><span class="mut" style="font-size:12px">'+esc(nm[o.ac]||o.who||'')+(o.mode?' · '+esc(o.mode):'')+(o.start?' · يبدأ '+esc(String(o.start).slice(0,10)):'')+' · '+when(o.at)+'</span></span><span style="text-align:left;white-space:nowrap;padding-inline-start:8px">'+p+(o.url?'<br><a target="_blank" rel="noopener" href="'+esc(o.url)+'">المصدر ↗</a>':'')+'</span></div>'}).join(''):'<div class="mut">لا عروض بعد</div>')+'</div>';
   else $('cxb').innerHTML=Q.length?'<div class="cx-grid">'+Q.map(function(q){return '<div class="card" id="cxq_'+esc(q.id)+'"><div style="display:flex;gap:6px"><b>'+esc(q.asker||'سائل')+'</b><span class="mut" style="font-size:12px">عند '+esc(q.who||'')+' · '+esc(q.pf||'')+' · '+when(q.at)+'</span></div>'+
-      '<div class="cx-q">❓ '+esc(q.q||'')+'</div><div class="mut" style="font-size:12px">الرد المقترح:</div><div class="cx-q" style="background:#eef7f1">'+esc(q.reply||'—')+'</div>'+
+      '<div class="cx-q">❓ '+esc(q.q||'')+'</div><div class="mut" style="font-size:12px">الرد المقترح:</div><div class="cx-q" style="background:#142a1f">'+esc(q.reply||'—')+'</div>'+
       '<div class="cx-acts"><button class="btn p" onclick="cxCopy(\''+esc(q.id)+'\')">📋 نسخ الرد</button>'+(q.url?'<a class="btn" target="_blank" rel="noopener" href="'+esc(q.url)+'">فتح المنشور ↗</a>':'')+
       '<button class="btn" onclick="cxSet(\''+esc(q.id)+'\',\'رُدّ\')">✓ رددت</button><button class="btn" onclick="cxSet(\''+esc(q.id)+'\',\'مستبعد\')">✕ ليس سؤالاً</button></div></div>'}).join('')+'</div>':'<div class="card mut">لا أسئلة تنتظر — ممتاز 👌</div>';
 }
