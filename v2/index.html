@@ -29,7 +29,7 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
 .cx-q{white-space:pre-wrap;font-size:13px;background:#1e232b;border-radius:8px;padding:8px;margin:6px 0}
 .cx-th{font-size:11px;border-radius:99px;padding:1px 8px;background:#1e232b;color:var(--mut)}.cx-th.h{background:#3a1d1f;color:var(--b)}.cx-th.m{background:#3a2f17;color:var(--gold)}
-#cxb a:not(.btn),#mkb a:not(.btn),#mtb a:not(.btn),#bbb a:not(.btn),#clb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
+#cxb a:not(.btn),#mkb a:not(.btn),#mtb a:not(.btn),#bbb a:not(.btn),#clb a:not(.btn),#ctb a:not(.btn){color:var(--a)}.cx-acts{display:flex;gap:6px;flex-wrap:wrap}.cx-acts .btn,.cx-acts button{font-size:12px}
 </style></head><body><div class="wrap" id="app"></div><script>
 var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"},EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",TOK='',EMAIL='',FT='';
 try{TOK=localStorage.getItem('v2_sess')||''}catch(e){}
@@ -314,5 +314,32 @@ function clRender(){var E=CL.d||[],n={};E.forEach(function(e){n[e.k]=(n[e.k]||0)
     return '<div class="card" style="'+(d===today?'border-color:var(--a)':'')+'"><h3>'+(d===today?'اليوم · ':'')+dt.toLocaleDateString('ar-SA-u-nu-latn',{weekday:'long',day:'numeric',month:'long'})+'</h3>'+by[d].map(function(e){var k=CLK[e.k]||['•',''];
       return '<div class="row" style="align-items:flex-start"><span>'+k[0]+' <b>'+esc(e.t||'')+'</b>'+(e.sub?'<br><span class="mut" style="font-size:12px">'+esc(e.sub)+'</span>':'')+'</span>'+(e.url?mkLink(e.url):'')+'</div>'}).join('')+'</div>'}).join('')
     :'<div class="card mut">لا مواعيد في هذه الفترة</div>';
+}
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'ctl',label:'غرفة التحكم',fn:'ctlScreen',tip:'غرفة التحكم: فحص النظام والحصة، المؤشرات، التقارير، التقرير الأسبوعي'}]);
+var CT={sub:'h',d:null,h:null,m:null,open:''};
+function ctlScreen(){TAB='ctl';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">غرفة التحكم</b><span class="sp"></span><button class="ib" title="تحديث" onclick="CT.h=CT.m=null;ctlScreen()">⟳</button></div><div class="cx-tabs" id="ctt"></div><div id="ctb"><div class="mut">جارٍ التحميل…</div></div>');
+  rpc('app_control',{token:TOK}).then(function(d){CT.d=d;ctRender()}).catch(function(e){$('ctb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'});
+  if(!CT.h)gapi('screen','health',{}).then(function(r){CT.h=(r&&r.data)||r||{};if(CT.sub==='h')ctRender()}).catch(function(){CT.h={err:1}});
+  if(!CT.m)gapi('screen','modules',{}).then(function(r){CT.m=(r&&r.data)||r||{};if(CT.sub==='h')ctRender()}).catch(function(){CT.m={err:1}})}
+function ctSub(s){CT.sub=s;ctRender()}
+function ctOpen(id){CT.open=CT.open===id?'':id;ctRender()}
+function ctRender(){var d=CT.d||{},K=d.kpis||[],R=d.reports||[];
+  $('ctt').innerHTML=[['h','🩺 الحالة'],['k','📊 المؤشرات'],['r','📄 التقارير'],['w','🗞 التقرير الأسبوعي']].map(function(t){return '<button class="'+(CT.sub===t[0]?'on':'')+'" onclick="ctSub(\''+t[0]+'\')">'+t[1]+'</button>'}).join('');
+  var h='';
+  if(CT.sub==='h'){var hl=(CT.h&&CT.h.last)||null,m=CT.m||{},u=m.usage||{},mods=m.modules||[];
+    var err=mods.filter(function(x){return x.enabled==='مفعّل'&&x.last_status==='error'});
+    h='<div class="kpi"><span><b>'+(u.pct!=null?u.pct+'%':'…')+'</b>حصة جوجل اليوم'+(u.quota_min?' (من '+u.quota_min+' د)':'')+'</span><span><b>'+(mods.length?mods.filter(function(x){return x.enabled==='مفعّل'}).length:'…')+'</b>وحدة مفعّلة في جوجل</span><span><b style="'+(err.length?'color:var(--b)':'')+'">'+(mods.length?err.length:'…')+'</b>وحدة فيها خطأ</span>'+(m.paused?'<span><b style="color:var(--b)">⏸</b>الأتمتة موقوفة</span>':'')+'</div>';
+    if(err.length)h+='<div class="card"><h3>⚠️ وحدات فيها خطأ</h3>'+err.map(function(x){return '<div class="row"><span><b>'+esc(x.module_name_ar||x.module_key)+'</b><br><span class="mut" style="font-size:12px">'+esc(String(x.last_message||x.notes||'').slice(0,160))+'</span></span><span class="mut" style="font-size:12px">'+when(x.last_run)+'</span></div>'}).join('')+'</div>';
+    if(!CT.h)h+='<div class="card mut">جارٍ جلب فحص النظام…</div>';
+    else if(!hl)h+='<div class="card mut">'+(CT.h.err?'تعذّر جلب فحص النظام من جوجل':'لم يُشغَّل فحص النظام بعد')+'</div>';
+    else{var items=hl.items||hl.checks||[],lv={urgent:['🔴','عاجل'],important:['🟠','مهم'],ok:['🟢','سليم'],setup:['⚙️','إعداد']};
+      h+='<div class="card"><h3>🩺 آخر فحص للنظام <span class="mut" style="font-size:12px">'+when(hl.at||hl.ran_at)+'</span></h3>'+(items.length?items.slice().sort(function(a,b){var o={urgent:0,important:1,setup:2,ok:3};return (a.level in o?o[a.level]:9)-(b.level in o?o[b.level]:9)}).map(function(i){var l=lv[i.level]||['•',''];
+        return '<div class="row" style="align-items:flex-start"><span>'+l[0]+' '+esc(i.icon||'')+' <b>'+esc(i.title||'')+'</b>'+(i.detail?'<br><span class="mut" style="font-size:12px">'+esc(i.detail)+'</span>':'')+'</span></div>'}).join(''):'<div class="mut">'+esc(JSON.stringify(hl).slice(0,300))+'</div>')+'</div>'}
+  } else if(CT.sub==='k') h=K.length?'<div class="cx-grid">'+K.map(function(k){var a=Number(k.actual),t=Number(k.target),pct=t?Math.round(a/t*100):null;
+      return '<div class="card"><div class="mut" style="font-size:12px">'+esc(k.period||'')+(String(k.assume)==='نعم'?' · افتراض':'')+'</div><b>'+esc(k.name||k.k)+'</b><div style="font-size:24px;font-weight:800;margin:4px 0">'+esc(k.actual==null||k.actual===''?'—':k.actual)+(t?' <span class="mut" style="font-size:13px">/ '+esc(k.target)+'</span>':'')+'</div>'+(pct!=null?'<div style="height:6px;background:var(--line);border-radius:9px"><div style="height:6px;width:'+Math.min(pct,100)+'%;background:'+(pct>=100?'var(--g)':'var(--a)')+';border-radius:9px"></div></div>':'')+(k.note?'<div class="mut" style="font-size:11px;margin-top:6px">'+esc(k.note)+'</div>':'')+'</div>'}).join('')+'</div>':'<div class="card mut">لا مؤشرات بعد</div>';
+  else if(CT.sub==='r') h=R.length?R.map(function(r){var o=CT.open===r.id;return '<div class="card"><div class="row" style="cursor:pointer" onclick="ctOpen(\''+esc(r.id)+'\')"><span><b>'+esc(r.sec||'')+'</b> <span class="mut" style="font-size:12px">'+esc(r.week||'')+'</span></span><span>'+(o?'▲':'▼')+'</span></div>'+(o?'<div class="cx-q" style="max-height:none">'+esc(r.body||'')+'</div>':'<div class="mut" style="font-size:12px">'+esc(String(r.body||'').replace(/[#*]/g,'').slice(0,160))+'…</div>')+'</div>'}).join(''):'<div class="card mut">لا تقارير</div>';
+  else h=d.weekly?'<div class="card"><h3>🗞 آخر تقرير أسبوعي <span class="mut" style="font-size:12px">'+esc(d.weekly.week||'')+'</span></h3><iframe sandbox="" style="width:100%;height:70vh;border:0;background:#fff;border-radius:10px" srcdoc="'+esc(d.weekly.html||'')+'"></iframe></div>':'<div class="card mut">لا تقرير أسبوعي بعد</div>';
+  $('ctb').innerHTML=h;
 }
 </script></body></html>
