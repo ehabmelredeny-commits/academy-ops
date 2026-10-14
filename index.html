@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv8hpx9y";
+  var APP_BUILD = "mv8ikl58";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -1980,9 +1980,9 @@ ACT.finReport = function (el) { el.disabled = true; el.textContent = '⏳ ينش
 .ac-sess { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 .ac-sc { width: 64px; text-align: center; padding: 4px; }
 .ac-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.ac-f { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; margin: 8px 0; }
-.ac-f label { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
-.ac-f input, .ac-f select { width: 100%; color: var(--ink); background: var(--card); font-size: 14px; }
+.ac-f { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 8px 0; min-width: 0; } /* 2026-10-14: حقول التاريخ لها عرض أدنى ذاتي (~220px) فكانت تدفع الشبكة خارج اللوحة يساراً وتختفي «تاريخ النهاية» */
+.ac-f label { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ac-f input, .ac-f select { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; color: var(--ink); background: var(--card); font-size: 14px; }
 .ac-note { font-size: 11.5px; color: var(--muted); }
 .ac-empty { text-align: center; padding: 24px 10px; color: var(--muted); }
 /* الجوال والآيباد العمودي: الجدول يتحول لبطاقات */
