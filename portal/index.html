@@ -135,7 +135,7 @@ function render(){
       (B.phone?'<div class="row"><span>تواصل معنا</span><a href="tel:'+esc(B.phone)+'">'+esc(B.phone)+'</a></div>':'')+'</div></div></div>';
   }
   if(D.enrollments.length>1)html+='<div class="card noprint"><h3>🎓 برامجي</h3>'+D.enrollments.map(function(x,i){return '<div class="row"><span>'+esc(x.program.name)+' <span class="xs mut">'+esc(x.cohort.name)+'</span></span><button class="btn" onclick="E=D.enrollments['+i+'];render()">'+(x===E?'✓ معروض':'عرض')+'</button></div>'}).join('')+'</div>';
-  $('main').innerHTML=html+footHtml(B);
+  $('main').innerHTML=(PV?'<div class="card noprint" style="background:#fff4d6;border:1px solid #e4b74a;color:#5a4300;text-align:center">👁 <b>معاينة المالك</b> — هذا ما يراه «'+esc(D.name)+'» بالضبط · للعرض فقط: الأزرار لا تُنفّذ شيئاً باسمه</div>':'')+html+footHtml(B);
   if(PANE==='cert'&&E.cert)qr();
   if(PANE==='study')retakes();
   if(PANE==='acc')refundCard();
@@ -219,11 +219,13 @@ function ics(){var c=E.cohort,p=function(n){return('0'+n).slice(-2)},lines=['BEG
   lines.push('END:VCALENDAR');var a=document.createElement('a');a.href='data:text/calendar;charset=utf-8,'+encodeURIComponent(lines.join('\r\n'));a.download='schedule.ics';document.body.appendChild(a);a.click();a.remove()}
 /* ── الدخول (التصميم المعتمد 2026-10-12): جوال + رمز لمرة واحدة · جهاز واحد · الرابط الشخصي = دخول لمرة واحدة ── */
 var SESS='',PHONE='',FT='',SCAN=null;
-try{SESS=localStorage.getItem('ac_sess')||''}catch(e){}
+var PV=(location.hash.match(/pv=([0-9a-f]{40,})/)||[])[1]||'';
+try{SESS=PV||localStorage.getItem('ac_sess')||''}catch(e){SESS=PV}
+if(PV){try{history.replaceState(null,'',location.pathname)}catch(e){}}
 (function(){var h=location.hash,m=/[#&]t=([a-f0-9]{24,})/.exec(h),s=/[#&]scan=([0-9a-f-]{36}).([0-9a-f]{10})/.exec(h);
   if(m)window.__LINK=m[1];if(s)SCAN={sid:s[1],code:s[2]};if(m||s)history.replaceState(null,'',location.pathname);})();
 function device(){var u=navigator.userAgent;return /iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1)?'آيباد':/iPhone/.test(u)?'آيفون':/Android/.test(u)?'أندرويد':/Windows/.test(u)?'كمبيوتر ويندوز':/Mac/.test(u)?'ماك':'جهاز'}
-function saveSess(t){SESS=t;try{localStorage.setItem('ac_sess',t);localStorage.removeItem('ac_tok')}catch(e){}}
+function saveSess(t){SESS=t;if(PV)return;try{localStorage.setItem('ac_sess',t);localStorage.removeItem('ac_tok')}catch(e){}}
 function hdr(title,sub){$('bt').innerHTML=logoHtml(B)+'<div><b>'+esc(B.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>';$('hi').innerHTML=esc(title)+(sub?'<small>'+esc(sub)+'</small>':'');$('nav').innerHTML=''}
 // رمز النموذج صالح من ٤ ثوانٍ إلى ساعتين — نجدّده بعد ٩٠ دقيقة وننتظر حتى يبلغ ٥ ثوانٍ (صفحة مفتوحة طويلاً كانت تُتجاهل بصمت)
 var FTAT=0;function ftWait(){var age=Date.now()-FTAT;return new Promise(function(res){setTimeout(function(){res(FT)},Math.max(0,5000-age))})}
@@ -268,7 +270,7 @@ function boot(quiet){
   if(window.__LINK){window.__LINK='';if(!SESS)return loginScreen()} // الرابط لا يُدخل مباشرة: الدخول دائماً بالجوال + رمز
   if(!SESS)return loginScreen();
   rpc('ac_me',{token:SESS}).then(function(d){
-    if(!d||!d.auth){if(d&&d.signed_out)return signedOutScreen(d);SESS='';try{localStorage.removeItem('ac_sess')}catch(e){};return loginScreen()}
+    if(!d||!d.auth){if(PV){document.body.innerHTML='<div style="padding:30px;text-align:center;font-family:Tahoma">انتهت مدة المعاينة (١٥ دقيقة) — افتحها من جديد من لوحة الإدارة</div>';return}if(d&&d.signed_out)return signedOutScreen(d);SESS='';try{localStorage.removeItem('ac_sess')}catch(e){};return loginScreen()}
     D=d;E=(d.enrollments||[]).filter(function(x){return x.status!=='منسحب'})[0]||(d.enrollments||[])[0]||null;
     function apply(b){B=b;document.title='بوابة المتدرب'+(b.name?' — '+b.name:'');$('bt').innerHTML=logoHtml(b)+'<div><b>'+esc(b.name||'الأكاديمية')+'</b><small>بوابة المتدرب</small></div>'}
     var b0={};Object.keys(d.brand||{}).forEach(function(k){b0[k]=pub(d.brand[k])});apply(b0);
