@@ -323,7 +323,8 @@ function compScreen(){TAB='comp';if(!TOK)return loginScreen();
 function cxSub(s){CX.sub=s;cxRender()}
 function cxRender(){var d=CX.d||{},A=d.academies||[],O=d.offers||[],Q=d.questions||[];
   $('cxk').innerHTML='<span><b>'+A.length+'</b>منافس</span><span><b>'+A.filter(function(a){return /عال|مرتفع/.test(a.threat||'')}).length+'</b>تهديد عالٍ</span><span><b>'+O.length+'</b>آخر العروض</span><span><b>'+Q.length+'</b>سؤال ينتظر ردنا</span>';
-  $('cxt').innerHTML=[['q','💬 أسئلة تنتظر ('+Q.length+')'],['a','🏫 المنافسون'],['o','🏷 آخر العروض']].map(function(t){return '<button class="'+(CX.sub===t[0]?'on':'')+'" onclick="cxSub(\''+t[0]+'\')">'+t[1]+'</button>'}).join('');
+  $('cxt').innerHTML=[['q','💬 أسئلة تنتظر ('+Q.length+')'],['a','🏫 المنافسون'],['o','🏷 آخر العروض'],['r','🔗 العلاقات']].map(function(t){return '<button class="'+(CX.sub===t[0]?'on':'')+'" onclick="cxSub(\''+t[0]+'\')">'+t[1]+'</button>'}).join('');
+  if(CX.sub==='r'){cxLinks();return}
   var nm={};A.forEach(function(a){nm[a.id]=a.name});O.forEach(function(o){o.whoName=nm[o.ac]||o.who||''});
   var sk=CX.sub==='a'||CX.sub==='o'?CX.sub:'q',all={a:A,o:O,q:Q}[sk],fid='cx'+sk,cfg=CXF[sk],bar=flBar(fid,cfg,all),shown=flApply(fid,cfg,all);
   if(sk==='a')A=shown;else if(sk==='o')O=shown;else Q=shown;
@@ -340,6 +341,17 @@ function cxRender(){var d=CX.d||{},A=d.academies||[],O=d.offers||[],Q=d.question
       '<div class="cx-acts"><button class="btn p" onclick="cxCopy(\''+esc(q.id)+'\')">📋 نسخ الرد</button>'+(q.url?'<a class="btn" target="_blank" rel="noopener" href="'+esc(q.url)+'">فتح المنشور ↗</a>':'')+
       '<button class="btn" onclick="cxSet(\''+esc(q.id)+'\',\'رُدّ\')">✓ رددت</button><button class="btn" onclick="cxSet(\''+esc(q.id)+'\',\'مستبعد\')">✕ ليس سؤالاً</button></div></div>'}).join('')+'</div>':'<div class="card mut">'+(all.length?'لا نتائج بهذا الفلتر':'لا أسئلة تنتظر — ممتاز 👌')+'</div>');
 }
+function cxLinks(){var el=$('cxb');if(!CX.lk){el.innerHTML='<div class="mut">جارٍ التحميل…</div>';rpc('app_comp_links',{token:TOK}).then(function(d){CX.lk=d;cxLinks()}).catch(function(e){el.innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'});return}
+  var d=CX.lk,L=d.links||[],AC=d.accred||[],st=d.status||{},conf=function(c){return c>=70?'var(--g)':c>=40?'var(--gold)':'var(--mut)'};
+  var h='<div class="card" style="font-size:12.5px">🧠 العقل يربط بين الإعلانات والمواقع وانستغرام: من يتعاون مع من. كل علاقة <b>شبهة بدرجة ثقة</b> من أدلتها (شعار أو «شريك رسمي» = قوي · «لموظفي» أو «في مقر» = متوسط · «بالتعاون مع» = ضعيف). أكّد أو انفِ ليتعلّم.</div>';
+  h+='<div class="card"><h3>🔗 علاقات المنافسين بالجهات ('+L.length+')</h3>'+(L.length?L.map(function(x){var k=x.from_ac+'|'+x.to_norm,s=st[k]||'';
+    return '<div class="row" style="align-items:flex-start;flex-direction:column;gap:3px;border-bottom:1px solid var(--line);padding:7px 0"><div style="display:flex;gap:6px;width:100%;align-items:center"><b>'+esc(x.from_name)+'</b><span class="mut">←</span><b>'+esc(x.to_name)+'</b><span class="chip">'+esc(x.relations||'')+'</span><span class="sp"></span><b style="color:'+conf(x.confidence)+'">'+x.confidence+'%</b>'+(s?'<span class="chip'+(s==='مؤكد'?' cg':'')+'">'+esc(s)+'</span>':'')+'</div>'+
+      '<div class="mut" style="font-size:12px">'+(x.evidence||[]).slice(0,3).map(function(e){return '📎 '+esc(e.ev||'')+(e.url?' <a target="_blank" rel="noopener" href="'+esc(e.url)+'">المصدر ↗</a>':'')+' <span class="mut">('+esc(e.src||'')+')</span>'}).join('<br>')+'</div>'+
+      '<div style="display:flex;gap:6px"><button class="btn s" data-f="'+esc(x.from_ac)+'" data-t="'+esc(x.to_norm)+'" data-s="مؤكد" onclick="cxMark(this)">✓ تأكدت</button><button class="btn s" data-f="'+esc(x.from_ac)+'" data-t="'+esc(x.to_norm)+'" data-s="غير صحيح" onclick="cxMark(this)">✕ غير صحيح</button></div></div>'}).join(''):'<div class="mut">لا علاقات بعد — تتراكم يومياً من الرادار والرادار البصري وانستغرام</div>')+'</div>';
+  var by={};AC.forEach(function(a){(by[a.from]=by[a.from]||[]).push(a)});
+  h+='<div class="card"><h3>🎓 من يعتمد على من</h3><div class="mut" style="font-size:12px;margin-bottom:6px">الجهات التي يعلنها كل منافس كاعتماد — مفيدة لرسائلنا التسويقية (اعتمادنا: وزارة الرياضة ومعهد إعداد القادة LDI)</div>'+(Object.keys(by).length?Object.keys(by).sort().map(function(f){return '<div class="row"><span>'+esc(f)+'</span><span style="text-align:left">'+by[f].map(function(a){return '<span class="chip"'+(/وزار|LDI|اعداد القاده|إعداد القادة/i.test(a.to)?' style="border-color:var(--gold);color:var(--gold)"':'')+'>'+(a.url?'<a target="_blank" rel="noopener" href="'+esc(a.url)+'">'+esc(a.to)+'</a>':esc(a.to))+'</span>'}).join(' ')+'</span></div>'}).join(''):'<div class="mut">لا بيانات بعد</div>')+'</div>';
+  el.innerHTML=h}
+function cxMark(b){var d=b.dataset;rpc('app_comp_link_mark',{token:TOK,from_ac:d.f,to_norm:d.t,status:d.s}).then(function(){CX.lk=null;cxLinks()})}
 function cxCopy(id){var q=(CX.d.questions||[]).filter(function(x){return x.id===id})[0];if(!q)return;try{navigator.clipboard.writeText(q.reply||'')}catch(e){}}
 function cxSet(id,st){var el=$('cxq_'+id);if(el)el.style.opacity=.4;
   gapi('action','engageStatus',{eng_id:id,status:st}).then(function(r){if(r&&r.ok===false)throw new Error(r.error||'خطأ');CX.d.questions=(CX.d.questions||[]).filter(function(x){return x.id!==id});cxRender()})
