@@ -62,7 +62,11 @@ $('f').addEventListener('submit',function(e){
   $('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
   var body={name:$('name').value,phone:$('phone').value,email:$('email').value,city:$('city').value,course:$('course').value,persona:$('persona').value,note:$('note').value,
     website:$('website').value,ft:CFG.ft||'',consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||''};
-  fetch(EXEC+'?public=register',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()}).then(function(j){
+  // أولاً طابور Supabase (يتحمّل الضغط — اختبار الحمل 2026-10-14)، وإن تعذّر فالنقطة القديمة في جوجل
+  var AQ={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
+  var send=function(){return AQ?fetch(AQ.url+'/rest/v1/rpc/public_register',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({body:body})}).then(function(r){if(!r.ok)throw new Error('q');return r.json()}):Promise.reject()};
+  var old=function(){return fetch(EXEC+'?public=register',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()})};
+  send().catch(old).then(function(j){
     if(!j.ok){$('go').disabled=false;$('go').textContent='أرسل طلبي';$('err').textContent=j.error||'حدث خطأ';return}
     track('Lead');$('f').style.display='none';$('done').style.display='block';
     var w=(CFG.biz||{}).whatsapp;if(w){$('wa').href='https://wa.me/'+String(w).replace(/\D/g,'')+'?text='+encodeURIComponent('السلام عليكم، سجّلت اهتمامي بـ '+($('course').value||'الدورات')+' باسم '+$('name').value);$('wa').style.display='inline-block'}
