@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv7xfi31";
+  var APP_BUILD = "mv7xlmfy";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -6518,6 +6518,11 @@ SCREENS.comptimeline = { render: function (d, args) {
       return '<span class="statmini"><b>' + x[0] + '</b> ' + x[1] + '</span>'; }).join('') +
     '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y - 1, topic: d.topic, sort: d.sort }) + '">‹ ' + (y - 1) + '</button><b>' + y + '</b>' +
     '<button class="btn sm" data-go="comptimeline" data-args="' + attr({ year: y + 1, topic: d.topic, sort: d.sort }) + '">' + (y + 1) + ' ›</button></span></div>';
+  // 🧠 أفضل موعد لدخولنا بكل دورة (من بدايات المنافسين الحقيقية في نفس الفئة)
+  if (d.entry && d.entry.length) html += '<div class="card small" style="border-color:#24a148;margin:6px 0"><b>🧠 أفضل موعد لدخولنا بكل دورة</b> <span class="muted tiny">— الأحد الأقل تزاحماً مع بدايات المنافسين في نفس الدورة، بعد ٤٥ يوماً على الأقل للتسويق</span>' +
+    d.entry.map(function (e) { return '<div style="margin:3px 0">📆 <b>' + esc(e.course) + ': ' + esc(e.date) + '</b>' + (e.ours ? ' <span class="muted">(موعدنا الحالي ' + esc(e.ours) + ')</span>' : '') + ' <span class="muted tiny">— ' + esc(e.why) + (e.low ? ' · ثقة منخفضة: بدايات معروفة قليلة' : '') + '</span></div>'; }).join('') + '</div>';
+  if (d.undated_n) html += '<details class="card small" style="margin:6px 0"><summary>⏳ <b>' + d.undated_n + ' دورة منافس بلا تاريخ بدء معروف</b> <span class="muted tiny">— لا تُرسم على الخط (يوم الرصد ليس البداية). العقل يستخرج تواريخها من صفحاتها وصورها يومياً</span></summary>' +
+    d.undated.map(function (u) { return '<div class="muted tiny" style="margin:2px 0">' + esc(u.who) + ' · ' + esc(u.course) + (u.price ? ' · ' + u.price.toLocaleString('en') + ' ر.س' : '') + ' · رُصد ' + esc(fmtDate(u.captured)) + (u.url ? ' · <a href="' + esc(u.url) + '" target="_blank" rel="noopener">المصدر ↗</a>' : '') + '</div>'; }).join('') + '</details>';
   // 🧠 العقل: فجوات الخط الزمني = أفضل نافذة لبدء دوراتنا (لا منافس يبدأ نفس الدورة فيها)
   html += (d.gaps && d.gaps.length ? d.gaps.map(function (g) { return '<div class="card small" style="border-color:#24a148;padding:6px 10px;margin:4px 0">📆 <b>أفضل نافذة لبدء «' + esc(g.course) + '»: ' + esc(g.from) + ' ← ' + esc(g.to) + '</b> <span class="muted">— ' + esc(g.why) + '</span></div>'; }).join('')
     : '<div class="muted tiny" style="margin:4px 0">📆 العقل يبحث عن فجوات في الخط الزمني لاقتراح موعد بدء دوراتنا — يحتاج موعدَي بدء معروفين على الأقل لنفس الدورة عند المنافسين (أغلبهم لا ينشر مواعيده).</div>');
