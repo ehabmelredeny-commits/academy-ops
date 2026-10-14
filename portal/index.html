@@ -60,6 +60,8 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 .cert .accbox{border:.11cqw solid #e6d4a3;background:#fdf8ea;border-radius:1cqw;padding:.5cqw 1.6cqw;font-weight:700;color:#0B2D4B;font-size:1.45cqw}
 .cert .bot{position:absolute;bottom:5cqw;left:8cqw;right:8cqw;display:flex;justify-content:space-between;align-items:flex-end;font-size:1.3cqw;color:#444}
 .cert .sig{text-align:center;width:18.5cqw}.cert .sig .ln{border-top:.11cqw solid #777;margin-bottom:.4cqw;height:3cqw}.cert .sig img{display:block;height:4cqw;margin:0 auto -1cqw}
+.cert .bdg{position:absolute;top:5.2cqw;right:7cqw;width:8.6cqw;height:8.7cqw;background-size:contain;background-repeat:no-repeat;background-position:center;mix-blend-mode:multiply}
+.cert .sig{position:relative}.cert .stx{position:absolute;left:50%;bottom:1.2cqw;width:9.6cqw;height:9.9cqw;margin-left:-4.8cqw;background-size:cover;background-position:center;border-radius:50%;transform:rotate(-9deg);opacity:.88;mix-blend-mode:multiply;pointer-events:none}
 .cert .seal{width:10cqw;height:10cqw;border-radius:50%;background:radial-gradient(circle,#fff 0 52%,#D4A853 53% 57%,#fff 58% 63%,#0B2D4B 64% 68%,#D4A853 69%);display:flex;align-items:center;justify-content:center}
 .cert .seal i{width:5.2cqw;height:5.2cqw;border-radius:1cqw;background-size:cover;background-position:center}
 .cert .qrw{display:flex;gap:1.3cqw;align-items:center;text-align:start;line-height:1.6}.cert .qrw b{color:#0B2D4B;font-size:1.45cqw;direction:ltr;display:inline-block}
@@ -171,7 +173,7 @@ function drawCard(){var cv=$('mcard');if(!cv)return;var bg=new Image(),lg=new Im
     box(String(D.name||''),549);box(String(D.member_no||''),678,true);box(D.member_issued_at?String(D.member_issued_at).slice(0,10):'',791,true);
     x.fillStyle='#e8c76a';x.direction='rtl';x.textAlign='center';x.textBaseline='alphabetic';fit(B.name||'',540,40);x.fillText(B.name||'',1022,150);
     if(lg.complete&&lg.naturalWidth){x.save();[[1425,152],[165,786]].forEach(function(p){x.drawImage(lg,p[0]-62,p[1]-62,124,124)});x.restore()}};
-  var n=0,done=function(){if(++n===2)go()};bg.onload=lg.onload=done;bg.onerror=function(){};lg.onerror=done;bg.src=base+'member-card.webp';lg.src=B.icon_url||base+'logo-icon.png'}
+  var n=0,done=function(){if(++n===2)go()};bg.onload=lg.onload=done;bg.onerror=function(){};lg.onerror=done;bg.src=base+'member-card.png';lg.src=B.icon_url||base+'logo-icon.png'}
 function saveCard(){var cv=$('mcard');if(!cv)return;try{var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='membership-'+D.member_no+'.png';document.body.appendChild(a);a.click();a.remove()}catch(e){alert('اضغط مطوّلاً على البطاقة ثم «حفظ الصورة»')}}
 function studyCard(short){var u=E.cohort.classroom_url,a=u?'href="'+esc(u)+'" target="_blank" rel="noopener"':'href="#" onclick="alert(\'يُفتح فصل المذاكرة مع بداية البرنامج\');return false"';
   return '<div class="card"><h3>📚 المذاكرة والاختبارات</h3><div class="grid3"><a class="btn" '+a+' data-tip="كتب البرنامج (للعرض فقط) في Google Classroom"><span>📖</span>كتبي</a><a class="btn" '+a+' data-tip="الاختبارات القصيرة والنهائية — تُصحَّح تلقائياً"><span>📝</span>الاختبارات</a><a class="btn" '+a+' data-tip="المحاضرات والملخصات"><span>🎥</span>المحاضرات</a></div>'+
@@ -179,6 +181,8 @@ function studyCard(short){var u=E.cohort.classroom_url,a=u?'href="'+esc(u)+'" ta
 function certTeaser(){return '<div class="card" style="background:linear-gradient(135deg,#fff8e6,#fdf0cc);border:1px solid #ecd590;color:#3a2e00;text-align:center"><div style="font-size:28px">🏅</div><b>مبروك! شهادتك جاهزة</b><div><button class="btn g" style="margin-top:6px" onclick="go(\'cert\')">عرض الشهادة</button></div></div>'}
 function verifyUrl(){return (B.site||location.origin+location.pathname.replace(/portal\/?.*$/,''))+'verify/?c='+encodeURIComponent(E.cert.code)}
 function refUrl(){return (B.site||location.origin+location.pathname.replace(/portal\/?.*$/,''))+'register/?ref='+encodeURIComponent(D.ref_code)}
+// شارة كل برنامج من لوحة الهوية (assets/brand/badges/b01–b15) بالاسم
+function badgeNo(n){n=String(n||'');var s=/شخصي/.test(n)?(/مكثف/.test(n)?2:/أونلاين|اونلاين/.test(n)?4:/إنجليزي|انجليزي/.test(n)?3:1):/جماعي/.test(n)?(/إنجليزي|انجليزي/.test(n)?6:5):/للمجموعات|مجموعات/.test(n)?7:/الصالة|صالة/.test(n)?8:/منشآت|منشات|FCM/i.test(n)?9:/تصحيح/.test(n)?10:/أداء|اداء/.test(n)?11:/تغذية/.test(n)?12:/قيادة/.test(n)?13:/تصميم/.test(n)?14:/صحة|عافية/.test(n)?15:0;return s?('0'+s).slice(-2):''}
 function certFull(){var c=E.cert,v=verifyUrl(),y=new Date(c.issued_at),title=E.program.cert_title||E.program.name,rev=c.status!=='صالحة';
   var fem=D.gender==='أنثى'||(!D.gender&&E.cohort.gender==='نساء'),acc=E.program.accredited&&B.acc_logo_url,an=B.name||'الأكاديمية';
   var li='https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name='+encodeURIComponent(title)+'&organizationName='+encodeURIComponent(B.name_en||an)+'&issueYear='+y.getFullYear()+'&issueMonth='+(y.getMonth()+1)+'&certUrl='+encodeURIComponent(v)+'&certId='+encodeURIComponent(c.code);
@@ -187,15 +191,15 @@ function certFull(){var c=E.cert,v=verifyUrl(),y=new Date(c.issued_at),title=E.p
   var foot=[B.legal_name,B.license?'ترخيص التدريب '+B.license:'','للتحقق: '+v.replace('https://','')].filter(Boolean).join(' · ');
   return '<div class="card'+(rev?'':' printme')+'"><h3 class="noprint">🏅 شهادتي'+(rev?' <span class="chip cb">ملغاة</span>':'')+'</h3>'+
     '<div class="paper"><div class="cert'+(rev?' rev':'')+'"><div class="wm"'+bg(B.logo_url)+'></div><div class="f1"></div><div class="f2"></div><div class="cn tl"></div><div class="cn tr"></div><div class="cn bl"></div><div class="cn br"></div>'+
-    '<div class="in">'+(B.logo_url?'<div class="lg"'+bg(B.logo_url)+'></div>':'<div class="lgt">'+esc(an)+'</div>')+
+    (badgeNo(E.program.name)?'<div class="bdg" style="background-image:url('+esc((B.site||location.origin+location.pathname.split('portal')[0])+'brand/badges/b'+badgeNo(E.program.name)+'.png')+')"></div>':'')+'<div class="in">'+(B.logo_url?'<div class="lg"'+bg(B.logo_url)+'></div>':'<div class="lgt">'+esc(an)+'</div>')+
     '<h4>شهادة إتمام برنامج</h4><div class="h1en">Certificate of Completion</div>'+
     '<div class="t">تشهد '+esc(an)+' بأن '+(fem?'المتدربة':'المتدرب')+'</div><div class="nm">'+esc(D.name)+'</div>'+(D.name_en?'<div class="nmen">'+esc(D.name_en)+'</div>':'')+
     '<div class="p">'+(fem?'قد أتمّت':'قد أتمّ')+' بنجاح برنامج <b>«'+esc(title)+'»</b>'+(E.program.hours?' بإجمالي <b>'+E.program.hours+'</b> ساعة تدريبية':'')+'</div>'+
     (d1?'<div class="sub">من '+dAr(d1)+(d2?' إلى '+dAr(d2):'')+'</div>':'')+
     '<div class="acc">'+(acc?'<img src="'+esc(B.acc_logo_url)+'" alt="معهد إعداد القادة ووزارة الرياضة"><span class="accbox">'+esc(B.accreditation||'معتمدة من وزارة الرياضة ومعهد إعداد القادة (LDI)')+'</span>':'<span class="accbox">شهادة صادرة ومعتمدة من '+esc(an)+'</span>')+'</div></div>'+
-    '<div class="bot"><div class="sig">'+(B.sig_url?'<img src="'+esc(B.sig_url)+'" alt="">':'')+'<div class="ln"></div>مدير الأكاديمية</div>'+
+    '<div class="bot"><div class="sig">'+(B.stamp_url?'<i class="stx"'+bg(B.stamp_url)+'></i>':'')+(B.sig_url?'<img src="'+esc(B.sig_url)+'" alt="">':'')+'<div class="ln"></div>مدير الأكاديمية</div>'+
     '<div class="qrw"><div class="qr" id="qr" aria-label="رمز التحقق"></div><div>رقم الشهادة <b>'+esc(c.code)+'</b>'+(/^[A-Z]{1,4}-[0-9]{4,}$/.test(D.ref_code||'')?'<br>رقم العضوية <b>'+esc(D.ref_code)+'</b>':'')+'<br>الإصدار '+dAr(c.issued_at)+'</div></div>'+
-    '<div class="seal"><i'+bg(B.icon_url)+'></i></div><div class="sig"><div class="ln"></div>'+(fem?'المدربة المسؤولة':'المدرب المسؤول')+'</div></div>'+
+    (B.stamp_url?'':'<div class="seal"><i'+bg(B.icon_url)+'></i></div>')+'<div class="sig"><div class="ln"></div>'+(fem?'المدربة المسؤولة':'المدرب المسؤول')+'</div></div>'+
     '<div class="foot2">'+esc(foot)+'</div></div></div>'+
     (rev?'':'<div class="share noprint"><button class="btn g" onclick="window.print()" data-tip="آيفون: اختر «طباعة» ثم «حفظ PDF» أو شارك — لابتوب: «حفظ بصيغة PDF»">⬇ PDF</button><a class="btn" target="_blank" rel="noopener" href="'+esc(li)+'" data-tip="يضيف الشهادة لقسم الشهادات في ملفك على LinkedIn">in LinkedIn</a>'+
     '<a class="btn" target="_blank" rel="noopener" href="https://x.com/intent/post?text='+encodeURIComponent(txt)+'" data-tip="انشرها على X">𝕏</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(txt)+'" data-tip="أرسلها على واتساب">💬</a>'+
