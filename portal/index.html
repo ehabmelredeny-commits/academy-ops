@@ -123,7 +123,7 @@ function render(){
         (st?'<span class="dots"><span class="s'+st+'">'+({P:'✓',L:'⏱',A:'✗',E:'ع'})[st]+'</span></span>':s.day<t?'<span class="xs mut">—</span>':'<span class="xs mut">قادمة</span>')+'</div>'}).join(''):'<div class="empty">يُعلن الجدول قريباً</div>')+
       '<div class="xs mut" style="margin-top:6px">✓ حاضر · ⏱ متأخر (يُحسب حضوراً) · ع عذر مقبول · ✗ غائب</div></div>';
   } else if(PANE==='study'){
-    html+=studyCard(false)+'<div id="stl"></div>';
+    html+=studyCard(false)+'<div id="stl"></div><div id="qz"></div>';
     html+='<div class="card"><h3>🧾 درجاتي</h3>'+((E.assessments||[]).length?E.assessments.map(function(x){return '<div class="row"><span>'+esc(x.name)+' <span class="xs mut">('+Number(x.weight)+'%)</span>'+(x.attempts>1?' <span class="chip cw">'+x.attempts+' محاولات</span>':'')+'</span>'+(x.best==null?'<span class="chip">لم يُجرَ</span>':'<b>'+Number(x.best)+' / '+Number(x.max)+'</b>')+'</div>'}).join(''):'<div class="sm mut">تُعلن التقييمات مع بداية البرنامج</div>')+
       '<div class="xs mut" style="margin-top:6px">النجاح '+r.pass_min+'% · تُحتسب أفضل محاولة · لك '+r.retake_free+' إعادة مجاناً بعد المحاولة الأساسية، بعدها '+r.retake_fee_pct+'% من سعر الدورة لكل إعادة</div></div><div id="rtk"></div>';
   } else if(PANE==='cert'){
@@ -178,34 +178,64 @@ function saveCard(){var cv=$('mcard');if(!cv)return;try{var a=document.createEle
 var STUDY=null;
 function myLessons(){return (STUDY||[]).filter(function(x){return E&&x.cohort===E.cohort.name})}
 /* الدروس داخل البوابة: الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · الاختبار يُصحَّح في القاعدة */
-function openLesson(id,b){var w=window.open('','_blank');b.disabled=true;
-  fetch(EXEC+'?public=study',{method:'POST',body:JSON.stringify({token:SESS,lesson:id})}).then(function(r){return r.json()}).then(function(j){b.disabled=false;if(!j.ok)throw new Error(j.error);
-    var bin=atob(j.b64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);var url=URL.createObjectURL(new Blob([u8],{type:j.mime||'application/pdf'}));if(w)w.location=url;else location.href=url})
-  .catch(function(e){b.disabled=false;if(w)w.close();alert(e.message||'تعذّر فتح الدرس')})}
+/* المذاكرة (تصميم معتمد 2026-10-14 docs/mockup-study-flow.png): خريطة رحلة ← قراءة داخل البوابة (pdf.js، بلا تنزيل) ← إقرار ← اختبار سؤال بسؤال ← نتيجة تفتح التالي.
+   الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · القفل والتصحيح في القاعدة · إعادة اختبار الفصل مفتوحة بلا حد حتى النجاح */
+var PDFS={},RD={cur:null,doc:null,pg:1};
+function ls_(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function lessonsUI(){var el=$('stl');if(!el)return;var ls=myLessons();if(!ls.length){el.innerHTML='';return}
-  el.innerHTML='<div class="card"><h3>📖 دروسي</h3>'+ls.map(function(x){var st=!x.open?'🔒':x.done?'✅':'🟡';
-    var acts=!x.open?'<span class="xs mut">اجتز الدرس السابق أولاً</span>':(x.has_file?'<button class="btn" onclick="openLesson(\''+x.id+'\',this)" data-tip="عرض الدرس">📖</button> ':'')+
-      (x.gate==='ack'?(x.done?'':'<button class="btn" onclick="ackShow(\''+x.id+'\')" data-tip="الموافقة على نظام المذاكرة لفتح الفصل التالي">✍️</button>'):x.questions?'<button class="btn" onclick="quiz(\''+x.id+'\')" data-tip="'+x.questions+' أسئلة — تصحيح فوري">📝</button>':'');
-    return '<div class="row"><span>'+st+' '+esc(x.title)+(x.demo?' <span class="chip cw">تجريبي</span>':'')+(x.gate!=='ack'&&x.tries?' <span class="xs mut">أفضل نتيجة '+Number(x.best)+'%</span>':'')+'</span><span>'+acts+'</span></div>'}).join('')+
-    '<div class="xs mut" style="margin-top:6px">تُفتح الفصول بالتدرّج: اجتياز اختبار الفصل يفتح التالي · للعرض فقط — المحتوى ملك الأكاديمية ولا يجوز نسخه أو مشاركته</div></div><div id="qz"></div>'}
-function reStudy(){rpc('ac_study',{token:SESS}).then(function(x){STUDY=x||[];lessonsUI()})}
-function ackShow(id){var x=myLessons().filter(function(l){return l.id===id})[0],el=$('qz');
-  el.innerHTML='<div class="card"><h3>✍️ الموافقة على نظام المذاكرة</h3><div style="white-space:pre-line;line-height:1.9">'+esc(x.ack_text||'')+'</div><label style="display:block;margin:10px 0"><input type="checkbox" id="ackc"> قرأت وأوافق</label><button class="btn" id="ackb">✅ موافق — افتح الفصل التالي</button></div>';
-  el.scrollIntoView({behavior:'smooth'});
-  $('ackb').onclick=function(){if(!$('ackc').checked){alert('ضع علامة «قرأت وأوافق» أولاً');return}this.disabled=true;
-    rpc('ac_lesson_ack',{token:SESS,lesson:id}).then(function(r){if(r.preview)alert('معاينة — لا تُحفظ الموافقة');reStudy()}).catch(function(e){alert(e.message)})}}
+  var done=ls.filter(function(x){return x.done}).length,cur=ls.filter(function(x){return x.open&&!x.done})[0];
+  el.innerHTML='<div class="card"><h3>📚 رحلتي في البرنامج</h3><div style="height:8px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i style="display:block;height:100%;width:'+Math.round(done*100/ls.length)+'%;background:#D4A853"></i></div>'+
+    '<div class="xs mut">أنجزت '+done+' من '+ls.length+(cur?' · التالي: '+esc(cur.title):' · أنهيت كل الدروس المتاحة 🎉')+'</div>'+
+    ls.map(function(x){var ic=!x.open?'🔒':x.done?'✅':'▶️',sub=!x.open?'يُفتح بعد اجتياز الدرس السابق':x.gate==='ack'?(x.done?'وافقت على نظام المذاكرة':'اقرأ ثم وافق على نظام المذاكرة'):(x.questions?'اختبار '+x.questions+' أسئلة'+(x.tries?' · أفضل نتيجة '+Number(x.best)+'%':''):'');
+      return '<div data-id="'+x.id+'" onclick="'+(x.open?'stOpen(this.dataset.id)':'')+'" style="display:flex;gap:10px;align-items:center;padding:10px;margin:6px 0;border-radius:12px;cursor:'+(x.open?'pointer':'default')+';opacity:'+(x.open?1:.6)+';border:'+(cur&&cur.id===x.id?'2px solid #D4A853':'1px solid rgba(127,127,127,.25)')+'">'+
+        '<span style="font-size:20px">'+ic+'</span><span style="flex:1"><b>'+esc(x.title)+'</b>'+(x.demo?' <span class="chip cw">تجريبي</span>':'')+'<div class="xs mut">'+sub+'</div></span></div>'}).join('')+
+    (cur?'<button class="btn" style="width:100%;margin-top:6px" data-id="'+cur.id+'" onclick="stOpen(this.dataset.id)">▶ تابع من حيث توقفت</button>':'')+
+    '<div class="xs mut" style="margin-top:6px">النجاح '+(window.PASS||70)+'% · إعادة اختبار الفصل مفتوحة بلا حد ولا رسوم حتى تنجح (اختبار آخر الدورة له نظامه) · المحتوى ملك الأكاديمية ولا يجوز نسخه أو مشاركته</div></div>'}
+function reStudy(cb){rpc('ac_study',{token:SESS}).then(function(x){STUDY=x||[];lessonsUI();if(cb)cb()})}
+function lessonById(id){return myLessons().filter(function(l){return l.id===id})[0]}
+function pdfLib(){return window.pdfjsLib?Promise.resolve(window.pdfjsLib):new Promise(function(ok,no){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  s.onload=function(){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';ok(pdfjsLib)};s.onerror=function(){no(new Error('تعذّر تحميل قارئ الدروس'))};document.head.appendChild(s)})}
+function pdfBytes(id){if(PDFS[id])return Promise.resolve(PDFS[id]);
+  return fetch(EXEC+'?public=study',{method:'POST',body:JSON.stringify({token:SESS,lesson:id})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'تعذّر فتح الدرس');
+    var bin=atob(j.b64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);PDFS[id]=u8;return u8})}
+function stOpen(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
+  el.innerHTML='<div class="card" oncontextmenu="return false"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+esc(x.title)+'</b><button class="btn" onclick="$(\'qz\').innerHTML=\'\'" data-tip="إغلاق">✕</button></div>'+
+    '<div class="xs mut" id="rdi">جارٍ فتح الدرس…</div><div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i id="rdb" style="display:block;height:100%;width:0;background:#D4A853"></i></div>'+
+    '<div style="background:#fff;border-radius:8px;overflow:hidden;min-height:200px;user-select:none;-webkit-user-select:none"><canvas id="rdc" style="width:100%;display:block"></canvas></div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1" onclick="rdGo(-1)">→ السابقة</button><button class="btn" style="flex:1" onclick="rdGo(1)">التالية ←</button></div><div id="rde"></div></div>';
+  el.scrollIntoView({behavior:'smooth'});RD={cur:x,doc:null,pg:Number(ls_('rdp_'+id))||1};
+  Promise.all([pdfLib(),x.has_file?pdfBytes(id):Promise.resolve(null)]).then(function(a){if(!a[1]){rdEnd();$('rdi').textContent='لا ملف لهذا الدرس';return}
+    return a[0].getDocument({data:a[1].slice()}).promise.then(function(doc){RD.doc=doc;if(RD.pg>doc.numPages)RD.pg=1;rdDraw()})}).catch(function(e){$('rdi').textContent=e.message||'تعذّر فتح الدرس'})}
+function rdGo(d){if(!RD.doc)return;var n=RD.pg+d;if(n<1||n>RD.doc.numPages)return;RD.pg=n;rdDraw();$('rdc').scrollIntoView({block:'start',behavior:'smooth'})}
+function rdDraw(){var doc=RD.doc,id=RD.cur.id;doc.getPage(RD.pg).then(function(p){var c=$('rdc');if(!c)return;var w=c.parentNode.clientWidth||340,v1=p.getViewport({scale:1}),sc=w/v1.width*(window.devicePixelRatio||1),v=p.getViewport({scale:sc});
+  c.width=v.width;c.height=v.height;p.render({canvasContext:c.getContext('2d'),viewport:v});
+  $('rdi').textContent='صفحة '+RD.pg+' من '+doc.numPages;$('rdb').style.width=Math.round(RD.pg*100/doc.numPages)+'%';ls_('rdp_'+id,String(RD.pg));
+  if(RD.pg===doc.numPages){ls_('rd_'+id,'1');rdEnd()}else $('rde').innerHTML=''})}
+function rdEnd(){var x=RD.cur,el=$('rde');if(!el)return;
+  if(x.gate==='ack'){el.innerHTML=x.done?'<div class="xs mut" style="margin-top:8px">✅ وافقت على نظام المذاكرة</div>':'<div class="card" style="margin-top:10px"><b>✍️ الموافقة على نظام المذاكرة</b><div style="white-space:pre-line;line-height:1.9;margin:6px 0">'+esc(x.ack_text||'')+'</div><label style="display:block;margin:8px 0"><input type="checkbox" id="ackc"> قرأت وأوافق</label><button class="btn" style="width:100%" data-id="'+x.id+'" onclick="ackGo(this)">✅ موافق — افتح الفصل التالي</button></div>';return}
+  if(x.questions)el.innerHTML='<button class="btn" style="width:100%;margin-top:10px" data-id="'+x.id+'" onclick="quiz(this.dataset.id)">✅ أنهيت الفصل — ابدأ الاختبار</button>'}
+function ackGo(b){if(!$('ackc').checked){alert('ضع علامة «قرأت وأوافق» أولاً');return}b.disabled=true;var id=b.dataset.id;
+  rpc('ac_lesson_ack',{token:SESS,lesson:id}).then(function(r){if(r.preview)alert('معاينة — لا تُحفظ الموافقة');reStudy(function(){var n=myLessons().filter(function(l){return l.open&&!l.done})[0];if(n)stOpen(n.id)})}).catch(function(e){b.disabled=false;alert(e.message)})}
 function bi(o){return typeof o==='string'?esc(o):'<span dir="ltr" style="display:block;text-align:left">'+esc(o.en)+'</span><span style="display:block" class="mut">'+esc(o.ar)+'</span>'}
-function quiz(id){var el=$('qz');el.innerHTML='<div class="card">جارٍ التحميل…</div>';el.scrollIntoView({behavior:'smooth'});
-  rpc('ac_quiz_get',{token:SESS,lesson:id}).then(function(qs){el.innerHTML='<div class="card"><h3>📝 الاختبار · Quiz</h3>'+qs.map(function(q,i){return '<div style="margin:14px 0;padding-bottom:10px;border-bottom:1px solid #eee"><b>'+(i+1)+'.</b> '+bi(q.q_en?{en:q.q_en,ar:q.q}:q.q)+
-      q.choices.map(function(c,j){return '<label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0"><input type="radio" name="q'+q.id+'" value="'+j+'" style="margin-top:4px"> <span><b>'+'ABCD'[j]+'.</b> '+bi(c)+'</span></label>'}).join('')+'<div id="w'+q.id+'" class="xs"></div></div>'}).join('')+
-    '<button class="btn" id="qsub">✅ سلّم الإجابات · Submit</button></div>';
-    $('qsub').onclick=function(){var a={},miss=0;qs.forEach(function(q){var c=document.querySelector('input[name="q'+q.id+'"]:checked');if(c)a[q.id]=Number(c.value);else miss++});if(miss&&!confirm('بقي '+miss+' سؤال بلا إجابة — تسليم؟'))return;this.disabled=true;
-      rpc('ac_quiz_submit',{token:SESS,lesson:id,answers:a}).then(function(r){r.items.forEach(function(x,i){var q=qs[i],mine=a[x.id],n=(x.notes||{})[mine];
-          $('w'+x.id).innerHTML='<div style="margin-top:6px;padding:8px;border-radius:8px;background:'+(x.ok?'#eaf7ee':'#fdeeee')+'">'+(x.ok?'✅ صحيح · Correct':'❌ الإجابة الصحيحة · Correct answer: <b>'+'ABCD'[x.correct]+'</b>')+
-          (!x.ok&&n?'<div style="margin-top:4px"><b>لماذا اختيارك خاطئ:</b> '+bi(n)+'</div>':'')+(x.why||x.why_en?'<div style="margin-top:4px"><b>التعليل:</b> '+bi(x.why_en?{en:x.why_en,ar:x.why}:x.why)+'</div>':'')+'</div>'});
-        $('qsub').outerHTML='<div class="card" style="text-align:center"><b style="font-size:22px">'+r.score+'%</b> — '+r.right+' من '+r.total+(r.pass?' · ناجح ✅ فُتح الفصل التالي':' · لم تجتز — راجع الفصل وأعد المحاولة')+(r.preview?'<div class="xs mut">معاينة — لا تُحفظ</div>':'')+'</div>';
-        rpc('ac_study',{token:SESS}).then(function(x){STUDY=x||[]})})
-      .catch(function(e){alert(e.message)})}}).catch(function(e){el.innerHTML='';alert(e.message)})}
+var QZ=null;
+function quiz(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
+  if(!ls_('rd_'+id)){el.innerHTML='<div class="card" style="border:1px solid #D4A853"><b>قبل الاختبار</b><p style="line-height:1.9">لم تُكمل قراءة الفصل بعد.<br>أقرّ أنني اطّلعت على «'+esc(x.title)+'» كاملاً وأوافق على دخول الاختبار.</p>'+
+    '<button class="btn" style="width:100%" data-id="'+id+'" onclick="ls_(\'rd_\'+this.dataset.id,\'1\');quiz(this.dataset.id)">✍️ أقرّ وأبدأ</button><button class="btn" style="width:100%;margin-top:6px" data-id="'+id+'" onclick="stOpen(this.dataset.id)">📖 أكمل القراءة أولاً</button></div>';el.scrollIntoView({behavior:'smooth'});return}
+  el.innerHTML='<div class="card">جارٍ التحميل…</div>';el.scrollIntoView({behavior:'smooth'});
+  rpc('ac_quiz_get',{token:SESS,lesson:id}).then(function(qs){QZ={id:id,qs:qs,i:0,a:{}};qzDraw()}).catch(function(e){el.innerHTML='';alert(e.message)})}
+function qzDraw(){var q=QZ.qs[QZ.i],n=QZ.qs.length,el=$('qz');
+  el.innerHTML='<div class="card"><b>📝 '+esc(lessonById(QZ.id).title)+'</b><div class="xs mut">السؤال '+(QZ.i+1)+' من '+n+'</div><div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i style="display:block;height:100%;width:'+Math.round((QZ.i+1)*100/n)+'%;background:#D4A853"></i></div>'+
+    '<div style="margin:10px 0">'+bi(q.q_en?{en:q.q_en,ar:q.q}:q.q)+'</div>'+q.choices.map(function(c,j){var on=QZ.a[q.id]===j;return '<div data-j="'+j+'" onclick="QZ.a[QZ.qs[QZ.i].id]=Number(this.dataset.j);qzDraw()" style="cursor:pointer;padding:9px;margin:7px 0;border-radius:10px;border:'+(on?'2px solid #D4A853':'1px solid rgba(127,127,127,.3)')+'"><b>'+'ABCD'[j]+'.</b> '+bi(c)+'</div>'}).join('')+
+    '<div style="display:flex;gap:8px;margin-top:8px">'+(QZ.i?'<button class="btn" style="flex:1" onclick="QZ.i--;qzDraw()">→ السابق</button>':'')+(QZ.i<n-1?'<button class="btn" style="flex:1" onclick="QZ.i++;qzDraw()">التالي ←</button>':'<button class="btn" style="flex:1" id="qsub" onclick="qzSubmit()">✅ سلّم الإجابات</button>')+'</div></div>'}
+function qzSubmit(){var miss=QZ.qs.filter(function(q){return QZ.a[q.id]===undefined}).length;if(miss&&!confirm('بقي '+miss+' سؤال بلا إجابة — تسليم؟'))return;$('qsub').disabled=true;
+  rpc('ac_quiz_submit',{token:SESS,lesson:QZ.id,answers:QZ.a}).then(function(r){var wrong=r.items.map(function(x,i){return {x:x,q:QZ.qs[i]}}).filter(function(o){return !o.x.ok});
+    var rev=wrong.map(function(o){var mine=QZ.a[o.x.id],n=(o.x.notes||{})[mine];return '<div style="margin:8px 0;padding:8px;border-radius:10px;border:1px solid #c0504d"><div>'+bi(o.q.q_en?{en:o.q.q_en,ar:o.q.q}:o.q.q)+'</div>'+
+      '<div class="xs" style="margin-top:4px">❌ اخترت: '+(mine===undefined?'—':'ABCD'[mine])+' · ✅ الصحيح: <b>'+'ABCD'[o.x.correct]+'</b> — '+bi(o.q.choices[o.x.correct])+'</div>'+(n?'<div class="xs" style="margin-top:4px"><b>لماذا اختيارك خاطئ:</b> '+bi(n)+'</div>':'')+(o.x.why||o.x.why_en?'<div class="xs" style="margin-top:4px"><b>التعليل:</b> '+bi(o.x.why_en?{en:o.x.why_en,ar:o.x.why}:o.x.why)+'</div>':'')+'</div>'}).join('');
+    $('qz').innerHTML='<div class="card" style="text-align:center"><div style="font-size:40px">'+(r.pass?'🎉':'📖')+'</div><b style="font-size:28px">'+r.score+'%</b><div>'+r.right+' من '+r.total+(r.pass?' · ناجح':' · تحتاج '+(window.PASS||70)+'%')+'</div>'+(r.preview?'<div class="xs mut">معاينة — لا تُحفظ</div>':'')+'</div>'+
+      (rev?'<div class="card"><b>راجع إجاباتك الخاطئة</b>'+rev+'</div>':'')+
+      (r.pass?'<button class="btn" style="width:100%" onclick="reStudy(function(){var n=myLessons().filter(function(l){return l.open&&!l.done})[0];if(n)stOpen(n.id);else $(\'qz\').innerHTML=\'\'})">▶ ابدأ الدرس التالي</button>':
+        '<div class="card"><div class="xs mut">راجع الفصل وأعد المحاولة — الإعادة مفتوحة بلا حد حتى تنجح</div><button class="btn" style="width:100%;margin-top:6px" onclick="quiz(QZ.id)">🔁 أعد الاختبار</button><button class="btn" style="width:100%;margin-top:6px" onclick="stOpen(QZ.id)">📖 راجع الفصل</button></div>');
+    reStudy()}).catch(function(e){$('qsub').disabled=false;alert(e.message)})}
 function studyCard(short){var u=E.cohort.classroom_url,started=E.cohort.start_date&&E.cohort.start_date<=today(),msg=started?'فصل المذاكرة قيد التجهيز — يصلك إشعار فور ربطه':'يُفتح فصل المذاكرة مع بداية البرنامج',ls=myLessons(),a=u?'href="'+esc(u)+'" target="_blank" rel="noopener"':ls.length?'href="#" onclick="go(\'study\');return false"':'href="#" onclick="alert(this.dataset.m);return false" data-m="'+esc(msg)+'"';
   return '<div class="card"><h3>📚 المذاكرة والاختبارات</h3><div class="grid3"><a class="btn" '+a+' data-tip="كتب البرنامج (للعرض فقط) في Google Classroom"><span>📖</span>كتبي</a><a class="btn" '+a+' data-tip="الاختبارات القصيرة والنهائية — تُصحَّح تلقائياً"><span>📝</span>الاختبارات</a><a class="btn" '+a+' data-tip="المحاضرات والملخصات"><span>🎥</span>المحاضرات</a></div>'+
     '<div class="xs mut" style="margin-top:6px">'+(u?'يفتح في Google Classroom بحسابك':ls.length?ls.length+' درس داخل البوابة':'⏳ '+msg)+' · المحتوى ملك الأكاديمية ولا يجوز نسخه أو مشاركته</div></div>'}
