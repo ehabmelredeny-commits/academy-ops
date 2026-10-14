@@ -77,7 +77,7 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function rpc(fn,body){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('تعذّر الاتصال');return r.json()})}
-var BDEF={name:'ميزان التدريب',icon_url:'../brand/logo-icon.png'};
+var BDEF={name:'أكاديمية السعد الرياضية',icon_url:'../brand/logo-icon.png'};
 function pub(v){return v&&!/قيد الإصدار/.test(v)?v:''}
 /** الهوية: إعدادات الأكاديمي أولاً، والفارغ يُكمَّل من بيانات المنشأة في النظام الأساسي */
 function brandMerge(b){b=b||{};var ctl=window.AbortController?new AbortController():null;if(ctl)setTimeout(function(){ctl.abort()},8000);return fetch(EXEC+'?public=config',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{},z=c.biz||{};
