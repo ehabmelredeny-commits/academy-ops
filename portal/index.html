@@ -178,20 +178,33 @@ function saveCard(){var cv=$('mcard');if(!cv)return;try{var a=document.createEle
 var STUDY=null;
 function myLessons(){return (STUDY||[]).filter(function(x){return E&&x.cohort===E.cohort.name})}
 /* الدروس داخل البوابة: الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · الاختبار يُصحَّح في القاعدة */
-function lessonsUI(){var el=$('stl');if(!el)return;var ls=myLessons();if(!ls.length){el.innerHTML='';return}
-  el.innerHTML='<div class="card"><h3>📖 دروسي</h3>'+ls.map(function(x){return '<div class="row"><span>'+esc(x.title)+(x.demo?' <span class="chip cw">تجريبي</span>':'')+(x.tries?' <span class="xs mut">أفضل نتيجة '+Number(x.best)+'%</span>':'')+'</span><span>'+
-    (x.has_file?'<button class="btn" onclick="openLesson(\''+x.id+'\',this)" data-tip="عرض الدرس">📖</button> ':'')+(x.questions?'<button class="btn" onclick="quiz(\''+x.id+'\')" data-tip="'+x.questions+' أسئلة — تصحيح فوري">📝</button>':'')+'</span></div>'}).join('')+
-    '<div class="xs mut" style="margin-top:6px">للعرض فقط — المحتوى ملك الأكاديمية ولا يجوز نسخه أو مشاركته</div></div><div id="qz"></div>'}
 function openLesson(id,b){var w=window.open('','_blank');b.disabled=true;
   fetch(EXEC+'?public=study',{method:'POST',body:JSON.stringify({token:SESS,lesson:id})}).then(function(r){return r.json()}).then(function(j){b.disabled=false;if(!j.ok)throw new Error(j.error);
     var bin=atob(j.b64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);var url=URL.createObjectURL(new Blob([u8],{type:j.mime||'application/pdf'}));if(w)w.location=url;else location.href=url})
   .catch(function(e){b.disabled=false;if(w)w.close();alert(e.message||'تعذّر فتح الدرس')})}
+function lessonsUI(){var el=$('stl');if(!el)return;var ls=myLessons();if(!ls.length){el.innerHTML='';return}
+  el.innerHTML='<div class="card"><h3>📖 دروسي</h3>'+ls.map(function(x){var st=!x.open?'🔒':x.done?'✅':'🟡';
+    var acts=!x.open?'<span class="xs mut">اجتز الدرس السابق أولاً</span>':(x.has_file?'<button class="btn" onclick="openLesson(\''+x.id+'\',this)" data-tip="عرض الدرس">📖</button> ':'')+
+      (x.gate==='ack'?(x.done?'':'<button class="btn" onclick="ackShow(\''+x.id+'\')" data-tip="الموافقة على نظام المذاكرة لفتح الفصل التالي">✍️</button>'):x.questions?'<button class="btn" onclick="quiz(\''+x.id+'\')" data-tip="'+x.questions+' أسئلة — تصحيح فوري">📝</button>':'');
+    return '<div class="row"><span>'+st+' '+esc(x.title)+(x.demo?' <span class="chip cw">تجريبي</span>':'')+(x.gate!=='ack'&&x.tries?' <span class="xs mut">أفضل نتيجة '+Number(x.best)+'%</span>':'')+'</span><span>'+acts+'</span></div>'}).join('')+
+    '<div class="xs mut" style="margin-top:6px">تُفتح الفصول بالتدرّج: اجتياز اختبار الفصل يفتح التالي · للعرض فقط — المحتوى ملك الأكاديمية ولا يجوز نسخه أو مشاركته</div></div><div id="qz"></div>'}
+function reStudy(){rpc('ac_study',{token:SESS}).then(function(x){STUDY=x||[];lessonsUI()})}
+function ackShow(id){var x=myLessons().filter(function(l){return l.id===id})[0],el=$('qz');
+  el.innerHTML='<div class="card"><h3>✍️ الموافقة على نظام المذاكرة</h3><div style="white-space:pre-line;line-height:1.9">'+esc(x.ack_text||'')+'</div><label style="display:block;margin:10px 0"><input type="checkbox" id="ackc"> قرأت وأوافق</label><button class="btn" id="ackb">✅ موافق — افتح الفصل التالي</button></div>';
+  el.scrollIntoView({behavior:'smooth'});
+  $('ackb').onclick=function(){if(!$('ackc').checked){alert('ضع علامة «قرأت وأوافق» أولاً');return}this.disabled=true;
+    rpc('ac_lesson_ack',{token:SESS,lesson:id}).then(function(r){if(r.preview)alert('معاينة — لا تُحفظ الموافقة');reStudy()}).catch(function(e){alert(e.message)})}}
+function bi(o){return typeof o==='string'?esc(o):'<span dir="ltr" style="display:block;text-align:left">'+esc(o.en)+'</span><span style="display:block" class="mut">'+esc(o.ar)+'</span>'}
 function quiz(id){var el=$('qz');el.innerHTML='<div class="card">جارٍ التحميل…</div>';el.scrollIntoView({behavior:'smooth'});
-  rpc('ac_quiz_get',{token:SESS,lesson:id}).then(function(qs){el.innerHTML='<div class="card"><h3>📝 الاختبار</h3>'+qs.map(function(q,i){return '<div style="margin:10px 0"><b>'+(i+1)+'. '+esc(q.q)+'</b>'+q.choices.map(function(c,j){return '<label style="display:block;margin:4px 0"><input type="radio" name="q'+q.id+'" value="'+j+'"> '+esc(c)+'</label>'}).join('')+'<div id="w'+q.id+'" class="xs"></div></div>'}).join('')+
-    '<button class="btn" id="qsub">✅ سلّم الإجابات</button></div>';
+  rpc('ac_quiz_get',{token:SESS,lesson:id}).then(function(qs){el.innerHTML='<div class="card"><h3>📝 الاختبار · Quiz</h3>'+qs.map(function(q,i){return '<div style="margin:14px 0;padding-bottom:10px;border-bottom:1px solid #eee"><b>'+(i+1)+'.</b> '+bi(q.q_en?{en:q.q_en,ar:q.q}:q.q)+
+      q.choices.map(function(c,j){return '<label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0"><input type="radio" name="q'+q.id+'" value="'+j+'" style="margin-top:4px"> <span><b>'+'ABCD'[j]+'.</b> '+bi(c)+'</span></label>'}).join('')+'<div id="w'+q.id+'" class="xs"></div></div>'}).join('')+
+    '<button class="btn" id="qsub">✅ سلّم الإجابات · Submit</button></div>';
     $('qsub').onclick=function(){var a={},miss=0;qs.forEach(function(q){var c=document.querySelector('input[name="q'+q.id+'"]:checked');if(c)a[q.id]=Number(c.value);else miss++});if(miss&&!confirm('بقي '+miss+' سؤال بلا إجابة — تسليم؟'))return;this.disabled=true;
-      rpc('ac_quiz_submit',{token:SESS,lesson:id,answers:a}).then(function(r){r.items.forEach(function(x,i){var q=qs[i];$('w'+x.id).innerHTML=(x.ok?'✅ صحيح':'❌ الصحيح: '+esc(q.choices[x.correct]))+(x.why?'<div class="mut">'+esc(x.why)+'</div>':'')});
-        $('qsub').outerHTML='<div class="card" style="text-align:center"><b style="font-size:22px">'+r.score+'%</b> — '+r.right+' من '+r.total+(r.pass?' · ناجح ✅':' · أعد المحاولة بعد مراجعة الدرس')+(r.preview?'<div class="xs mut">معاينة — لا تُحفظ</div>':'')+'</div>';STUDY=null;rpc('ac_study',{token:SESS}).then(function(x){STUDY=x||[]})})
+      rpc('ac_quiz_submit',{token:SESS,lesson:id,answers:a}).then(function(r){r.items.forEach(function(x,i){var q=qs[i],mine=a[x.id],n=(x.notes||{})[mine];
+          $('w'+x.id).innerHTML='<div style="margin-top:6px;padding:8px;border-radius:8px;background:'+(x.ok?'#eaf7ee':'#fdeeee')+'">'+(x.ok?'✅ صحيح · Correct':'❌ الإجابة الصحيحة · Correct answer: <b>'+'ABCD'[x.correct]+'</b>')+
+          (!x.ok&&n?'<div style="margin-top:4px"><b>لماذا اختيارك خاطئ:</b> '+bi(n)+'</div>':'')+(x.why||x.why_en?'<div style="margin-top:4px"><b>التعليل:</b> '+bi(x.why_en?{en:x.why_en,ar:x.why}:x.why)+'</div>':'')+'</div>'});
+        $('qsub').outerHTML='<div class="card" style="text-align:center"><b style="font-size:22px">'+r.score+'%</b> — '+r.right+' من '+r.total+(r.pass?' · ناجح ✅ فُتح الفصل التالي':' · لم تجتز — راجع الفصل وأعد المحاولة')+(r.preview?'<div class="xs mut">معاينة — لا تُحفظ</div>':'')+'</div>';
+        rpc('ac_study',{token:SESS}).then(function(x){STUDY=x||[]})})
       .catch(function(e){alert(e.message)})}}).catch(function(e){el.innerHTML='';alert(e.message)})}
 function studyCard(short){var u=E.cohort.classroom_url,started=E.cohort.start_date&&E.cohort.start_date<=today(),msg=started?'فصل المذاكرة قيد التجهيز — يصلك إشعار فور ربطه':'يُفتح فصل المذاكرة مع بداية البرنامج',ls=myLessons(),a=u?'href="'+esc(u)+'" target="_blank" rel="noopener"':ls.length?'href="#" onclick="go(\'study\');return false"':'href="#" onclick="alert(this.dataset.m);return false" data-m="'+esc(msg)+'"';
   return '<div class="card"><h3>📚 المذاكرة والاختبارات</h3><div class="grid3"><a class="btn" '+a+' data-tip="كتب البرنامج (للعرض فقط) في Google Classroom"><span>📖</span>كتبي</a><a class="btn" '+a+' data-tip="الاختبارات القصيرة والنهائية — تُصحَّح تلقائياً"><span>📝</span>الاختبارات</a><a class="btn" '+a+' data-tip="المحاضرات والملخصات"><span>🎥</span>المحاضرات</a></div>'+
