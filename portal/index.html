@@ -196,11 +196,12 @@ function lessonById(id){return myLessons().filter(function(l){return l.id===id})
 function pdfLib(){return window.pdfjsLib?Promise.resolve(window.pdfjsLib):new Promise(function(ok,no){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
   s.onload=function(){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';ok(pdfjsLib)};s.onerror=function(){no(new Error('تعذّر تحميل قارئ الدروس'))};document.head.appendChild(s)})}
 function pdfBytes(id){if(PDFS[id])return Promise.resolve(PDFS[id]);
-  return fetch(EXEC+'?public=study',{method:'POST',body:JSON.stringify({token:SESS,lesson:id})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'تعذّر فتح الدرس');
+  var get=function(){return fetch(EXEC+'?public=study',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SESS,lesson:id})}).then(function(r){return r.json()})};
+  return get().catch(function(){return get()}).then(function(j){if(!j.ok)throw new Error(j.error||'تعذّر فتح الدرس');
     var bin=atob(j.b64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);PDFS[id]=u8;return u8})}
 function stOpen(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
   el.innerHTML='<div class="card" oncontextmenu="return false"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+esc(x.title)+'</b><button class="btn" onclick="$(\'qz\').innerHTML=\'\'" data-tip="إغلاق">✕</button></div>'+
-    '<div class="xs mut" id="rdi">جارٍ فتح الدرس…</div><div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i id="rdb" style="display:block;height:100%;width:0;background:#D4A853"></i></div>'+
+    '<div class="xs mut" id="rdi">⏳ جارٍ تحميل الدرس — قد يأخذ حتى ٢٠ ثانية أول مرة</div><div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i id="rdb" style="display:block;height:100%;width:0;background:#D4A853"></i></div>'+
     '<div style="background:#fff;border-radius:8px;overflow:hidden;min-height:200px;user-select:none;-webkit-user-select:none"><canvas id="rdc" style="width:100%;display:block"></canvas></div>'+
     '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1" onclick="rdGo(-1)">→ السابقة</button><button class="btn" style="flex:1" onclick="rdGo(1)">التالية ←</button></div><div id="rde"></div></div>';
   el.scrollIntoView({behavior:'smooth'});RD={cur:x,doc:null,pg:Number(ls_('rdp_'+id))||1};
