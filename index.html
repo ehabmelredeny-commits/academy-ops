@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvbilyh7";
+  var APP_BUILD = "mvbj7p9i";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -686,6 +686,9 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
     opsAskKey_(false);
   });
 </script>
+  <!-- زر الوضع الليلي/النهاري في كل الشاشات (2026-10-17) — نفس الاختيار المحفوظ ops_theme -->
+  <button type="button" id="thmG" aria-label="الوضع الليلي/النهاري" title="الوضع الليلي/النهاري" style="position:fixed;bottom:14px;left:14px;z-index:90;border:1px solid #D4A853;background:var(--card,#fff);color:inherit;border-radius:20px;padding:6px 11px;font-size:16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)" onclick="ACT.themeToggle();this.textContent=themeIs_()==='dark'?'☀️':'🌙'">🌙</button>
+  <script>try{var t0=localStorage.getItem("ops_theme");if(t0)document.documentElement.setAttribute("data-theme",t0);var d0=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.getElementById("thmG").textContent=d0==="dark"?"☀️":"🌙"}catch(e){}</script>
   <div id="cpill"></div>
   <div id="oppbar"></div>
   <div class="wrap">
@@ -7455,7 +7458,8 @@ ACT.egScreen = function (el) {
 };
 ACT.egQuick = function (el) {
   var text = val('eg_text'), url = val('eg_url').trim();
-  if (!text.trim() && !url && !ENG.pasted.length && !($('eg_imgs') && $('eg_imgs').files.length)) return toast('الصق لقطة (Ctrl+V) أو ارفع صوراً أو الصق رابط المنشور/النص أولاً', true);
+  // لا شيء ملصوق ← بدل رسالة خطأ: يبدأ «صوّر شاشتي» مباشرة (يجمع التعليقات من تبويب المنشور ثم يسجّلها) — طلب المالك 2026-10-17
+  if (!text.trim() && !url && !ENG.pasted.length && !($('eg_imgs') && $('eg_imgs').files.length)) { var sc = document.querySelector('[data-act="egScreen"]'); if (sc && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) return ACT.egScreen(sc); return toast('على الجوال: الصق لقطة الشاشة (أو ارفع الصور) أو رابط المنشور أولاً — التصوير التلقائي يعمل من الكمبيوتر', true); }
   // بلا رابط لا يمكن فتح المنشور لاحقاً (المنصات لا تسمح بالبحث في التعليقات) — تنبيه مرة قبل الحفظ
   if (!url && !el.dataset.nourl) { var u = $('eg_url'); if (u) { u.style.outline = '2px solid #f1c21b'; u.focus(); } el.dataset.nourl = '1'; return toast('الصق رابط المنشور في الخانة الصفراء حتى تصل للمنشور لاحقاً — أو اضغط الزر مرة أخرى للمتابعة بدونه', true); }
   delete el.dataset.nourl;

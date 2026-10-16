@@ -1,33 +1,39 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>التسجيل في الدورات</title><meta name="robots" content="noindex"><style>:root{--a:#0b6e7f;--bg:#f5f8f9;--ink:#15212a;--mut:#5d6b73;--line:#d9e2e6}
+<title>ابدأ مسيرتك كمدرب معتمد</title><meta name="robots" content="noindex"><style>:root{--a:#0B2D4B;--gold:#D4A853;--bg:#fbf8f1;--ink:#0B2D4B;--mut:#5d6b73;--line:#e3d9c2;--card:#fff;--in:#fff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--a:#D4A853;--bg:#0e1a27;--ink:#e8eef5;--mut:#9fb0c2;--line:#2f4560;--card:#16263a;--in:#0f1f31;color-scheme:dark}}
+:root[data-theme=dark]{--a:#D4A853;--bg:#0e1a27;--ink:#e8eef5;--mut:#9fb0c2;--line:#2f4560;--card:#16263a;--in:#0f1f31;color-scheme:dark}
+.en{display:block;font:500 11.5px 'Segoe UI',Arial,sans-serif;opacity:.65;direction:ltr;text-align:right;margin-top:1px}.hero .en{font-size:13px;opacity:.85;color:var(--gold)}
+.thm{position:fixed;top:10px;left:10px;z-index:9;width:auto;margin:0;padding:6px 10px;border-radius:20px;background:var(--card);color:var(--ink);border:1px solid var(--gold);font-size:15px}
 *{box-sizing:border-box}body{margin:0;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
-.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}.hero{background:var(--a);color:#fff;border-radius:18px;padding:20px 18px;margin-bottom:14px}
-.hero h1{margin:0 0 4px;font-size:22px}.hero p{margin:0;opacity:.92}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
-label{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}.hero{background:linear-gradient(160deg,#0f3a60,#081f36);color:#fff;border:1px solid var(--gold);border-radius:18px;padding:20px 18px;margin-bottom:14px}
+.hero h1{margin:0 0 4px;font-size:22px}.hero p{margin:0;opacity:.92}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--in);color:var(--ink)}
 textarea{min-height:80px}.chk{display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:13.5px}.chk input{width:auto;margin-top:5px}
-button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:var(--a);color:#fff;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
+button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:var(--gold);color:#0B2D4B;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
 button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-height:1em}.ok{text-align:center;padding:30px 10px}.ok h2{color:var(--a)}
 .wa{display:inline-block;margin-top:10px;background:#25d366;color:#fff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:700}
 .foot{text-align:center;color:var(--mut);font-size:12.5px;margin-top:18px}.foot a{color:var(--a)}.hp{position:absolute;left:-9999px}
 .sbx{background:#c0392b;color:#fff;text-align:center;font-size:12.5px;padding:4px}</style></head><body>
 
 <div class="wrap">
-<div class="hero"><h1 id="t">سجّل اهتمامك بالدورة</h1><p>اترك بياناتك ونتواصل معك بالتفاصيل: الموعد، والسعر، والمقاعد المتاحة.</p></div>
+<button type="button" class="thm" id="thm" aria-label="الوضع الليلي/النهاري">🌙</button>
+<div class="hero"><h1 id="t">ابدأ مسيرتك كمدرب معتمد</h1><span class="en">Start your journey as a certified trainer</span><p style="margin-top:6px">مقعدك يبدأ من هنا — نرسل لك خلال ساعات الموعد والتفاصيل والعرض المتاح لك.<span class="en">Your seat starts here — we'll send you the dates, details and your offer within hours.</span></p></div>
 <form class="card" id="f" novalidate>
-<label for="name">الاسم *</label><input id="name" autocomplete="name" required>
-<label for="phone">رقم الجوال (واتساب) *</label><input id="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required>
-<label for="email">البريد الإلكتروني (اختياري)</label><input id="email" type="email" dir="ltr" autocomplete="email">
-<label for="city">المدينة</label><select id="city"><option value="">اختر المدينة</option></select>
-<label for="course">الدورة التي تهمك</label><select id="course"><option value="">لم أحدد بعد</option></select>
-<label for="persona">وضعك الحالي</label><select id="persona"><option value="">اختر</option><option>أبدأ في المجال من الصفر</option><option>مدرب حالياً وأريد التطوير</option>
+<label for="name">الاسم *<small class="en">Full name *</small></label><input id="name" autocomplete="name" required>
+<label for="phone">رقم الجوال (واتساب) *<small class="en">Mobile (WhatsApp) *</small></label><input id="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required>
+<label for="email">البريد الإلكتروني (اختياري)<small class="en">Email (optional)</small></label><input id="email" type="email" dir="ltr" autocomplete="email">
+<label for="city">المدينة<small class="en">City</small></label><select id="city"><option value="">اختر المدينة</option></select>
+<label for="course">الدورة التي تناسب طموحك<small class="en">The course that fits your goal</small></label><select id="course"><option value="">لم أحدد بعد</option></select>
+<label for="persona">أين أنت الآن؟<small class="en">Where are you now?</small></label><select id="persona"><option value="">اختر</option><option>أبدأ في المجال من الصفر</option><option>مدرب حالياً وأريد التطوير</option>
 <option>أحتاج رخصة أو شهادة لعملي</option><option>أقارن بين الشهادات</option></select>
-<label for="note">سؤالك أو ملاحظتك (اختياري)</label><textarea id="note"></textarea>
+<label for="note">سؤالك — نجاوبك بصراحة (اختياري)<small class="en">Your question — we answer honestly (optional)</small></label><textarea id="note"></textarea>
 <div id="refbox" style="display:none;background:#e3f5e8;color:#15803d;border-radius:10px;padding:8px 10px;margin-top:12px;font-size:14px"></div>
-<label for="member_no">رقم عضوية صديق (اختياري)</label><input id="member_no" dir="ltr" placeholder="مثال: M-23456" autocomplete="off" maxlength="30">
+<label for="member_no">رشّحك صديق؟ اكتب رقم عضويته وتحصل على خصم (اختياري)<small class="en">Referred by a friend? Enter their member no. for a discount (optional)</small></label><input id="member_no" dir="ltr" placeholder="مثال: M-23456" autocomplete="off" maxlength="30">
 <label class="chk"><input type="checkbox" id="member_consent"> أوافق (اختيارياً) على عضويتي في مجتمع الأكاديمية بعد إتمام دورتي، وأن يُستخدم رقم عضويتي لمنح أصدقائي خصومات تساعد الأكاديمية في التسويق. يمكنني الانسحاب في أي وقت.</label>
 <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 <label class="chk"><input type="checkbox" id="consent"> أوافق على تواصل الأكاديمية معي عبر واتساب أو الاتصال بخصوص الدورات. يمكنني إيقاف التواصل في أي وقت بكتابة «إيقاف». <a href="../privacy/" target="_blank">سياسة الخصوصية</a></label>
-<button id="go" type="submit">أرسل طلبي</button><div class="err" id="err"></div></form>
+<script>(function(){var k="ao_theme",r=document.documentElement,b=document.getElementById("thm");function cur(){return r.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light")}function show(){b.textContent=cur()==="dark"?"☀️":"🌙"}try{var v=localStorage.getItem(k);if(v)r.dataset.theme=v}catch(e){}show();b.onclick=function(){var n=cur()==="dark"?"light":"dark";r.dataset.theme=n;try{localStorage.setItem(k,n)}catch(e){}show()}})()</script>
+<button id="go" type="submit">احجز مقعدك — دقيقة واحدة<small class="en" style="text-align:center;opacity:.8">Reserve your seat — 1 minute</small></button><div class="err" id="err"></div></form>
 <div class="card ok" id="done" style="display:none"><h2>✅ وصلنا طلبك</h2><p>سنتواصل معك قريباً بالتفاصيل.</p><a class="wa" id="wa" style="display:none" target="_blank" rel="noopener">راسلنا على واتساب الآن</a></div>
 <div class="foot" id="foot"><a href="../privacy/">سياسة الخصوصية</a></div></div>
 <script>
@@ -42,7 +48,7 @@ function loadTrackers(c){
 }
 fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){
   CFG=j.data||{};
-  if(CFG.academy){$('t').textContent='سجّل اهتمامك — '+CFG.academy;document.title='التسجيل — '+CFG.academy;}
+  if(CFG.academy){document.title='ابدأ مسيرتك كمدرب معتمد — '+CFG.academy;}
   (CFG.cities||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c;$('city').appendChild(o)});
   (CFG.courses||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c.name;$('course').appendChild(o)});
   var pre=P.get('course');if(pre)$('course').value=pre;
@@ -67,9 +73,9 @@ $('f').addEventListener('submit',function(e){
   var send=function(){return AQ?fetch(AQ.url+'/rest/v1/rpc/public_register',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({body:body})}).then(function(r){if(!r.ok)throw new Error('q');return r.json()}):Promise.reject()};
   var old=function(){return fetch(EXEC+'?public=register',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()})};
   send().catch(old).then(function(j){
-    if(!j.ok){$('go').disabled=false;$('go').textContent='أرسل طلبي';$('err').textContent=j.error||'حدث خطأ';return}
+    if(!j.ok){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent=j.error||'حدث خطأ';return}
     track('Lead');$('f').style.display='none';$('done').style.display='block';
     var w=(CFG.biz||{}).whatsapp;if(w){$('wa').href='https://wa.me/'+String(w).replace(/\D/g,'')+'?text='+encodeURIComponent('السلام عليكم، سجّلت اهتمامي بـ '+($('course').value||'الدورات')+' باسم '+$('name').value);$('wa').style.display='inline-block'}
-  }).catch(function(){$('go').disabled=false;$('go').textContent='أرسل طلبي';$('err').textContent='تعذّر الإرسال — تحقق من الإنترنت وحاول مرة أخرى'});
+  }).catch(function(){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent='تعذّر الإرسال — تحقق من الإنترنت وحاول مرة أخرى'});
 });
 </script></body></html>
