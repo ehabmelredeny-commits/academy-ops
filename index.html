@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mv9ab44x";
+  var APP_BUILD = "mvbib1e7";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -2425,7 +2425,7 @@ SCREENS.acRefs = {
     var cr = d.fin.filter(function (r) { return r.kind === 'رصيد_مرشِّح'; });
     var html = '<div class="ac-bar"><h1>🤝 ترشيحات الخريجين</h1><span class="ac-sp"></span>' + acIb_('⟳', 'acRefresh', 'تحديث') + '</div>' +
       statMini_([[d.refs.length, 'ترشيح'], [d.refs.filter(function (r) { return r.r.status === 'دفع'; }).length, 'دفعوا', 'good'], [sum('خصم_ترشيح').toLocaleString('en') + ' ر.س', 'خصومات للمرشَّحين'],
-        [cr.length, 'رصيد للخريجين (يُستخدم على دورة لاحقة)'], [sum('رسوم_إعادة').toLocaleString('en') + ' ر.س', 'رسوم إعادة مستحقة', 'warn']]) +
+        [cr.length, 'مكافأة ترشيح لخريج (خصم على دورته القادمة)'], [sum('رسوم_إعادة').toLocaleString('en') + ' ر.س', 'رسوم إعادة مستحقة', 'warn']]) +
       '<div class="ac-note" style="margin-bottom:8px">الرابط شخصي يرسله الخريج بنفسه — لا نطلب بيانات أي شخص لم يوافق (PDPL). الخصم لا ينزل عن الحد الأدنى للدورة. كل الأرقام هنا تدخل التقارير المالية.</div>';
     html += '<div class="card"><h3 style="margin:0 0 6px">الترشيحات</h3>' + (d.refs.length ? '<table class="ac-tbl"><thead><tr><th>المرشِّح (الخريج)</th><th>المسجَّل</th><th>الدفعة</th><th>الحالة</th><th>رصيده</th></tr></thead><tbody>' + d.refs.map(function (x) {
       return '<tr><td class="ac-first"><b>' + esc(x.referrer) + '</b> <span class="ac-note" dir="ltr">' + esc(x.r.ref_code) + '</span></td><td data-h="المسجَّل">' + esc(x.referred) + '</td><td data-h="الدفعة">' + esc(x.cohort) + '</td><td data-h="الحالة">' + chip(x.r.status, x.r.status === 'دفع' ? 'good' : x.r.status === 'ملغى' ? 'bad' : 'warn') + '</td><td data-h="رصيده">' + (Number(x.r.credit_pct) ? '+' + Number(x.r.credit_pct) + '%' : '—') + '</td></tr>';
