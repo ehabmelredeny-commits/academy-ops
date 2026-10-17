@@ -286,7 +286,7 @@ function certFull(){var c=E.cert,v=verifyUrl(),y=new Date(c.issued_at),title=E.p
     '<div class="t">تشهد '+esc(an)+' بأن '+(fem?'المتدربة':'المتدرب')+'</div><div class="nm">'+esc(D.name)+'</div>'+(D.name_en?'<div class="nmen">'+esc(D.name_en)+'</div>':'')+
     '<div class="p">'+(fem?'قد أتمّت':'قد أتمّ')+' بنجاح برنامج <b>«'+esc(title)+'»</b>'+(E.program.hours?' بإجمالي <b>'+E.program.hours+'</b> ساعة تدريبية':'')+'</div>'+
     (d1?'<div class="sub">من '+dAr(d1)+(d2?' إلى '+dAr(d2):'')+'</div>':'')+
-    '<div class="acc">'+(acc?'<img src="'+esc(B.acc_logo_url)+'" alt="معهد إعداد القادة ووزارة الرياضة"><span class="accbox">'+esc(B.accreditation||'معتمدة من وزارة الرياضة ومعهد إعداد القادة (LDI)')+'</span>':'<span class="accbox">شهادة صادرة ومعتمدة من '+esc(an)+'</span>')+'</div></div>'+
+    '<div class="acc">'+(acc?'<img src="'+esc(B.acc_logo_url)+'" alt="معهد إعداد القادة ووزارة الرياضة"><span class="accbox">'+esc(B.accreditation||'معهد رياضي مرخّص من وزارة الرياضة · ترخيص رقم STI-License00181')+'</span>':'<span class="accbox">شهادة صادرة ومعتمدة من '+esc(an)+'</span>')+'</div></div>'+
     '<div class="bot"><div class="sig">'+(B.stamp_url?'<i class="stx"'+bg(B.stamp_url)+'></i>':'')+(B.sig_url?'<img src="'+esc(B.sig_url)+'" alt="">':'')+'<div class="ln"></div>مدير الأكاديمية</div>'+
     '<div class="qrw"><div class="qr" id="qr" aria-label="رمز التحقق"></div><div>رقم الشهادة <b>'+esc(c.code)+'</b>'+(/^[A-Z]{1,4}-[0-9]{4,}$/.test(D.ref_code||'')?'<br>رقم العضوية <b>'+esc(D.ref_code)+'</b>':'')+'<br>الإصدار '+dAr(c.issued_at)+'</div></div>'+
     (B.stamp_url?'':'<div class="seal"><i'+bg(B.icon_url)+'></i></div>')+'<div class="sig"><div class="ln"></div>'+(fem?'المدربة المسؤولة':'المدرب المسؤول')+'</div></div>'+
