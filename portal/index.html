@@ -208,10 +208,17 @@ function stOpen(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
     '<div style="background:#fff;border-radius:8px;overflow:hidden;min-height:200px;user-select:none;-webkit-user-select:none"><canvas id="rdc" style="width:100%;display:block"></canvas></div>'+
     '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1" onclick="rdGo(-1)">→ السابقة</button><button class="btn" style="flex:1" onclick="rdGo(1)">التالية ←</button></div><div id="rde"></div></div>';
   el.scrollIntoView({behavior:'smooth'});RD={cur:x,doc:null,pg:Number(ls_('rdp_'+id))||1};
+  if(x.pages){RD.doc={numPages:x.pages,img:1};if(RD.pg>x.pages)RD.pg=1;$('rdc').outerHTML='<img id="rdm" alt="" draggable="false" oncontextmenu="return false" style="width:100%;display:block;min-height:200px;-webkit-touch-callout:none">';rdDraw();return}
   Promise.all([pdfLib(),x.has_file?pdfBytes(id):Promise.resolve(null)]).then(function(a){if(!a[1]){rdEnd();$('rdi').textContent='لا ملف لهذا الدرس';return}
     return a[0].getDocument({data:a[1].slice(),cMapUrl:location.origin+location.pathname.split('portal')[0]+'pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:location.origin+location.pathname.split('portal')[0]+'pdfjs/standard_fonts/',useSystemFonts:false}).promise.then(function(doc){RD.doc=doc;if(RD.pg>doc.numPages)RD.pg=1;rdDraw()})}).catch(function(e){$('rdi').textContent=e.message||'تعذّر فتح الدرس'})}
-function rdGo(d){if(!RD.doc)return;var n=RD.pg+d;if(n<1||n>RD.doc.numPages)return;RD.pg=n;rdDraw();$('rdc').scrollIntoView({block:'start',behavior:'smooth'})}
-function rdDraw(){var doc=RD.doc,id=RD.cur.id;doc.getPage(RD.pg).then(function(p){var c=$('rdc');if(!c)return;var w=c.parentNode.clientWidth||340,v1=p.getViewport({scale:1}),sc=w/v1.width*(window.devicePixelRatio||1),v=p.getViewport({scale:sc});
+function rdGo(d){if(!RD.doc)return;var n=RD.pg+d;if(n<1||n>RD.doc.numPages)return;RD.pg=n;rdDraw();($('rdc')||$('rdm')).scrollIntoView({block:'start',behavior:'smooth'})}
+var PGI={};
+function pgImg(id,n){var k=id+':'+n;if(PGI[k])return PGI[k];var get=function(){return fetch(EXEC+'?public=study',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SESS,lesson:id,n:n})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'تعذّر فتح الصفحة');return 'data:'+(j.mime||'image/png')+';base64,'+j.b64})};
+  PGI[k]=get().catch(function(){return get()}).catch(function(e){delete PGI[k];throw e});return PGI[k]}
+function rdImg(){var id=RD.cur.id,n=RD.pg,tot=RD.doc.numPages;$('rdi').textContent='⏳ صفحة '+n+' من '+tot+'…';
+  pgImg(id,n).then(function(src){if(RD.cur.id!==id||RD.pg!==n)return;$('rdm').src=src;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';ls_('rdp_'+id,String(n));
+    if(n===tot){ls_('rd_'+id,'1');rdEnd()}else{$('rde').innerHTML='';pgImg(id,n+1).catch(function(){})}}).catch(function(e){$('rdi').textContent=e.message})}
+function rdDraw(){if(RD.doc&&RD.doc.img)return rdImg();var doc=RD.doc,id=RD.cur.id;doc.getPage(RD.pg).then(function(p){var c=$('rdc');if(!c)return;var w=c.parentNode.clientWidth||340,v1=p.getViewport({scale:1}),sc=w/v1.width*(window.devicePixelRatio||1),v=p.getViewport({scale:sc});
   c.width=v.width;c.height=v.height;p.render({canvasContext:c.getContext('2d'),viewport:v});
   $('rdi').textContent='صفحة '+RD.pg+' من '+doc.numPages;$('rdb').style.width=Math.round(RD.pg*100/doc.numPages)+'%';ls_('rdp_'+id,String(RD.pg));
   if(RD.pg===doc.numPages){ls_('rd_'+id,'1');rdEnd()}else $('rde').innerHTML=''})}
