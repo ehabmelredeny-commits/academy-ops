@@ -209,7 +209,7 @@ function stOpen(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
     '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1" onclick="rdGo(-1)">→ السابقة</button><button class="btn" style="flex:1" onclick="rdGo(1)">التالية ←</button></div><div id="rde"></div></div>';
   el.scrollIntoView({behavior:'smooth'});RD={cur:x,doc:null,pg:Number(ls_('rdp_'+id))||1};
   Promise.all([pdfLib(),x.has_file?pdfBytes(id):Promise.resolve(null)]).then(function(a){if(!a[1]){rdEnd();$('rdi').textContent='لا ملف لهذا الدرس';return}
-    return a[0].getDocument({data:a[1].slice()}).promise.then(function(doc){RD.doc=doc;if(RD.pg>doc.numPages)RD.pg=1;rdDraw()})}).catch(function(e){$('rdi').textContent=e.message||'تعذّر فتح الدرس'})}
+    return a[0].getDocument({data:a[1].slice(),cMapUrl:location.origin+location.pathname.split('portal')[0]+'pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:location.origin+location.pathname.split('portal')[0]+'pdfjs/standard_fonts/',useSystemFonts:false}).promise.then(function(doc){RD.doc=doc;if(RD.pg>doc.numPages)RD.pg=1;rdDraw()})}).catch(function(e){$('rdi').textContent=e.message||'تعذّر فتح الدرس'})}
 function rdGo(d){if(!RD.doc)return;var n=RD.pg+d;if(n<1||n>RD.doc.numPages)return;RD.pg=n;rdDraw();$('rdc').scrollIntoView({block:'start',behavior:'smooth'})}
 function rdDraw(){var doc=RD.doc,id=RD.cur.id;doc.getPage(RD.pg).then(function(p){var c=$('rdc');if(!c)return;var w=c.parentNode.clientWidth||340,v1=p.getViewport({scale:1}),sc=w/v1.width*(window.devicePixelRatio||1),v=p.getViewport({scale:sc});
   c.width=v.width;c.height=v.height;p.render({canvasContext:c.getContext('2d'),viewport:v});
