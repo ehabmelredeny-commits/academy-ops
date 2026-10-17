@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvc4u6us";
+  var APP_BUILD = "mvc573x8";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -689,6 +689,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
   <!-- زر الوضع الليلي/النهاري في كل الشاشات (2026-10-17) — نفس الاختيار المحفوظ ops_theme -->
   <button type="button" id="thmG" aria-label="الوضع الليلي/النهاري" title="الوضع الليلي/النهاري" style="position:fixed;bottom:14px;left:14px;z-index:90;border:1px solid #D4A853;background:var(--card,#fff);color:inherit;border-radius:20px;padding:6px 11px;font-size:16px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)" onclick="ACT.themeToggle();this.textContent=themeIs_()==='dark'?'☀️':'🌙'">🌙</button>
   <script>try{var t0=localStorage.getItem("ops_theme");if(t0)document.documentElement.setAttribute("data-theme",t0);var d0=document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.getElementById("thmG").textContent=d0==="dark"?"☀️":"🌙"}catch(e){}</script>
+  <button type="button" id="askB" aria-label="اسأل النظام" title="اسأل النظام — قراءة فقط" style="position:fixed;bottom:14px;left:64px;z-index:95;background:#D4A853;color:#0B2D4B;border:0;border-radius:22px;padding:8px 14px;font:inherit;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.35)" onclick="askOpen()">💬 اسأل النظام</button><div id="askD" style="display:none;position:fixed;top:0;bottom:0;left:0;width:400px;max-width:100vw;z-index:96;border-right:2px solid #D4A853;box-shadow:4px 0 20px rgba(0,0,0,.35);background:#0e1a27"><button type="button" onclick="document.getElementById('askD').style.display='none'" title="إغلاق" style="position:absolute;top:8px;left:8px;z-index:2;border:1px solid #D4A853;background:#16263a;color:#e8eef5;border-radius:10px;padding:4px 9px;cursor:pointer">✕</button><iframe id="askF" title="اسأل النظام" style="border:0;width:100%;height:100%"></iframe></div><script>function askOpen(){if(innerWidth<768){location.href="https://ehabmelredeny-commits.github.io/academy-ops/ask/";return}var d=document.getElementById("askD"),f=document.getElementById("askF");if(!f.src)f.src="https://ehabmelredeny-commits.github.io/academy-ops/ask/?embed=1";d.style.display=d.style.display==="none"?"block":"none"}</script>
   <div id="cpill"></div>
   <div id="oppbar"></div>
   <div class="wrap">

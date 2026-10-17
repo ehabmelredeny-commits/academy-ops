@@ -1,0 +1,53 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>اسأل النظام — أكاديمية السعد الرياضية</title><meta name="robots" content="noindex"><meta name="theme-color" content="#0e1a27">
+<link rel="icon" href="../brand/logo-icon.png"><link rel="apple-touch-icon" href="../brand/logo-icon.png"><meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+:root{--bg:#0e1a27;--card:#16263a;--ink:#e8eef5;--mut:#9fb0c2;--line:#2f4560;--me:#123138;--gold:#D4A853;color-scheme:dark}
+:root[data-theme=light]{--bg:#fbf8f1;--card:#fff;--ink:#0B2D4B;--mut:#5d6b73;--line:#e3d9c2;--me:#e2f1f3;color-scheme:light}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#fbf8f1;--card:#fff;--ink:#0B2D4B;--mut:#5d6b73;--line:#e3d9c2;--me:#e2f1f3;color-scheme:light}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+.hd{display:flex;align-items:center;gap:8px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:var(--card)}
+.hd b{flex:1;font-size:16px}.ib{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:5px 9px;font-size:14px;cursor:pointer;text-decoration:none}
+#log{flex:1;overflow-y:auto;padding:12px 14px}.m{border-radius:14px;padding:10px 12px;margin:8px 0;line-height:1.8;font-size:14.5px;white-space:pre-wrap;word-wrap:break-word;max-width:100%}
+.me{background:var(--me);margin-right:auto;margin-left:0;max-width:88%;width:fit-content}.ai{background:var(--card);border:1px solid var(--line)}
+.tag{display:inline-block;font-size:11px;border-radius:8px;padding:0 7px;margin:0 2px;white-space:nowrap}.td{background:#13301f;color:#4ade80}.te{background:#3a2a10;color:#f1c21b}
+:root[data-theme=light] .td{background:#e3f5e8;color:#15803d}:root[data-theme=light] .te{background:#fdf1dc;color:#b45309}
+.sug{padding:0 14px 6px}.sug button{border:1px solid var(--gold);background:transparent;color:var(--gold);border-radius:14px;padding:4px 11px;margin:3px 2px;font:inherit;font-size:12.5px;cursor:pointer}
+.ft{display:flex;gap:8px;padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--card)}
+textarea{flex:1;resize:none;height:44px;max-height:120px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;padding:10px}
+.go{background:var(--gold);color:#0B2D4B;border:0;border-radius:12px;padding:0 16px;font-size:18px;font-weight:800;cursor:pointer}.go:disabled{opacity:.5}
+.mut{color:var(--mut);font-size:12px}.dots:after{content:'…';animation:d 1.2s infinite}@keyframes d{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+</style></head><body>
+<div class="hd"><a class="ib" id="back" href="../v2/" title="رجوع">→</a><b>💬 اسأل النظام</b><span class="mut">قراءة فقط</span><button class="ib" id="thm" title="الوضع الليلي/النهاري">☀️</button><button class="ib" id="nw" title="محادثة جديدة">＋</button></div>
+<div id="log"></div>
+<div class="sug" id="sug"></div>
+<div class="ft"><textarea id="q" placeholder="اسأل عن العملاء، الدفعات، المالية، المنافسين، أو كيف يعمل أي جزء…"></textarea><button class="go" id="go" title="إرسال">↵</button></div>
+<script>
+var EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",EMB=/[?&]embed=1/.test(location.search);
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(e){return null}}
+function key(){var k=ls('ops_k');if(k)return k;var s=ls('v2_sess');return s?'v2:'+s:''}
+/* الوضع الليلي/النهاري — نفس الاختيار المحفوظ في كل الصفحات */
+function thC(){var r=document.documentElement;return r.dataset.theme||(matchMedia('(prefers-color-scheme:light)').matches?'light':'dark')}
+function thS(){$('thm').textContent=thC()==='dark'?'☀️':'🌙'}var t0=ls('ao_theme');if(t0)document.documentElement.dataset.theme=t0;thS();
+$('thm').onclick=function(){var n=thC()==='dark'?'light':'dark';document.documentElement.dataset.theme=n;ls('ao_theme',n);thS()};
+if(EMB)$('back').style.display='none';else if(document.referrer&&/\/academy-ops\/(?!ask)/.test(document.referrer))$('back').href=document.referrer;
+var CONV=sessionStorage.getItem('ask_conv')||('c'+Date.now().toString(36));sessionStorage.setItem('ask_conv',CONV);
+function fmt(a){return esc(a).replace(/\[(من بياناتنا[^\]]*)\]/g,'<span class="tag td">$1</span>').replace(/\[((?:تحليل|تقدير)[^\]]*)\]/g,'<span class="tag te">$1</span>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')}
+function add(cls,html){var d=document.createElement('div');d.className='m '+cls;d.innerHTML=html;$('log').appendChild(d);$('log').scrollTop=1e9;return d}
+var SUG=['ملخص اليوم','من يحتاج متابعة؟','وضع دفعات نوفمبر','إيرادات الشهر','أهم تهديد من المنافسين','كيف يعمل كود الخصم؟'];
+function hello(){$('log').innerHTML='';add('ai','أهلاً 👋 اسألني عن العملاء، الدفعات، المالية، المنافسين، أو كيف يعمل أي جزء في النظام. أجيب من بياناتك الحية وأذكر مصدر كل رقم — للقراءة والتحليل فقط، القرار لك.');
+  $('sug').innerHTML=SUG.map(function(s){return '<button>'+esc(s)+'</button>'}).join('');[].forEach.call($('sug').children,function(b){b.onclick=function(){send(b.textContent)}})}
+function send(q){q=String(q||$('q').value).trim();if(!q)return;var k=key();
+  if(!k){add('ai','🔑 ادخل لوحة الإدارة أولاً من هذا الجهاز: <a href="../v2/" style="color:var(--gold)">‎/v2/‎</a> ثم ارجع هنا.');return}
+  $('q').value='';$('sug').innerHTML='';add('me',esc(q));var w=add('ai','<span class="mut dots">يقرأ بياناتك ويحلّل</span>');$('go').disabled=true;
+  var u=EXEC+'?api=1&fn=action&name=askSystem&k='+encodeURIComponent(k)+'&args='+encodeURIComponent(JSON.stringify({q:q,conv:CONV}));
+  var get=function(){return fetch(u).then(function(r){return r.json()})};
+  get().catch(function(){return get()}).then(function(j){$('go').disabled=false;if(!j.ok)throw new Error(j.error);
+    w.innerHTML=fmt(j.data.answer)+'<div class="mut" style="margin-top:6px">⏱ '+Math.round(j.data.ms/100)/10+' ث</div>'})
+  .catch(function(e){$('go').disabled=false;w.innerHTML='⚠️ '+esc(/غير مصرّح/.test(e.message)?'انتهت جلستك — ادخل ‎/v2/‎ من جديد':e.message||'تعذّر الاتصال — حاول مرة أخرى')})}
+$('go').onclick=function(){send()};$('q').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('nw').onclick=function(){CONV='c'+Date.now().toString(36);sessionStorage.setItem('ask_conv',CONV);hello()};
+hello();setTimeout(function(){if(!EMB)$('q').focus()},200);
+</script></body></html>
