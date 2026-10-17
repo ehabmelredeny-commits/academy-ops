@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvchmizb";
+  var APP_BUILD = "mvchwref";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -5546,7 +5546,11 @@ ACT.tiParse = function () { tiPreview_(srcdbParseText_(val('ti_paste'))); };
 document.addEventListener('change', function (e) {
   if (!e.target || e.target.id !== 'ti_file' || !e.target.files || !e.target.files[0]) return;
   var f = e.target.files[0];
-  if (/\.xlsx?$/i.test(f.name) && typeof XLSX !== 'undefined') { var r = new FileReader(); r.onload = function () { var wb = XLSX.read(new Uint8Array(r.result), { type: 'array' }); var arr = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' }).filter(function (x) { return x.some(function (c) { return String(c).trim(); }); }); tiPreview_({ headers: arr[0].map(String), rows: arr.slice(1).map(function (x) { return x.map(String); }) }); }; r.readAsArrayBuffer(f); }
+  // قارئ إكسل يُحمَّل عند الحاجة (2026-10-17: بدونه كان الملف يُقرأ كنص فتظهر رموز غريبة)
+  if (/\.xlsx?$/i.test(f.name)) {
+    var goX = function () { var r = new FileReader(); r.onload = function () { try { var wb = XLSX.read(new Uint8Array(r.result), { type: 'array' }); var arr = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: '' }).filter(function (x) { return x.some(function (c) { return String(c).trim(); }); }); tiPreview_({ headers: arr[0].map(String), rows: arr.slice(1).map(function (x) { return x.map(String); }) }); } catch (err) { toast('تعذّرت قراءة الملف: ' + err.message, true); } }; r.readAsArrayBuffer(f); };
+    if (window.XLSX) goX(); else { var sx = document.createElement('script'); sx.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'; sx.onload = goX; sx.onerror = function () { toast('تعذّر تحميل قارئ إكسل — احفظ الملف CSV أو الصقه', true); }; document.head.appendChild(sx); }
+  }
   else { var r2 = new FileReader(); r2.onload = function () { tiPreview_(srcdbParseText_(r2.result)); }; r2.readAsText(f, 'UTF-8'); }
 });
 ACT.tiImport = function (el) {
