@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvcjb4m5";
+  var APP_BUILD = "mvcjjypu";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -5483,6 +5483,8 @@ SCREENS.trainers = { render: function (d, args) {
     '<label class="f">الصق الجدول من إكسل/شيت (بعناوين أو بدونها)</label><textarea id="ti_paste" dir="ltr" class="ltr-table" style="min-height:70px" placeholder="الجنس	الاسم	الجوال	المدينة	التخصص	الحساب"></textarea>' +
     '<div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" data-act="tiParse">قراءة اللصق</button><label class="btn sm">📄 أو ارفع ملف (CSV / Excel)<input type="file" id="ti_file" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden></label>' +
     '<label class="chip" style="cursor:pointer"><input type="checkbox" id="ti_nohdr"> الملف بلا عناوين (يُكتشف تلقائياً أيضاً)</label></div><div id="ti_prev"></div></details>';
+  // 📋 القوائم ظاهرة دائماً — لكل قائمة عددها وزر حملتها (يفتحها في «قواعد عملاء المصادر»)
+  if ((d.lists || []).length) html += '<div class="card" style="margin:8px 0"><b>📋 قوائم المدربين للحملات</b>' + d.lists.map(function (l) { return '<div class="row between" style="margin-top:6px;gap:6px;flex-wrap:wrap"><span>' + esc(l.name) + ' ' + chip(l.n) + '</span><span><button class="btn sm" data-act="trnShowList" data-list="' + esc(l.name) + '">👁 عرض</button> <button class="btn sm pri" data-act="trnListCampaign" data-list="' + esc(l.name) + '">📣 جهّز حملة لهذه القائمة</button></span></div>'; }).join('') + '</div>';
   html += '<div class="row" style="flex-wrap:wrap;gap:6px;margin:8px 0"><input id="tf_q" class="grow" placeholder="بحث بالاسم / الجهة / التخصص" value="' + esc(f.q) + '" data-act="trnFilter">' +
     '<select id="tf_t" data-act="trnFilter"><option value="">كل الجهات</option>' + opt(d.types, f.type) + '</select>' +
     '<select id="tf_g" data-act="trnFilter"><option value="">مدرب ومدربة</option>' + opt(d.genders, f.gender) + '</select>' +
@@ -5568,6 +5570,7 @@ ACT.tiImport = function (el) {
   })(0);
 };
 ACT.trnFilter = function () { go('trainers', { q: val('tf_q'), type: val('tf_t'), gender: val('tf_g'), city: val('tf_c'), role: val('tf_r'), list: val('tf_l') }, true); };
+ACT.trnShowList = function (el) { go('trainers', { list: el.dataset.list }, true); };
 ACT.trnListCampaign = function (el) { if (!confirm('تجهيز حملة لقائمة «' + el.dataset.list + '»؟ يصبح أعضاؤها «جاهز للإرسال» — لا يُرسل شيء الآن')) return; el.disabled = true; api('action', 'trainersListMark', { list: el.dataset.list }).then(function (r) { toast('📣 ' + r.n + ' مدرب جاهز — تُكمل الحملة من «قواعد عملاء المصادر» (رسالة لكل شخص + الجدولة)'); go('sources', { batch: r.sources_batch }, true); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 ACT.trnCollect = function (el) { el.disabled = true; act('trainersCollect', {}, function (r) { return r.added ? 'أُضيف ' + r.added + ' مدرباً من أدوات النظام' : 'لا جديد — كل المدربين المعروفين موجودون'; }); };
 ACT.trnSearch = function () {
