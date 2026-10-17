@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvciyb9q";
+  var APP_BUILD = "mvcjb4m5";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -5489,7 +5489,7 @@ SCREENS.trainers = { render: function (d, args) {
     '<select id="tf_c" data-act="trnFilter"><option value="">كل المدن</option>' + opt(cities, f.city) + '</select>' +
     '<select id="tf_r" data-act="trnFilter"><option value="">كل الأدوار</option>' + opt(d.roles, f.role) + '</select>' +
     '<select id="tf_l" data-act="trnFilter"><option value="">كل القوائم</option>' + (d.lists || []).map(function (l) { return '<option value="' + esc(l.name) + '"' + (f.list === l.name ? ' selected' : '') + '>📋 ' + esc(l.name) + ' (' + l.n + ')</option>'; }).join('') + '</select>' +
-    (f.list ? '<button class="btn sm pri" data-act="trnListCampaign" data-list="' + esc(f.list) + '" data-tip="يعلّم أعضاء القائمة «جاهز للإرسال» — الإرسال بموافقتك، و«لا تراسل» لا يُمس">📣 جهّز حملة لهذه القائمة</button>' : '') + '</div>';
+    (f.list ? '<button class="btn sm pri" data-act="trnListCampaign" data-list="' + esc(f.list) + '" data-tip="يجهّز القائمة ويفتحها في «قواعد عملاء المصادر» حيث تُكتب رسالة لكل شخص وتُجدول — الإرسال بموافقتك، و«لا تراسل» لا يُمس">📣 جهّز حملة لهذه القائمة</button>' : '') + '</div>';
   html += rows.length ? '<div class="muted tiny">اضغط أي مدرب للتفاصيل والإجراءات</div>' + stripList_([
     ['الحالة', '75px', function (t) { return chip(t.status, t.status === 'متحقق' ? 'good' : 'warn'); }],
     ['المدرب', 'minmax(130px,1.6fr)', function (t) { return '<b>' + esc(t.name) + '</b>' + (t.gender ? ' <span class="muted tiny">' + esc(t.gender) + '</span>' : ''); }],
@@ -5568,7 +5568,7 @@ ACT.tiImport = function (el) {
   })(0);
 };
 ACT.trnFilter = function () { go('trainers', { q: val('tf_q'), type: val('tf_t'), gender: val('tf_g'), city: val('tf_c'), role: val('tf_r'), list: val('tf_l') }, true); };
-ACT.trnListCampaign = function (el) { if (!confirm('تجهيز حملة لقائمة «' + el.dataset.list + '»؟ يصبح أعضاؤها «جاهز للإرسال» — لا يُرسل شيء الآن')) return; el.disabled = true; act('trainersListMark', { list: el.dataset.list }, function (r) { return '📣 ' + r.n + ' مدرب جاهز للحملة في قائمة «' + r.list + '»'; }); };
+ACT.trnListCampaign = function (el) { if (!confirm('تجهيز حملة لقائمة «' + el.dataset.list + '»؟ يصبح أعضاؤها «جاهز للإرسال» — لا يُرسل شيء الآن')) return; el.disabled = true; api('action', 'trainersListMark', { list: el.dataset.list }).then(function (r) { toast('📣 ' + r.n + ' مدرب جاهز — تُكمل الحملة من «قواعد عملاء المصادر» (رسالة لكل شخص + الجدولة)'); go('sources', { batch: r.sources_batch }, true); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 ACT.trnCollect = function (el) { el.disabled = true; act('trainersCollect', {}, function (r) { return r.added ? 'أُضيف ' + r.added + ' مدرباً من أدوات النظام' : 'لا جديد — كل المدربين المعروفين موجودون'; }); };
 ACT.trnSearch = function () {
   if (window.SRC) { SRC.compose = srcNewCompose_(SEARCH_CATALOG.categories.filter(function (c) { return c.id === 'trainer_sourcing'; })[0].queries[2], 'trainer_sourcing', ''); }
