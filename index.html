@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvchg8do";
+  var APP_BUILD = "mvchmizb";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -5503,6 +5503,7 @@ SCREENS.trainers = { render: function (d, args) {
   ], rows, { key: 'trn', id: function (t) { return t.tr_id; }, cls: function (t) { return t.outreach_status === 'لا تراسل' ? 'sl-off' : ''; }, detail: function (t) {
     var stop = t.outreach_status === 'لا تراسل';
     return '<div class="small">' + [extUrl(t.public_handle) ? '<a target="_blank" rel="noopener" href="' + esc(extUrl(t.public_handle)) + '">حسابه المهني</a>' : esc(t.public_handle), esc(t.public_contact)].filter(String).join(' · ') + '</div>' +
+      (t.handles ? '<div class="small">🔗 ' + String(t.handles).split(' · ').map(function (h) { var i = h.indexOf(': '), v = i > -1 ? h.slice(i + 2) : h, u = extUrl(v); return u ? '<a target="_blank" rel="noopener" href="' + esc(u) + '">' + esc(h.slice(0, i > -1 ? i : 20)) + '</a>' : esc(h); }).join(' · ') + '</div>' : '') +
       '<div class="muted small">المصدر: ' + esc(t.source_kind) + (extUrl(t.source_url) ? ' · <a target="_blank" href="' + esc(extUrl(t.source_url)) + '">الرابط</a>' : '') + (t.last_contact ? ' · آخر تواصل ' + fmtDate(t.last_contact) : '') + '</div>' +
       (t.notes ? '<div class="muted small">' + esc(t.notes) + '</div>' : '') + '<div class="btns">' +
       (stop ? '' : '<button class="btn sm" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="أُرسل">تواصلت معه ✓</button><button class="btn sm" data-act="trnMark" data-id="' + esc(t.tr_id) + '" data-st="ردّ">ردّ</button>') +
@@ -5518,11 +5519,12 @@ SCREENS.trainers = { render: function (d, args) {
 } };
 /* ── 📥 استيراد المدربين ── */
 var TI = { parsed: null };
-var TI_KEYS = ['name_en', 'name', 'gender', 'phone', 'region', 'city', 'specialty', 'handle', 'entity_name', 'platforms', 'source_file', 'notes'];
-var TI_GUESS = { name_en: /english|إنجليزي|انجليزي|\(en\)|name \(en/i, name: /اسم|name/i, gender: /جنس|النوع|gender|sex/i, phone: /جوال|هاتف|موبايل|رقم الجوال|phone|mobile|whats/i,
+var TI_KEYS = ['name_en', 'name', 'gender', 'phone', 'region', 'city', 'specialty', 'h_ig', 'h_tt', 'h_sc', 'h_x', 'h_fb', 'h_yt', 'h_li', 'h_wa', 'h_web', 'handle', 'entity_name', 'platforms', 'source_file', 'notes'];
+var TI_GUESS = { h_ig: /انستا|انستغرام|انستجرام|instagram|insta\b|\big\b/i, h_tt: /تيك ?توك|tiktok|tik tok/i, h_sc: /سناب|snap/i, h_x: /تويتر|twitter|^x$|\(x\)|اكس/i, h_fb: /فيسبوك|فيس بوك|facebook|\bfb\b/i,
+  h_yt: /يوتيوب|youtube/i, h_li: /لينكد|linkedin/i, h_wa: /واتس|whatsapp|wa\.me/i, h_web: /موقع|website|web|رابط/i, name_en: /english|إنجليزي|انجليزي|\(en\)|name \(en/i, name: /اسم|name/i, gender: /جنس|النوع|gender|sex/i, phone: /جوال|هاتف|موبايل|رقم الجوال|phone|mobile|whats/i,
   region: /منطقة|المنطقه|منطقه|مجموعة|region|area/i, city: /مدينة|المدينه|city/i, specialty: /تخصص|specialty|مجال|نوع التدريب/i, handle: /حساب|انستا|insta|handle|يوزر|user/i,
   entity_name: /نادي|جهة|club|academy|أكاديمية|مركز|علامة|العلامه|brand/i, platforms: /منص|platform/i, source_file: /الملفات المصدرية|ملف المصدر|source file|مصدر/i, notes: /ملاحظ|note/i };
-var TI_LABEL = { name_en: 'الاسم بالإنجليزي', name: 'الاسم', gender: 'الجنس', phone: 'الجوال', region: 'المنطقة', city: 'المدينة', specialty: 'التخصص', handle: 'الحساب', entity_name: 'الجهة/العلامة', platforms: 'المنصات', source_file: 'الملف المصدر', notes: 'ملاحظات' };
+var TI_LABEL = { h_ig: 'انستغرام', h_tt: 'تيك توك', h_sc: 'سناب', h_x: 'X/تويتر', h_fb: 'فيسبوك', h_yt: 'يوتيوب', h_li: 'لينكدإن', h_wa: 'واتساب', h_web: 'الموقع', name_en: 'الاسم بالإنجليزي', name: 'الاسم', gender: 'الجنس', phone: 'الجوال', region: 'المنطقة', city: 'المدينة', specialty: 'التخصص', handle: 'الحساب', entity_name: 'الجهة/العلامة', platforms: 'المنصات', source_file: 'الملف المصدر', notes: 'ملاحظات' };
 function tiPreview_(p) {
   if (!p) return toast('لم أجد صفوفاً', true);
   var forced = $('ti_nohdr') && $('ti_nohdr').checked, auto = !forced && srcdbLooksData_(p.headers);
@@ -5532,7 +5534,7 @@ function tiPreview_(p) {
   if (p.noHeader) { var mc = srcdbMapByContent_(p.rows); m = { gender: mc.gender, name: mc.name, phone: mc.phone, city: mc.city, specialty: mc.notes, handle: -1, entity_name: -1, notes: -1 };
     // عمود فيه @ بلا نطاق = حساب تواصل (لا إيميل)
     if (mc.email > -1 && !p.rows.some(function (r) { return /@.+\./.test(String(r[mc.email] || '')); })) m.handle = mc.email;
-  } else { var used = {}; TI_KEYS.forEach(function (k) { m[k] = p.headers.findIndex(function (h, i) { return !used[i] && !/^\s*#\s*$/.test(h) && TI_GUESS[k].test(h); }); if (m[k] > -1) used[m[k]] = 1; }); }
+  } else { var used = {}; TI_KEYS.forEach(function (k) { m[k] = p.headers.findIndex(function (h, i) { return !used[i] && !/^\s*#\s*$/.test(h) && !(/^h_/.test(k) && /منص|platform|المصدر|source/i.test(h)) && TI_GUESS[k].test(h); }); if (m[k] > -1) used[m[k]] = 1; }); }
   TI_KEYS.forEach(function (k) { if (m[k] === undefined) m[k] = -1; });
   var sel = function (k, label) { return '<select id="ti_' + k + '" style="width:auto"><option value="-1">' + label + ' = —</option>' + p.headers.map(function (h, i) { return '<option value="' + i + '"' + (m[k] === i ? ' selected' : '') + '>' + label + ' = ' + esc(h) + '</option>'; }).join('') + '</select>'; };
   $('ti_prev').innerHTML = '<div class="card small" style="margin-top:8px"><b>' + p.rows.length + ' صف</b> ' + (p.noHeader ? chip('ملف بلا عناوين — الأعمدة خُمّنت من محتواها', 'acc') : '') + ' — اربط الأعمدة (راجعها):' +
