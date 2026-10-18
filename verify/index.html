@@ -31,7 +31,7 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 .sP{background:var(--gs)!important;color:var(--g)}.sL{background:var(--ws)!important;color:var(--w)}.sA{background:var(--bs)!important;color:var(--b)}.sE{background:var(--soft)}
 .share{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .ref{background:var(--as);border-radius:11px;padding:9px 10px;font-size:13px;direction:ltr;text-align:center;font-weight:700;color:var(--a);margin:7px 0;word-break:break-all}
-.foot{font-size:11px;color:var(--mut);text-align:center;padding:10px 14px;line-height:1.8}
+.foot{font-size:11px;color:var(--mut);text-align:center;padding:10px 14px;line-height:1.8}.tg{color:#b8892f;font-weight:500;letter-spacing:.5px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 0 calc(env(safe-area-inset-bottom) + 6px);z-index:9}
 .nav button{background:none;border:0;font-size:11px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:56px;cursor:pointer}.nav button span{font-size:19px}.nav button.on{color:var(--a);font-weight:700}
 .pane{display:none}.pane.on{display:block}
@@ -81,14 +81,14 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function rpc(fn,body){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('تعذّر الاتصال');return r.json()})}
-var BDEF={name:'أكاديمية السعد الرياضية',icon_url:'../brand/logo-icon.png'};
+var BDEF={name:'أكاديمية السعد الرياضية',tagline_ar:'السعد طريق المجد',icon_url:'../brand/logo-icon.png'};
 function pub(v){return v&&!/قيد الإصدار/.test(v)?v:''}
 /** الهوية: إعدادات الأكاديمي أولاً، والفارغ يُكمَّل من بيانات المنشأة في النظام الأساسي */
 function brandMerge(b){b=b||{};var ctl=window.AbortController?new AbortController():null;if(ctl)setTimeout(function(){ctl.abort()},8000);return fetch(EXEC+'?public=config',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{},z=c.biz||{};
   return Object.assign({},b,{name:pub(b.name)||c.academy||BDEF.name,legal_name:pub(b.legal_name)||z.legal_name||'',cr:pub(b.cr)||z.cr||'',vat:pub(b.vat)||z.vat||'',license:pub(b.license),address:pub(b.address)||z.address||'',phone:pub(b.phone)||z.phone||'',email:pub(b.email)||z.email||'',logo_url:b.logo_url||'',icon_url:b.icon_url||BDEF.icon_url,accreditation:b.accreditation||'',site:b.site||''})}).catch(function(){return Object.assign({},BDEF,b)})}
 function logoHtml(b){var u=b.icon_url||b.logo_url;return '<div class="logo">'+(u?'<img src="'+esc(u)+'" alt="">':esc((b.name||'A').trim().charAt(0)))+'</div>'}
 function footHtml(b){var x=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.vat?'الرقم الضريبي '+b.vat:'',b.license?'ترخيص '+b.license:''].filter(Boolean).join(' · ');
-  return '<div class="foot">'+(x?esc(x)+'<br>':'')+(b.accreditation?esc(b.accreditation)+'<br>':'')+esc([b.address,b.phone,b.email].filter(Boolean).join(' · '))+(b.site?'<br><a href="'+esc(b.site)+'privacy/">سياسة الخصوصية</a>':'')+'</div>'}
+  return '<div class="foot">'+(x?esc(x)+'<br>':'')+(b.accreditation?esc(b.accreditation)+'<br>':'')+esc([b.address,b.phone,b.email].filter(Boolean).join(' · '))+(b.site?'<br><a href="'+esc(b.site)+'privacy/">سياسة الخصوصية</a>':'')+(b.tagline_ar?'<br><span class="tg">'+esc(b.tagline_ar)+'</span>':'')+'</div>'}
 function dAr(d,o){if(!d)return'—';var x=new Date(String(d).length===10?d+'T12:00:00':d);return isNaN(x)?d:x.toLocaleDateString('ar-SA-u-nu-latn',o||{day:'numeric',month:'long',year:'numeric'})}
 var DAYS=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 /* شرح الأزرار: وقوف الماوس، أو ضغطة مطوّلة على الآيفون/الآيباد */

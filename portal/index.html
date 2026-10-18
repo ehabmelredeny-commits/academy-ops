@@ -31,7 +31,7 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 .sP{background:var(--gs)!important;color:var(--g)}.sL{background:var(--ws)!important;color:var(--w)}.sA{background:var(--bs)!important;color:var(--b)}.sE{background:var(--soft)}
 .share{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
 .ref{background:var(--as);border-radius:11px;padding:9px 10px;font-size:13px;direction:ltr;text-align:center;font-weight:700;color:var(--a);margin:7px 0;word-break:break-all}
-.foot{font-size:11px;color:var(--mut);text-align:center;padding:10px 14px;line-height:1.8}
+.foot{font-size:11px;color:var(--mut);text-align:center;padding:10px 14px;line-height:1.8}.tg{color:#b8892f;font-weight:500;letter-spacing:.5px}
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 0 calc(env(safe-area-inset-bottom) + 6px);z-index:9}
 .nav button{background:none;border:0;font-size:11px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:56px;cursor:pointer}.nav button span{font-size:19px}.nav button.on{color:var(--a);font-weight:700}
 .pane{display:none}.pane.on{display:block}
@@ -81,14 +81,14 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function rpc(fn,body){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('تعذّر الاتصال');return r.json()})}
-var BDEF={name:'أكاديمية السعد الرياضية',icon_url:'../brand/logo-icon.png'};
+var BDEF={name:'أكاديمية السعد الرياضية',tagline_ar:'السعد طريق المجد',icon_url:'../brand/logo-icon.png'};
 function pub(v){return v&&!/قيد الإصدار/.test(v)?v:''}
 /** الهوية: إعدادات الأكاديمي أولاً، والفارغ يُكمَّل من بيانات المنشأة في النظام الأساسي */
 function brandMerge(b){b=b||{};var ctl=window.AbortController?new AbortController():null;if(ctl)setTimeout(function(){ctl.abort()},8000);return fetch(EXEC+'?public=config',ctl?{signal:ctl.signal}:{}).then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{},z=c.biz||{};
   return Object.assign({},b,{name:pub(b.name)||c.academy||BDEF.name,legal_name:pub(b.legal_name)||z.legal_name||'',cr:pub(b.cr)||z.cr||'',vat:pub(b.vat)||z.vat||'',license:pub(b.license),address:pub(b.address)||z.address||'',phone:pub(b.phone)||z.phone||'',email:pub(b.email)||z.email||'',logo_url:b.logo_url||'',icon_url:b.icon_url||BDEF.icon_url,accreditation:b.accreditation||'',site:b.site||''})}).catch(function(){return Object.assign({},BDEF,b)})}
 function logoHtml(b){var u=b.icon_url||b.logo_url;return '<div class="logo">'+(u?'<img src="'+esc(u)+'" alt="">':esc((b.name||'A').trim().charAt(0)))+'</div>'}
 function footHtml(b){var x=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.vat?'الرقم الضريبي '+b.vat:'',b.license?'ترخيص '+b.license:''].filter(Boolean).join(' · ');
-  return '<div class="foot">'+(x?esc(x)+'<br>':'')+(b.accreditation?esc(b.accreditation)+'<br>':'')+esc([b.address,b.phone,b.email].filter(Boolean).join(' · '))+(b.site?'<br><a href="'+esc(b.site)+'privacy/">سياسة الخصوصية</a>':'')+'</div>'}
+  return '<div class="foot">'+(x?esc(x)+'<br>':'')+(b.accreditation?esc(b.accreditation)+'<br>':'')+esc([b.address,b.phone,b.email].filter(Boolean).join(' · '))+(b.site?'<br><a href="'+esc(b.site)+'privacy/">سياسة الخصوصية</a>':'')+(b.tagline_ar?'<br><span class="tg">'+esc(b.tagline_ar)+'</span>':'')+'</div>'}
 function dAr(d,o){if(!d)return'—';var x=new Date(String(d).length===10?d+'T12:00:00':d);return isNaN(x)?d:x.toLocaleDateString('ar-SA-u-nu-latn',o||{day:'numeric',month:'long',year:'numeric'})}
 var DAYS=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 /* شرح الأزرار: وقوف الماوس، أو ضغطة مطوّلة على الآيفون/الآيباد */
@@ -169,14 +169,14 @@ function groupCard(){var u=E&&E.cohort.wa_group_url;if(!u)return '';return '<div
 /* 🪪 بطاقة العضوية (التصميم المعتمد) — تُرسم بالاسم ورقم العضوية وتاريخ الإصدار والشعار */
 function memberCard(){if(!D.member_no)return '<div class="card"><h3>🪪 بطاقة العضوية</h3><div class="sm mut">تصدر بعد أول دفعة مع موافقتك على العضوية — وتظهر هنا تلقائياً.</div></div>';
   setTimeout(drawCard,50);return '<div class="card"><h3>🪪 بطاقة العضوية</h3><canvas id="mcard" style="width:100%;border-radius:12px;display:block"></canvas><div class="share" style="margin-top:8px"><button class="btn g" onclick="saveCard()" data-tip="حفظ صورة البطاقة في جوالك">⬇ حفظ البطاقة</button><button class="btn" onclick="copy(D.member_no)" data-tip="نسخ رقم العضوية">📋 '+esc(D.member_no)+'</button></div><div class="xs mut" style="margin-top:6px">رقم عضويتك هو نفسه رمز ترشيحك لأصدقائك</div></div>'}
-function drawCard(){var cv=$('mcard');if(!cv)return;var bg=new Image(),lg=new Image(),base=(B.site||location.origin+location.pathname.split('portal')[0])+'brand/';bg.crossOrigin=lg.crossOrigin='anonymous';
-  var go=function(){var W=1578,H=996,x=cv.getContext('2d');cv.width=W;cv.height=H;x.drawImage(bg,0,0,W,H);
+function drawCard(){var cv=$('mcard');if(!cv)return;var bg=new Image(),base=(B.site||location.origin+location.pathname.split('portal')[0])+'brand/';bg.crossOrigin='anonymous';
+  /* قالب 2026-10-18 (Canva DAHYW3ckhFI ← assets/brand/member-card-v2.png 1578x996): «نفخر بعضويتك» + الاسم ورقم العضوية والتاريخ تحت عناوينها + QR رابط الترشيح */
+  var go=function(){var W=1578,H=996,x=cv.getContext('2d');cv.width=W;cv.height=H;x.drawImage(bg,0,0,W,H);if(lg.complete&&lg.naturalWidth)x.drawImage(lg,73,560,300,200);
     var fit=function(t,max,size){var f=size;do{x.font='700 '+f+'px Tajawal, sans-serif';f-=2}while(x.measureText(t).width>max&&f>16)};
-    var box=function(t,y,ltr){x.fillStyle='#1a1a1a';x.direction=ltr?'ltr':'rtl';x.textAlign='center';x.textBaseline='middle';fit(t,520,ltr?46:44);x.fillText(t,1019,y)};
-    box(String(D.name||''),549);box(String(D.member_no||''),678,true);box(D.member_issued_at?String(D.member_issued_at).slice(0,10):'',791,true);
-    x.fillStyle='#e8c76a';x.direction='rtl';x.textAlign='center';x.textBaseline='alphabetic';fit(B.name||'',540,40);x.fillText(B.name||'',1022,150);
-    if(lg.complete&&lg.naturalWidth){x.save();[[1425,152],[165,786]].forEach(function(p){x.drawImage(lg,p[0]-62,p[1]-62,124,124)});x.restore()}};
-  var n=0,done=function(){if(++n===2)go()};bg.onload=lg.onload=done;bg.onerror=function(){};lg.onerror=done;bg.src=base+'member-card.png';lg.src=B.icon_url||base+'logo-icon.png'}
+    var val=function(t,y,ltr){x.fillStyle='#FFFFFF';x.textBaseline='alphabetic';x.direction=ltr?'ltr':'rtl';x.textAlign=ltr?'left':'right';fit(t,820,ltr?40:46);x.fillText(t,ltr?492:1318,y)};
+    val(String(D.name||''),385);val(String(D.member_no||''),515,true);val(D.member_issued_at?String(D.member_issued_at).slice(0,10):'',652,true);
+    var q=document.createElement('div');if(window.QRCode&&D.member_no){try{new QRCode(q,{text:(B.site||location.origin+location.pathname.split('portal')[0])+'register/?ref='+encodeURIComponent(D.member_no),width:255,height:255,colorDark:'#0B2D4B',correctLevel:QRCode.CorrectLevel.M});var qc=q.querySelector('canvas');if(qc)x.drawImage(qc,96,201,255,255)}catch(e){}}};
+  var lg=new Image();lg.crossOrigin='anonymous';var n=0,done=function(){if(++n===2)go()};bg.onload=lg.onload=done;bg.onerror=function(){};lg.onerror=done;bg.src=base+'member-card-v2.png';lg.src=base+'logo-transparent.png'}
 function saveCard(){var cv=$('mcard');if(!cv)return;try{var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='membership-'+D.member_no+'.png';document.body.appendChild(a);a.click();a.remove()}catch(e){alert('اضغط مطوّلاً على البطاقة ثم «حفظ الصورة»')}}
 var STUDY=null;
 function myLessons(){return (STUDY||[]).filter(function(x){return E&&x.cohort===E.cohort.name})}
@@ -290,7 +290,7 @@ function certFull(){var c=E.cert,v=verifyUrl(),y=new Date(c.issued_at),title=E.p
     '<div class="bot"><div class="sig">'+(B.stamp_url?'<i class="stx"'+bg(B.stamp_url)+'></i>':'')+(B.sig_url?'<img src="'+esc(B.sig_url)+'" alt="">':'')+'<div class="ln"></div>مدير الأكاديمية</div>'+
     '<div class="qrw"><div class="qr" id="qr" aria-label="رمز التحقق"></div><div>رقم الشهادة <b>'+esc(c.code)+'</b>'+(/^[A-Z]{1,4}-[0-9]{4,}$/.test(D.ref_code||'')?'<br>رقم العضوية <b>'+esc(D.ref_code)+'</b>':'')+'<br>الإصدار '+dAr(c.issued_at)+'</div></div>'+
     (B.stamp_url?'':'<div class="seal"><i'+bg(B.icon_url)+'></i></div>')+'<div class="sig"><div class="ln"></div>'+(fem?'المدربة المسؤولة':'المدرب المسؤول')+'</div></div>'+
-    '<div class="foot2">'+esc(foot)+'</div></div></div>'+
+    '<div class="foot2">'+esc(foot)+(B.tagline_ar?' · <b class="tg">'+esc(B.tagline_ar)+'</b>':'')+'</div></div></div>'+
     (rev?'':'<div class="share noprint"><button class="btn g" onclick="window.print()" data-tip="آيفون: اختر «طباعة» ثم «حفظ PDF» أو شارك — لابتوب: «حفظ بصيغة PDF»">⬇ PDF</button><a class="btn" target="_blank" rel="noopener" href="'+esc(li)+'" data-tip="يضيف الشهادة لقسم الشهادات في ملفك على LinkedIn">in LinkedIn</a>'+
     '<a class="btn" target="_blank" rel="noopener" href="https://x.com/intent/post?text='+encodeURIComponent(txt)+'" data-tip="انشرها على X">𝕏</a><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(txt)+'" data-tip="أرسلها على واتساب">💬</a>'+
     '<button class="btn" onclick="shareIt(TXT.cert)" data-tip="انستغرام وغيره: من قائمة المشاركة في جوالك">📸 مشاركة</button></div>')+'</div>'}
