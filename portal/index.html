@@ -240,7 +240,19 @@ window.addEventListener('popstate',function(){if($('rdo'))rdClose('pop')});
 document.addEventListener('keydown',function(e){if(!$('rdo'))return;if(e.key==='ArrowLeft'){e.preventDefault();rdGo(1)}else if(e.key==='ArrowRight'){e.preventDefault();rdGo(-1)}else if(e.key==='Escape'&&!document.fullscreenElement)rdClose()});
 var PGI={};
 function pgImg(id,n){var k=id+':'+n;if(PGI[k])return PGI[k];var get=function(){return fetch(EXEC+'?public=study',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SESS,lesson:id,n:n})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'تعذّر فتح الصفحة');return 'data:'+(j.mime||'image/png')+';base64,'+j.b64})};
-  PGI[k]=get().catch(function(){return get()}).catch(function(e){delete PGI[k];throw e});return PGI[k]}
+  PGI[k]=get().catch(function(){return get()}).then(rdCrop).catch(function(e){delete PGI[k];throw e});return PGI[k]}
+/* قصّ هوامش الصفحة البيضاء على الجهاز (2026-10-19): يكشف حدود الحبر (أغمق من 245، عيّنة كل 2px، صفّ/عمود يُحسب إن فيه ≥3 نقاط)، ويحذف ترويسة أعلى الصفحة ورقمها أسفلها إن فصلتهما فجوة بيضاء >4% من الارتفاع، ثم هامش 8px. الناتج يُخزَّن مع الصفحة (PGI) فلا يُعاد. أي فشل ← الصورة الأصلية */
+function rdCrop(src){return new Promise(function(ok){var im=new Image();im.onload=function(){try{var W=im.naturalWidth,H=im.naturalHeight,c=document.createElement('canvas');c.width=W;c.height=H;var g=c.getContext('2d');g.drawImage(im,0,0);
+  var d=g.getImageData(0,0,W,H).data,st=2,rows=new Uint16Array(H),cols=new Uint16Array(W),x,y,i;
+  for(y=0;y<H;y+=st)for(x=0;x<W;x+=st){i=(y*W+x)*4;if(d[i]<245||d[i+1]<245||d[i+2]<245){rows[y]++;cols[x]++}}
+  var seg=[],on=-1,gap=0,G=Math.max(4,H*0.01);for(y=0;y<H;y+=st){if(rows[y]>=3){if(on<0)on=y;gap=0;seg.length&&seg[seg.length-1][1]===-1;var last=seg[seg.length-1];if(last&&last[2]===0)last[1]=y;else{seg.push([y,y,0])}}else if(seg.length){var l=seg[seg.length-1];if(l[2]===0&&y-l[1]>G)l[2]=1}}
+  if(!seg.length)return ok(src);var big=H*0.04,sm=H*0.06;
+  if(seg.length>1&&seg[0][1]-seg[0][0]<sm&&seg[1][0]-seg[0][1]>big)seg.shift();
+  if(seg.length>1){var z=seg.length-1;if(seg[z][1]-seg[z][0]<sm&&seg[z][0]-seg[z-1][1]>big)seg.pop()}
+  var t=seg[0][0],b=seg[seg.length-1][1];cols=new Uint16Array(W);for(y=t;y<=b;y+=st)for(x=0;x<W;x+=st){i=(y*W+x)*4;if(d[i]<245||d[i+1]<245||d[i+2]<245)cols[x]++}
+  var l0=0,r0=W-1;while(l0<W&&cols[l0]<3)l0++;while(r0>0&&cols[r0]<3)r0--;if(r0<=l0)return ok(src);
+  var p=8;l0=Math.max(0,l0-p);r0=Math.min(W-1,r0+p);t=Math.max(0,t-p);b=Math.min(H-1,b+p);
+  if((r0-l0)>W*0.97&&(b-t)>H*0.97)return ok(src);var o=document.createElement('canvas');o.width=r0-l0+1;o.height=b-t+1;o.getContext('2d').drawImage(c,l0,t,o.width,o.height,0,0,o.width,o.height);ok(o.toDataURL('image/png'))}catch(e){ok(src)}};im.onerror=function(){ok(src)};im.src=src})}
 function rdImg(){var id=RD.cur.id,n=RD.pg,tot=RD.doc.numPages;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';$('rdb').style.opacity=.4;
   pgImg(id,n).then(function(src){if(RD.cur.id!==id||RD.pg!==n||!$('rdm'))return;$('rdm').src=src;$('rdb').style.opacity=1;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';ls_('rdp_'+id,String(n));
     if(n===tot){ls_('rd_'+id,'1');rdEnd()}else{$('rde').innerHTML='';pgImg(id,n+1).catch(function(){})}}).catch(function(e){$('rdi').textContent=e.message})}
