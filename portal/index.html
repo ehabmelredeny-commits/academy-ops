@@ -208,15 +208,40 @@ function stOpen(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
     '<div style="background:#fff;border-radius:8px;overflow:hidden;min-height:200px;user-select:none;-webkit-user-select:none"><canvas id="rdc" style="width:100%;display:block"></canvas></div>'+
     '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1" onclick="rdGo(-1)">→ السابقة</button><button class="btn" style="flex:1" onclick="rdGo(1)">التالية ←</button></div><div id="rde"></div></div>';
   el.scrollIntoView({behavior:'smooth'});RD={cur:x,doc:null,pg:Number(ls_('rdp_'+id))||1};
-  if(x.pages){RD.doc={numPages:x.pages,img:1};if(RD.pg>x.pages)RD.pg=1;$('rdc').outerHTML='<img id="rdm" alt="" draggable="false" oncontextmenu="return false" style="width:100%;display:block;min-height:200px;-webkit-touch-callout:none">';rdDraw();return}
+  if(x.pages){RD.doc={numPages:x.pages,img:1};if(RD.pg>x.pages)RD.pg=1;rdCard();rdOpen(x);rdDraw();return}
   Promise.all([pdfLib(),x.has_file?pdfBytes(id):Promise.resolve(null)]).then(function(a){if(!a[1]){rdEnd();$('rdi').textContent='لا ملف لهذا الدرس';return}
     return a[0].getDocument({data:a[1].slice(),cMapUrl:location.origin+location.pathname.split('portal')[0]+'pdfjs/cmaps/',cMapPacked:true,standardFontDataUrl:location.origin+location.pathname.split('portal')[0]+'pdfjs/standard_fonts/',useSystemFonts:false}).promise.then(function(doc){RD.doc=doc;if(RD.pg>doc.numPages)RD.pg=1;rdDraw()})}).catch(function(e){$('rdi').textContent=e.message||'تعذّر فتح الدرس'})}
-function rdGo(d){if(!RD.doc)return;var n=RD.pg+d;if(n<1||n>RD.doc.numPages)return;RD.pg=n;rdDraw();($('rdc')||$('rdm')).scrollIntoView({block:'start',behavior:'smooth'})}
+function rdGo(d){if(!RD.doc)return;var n=RD.pg+d;if(n<1||n>RD.doc.numPages)return;RD.pg=n;rdDraw();if($('rds'))$('rds').scrollTop=0;else ($('rdc')||$('rdm')).scrollIntoView({block:'start',behavior:'smooth'})}
+/* القارئ بملء الشاشة (معتمد 2026-10-19 docs/mockup-mobile-reader.jpg) — وضع الصور فقط: سحب الإصبع من اليسار لليمين = التالية (كتاب عربي) · أسهم: يسار=التالية يمين=السابقة · زر رجوع الجوال يغلق */
+function rdCard(){var x=RD.cur,el=$('qz');if(!x||!el)return;var t=RD.doc?RD.doc.numPages:0;
+  el.innerHTML='<div class="card" oncontextmenu="return false"><div style="display:flex;justify-content:space-between;align-items:center"><b>📖 '+esc(x.title)+'</b><button class="btn" onclick="rdClose();this.closest(&quot;.card&quot;).remove()" data-tip="إغلاق">✕</button></div><div class="xs mut" id="rdq">صفحة '+RD.pg+' من '+t+'</div><button class="btn" style="width:100%;margin-top:8px" data-id="'+x.id+'" onclick="stOpen(this.dataset.id)">📖 تابع القراءة من حيث توقفت</button></div>'}
+function rdOpen(x){rdClose(1);var o=document.createElement('div'),fs=document.documentElement.requestFullscreen,bt='border:0;border-radius:12px;font:inherit;font-weight:700;cursor:pointer;';o.id='rdo';o.oncontextmenu=function(){return false};
+  o.style.cssText='position:fixed;left:0;right:0;top:0;height:100vh;height:100dvh;z-index:9999;background:#0B2D4B;display:flex;flex-direction:column;direction:rtl;user-select:none;-webkit-user-select:none';
+  o.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));color:#fff"><button id="rdx" style="'+bt+'background:#D4A853;color:#0B2D4B;padding:8px 12px">→ رجوع</button><div style="flex:1;min-width:0;text-align:center"><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(x.title)+'</b><span id="rdi" style="font-size:12px;color:#D4A853">⏳</span></div>'+(fs?'<button id="rdf" data-tip="ملء الشاشة" style="'+bt+'background:none;color:#fff;font-size:20px;padding:4px 8px">⛶</button>':'')+'</div>'+
+    '<div style="height:4px;background:rgba(255,255,255,.15)"><i id="rdb" style="display:block;height:100%;width:0;background:#D4A853;transition:width .3s"></i></div>'+
+    '<div id="rds" style="flex:1;overflow:auto;background:#fff;touch-action:pan-x pan-y pinch-zoom;-webkit-overflow-scrolling:touch;position:relative"><img id="rdm" alt="" draggable="false" style="width:100%;display:block;min-height:200px;-webkit-touch-callout:none"></div>'+
+    (ls_('rdhint')?'':'<div id="rdh" style="position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(40,40,40,.85);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;transition:opacity .6s;pointer-events:none">⇆ اسحب لتقليب الصفحة</div>')+
+    '<div id="rde" style="padding:0 10px"></div><div style="display:flex;gap:10px;padding:10px;padding-bottom:max(10px,env(safe-area-inset-bottom))"><button id="rdp" style="'+bt+'flex:1;padding:14px;background:transparent;color:#fff;border:1.5px solid #D4A853">→ السابقة</button><button id="rdn" style="'+bt+'flex:1;padding:14px;background:#D4A853;color:#0B2D4B">التالية ←</button></div>';
+  document.body.appendChild(o);RD.ov=1;RD.bo=document.body.style.overflow;document.body.style.overflow='hidden';
+  $('rdx').onclick=function(){rdClose()};$('rdp').onclick=function(){rdGo(-1)};$('rdn').onclick=function(){rdGo(1)};
+  if($('rdf'))$('rdf').onclick=function(){if(document.fullscreenElement)document.exitFullscreen();else o.requestFullscreen().catch(function(){})};
+  if($('rdh')){ls_('rdhint','1');setTimeout(function(){var h=$('rdh');if(h)h.style.opacity=0},3000)}
+  var sx=0,sy=0,pin=0,sc=$('rds');
+  sc.addEventListener('touchstart',function(e){if(e.touches.length>1){pin=1;return}pin=0;sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+  sc.addEventListener('touchmove',function(e){if(e.touches.length>1)pin=1},{passive:true});
+  sc.addEventListener('touchend',function(e){if(pin||e.touches.length)return;if(window.visualViewport&&visualViewport.scale>1.05)return;var t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(Math.abs(dx)>60&&Math.abs(dx)>1.5*Math.abs(dy))rdGo(dx>0?1:-1)},{passive:true});
+  try{history.pushState({rd:1},'')}catch(e){}}
+function rdClose(quiet){var o=$('rdo');if(!o)return;if(document.fullscreenElement)try{document.exitFullscreen()}catch(e){}
+  o.remove();document.body.style.overflow=RD.bo||'';var h=RD.ov;RD.ov=0;if($('rdq')&&RD.doc)$('rdq').textContent='صفحة '+RD.pg+' من '+RD.doc.numPages;
+  if(h&&quiet!=='pop'&&history.state&&history.state.rd)try{history.back()}catch(e){}}
+window.addEventListener('popstate',function(){if($('rdo'))rdClose('pop')});
+document.addEventListener('keydown',function(e){if(!$('rdo'))return;if(e.key==='ArrowLeft'){e.preventDefault();rdGo(1)}else if(e.key==='ArrowRight'){e.preventDefault();rdGo(-1)}else if(e.key==='Escape'&&!document.fullscreenElement)rdClose()});
 var PGI={};
 function pgImg(id,n){var k=id+':'+n;if(PGI[k])return PGI[k];var get=function(){return fetch(EXEC+'?public=study',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:SESS,lesson:id,n:n})}).then(function(r){return r.json()}).then(function(j){if(!j.ok)throw new Error(j.error||'تعذّر فتح الصفحة');return 'data:'+(j.mime||'image/png')+';base64,'+j.b64})};
   PGI[k]=get().catch(function(){return get()}).catch(function(e){delete PGI[k];throw e});return PGI[k]}
 function rdImg(){var id=RD.cur.id,n=RD.pg,tot=RD.doc.numPages;$('rdi').textContent='⏳ صفحة '+n+' من '+tot+'…';
-  pgImg(id,n).then(function(src){if(RD.cur.id!==id||RD.pg!==n)return;$('rdm').src=src;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';ls_('rdp_'+id,String(n));
+  pgImg(id,n).then(function(src){if(RD.cur.id!==id||RD.pg!==n||!$('rdm'))return;$('rdm').src=src;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';ls_('rdp_'+id,String(n));
     if(n===tot){ls_('rd_'+id,'1');rdEnd()}else{$('rde').innerHTML='';pgImg(id,n+1).catch(function(){})}}).catch(function(e){$('rdi').textContent=e.message})}
 function rdDraw(){if(RD.doc&&RD.doc.img)return rdImg();var doc=RD.doc,id=RD.cur.id;doc.getPage(RD.pg).then(function(p){var c=$('rdc');if(!c)return;var w=c.parentNode.clientWidth||340,v1=p.getViewport({scale:1}),sc=w/v1.width*(window.devicePixelRatio||1),v=p.getViewport({scale:sc});
   c.width=v.width;c.height=v.height;p.render({canvasContext:c.getContext('2d'),viewport:v});
@@ -225,11 +250,11 @@ function rdDraw(){if(RD.doc&&RD.doc.img)return rdImg();var doc=RD.doc,id=RD.cur.
 function rdEnd(){var x=RD.cur,el=$('rde');if(!el)return;
   if(x.gate==='ack'){el.innerHTML=x.done?'<div class="xs mut" style="margin-top:8px">✅ وافقت على نظام المذاكرة</div>':'<div class="card" style="margin-top:10px"><b>✍️ الموافقة على نظام المذاكرة</b><div style="white-space:pre-line;line-height:1.9;margin:6px 0">'+esc(x.ack_text||'')+'</div><label style="display:block;margin:8px 0"><input type="checkbox" id="ackc"> قرأت وأوافق</label><button class="btn" style="width:100%" data-id="'+x.id+'" onclick="ackGo(this)">✅ موافق — افتح الفصل التالي</button></div>';return}
   if(x.questions)el.innerHTML='<button class="btn" style="width:100%;margin-top:10px" data-id="'+x.id+'" onclick="quiz(this.dataset.id)">✅ أنهيت الفصل — ابدأ الاختبار</button>'}
-function ackGo(b){if(!$('ackc').checked){alert('ضع علامة «قرأت وأوافق» أولاً');return}b.disabled=true;var id=b.dataset.id;
+function ackGo(b){rdClose();if(!$('ackc').checked){alert('ضع علامة «قرأت وأوافق» أولاً');return}b.disabled=true;var id=b.dataset.id;
   rpc('ac_lesson_ack',{token:SESS,lesson:id}).then(function(r){if(r.preview)alert('معاينة — لا تُحفظ الموافقة');reStudy(function(){var n=myLessons().filter(function(l){return l.open&&!l.done})[0];if(n)stOpen(n.id)})}).catch(function(e){b.disabled=false;alert(e.message)})}
 function bi(o){return typeof o==='string'?esc(o):'<span dir="ltr" style="display:block;text-align:left">'+esc(o.en)+'</span><span style="display:block" class="mut">'+esc(o.ar)+'</span>'}
 var QZ=null;
-function quiz(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
+function quiz(id){rdClose();var x=lessonById(id),el=$('qz');if(!x||!el)return;
   if(!ls_('rd_'+id)){el.innerHTML='<div class="card" style="border:1px solid #D4A853"><b>قبل الاختبار</b><p style="line-height:1.9">لم تُكمل قراءة الفصل بعد.<br>أقرّ أنني اطّلعت على «'+esc(x.title)+'» كاملاً وأوافق على دخول الاختبار.</p>'+
     '<button class="btn" style="width:100%" data-id="'+id+'" onclick="ls_(\'rd_\'+this.dataset.id,\'1\');quiz(this.dataset.id)">✍️ أقرّ وأبدأ</button><button class="btn" style="width:100%;margin-top:6px" data-id="'+id+'" onclick="stOpen(this.dataset.id)">📖 أكمل القراءة أولاً</button></div>';el.scrollIntoView({behavior:'smooth'});return}
   el.innerHTML='<div class="card">جارٍ التحميل…</div>';el.scrollIntoView({behavior:'smooth'});
