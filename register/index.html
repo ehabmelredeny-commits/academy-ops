@@ -1,5 +1,5 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ابدأ مسيرتك كمدرب معتمد</title><meta name="robots" content="noindex"><style>:root{--a:#0B2D4B;--gold:#D4A853;--bg:#fbf8f1;--ink:#0B2D4B;--mut:#5d6b73;--line:#e3d9c2;--card:#fff;--in:#fff;color-scheme:light}
+<title>ابدأ مسيرتك كمدرب محترف</title><meta name="robots" content="noindex"><style>:root{--a:#0B2D4B;--gold:#D4A853;--bg:#fbf8f1;--ink:#0B2D4B;--mut:#5d6b73;--line:#e3d9c2;--card:#fff;--in:#fff;color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--a:#D4A853;--bg:#0e1a27;--ink:#e8eef5;--mut:#9fb0c2;--line:#2f4560;--card:#16263a;--in:#0f1f31;color-scheme:dark}}
 :root[data-theme=dark]{--a:#D4A853;--bg:#0e1a27;--ink:#e8eef5;--mut:#9fb0c2;--line:#2f4560;--card:#16263a;--in:#0f1f31;color-scheme:dark}
 .en{display:block;font:500 11.5px 'Segoe UI',Arial,sans-serif;opacity:.65;direction:ltr;text-align:right;margin-top:1px}.hero .en{font-size:13px;opacity:.85;color:var(--gold)}
@@ -17,7 +17,7 @@ button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-
 
 <div class="wrap">
 <button type="button" class="thm" id="thm" aria-label="الوضع الليلي/النهاري">🌙</button>
-<div class="hero"><h1 id="t">ابدأ مسيرتك كمدرب معتمد</h1><span class="en">Start your journey as a certified trainer</span><p style="margin-top:6px">مقعدك يبدأ من هنا — نرسل لك خلال ساعات الموعد والتفاصيل والعرض المتاح لك.<span class="en">Your seat starts here — we'll send you the dates, details and your offer within hours.</span></p></div>
+<div class="hero"><img src="../brand/logo-transparent.png" alt="أكاديمية السعد الرياضية" style="display:block;margin:0 auto 10px;width:150px;max-width:45%;height:auto"><h1 id="t">ابدأ مسيرتك كمدرب محترف</h1><span class="en">Start your journey as a professional trainer</span><p style="margin-top:6px">مقعدك يبدأ من هنا — نرسل لك خلال ساعات الموعد والتفاصيل والعرض المتاح لك.<span class="en">Your seat starts here — we'll send you the dates, details and your offer within hours.</span></p></div>
 <form class="card" id="f" novalidate>
 <label for="name">الاسم *<small class="en">Full name *</small></label><input id="name" autocomplete="name" required>
 <label for="phone">رقم الجوال (واتساب) *<small class="en">Mobile (WhatsApp) *</small></label><input id="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required>
@@ -48,7 +48,7 @@ function loadTrackers(c){
 }
 fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){
   CFG=j.data||{};
-  if(CFG.academy){document.title='ابدأ مسيرتك كمدرب معتمد — '+CFG.academy;}
+  if(CFG.academy){document.title='ابدأ مسيرتك كمدرب محترف — '+CFG.academy;}
   (CFG.cities||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c;$('city').appendChild(o)});
   (CFG.courses||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c.name;$('course').appendChild(o)});
   var pre=P.get('course');if(pre)$('course').value=pre;
