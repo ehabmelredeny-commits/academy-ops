@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mveuzxb5";
+  var APP_BUILD = "mvev8yla";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -4284,7 +4284,7 @@ ACT.calSheet = function (el) {
     row('الحالة', c.status) + row('ملاحظات', c.notes) + '</table>' +
     '<h3>جدول الجلسات</h3><table class="ses"><tr><th>#</th><th>اليوم</th><th>التاريخ</th><th>الوقت</th><th>الحضور</th></tr>' +
     ses.map(function (x, i) { return '<tr><td>' + (i + 1) + '</td><td>' + CAL_DAYS[x.getDay()][1] + '</td><td>' + x.toLocaleDateString('ar-SA-u-ca-gregory') + '</td><td>' + esc(c.time || '') + '</td><td></td></tr>'; }).join('') +
-    '</table><div class="foot">أُعدّت من Academy OPS · ' + new Date().toLocaleDateString('ar-SA-u-ca-gregory') + '</div><script>(function(){var A='info@alsaad-academy.com';document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;try{var u=new URL(a.href);if(/(^|[.])google[.]com$/.test(u.hostname)&&!u.searchParams.has('authuser')){u.searchParams.set('authuser',A);a.href=u.toString()}}catch(x){}},true)})()</script></body></html>';
+    '</table><div class="foot">أُعدّت من Academy OPS · ' + new Date().toLocaleDateString('ar-SA-u-ca-gregory') + '</div></body></html>';
   var w = window.open('', '_blank');
   if (!w) return toast('اسمح بالنوافذ المنبثقة لفتح الورقة', true);
   w.document.write(html); w.document.close();
@@ -7861,5 +7861,5 @@ ACT.stSetUrl = function (el) { act('storeSetUrl', { ac_id: el.dataset.id, url: v
 ACT.stRead = function (el) { el.disabled = true; el.textContent = '⏳ يقرأ…'; act('storeReadNow', {}, function (r) { return r && r.message ? r.message : 'اكتملت القراءة'; }); };
 </script>
 
-</body>
+<style>@media(max-width:767px){#askB{font-size:0!important;width:42px;height:42px;padding:0!important;left:62px!important;bottom:12px!important;border-radius:50%!important;opacity:.92}#askB::before{content:'💬';font-size:19px}#thmG{width:42px;height:42px;padding:0!important;left:12px!important;bottom:12px!important;border-radius:50%!important;opacity:.92}body{padding-bottom:72px!important}}</style><script>(function(){var A='info@alsaad-academy.com';document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;try{var u=new URL(a.href);if(/(^|[.])google[.]com$/.test(u.hostname)&&!u.searchParams.has('authuser')){u.searchParams.set('authuser',A);a.href=u.toString()}}catch(x){}},true)})()</script></body>
 </html>
