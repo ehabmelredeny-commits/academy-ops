@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mve88o05";
+  var APP_BUILD = "mvepijp5";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -4284,7 +4284,7 @@ ACT.calSheet = function (el) {
     row('الحالة', c.status) + row('ملاحظات', c.notes) + '</table>' +
     '<h3>جدول الجلسات</h3><table class="ses"><tr><th>#</th><th>اليوم</th><th>التاريخ</th><th>الوقت</th><th>الحضور</th></tr>' +
     ses.map(function (x, i) { return '<tr><td>' + (i + 1) + '</td><td>' + CAL_DAYS[x.getDay()][1] + '</td><td>' + x.toLocaleDateString('ar-SA-u-ca-gregory') + '</td><td>' + esc(c.time || '') + '</td><td></td></tr>'; }).join('') +
-    '</table><div class="foot">أُعدّت من Academy OPS · ' + new Date().toLocaleDateString('ar-SA-u-ca-gregory') + '</div></body></html>';
+    '</table><div class="foot">أُعدّت من Academy OPS · ' + new Date().toLocaleDateString('ar-SA-u-ca-gregory') + '</div><script>(function(){var A='info@alsaad-academy.com';document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;try{var u=new URL(a.href);if(/(^|[.])google[.]com$/.test(u.hostname)&&!u.searchParams.has('authuser')){u.searchParams.set('authuser',A);a.href=u.toString()}}catch(x){}},true)})()</script></body></html>';
   var w = window.open('', '_blank');
   if (!w) return toast('اسمح بالنوافذ المنبثقة لفتح الورقة', true);
   w.document.write(html); w.document.close();
@@ -5901,7 +5901,7 @@ var REG_PLATFORMS = [['whatsapp', 'واتساب', '💬'], ['instagram', 'انس
   ['facebook', 'فيسبوك', '📘'], ['linkedin', 'لينكدإن', '💼'], ['email', 'البريد', '✉️'], ['qr', 'مطبوعات / QR', '🔳'], ['ads', 'إعلانات ممولة', '📣']];
 function regBase_() {
   var sbx = S.sandbox ? 'sandbox/' : '';
-  return 'https://ehabmelredeny-commits.github.io/academy-ops/' + sbx + 'register/';
+  return (S.sandbox ? 'https://ehabmelredeny-commits.github.io/academy-ops/' + sbx : 'https://alsaad-academy.com/') + 'register/'; // دومين الأكاديمية 2026-10-19
 }
 function regLink_(src, course, campaign) {
   var p = ['utm_source=' + encodeURIComponent(src), 'utm_medium=' + (src === 'ads' ? 'paid' : src === 'qr' ? 'offline' : 'social')];
