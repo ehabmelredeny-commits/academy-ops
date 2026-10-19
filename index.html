@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvf9p1yc";
+  var APP_BUILD = "mvfmmr91";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -6350,7 +6350,7 @@ function covExcluded_(cv) {
 }
 ACT.cmpExclude = function (el) { act('compExclude', { ac_id: el.dataset.id, exclude: el.dataset.on === '1' }, el.dataset.on === '1' ? 'استُبعد من الرصد (يمكن إعادته)' : 'أُعيد للرصد'); };
 ACT.cmpCapture = function (el) {
-  var opts = (CW_COVER() || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (x.ac_id === el.dataset.id ? ' selected' : '') + '>' + esc(String(x.name).split(/\s[—–-]\s/)[0]) + '</option>'; }).join('');
+  var opts = (CW_COVER() || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (String(x.ac_id) === el.dataset.id ? ' selected' : '') + '>' + esc(String(x.name).split(/\s[—–-]\s/)[0]) + '</option>'; }).join('');
   openSheet('<h3 style="margin:0 0 6px">📸 أضف إعلاناً رأيته</h3><div class="muted tiny" style="margin-bottom:6px">أعطِ النظام ما رأيته: رابط الإعلان، ولقطة شاشة (أو الصق نصه). يقرأ السعر والموعد والعملة ويسجّله باسم المنافس.</div>' +
     '<label class="f">المنافس</label><select id="cc_ac"><option value="">— يتعرف عليه النظام من اللقطة —</option>' + opts + '</select>' +
     '<label class="f">رابط الإعلان / المنشور (اختياري لكنه يفتح لاحقاً)</label><input id="cc_url" dir="ltr" placeholder="https://www.instagram.com/p/…">' +
@@ -7837,7 +7837,7 @@ function stMarket_(d) {
 function stRedraw_() { if (!ST.data || S.screen !== 'storecourses') return go('storecourses', {}, true); var y = window.scrollY; $('main').innerHTML = tabsBar_('storecourses') + pageHead_('storecourses') + SCREENS.storecourses.render(ST.data, S.args); if (typeof clearBtn_ === 'function') clearBtn_('storecourses'); window.scrollTo(0, y); }
 SCREENS.storecourses = { render: function (d) {
   ST.data = d;
-  if (ST.open === null) ST.open = d.groups[0] ? d.groups[0].ac_id : '';
+  if (ST.open === null) ST.open = d.groups[0] ? String(d.groups[0].ac_id) : ''; // نص دائماً: ac_id يصل رقماً من القاعدة و«نصاً» من الزر — المقارنة الصارمة كانت تمنع فتح أي منافس
   var f = ST.f, all = []; d.groups.forEach(function (g) { all = all.concat(g.courses); });
   var cities = {}; all.forEach(function (c) { if (c.city) cities[c.city] = 1; });
   var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">🛒 دورات المنافسين بمواقع الدفع <span class="muted tiny">· من صفحة الشراء نفسها فقط · ' + d.total + ' دورة · ' + d.groups.length + ' متجراً</span></h1><span class="row" style="gap:6px;flex-wrap:wrap">' +
@@ -7848,7 +7848,7 @@ SCREENS.storecourses = { render: function (d) {
     '<label class="chip"><input type="checkbox" id="st_o"' + (f.other ? ' checked' : '') + '> منتجات أخرى</label>' +
     '<button class="btn sm pri" data-act="stRead" data-tip="يقرأ المتاجر التي تسمح لخوادم جوجل. المتاجر التي تحجبها (سلة على Cloudflare…) تُقرأ من جهازك بالجامع المحلي: scripts/store-collector.js">🔄 اقرأ المتاجر الآن</button></span></div>' + stMarket_(d);
   html += d.groups.map(function (g) {
-    var open = ST.open === g.ac_id, shown = g.courses.filter(stFilter_).length;
+    var open = ST.open === String(g.ac_id), shown = g.courses.filter(stFilter_).length;
     return '<div class="card" style="margin-top:6px"><div class="st-hd" style="cursor:pointer" title="اضغط لعرض دورات هذا المنافس" data-act="stToggle" data-id="' + esc(g.ac_id) + '"><span>' + (open ? '▾' : '▸') + '</span><b>' + esc(g.name) + '</b><span class="tag acc">' + esc(g.platform) + '</span><span class="tag">' + g.n + ' دورة' + (shown !== g.n ? ' · ' + shown + ' مطابقة' : '') + '</span>' +
       (g.changed ? '<span class="tag bad">🔻 تغيّر ' + g.changed + '</span>' : '') + '<span class="muted tiny" style="margin-inline-start:auto">قُرئ ' + esc(stAgo_(g.seen)) + '</span></div>' + (open ? stRows_(g) : '') + '</div>';
   }).join('') || empty('لم تُقرأ متاجر بعد — اضغط «اقرأ المتاجر الآن» أو شغّل الجامع المحلي');
