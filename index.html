@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvg70pln";
+  var APP_BUILD = "mvg75h3z";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -7429,10 +7429,10 @@ SCREENS.engage = { after: function () {
   var P = d.posts || [], AC = d.accounts || [];
   html += '<div class="card"><div class="eg2-h"><span class="eg2-n">1</span><b>منشورات المنافسين — افتحها لالتقاط الأسئلة</b><span class="muted tiny">آخر ١٤ يوماً</span></div>' +
     (P.length ? '<div class="eg2-posts">' + P.map(function (p) {
-      return '<div class="eg2-post' + (p.q ? ' done' : '') + '"><span style="flex:1;min-width:0"><b>' + esc(String(p.ac || 'منافس').split(/\s[—–-]\s/)[0]) + '</b> <span class="muted">' + esc(p.platform || '') + ' · ' + fmtDate(p.at, true) + '</span>' +
+      return '<div class="eg2-post' + (p.q ? ' done' : '') + '"><span style="flex:1;min-width:0"><b>' + esc(egShort_(p.ac)) + '</b> <span class="muted">' + esc(p.platform || '') + ' · ' + fmtDate(p.at, true) + '</span>' +
         (p.q ? '<br>' + chip('✓ التُقط · ' + p.q + ' سؤال', 'good') : '') + '</span><a class="btn sm' + (p.q ? '' : ' pri') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + (p.q ? 'افتح مجدداً' : 'افتح ↗') + '</a></div>'; }).join('') + '</div>'
       : '<div class="muted small">لا منشورات بعد — تمتلئ هذه القائمة وحدها مع «جولة» الإضافة اليومية. وحتى ذلك: افتح حساب المنافس من الروابط تحت واختر أي منشور.</div>') +
-    (AC.length ? '<div class="eg2-acc"><span class="muted tiny">حسابات المنافسين:</span>' + AC.slice(0, 30).map(function (a) { return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener" title="' + esc(a.ac) + '">' + esc(String(a.ac).split(/\s[—–-]\s/)[0]) + ' · ' + esc(a.platform || '') + '</a>'; }).join('') + '</div>' : '') + '</div>';
+    egAccChips_(AC) + '</div>';
   // ② الأسئلة
   var Q = (d.rows || []).filter(function (e) { return e.status === 'ينتظر'; }).sort(function (a, b) { return (Number(b.intent) || 0) - (Number(a.intent) || 0); });
   var R = (d.rows || []).filter(function (e) { return e.status === 'رُدّ'; }).slice(0, 5);
@@ -7456,6 +7456,17 @@ SCREENS.engage = { after: function () {
     '<div class="muted tiny" style="margin-top:4px">➡️ السؤال المتكرر (٣ مرات فأكثر) يتحول تلقائياً إلى فكرة منشور تجيب عنه في <a href="#" data-go="content">💡 بنك الأفكار</a> · ويدخل تحليل <a href="#" data-go="dailyPost">🧠 العقل الآلي</a></div></div>';
   return html + '</div>';
 } };
+/** الاسم المختصر للمنافس: «الأكاديمية السعودية… — SASS» ← SASS */
+function egShort_(n) { n = String(n || 'منافس'); var p = n.split(/\s[—–-]\s/); return p.length > 1 ? p[p.length - 1] : n; }
+/** شريحة واحدة لكل منافس فيها روابط حساباته (بدل ٤٠ شريحة) */
+function egAccChips_(AC) {
+  if (!AC.length) return '';
+  var by = {}, IC = { instagram: 'IG', 'انستغرام': 'IG', tiktok: 'TT', 'تيك توك': 'TT', x: 'X', facebook: 'FB', youtube: 'YT', snapchat: 'SC', telegram: 'TG', whatsapp: 'WA' };
+  AC.forEach(function (a) { (by[a.ac] = by[a.ac] || []).push(a); });
+  return '<div class="eg2-acc"><span class="muted tiny">حسابات المنافسين:</span>' + Object.keys(by).map(function (k) {
+    return '<span class="chip" title="' + esc(k) + '">' + esc(egShort_(k)) + ' ' + by[k].map(function (a) { var t = IC[String(a.platform || '').toLowerCase()] || String(a.platform || '').slice(0, 2);
+      return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener" style="border:0;padding:0 2px" title="' + esc(a.platform || '') + '">' + esc(t) + '</a>'; }).join('·') + '</span>'; }).join(' ') + '</div>';
+}
 /** رابط ملف السائل على منصته (للحسابات الحقيقية فقط) */
 function egProfile_(e) {
   var h = String(e.asker || '').replace(/^@/, ''); if (!h || /\s/.test(h)) return '';
@@ -7467,7 +7478,7 @@ function egRow_(e) {
   return '<div class="eg2-q' + (done ? ' off' : '') + '">' +
     '<div class="who">' + (prof ? '<a href="' + esc(prof) + '" target="_blank" rel="noopener" data-tip="يفتح حسابه على المنصة"><b>@' + esc(e.asker) + ' ↗</b></a>' : '<b>' + (e.asker ? '@' + esc(e.asker) : 'سائل') + '</b>') +
       (ok ? ' ' + chip('✓ مؤكَّد', 'good') : '') + (e.person_id ? ' <a href="#" data-go="person" data-args="' + attr({ person_id: e.person_id }) + '" data-tip="الملف الموحّد">👤</a>' : '') +
-      '<br><span class="muted tiny">عند ' + esc(String(e.competitor || '').split(/\s[—–-]\s/)[0]) + ' · ' + esc(e.platform || '') + ' · ' + fmtDate(e.captured_at, true) + '</span><br><span style="color:#D4A853;font-size:11px">' + '★★★★★'.slice(0, n) + '</span><span class="muted" style="font-size:11px">' + '★★★★★'.slice(0, 5 - n) + '</span></div>' +
+      '<br><span class="muted tiny">عند ' + esc(egShort_(e.competitor)) + ' · ' + esc(e.platform || '') + ' · ' + fmtDate(e.captured_at, true) + '</span><br><span style="color:#D4A853;font-size:11px">' + '★★★★★'.slice(0, n) + '</span><span class="muted" style="font-size:11px">' + '★★★★★'.slice(0, 5 - n) + '</span></div>' +
     '<div><div class="qq">«' + esc(e.question) + '»</div><div class="rep">↩︎ ' + esc(e.reply || '—') + (e.code ? ' ' + chip('🎟 ' + e.code) : '') + '</div></div>' +
     '<div class="acts">' + (done ? chip('✓ رُدّ', 'good') + (e.lead_id ? ' <a href="#" data-go="lead" data-args="' + attr({ lead_id: e.lead_id }) + '">👤</a>' : '') :
       '<button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '" data-tip="ينسخ الرد ويفتح ' + (e.comment_url ? 'تعليقه هو' : 'المنشور') + ' ← الصق (Ctrl+V) وأرسل بنفسك ← ثم «✓ رددت»">📋 ' + (e.comment_url ? 'انسخ وافتح تعليقه' : 'انسخ وافتح المنشور') + '</button>' +
