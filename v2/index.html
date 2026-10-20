@@ -173,7 +173,10 @@ function todayCard(t){if(!t)return '';function k(n,l,fn){return '<span'+(fn?' st
     ((t.next_sessions||[]).length?'<div class="mut" style="margin-top:8px">الجلسات القادمة</div>'+t.next_sessions.map(function(x){return '<div class="row"><span>🗓 '+esc(x.cohort)+' · جلسة '+x.n+(x.title?' — '+esc(x.title):'')+'</span><span class="mut">'+dd(x.day)+'</span></div>'}).join(''):'')+'</div>'}
 /** جسر النظام الحالي: نفس شاشات وإجراءات Apps Script بجلسة v2 (لا مفتاح في الرابط للإجراءات) */
 function gapi(fn,name,args){var k='v2:'+TOK;if(fn==='screen')return fetch(EXEC+'?api=1&fn=screen&name='+encodeURIComponent(name)+'&k='+encodeURIComponent(k)+'&args='+encodeURIComponent(JSON.stringify(args||{}))).then(function(r){return r.json()});
-  return fetch(EXEC+'?api=1',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({name:name,args:args||{},k:k})}).then(function(r){return r.json()})}
+  // نقل التشغيل (2026-10-20): الأزرار تُنفَّذ أولاً في Supabase (v2-act)، وما لم يُنقل بعد يعود لجوجل كما كان
+  var viaGas=function(){return fetch(EXEC+'?api=1',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({name:name,args:args||{},k:k})}).then(function(r){return r.json()})};
+  return fetch(SUPA.url+'/functions/v1/v2-act',{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify({token:TOK,name:name,args:args||{}})})
+    .then(function(r){return r.json()}).then(function(x){return x&&x.fallback?viaGas():x}).catch(viaGas)}
 var SETS=[],SQ='';
 function settings(){TAB='settings';if(!TOK)return loginScreen();
   $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">الإعدادات</b><span class="mut" id="sc"></span><span class="sp"></span><button class="ib" title="تحديث" onclick="settings()">⟳</button></div><div class="mut" style="font-size:12px">الحفظ يتم مباشرة في النظام الحالي (نفس القيم) — يظهر هنا فوراً، وفي النسخة الحيّة خلال ساعة.</div><input id="sq" placeholder="ابحث في الإعدادات (الاسم أو الوصف)" oninput="SQ=this.value;sDraw()" value="'+esc(SQ)+'" style="margin-top:8px"><div id="sl" style="margin-top:10px"><div class="mut">جارٍ التحميل…</div></div>');
