@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvg6o3lf";
+  var APP_BUILD = "mvg6yid1";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -7412,49 +7412,73 @@ SCREENS.engage = { after: function () {
   if ($('eg_ac')) $('eg_ac').value = ''; // المنافس يُعرف من المنشور نفسه
   var b = document.querySelector('[data-act="egQuick"]'); if (b) { toast('وصل المنشور ' + (d.u ? 'برابطه' : '') + ' — يحلّل الآن…'); ACT.egQuick(b); }
 }, render: function (d, args) {
+  // التصميم المعتمد 2026-10-20 (docs/mockup-engage-v2.png): ① منشورات جاهزة بروابطها ② أسئلة مضغوطة بارتفاع يتبع المحتوى · الإدخال اليدوي احتياطي مطوي
   var c = d.counts || {};
-  var html = north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">💬 التفاعل مع منشورات المنافسين</h1>' +
-    statMini_([[c.week || 0, 'سؤال هذا الأسبوع'], [c.waiting || 0, 'ينتظر ردك', 'warn'], [c.replied || 0, 'رُدّ عليه', 'good'], [c.leads || 0, 'صاروا عملاء']]) + '</div>';
-  // ١) الإدخال
-  html += '<div class="card"><b>١) أدخل تعليقات منشور منافس</b> <span class="muted tiny">— بالطريقة الأسهل لك</span>' +
-    '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><select id="eg_ac" style="max-width:260px"><option value="">— المنافس —</option>' +
-      (d.competitors || []).map(function (x) { return '<option value="' + esc(x.ac_id) + '"' + (String(x.ac_id) === String(d.pick || egLastAc_()) ? ' selected' : '') + '>' + esc(x.name) + '</option>'; }).join('') + '</select>' +
-      '<input id="eg_url" dir="ltr" style="flex:1;min-width:220px" placeholder="رابط المنشور https://instagram.com/p/…"></div>' + egBookmarklet_() +
-    '<div class="eg-two"><div class="eg-in"><b>📷 ارفع صور الشاشة</b> <span class="chip good">الأسهل على الجوال</span>' +
+  var html = north(d.north) + '<style>' +
+    '.eg2 .card{padding:10px 12px;margin-bottom:10px}.eg2-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}.eg2-h b{font-size:14px}.eg2-n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800}' +
+    '.eg2-posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}.eg2-post{border:1px solid var(--line);border-radius:10px;padding:6px 8px;display:flex;align-items:center;gap:6px;font-size:12px}.eg2-post.done{opacity:.6}' +
+    '.eg2-acc{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}.eg2-acc a{font-size:11px;border:1px solid var(--line);border-radius:99px;padding:1px 8px;text-decoration:none}' +
+    '.eg2-q{display:grid;grid-template-columns:minmax(120px,170px) minmax(0,1fr) auto;gap:4px 10px;align-items:start;border-top:1px solid var(--line);padding:6px 2px}.eg2-q:first-child{border-top:0}.eg2-q.off{opacity:.5}' +
+    '.eg2-q .who{font-size:12px;line-height:1.35;overflow-wrap:anywhere}.eg2-q .qq{font-weight:700;font-size:13px;line-height:1.4;overflow-wrap:anywhere}.eg2-q .rep{font-size:12px;line-height:1.45;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}' +
+    '.eg2-q .acts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.eg2-q .acts .btn{padding:3px 8px;font-size:12px}.eg2-dim{opacity:.45}' +
+    '@media(max-width:760px){.eg2-q{grid-template-columns:1fr}.eg2-q .acts{justify-content:flex-start}}</style><div class="eg2">' +
+    '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">💬 أسئلة عند المنافسين — ردّ عليها قبلهم</h1>' +
+    statMini_([[c.waiting || 0, 'ينتظر ردك', 'warn'], [c.week || 0, 'هذا الأسبوع'], [c.replied || 0, 'رُدّ عليه', 'good'], [c.leads || 0, 'صاروا عملاء']]) + '</div>' +
+    '<div class="muted tiny" style="margin:2px 0 8px">النظام يجهّز لك المنشورات والردود — أنت فقط: تفتح ← تلصق ← ترسل. أي منشور تفتحه من هنا تلتقط إضافة كروم أسئلته وحدها (الإصدار 1.4).</div>';
+  // ① المنشورات
+  var P = d.posts || [], AC = d.accounts || [];
+  html += '<div class="card"><div class="eg2-h"><span class="eg2-n">1</span><b>منشورات المنافسين — افتحها لالتقاط الأسئلة</b><span class="muted tiny">آخر ١٤ يوماً</span></div>' +
+    (P.length ? '<div class="eg2-posts">' + P.map(function (p) {
+      return '<div class="eg2-post' + (p.q ? ' done' : '') + '"><span style="flex:1;min-width:0"><b>' + esc(String(p.ac || 'منافس').split(/\s[—–-]\s/)[0]) + '</b> <span class="muted">' + esc(p.platform || '') + ' · ' + fmtDate(p.at, true) + '</span>' +
+        (p.q ? '<br>' + chip('✓ التُقط · ' + p.q + ' سؤال', 'good') : '') + '</span><a class="btn sm' + (p.q ? '' : ' pri') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + (p.q ? 'افتح مجدداً' : 'افتح ↗') + '</a></div>'; }).join('') + '</div>'
+      : '<div class="muted small">لا منشورات بعد — تمتلئ هذه القائمة وحدها مع «جولة» الإضافة اليومية. وحتى ذلك: افتح حساب المنافس من الروابط تحت واختر أي منشور.</div>') +
+    (AC.length ? '<div class="eg2-acc"><span class="muted tiny">حسابات المنافسين:</span>' + AC.slice(0, 30).map(function (a) { return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener" title="' + esc(a.ac) + '">' + esc(String(a.ac).split(/\s[—–-]\s/)[0]) + ' · ' + esc(a.platform || '') + '</a>'; }).join('') + '</div>' : '') + '</div>';
+  // ② الأسئلة
+  var Q = (d.rows || []).filter(function (e) { return e.status === 'ينتظر'; }).sort(function (a, b) { return (Number(b.intent) || 0) - (Number(a.intent) || 0); });
+  var R = (d.rows || []).filter(function (e) { return e.status === 'رُدّ'; }).slice(0, 5);
+  html += '<div class="card"><div class="eg2-h"><span class="eg2-n">2</span><b>أسئلة تنتظر ردك</b>' + chip(String(Q.length), Q.length ? 'warn' : 'good') + '<span class="muted tiny">الأهم أولاً (★ النية) · الرد يُنشر بضغطتك — المنصات تمنع الرد الآلي</span></div>' +
+    (Q.length || R.length ? Q.concat(R).map(egRow_).join('') : '<div class="muted small">لا أسئلة تنتظر — افتح منشوراً من القائمة ① لالتقاط أسئلته</div>') + '</div>';
+  // احتياطي مطوي: الإدخال اليدوي القديم (لقطة / نص / رابط)
+  html += '<details class="card"><summary class="small"><b>طريقة بديلة</b> <span class="muted tiny">(عند تعطّل الإضافة): الصق لقطة شاشة للتعليقات أو نصها ← يستخرج النظام الأسئلة</span></summary>' +
+    '<input type="hidden" id="eg_ac" value="">' +
+    '<div class="row" style="gap:6px;margin-top:6px;flex-wrap:wrap"><input id="eg_url" dir="ltr" style="flex:1;min-width:220px" placeholder="رابط المنشور https://instagram.com/p/…"></div>' +
+    '<div class="eg-two"><div class="eg-in"><b>📷 لقطات الشاشة</b> ' +
       '<button class="btn sm" data-act="egClip" data-tip="خذ لقطة بـ Win+Shift+S (أو لقطة الجوال) ثم اضغط هنا — أو اضغط Ctrl+V في أي مكان بهذه الصفحة">📋 الصق لقطة من الحافظة</button> <span class="muted tiny">أو Ctrl+V</span>' +
       '<label class="eg-drop">⬆️ اسحب الصور هنا أو اضغط للاختيار<br><span class="muted tiny">عدة صور دفعة واحدة · يقرأ النظام النص منها مجاناً</span><input type="file" id="eg_imgs" accept="image/*" multiple hidden></label>' +
       '<div id="eg_thumbs" class="row tiny" style="gap:6px;margin-top:6px;flex-wrap:wrap"></div></div>' +
     '<div class="eg-in"><b>📋 أو الصق النص</b> <span class="muted tiny">حدّد الكل ← انسخ ← الصق</span><textarea id="eg_text" style="min-height:96px;margin-top:6px" placeholder="الصق التعليقات كما هي (مع أسماء الحسابات)"></textarea></div></div>' +
-    '<div class="row between" style="margin-top:6px;gap:8px;flex-wrap:wrap"><span class="muted tiny">تظهر لك الأسئلة المستخرجة قبل التحليل لتصحّح أي كلمة · يُستبعد غير الأسئلة (🔥، شكراً، تاقات) تلقائياً</span>' +
-      '<span class="row" style="gap:6px"><button class="btn" data-act="egExtract" data-tip="يقرأ التعليقات ويعرضها لتراجعها وتصحّح الأسماء قبل التسجيل">🔎 استخرج وراجع</button>' +
-        '<button class="btn pri" data-act="egScreen" data-tip="الأسرع: تختار التبويب الذي فيه التعليقات، يصوّره 6 مرات (كل 3 ثوانٍ) وأنت تمرّر التعليقات، ثم يقرأ ويحلّل ويسجّل — كل ذلك بضغطة واحدة">🖥 صوّر شاشتي وسجّل</button>' +
-        '<button class="btn pri" data-act="egQuick" data-tip="بضغطة واحدة: يقرأ الصور والنص، يحدد الأسئلة بأي موضوع، يستبعد المؤيدين، يكتب الردود ويسجّلها في «من يسأل الآن» — بلا مراجعة">⚡ سجّل كل شيء بضغطة</button></span></div><div id="eg_review"></div></div>';
-  // يوتيوب
-  var yt = d.yt || {};
-  html += '<div class="card small" style="border-color:#ff0000"><b>▶️ يوتيوب — آلي بالكامل ومجاني</b> ' +
-    (yt.key ? chip('⚙️ يعمل وحده يومياً', 'good') + ' <span class="muted tiny">يراقب ' + yt.channels + ' قناة منافس · آخر فحص: ' + (yt.last_run ? fmtDate(yt.last_run, true) : 'لم يعمل بعد') + '</span>'
-      : chip('بانتظار المفتاح المجاني', 'warn') + ' <span class="muted tiny">أنشئ مفتاح YouTube المجاني من Google ← ضعه في Script Properties باسم <code>YT_API_KEY</code> — بعدها يعمل وحده يومياً</span>') + '</div>';
-  // ٢) الأسئلة والردود
-  var rows = (d.rows || []).filter(function (e) { return e.status !== 'مستبعد'; });
-  html += '<div class="row between" style="align-items:center;margin-top:10px"><b>٢) الأسئلة والردود الجاهزة</b><span class="muted tiny">الرد يُنشر بضغطتك (المنصات تمنع الرد الآلي) · «✓ رددت» يضيف السائل لمراحل العملاء</span></div>';
-  html += rows.length ? stripList_([
-    ['السائل', '120px', function (e) { return '<b>' + (e.asker ? '@' + esc(e.asker) : '—') + '</b>' + (e.person_id ? ' <a href="#" data-go="person" data-args="' + attr({ person_id: e.person_id }) + '" data-tip="الملف الموحّد">👤</a>' : ''); }],
-    ['السؤال', 'minmax(140px,2fr)', function (e) { return esc(e.question); }],
-    ['النوع', '120px', function (e) { return String(e.qtype || '').split('،').map(function (t) { return chip(Engage_icon_(t) + ' ' + t, t === 'سعر' ? 'warn' : t === 'اعتماد' ? 'acc' : ''); }).join(' '); }],
-    ['النية', '65px', function (e) { var n = Number(e.intent) || 1; return '★★★★★'.slice(0, n) + '<span class="muted">' + '★★★★★'.slice(0, 5 - n) + '</span>'; }],
-    ['المنافس', 'minmax(90px,1fr)', function (e) { return '<span class="muted tiny">' + esc(e.competitor) + (e.source === 'يوتيوب' ? ' ▶️' : '') + '</span>'; }],
-    ['الرد الجاهز', 'minmax(160px,2.6fr)', function (e) { return '<span class="muted" title="' + esc(e.reply) + '">' + esc(e.reply) + '</span>' + (e.code ? ' ' + chip('🎟 ' + e.code) : ''); }],
-    ['إجراء', '190px', function (e) {
-      return e.status === 'رُدّ' ? chip('✓ رُدّ', 'good') + (e.lead_id ? ' <a href="#" data-go="lead" data-args="' + attr({ lead_id: e.lead_id }) + '">👤</a>' : '') :
-        '<button class="btn sm" data-act="msgSheet" data-ref="' + attr({ eng_id: e.eng_id }) + '" data-tip="رسالة خاصة كاملة على منصته (أو واتساب)">✉️ راسله</button><button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '" data-tip="ينسخ الرد ويفتح المنشور عند التعليق ← الصق (Ctrl+V) واضغط إرسال في المنصة. ⚠️ يدوي: انستغرام وتيك توك يمنعان الرد الآلي على تعليقات الآخرين — بعد الإرسال اضغط «تم الرد ✓».">📤 أرسل الرد</button> <button class="btn sm good" data-act="egDone" data-id="' + esc(e.eng_id) + '">✓ رددت</button> <a href="#" class="muted tiny" data-act="egSkip" data-id="' + esc(e.eng_id) + '" title="ليس سؤالاً حقيقياً">✕</a>'; }]
-  ], rows, { cls: function (e) { return e.status === 'رُدّ' ? 'sl-off' : ''; } }) : empty('لا أسئلة بعد — الصق تعليقات منشور منافس أو ارفع صورها');
+    '<div class="row between" style="margin-top:6px;gap:8px;flex-wrap:wrap"><span class="muted tiny">يُستبعد غير الأسئلة والمؤيدون تلقائياً</span><button class="btn pri" data-act="egQuick">⚡ استخرج وسجّل</button></div><div id="eg_review"></div>' +
+    '<div class="muted tiny" style="margin-top:6px">▶️ يوتيوب آلي: ' + ((d.yt || {}).key ? 'يعمل يومياً' : 'بانتظار مفتاح YouTube المجاني (YT_API_KEY)') + '</div></details>';
   // 🧠 ماذا يسأل جمهور المنافسين
   var st = d.stats || [];
   if (st.length) html += '<div class="card small" style="margin-top:10px;border-color:#8d6cd8"><b>🧠 ماذا يسأل جمهور المنافسين؟</b> (آخر 30 يوماً)<div class="row" style="gap:6px;margin-top:4px;flex-wrap:wrap">' +
     st.map(function (s) { return chip(s.icon + ' ' + s.type + ' ' + s.pct + '%', s.type === 'سعر' ? 'warn' : s.type === 'اعتماد' ? 'acc' : ''); }).join('') + '</div>' +
     '<div class="muted tiny" style="margin-top:4px">➡️ السؤال المتكرر (٣ مرات فأكثر) يتحول تلقائياً إلى فكرة منشور تجيب عنه في <a href="#" data-go="content">💡 بنك الأفكار</a> · ويدخل تحليل <a href="#" data-go="dailyPost">🧠 العقل الآلي</a></div></div>';
-  return html;
+  return html + '</div>';
 } };
+/** رابط ملف السائل على منصته (للحسابات الحقيقية فقط) */
+function egProfile_(e) {
+  var h = String(e.asker || '').replace(/^@/, ''); if (!h || /\s/.test(h)) return '';
+  return /انستغرام|instagram/i.test(e.platform) ? 'https://www.instagram.com/' + h + '/' : /تيك|tiktok/i.test(e.platform) ? 'https://www.tiktok.com/@' + h : /^x$|twitter|X/.test(e.platform) ? 'https://x.com/' + h : /يوتيوب|youtube/i.test(e.platform) ? 'https://www.youtube.com/@' + h : '';
+}
+/** صف سؤال مضغوط — ارتفاعه يتبع طول السؤال والرد (يلتف النص بدل القص) */
+function egRow_(e) {
+  var done = e.status === 'رُدّ', ok = e.asker_ok === 'نعم', prof = egProfile_(e), n = Number(e.intent) || 1;
+  return '<div class="eg2-q' + (done ? ' off' : '') + '">' +
+    '<div class="who">' + (prof ? '<a href="' + esc(prof) + '" target="_blank" rel="noopener" data-tip="يفتح حسابه على المنصة"><b>@' + esc(e.asker) + ' ↗</b></a>' : '<b>' + (e.asker ? '@' + esc(e.asker) : 'سائل') + '</b>') +
+      (ok ? ' ' + chip('✓ مؤكَّد', 'good') : '') + (e.person_id ? ' <a href="#" data-go="person" data-args="' + attr({ person_id: e.person_id }) + '" data-tip="الملف الموحّد">👤</a>' : '') +
+      '<br><span class="muted tiny">عند ' + esc(String(e.competitor || '').split(/\s[—–-]\s/)[0]) + ' · ' + esc(e.platform || '') + ' · ' + fmtDate(e.captured_at, true) + '</span><br><span style="color:#D4A853;font-size:11px">' + '★★★★★'.slice(0, n) + '</span><span class="muted" style="font-size:11px">' + '★★★★★'.slice(0, 5 - n) + '</span></div>' +
+    '<div><div class="qq">«' + esc(e.question) + '»</div><div class="rep">↩︎ ' + esc(e.reply || '—') + (e.code ? ' ' + chip('🎟 ' + e.code) : '') + '</div></div>' +
+    '<div class="acts">' + (done ? chip('✓ رُدّ', 'good') + (e.lead_id ? ' <a href="#" data-go="lead" data-args="' + attr({ lead_id: e.lead_id }) + '">👤</a>' : '') :
+      '<button class="btn sm pri" data-act="egCopy" data-id="' + esc(e.eng_id) + '" data-tip="ينسخ الرد ويفتح ' + (e.comment_url ? 'تعليقه هو' : 'المنشور') + ' ← الصق (Ctrl+V) وأرسل بنفسك ← ثم «✓ رددت»">📋 ' + (e.comment_url ? 'انسخ وافتح تعليقه' : 'انسخ وافتح المنشور') + '</button>' +
+      '<button class="btn sm' + (ok ? '' : ' eg2-dim') + '" data-act="' + (ok ? 'msgSheet' : 'egMsgUnverified') + '" data-id="' + esc(e.eng_id) + '" data-ref="' + attr({ eng_id: e.eng_id }) + '" data-tip="' + (ok ? 'رسالة خاصة كاملة على منصته (أو واتساب)' : 'الحساب غير مؤكَّد — افتح حسابه أولاً وتأكد أنه صاحب التعليق') + '">✉️ راسله</button>' +
+      '<button class="btn sm good" data-act="egDone" data-id="' + esc(e.eng_id) + '" data-tip="رددت عليه ← يدخل مراحل العملاء">✓ رددت</button>' +
+      '<button class="btn sm" data-act="egSkip" data-id="' + esc(e.eng_id) + '" data-tip="ليس سؤالاً حقيقياً ← يُستبعد (لا حذف)">✕</button>') + '</div></div>';
+}
+ACT.egMsgUnverified = function (el) {
+  if (!confirm('هذا الحساب لم تؤكّده الإضافة (التُقط قبل الإصدار 1.4 أو من لقطة شاشة).\nافتح حسابه أولاً وتأكد أنه صاحب التعليق نفسه — تكمل لكتابة الرسالة؟')) return;
+  ACT.msgSheet(el);
+};
 function Engage_icon_(t) { return { 'سعر': '💰', 'موعد': '📅', 'اعتماد': '🎓', 'مدينة': '📍', 'مقارنة': '⚖️' }[t] || '❓'; }
 function egReviewHtml_(r) {
   var qs = r.items.filter(function (x) { return x.question; }), other = r.items.length - qs.length;
@@ -7554,6 +7578,7 @@ function val_(sel) { var e = document.querySelector(sel); return e ? e.value : '
 ACT.egCopy = function (el) {
   var e = (S.data.rows || []).filter(function (x) { return x.eng_id === el.dataset.id; })[0]; if (!e) return;
   copyText(e.reply);
+  if (e.comment_url && extUrl(e.comment_url)) { window.open(extUrl(e.comment_url), '_blank', 'noopener'); return toast('نُسخ الرد وفُتح تعليق ' + (e.asker ? '@' + e.asker : 'السائل') + ' — الصق (Ctrl+V) وأرسل، ثم «✓ رددت»'); }
   if (extUrl(e.post_url)) { window.open(extUrl(e.post_url).replace(/#c\d+_\d+$/, ''), '_blank', 'noopener'); return toast('نُسخ الرد وفُتح المنشور — الصقه تحت تعليق ' + (e.asker ? '@' + e.asker : 'السائل') + ' ثم اضغط «✓ رددت»'); }
   toast('نُسخ الرد — لا رابط لهذا المنشور بعد'); linkHelpModal_({ eng_id: e.eng_id });
 };
