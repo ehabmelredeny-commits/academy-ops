@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvglolfv";
+  var APP_BUILD = "mvgqu7it";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -3210,7 +3210,7 @@ SCREENS.settings = { render: function (d, args) {
       '<div class="small muted">عند الإيقاف لا يخرج أي شيء آلياً مهما جُدول. التشغيل = المرحلة ١.</div></div>' +
       '<div class="card"><b>واتساب ' + (st.whatsapp ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">من حساب Meta للأعمال باسم الأكاديمية (System User) — لا حساب شخصي. رقم مخصص للأكاديمية. ' +
       'بدء المحادثة بقالب يوافق عليه واتساب؛ المتغيّر الأول = الاسم الأول، ورأس صورة اختياري.</div>' +
-      key('WA_TOKEN', 'رمز الوصول (Access Token)', 'EAAG…', true) + key('WA_PHONE_ID', 'معرّف رقم الهاتف (Phone number ID)', '1234567890') +
+      key('WA_TOKEN', 'رمز الوصول (Access Token)', 'EAAG…', true) + key('WA_PHONE_ID', 'معرّف رقم الهاتف (Phone number ID)', '1234567890') + key('WA_APP_SECRET', 'سرّ التطبيق (App secret) — من Meta ← App settings ← Basic', '••••', true) +
       key('WA_TEMPLATE', 'اسم القالب المعتمد', 'academy_intro' + (st.whatsapp_template ? ' — الحالي: ' + st.whatsapp_template : '')) + key('WA_TEMPLATE_LANG', 'لغة القالب', 'ar') +
       key('WA_TEMPLATE_IMAGE', 'للقالب رأس صورة؟ اكتب نعم', 'نعم / فارغ') + '</div>' +
       '<div class="card"><b>X ' + (st.x ? '✓ مربوط' : '✗ غير مربوط') + '</b><div class="small muted">رسائل X الخاصة تحتاج اشتراك X API المدفوع ورمز مستخدم بصلاحية dm.write من حساب الأكاديمية. تصل فقط لمن يسمح بالرسائل.</div>' +
