@@ -66,7 +66,7 @@ fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j)
 var SEAT={cohorts:[],tier:'',cohort:''},TC={premium:'#c99a2e',plus:'#6a3fa0',basic:'#2a8a55'};
 function sq(fn,b){var A={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};if(!A)return Promise.reject();return fetch(A.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:A.anon,Authorization:'Bearer '+A.anon,'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){return r.json()})}
 // الخريطة والأسعار برابط حجز خاص فقط (?b=TOKEN — قرار المالك 2026-10-21)
-function loadCohorts(){SEAT.inv=(P.get('b')||'').replace(/[^a-f0-9]/g,'').slice(0,40);if(!SEAT.inv)return;sq('seat_invite_open',{p_token:SEAT.inv}).then(function(x){if(!x||!x.ok)return;SEAT.cohorts=x.cohorts||[];if(x.course&&!$('course').value)$('course').value=x.course;renderSeats()}).catch(function(){})}
+function loadCohorts(){if(P.get('from')==='form'){document.title='اختر مقعدك 🎯';var h1=$('t');if(h1)h1.textContent='اختر مقعدك 🎯';$('err').insertAdjacentHTML('beforebegin','');var fb=document.createElement('div');fb.className='sm-hot';fb.textContent='✅ وصلنا تسجيلك — اختر الفترة ومقعدك من الخريطة، ثم أعد إدخال اسمك وجوالك واضغط «احجز». أرسلنا لك الرابط على واتساب أيضاً.';var sb=$('seatbox');if(sb)sb.parentNode.insertBefore(fb,sb);setTimeout(function(){var b=$('seatbox');if(b)b.scrollIntoView({behavior:'smooth'})},1500)}SEAT.inv=(P.get('b')||'').replace(/[^a-f0-9]/g,'').slice(0,40);if(!SEAT.inv)return;sq('seat_invite_open',{p_token:SEAT.inv}).then(function(x){if(!x||!x.ok)return;SEAT.cohorts=x.cohorts||[];if(x.course&&!$('course').value)$('course').value=x.course;renderSeats()}).catch(function(){})}
 function fmt(n){return Number(n||0).toLocaleString('en-US')}
 function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function pickPeriod(c){SEAT.pick=c;renderSeats()}
@@ -106,7 +106,10 @@ $('f').addEventListener('submit',function(e){
   var old=function(){return fetch(EXEC+'?public=register',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()})};
   send().catch(old).then(function(j){
     if(!j.ok){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent=j.error||'حدث خطأ';return}
-    track('Lead');$('f').style.display='none';$('done').style.display='block';
+    track('Lead');
+    // بعد التسجيل: انتقال فوري إلى «اختر مقعدك 🎯» برابط العميل الخاص (قرار المالك 2026-10-21)، ونسخة على واتساب
+    if(!SEAT.inv&&AQ){fetch(AQ.url+'/rest/v1/rpc/seat_invite_public',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({p_phone:$('phone').value,p_name:$('name').value,p_course:$('course').value})}).then(function(r){return r.json()}).then(function(t){if(t&&typeof t==='string'){location.href=location.pathname+'?b='+t+'&from=form'+(P.get('utm_source')?'&utm_source='+encodeURIComponent(P.get('utm_source')):'');}else{$('f').style.display='none';$('done').style.display='block'}}).catch(function(){$('f').style.display='none';$('done').style.display='block'});return}
+    $('f').style.display='none';$('done').style.display='block';
     var w=(CFG.biz||{}).whatsapp;if(w){$('wa').href='https://wa.me/'+String(w).replace(/\D/g,'')+'?text='+encodeURIComponent('السلام عليكم، سجّلت اهتمامي بـ '+($('course').value||'الدورات')+' باسم '+$('name').value);$('wa').style.display='inline-block'}
   }).catch(function(){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent='تعذّر الإرسال — تحقق من الإنترنت وحاول مرة أخرى'});
 });
