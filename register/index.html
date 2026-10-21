@@ -65,11 +65,12 @@ fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j)
 // 💺 خريطة المقاعد (فئات المقاعد — تصميم معتمد docs/mockups/seat-map.html): الفئة والحالة والمتبقي والسعر من الخادم فقط
 var SEAT={cohorts:[],tier:'',cohort:''},TC={premium:'#c99a2e',plus:'#6a3fa0',basic:'#2a8a55'};
 function sq(fn,b){var A={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};if(!A)return Promise.reject();return fetch(A.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:A.anon,Authorization:'Bearer '+A.anon,'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){return r.json()})}
-function loadCohorts(){sq('seat_cohorts').then(function(x){SEAT.cohorts=x||[];renderSeats()}).catch(function(){})}
+// الخريطة والأسعار برابط حجز خاص فقط (?b=TOKEN — قرار المالك 2026-10-21)
+function loadCohorts(){SEAT.inv=(P.get('b')||'').replace(/[^a-f0-9]/g,'').slice(0,40);if(!SEAT.inv)return;sq('seat_invite_open',{p_token:SEAT.inv}).then(function(x){if(!x||!x.ok)return;SEAT.cohorts=x.cohorts||[];if(x.course&&!$('course').value)$('course').value=x.course;renderSeats()}).catch(function(){})}
 function fmt(n){return Number(n||0).toLocaleString('en-US')}
 function renderSeats(){var box=$('seatbox'),cn=$('course').value,h=(SEAT.cohorts||[]).filter(function(x){return x.course===cn})[0];SEAT.tier='';SEAT.cohort='';
   if(!h){box.style.display='none';box.innerHTML='';return}
-  sq('seat_map',{p_cohort:h.cohort}).then(function(m){if(!m||!m.tiers)return;SEAT.cohort=h.cohort;SEAT.map=m;
+  sq('seat_invite_open',{p_token:SEAT.inv,p_cohort:h.cohort}).then(function(xx){var m=xx&&xx.map;if(!m||!m.tiers)return;SEAT.cohort=h.cohort;SEAT.map=m;
     var left=m.seats.filter(function(s){return s.status==='متاح'}).length,html='<div class="sm-h"><b>اختر مقعدك — '+cn+'</b><small>الدفعة القادمة · 25 مقعداً · بقي '+left+' مقعداً</small></div><div class="sm-lg">';
     m.tiers.slice().reverse().forEach(function(t){html+='<span><i style="background:'+TC[t.tier]+'"></i>'+t.name+' −'+t.pct+'% '+(t.badge?'⭐':'')+'</span>'});
     html+='<span><i style="background:#c9c9c9"></i>محجوز</span></div><div class="sm-stage">المدرب</div>';
@@ -96,7 +97,7 @@ $('f').addEventListener('submit',function(e){
   if(!$('consent').checked)return $('err').textContent='نحتاج موافقتك على التواصل لنرسل لك التفاصيل';
   $('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
   var body={name:$('name').value,phone:$('phone').value,email:$('email').value,city:$('city').value,course:$('course').value,persona:$('persona').value,note:$('note').value,
-    website:$('website').value,ft:CFG.ft||'',consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||'',cohort_id:SEAT.tier?SEAT.cohort:'',tier:SEAT.tier||'',voucher:($('voucher')&&$('voucher').value.trim())||''};
+    website:$('website').value,ft:CFG.ft||'',consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||'',cohort_id:SEAT.tier?SEAT.cohort:'',invite:SEAT.inv||'',tier:SEAT.tier||'',voucher:($('voucher')&&$('voucher').value.trim())||''};
   // أولاً طابور Supabase (يتحمّل الضغط — اختبار الحمل 2026-10-14)، وإن تعذّر فالنقطة القديمة في جوجل
   var AQ={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var send=function(){return AQ?fetch(AQ.url+'/rest/v1/rpc/public_register',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({body:body})}).then(function(r){if(!r.ok)throw new Error('q');return r.json()}):Promise.reject()};
