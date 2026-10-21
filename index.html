@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvi17g0h";
+  var APP_BUILD = "mvi1fkjo";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -2477,7 +2477,7 @@ SCREENS.acRules = {
       t('address', 'العنوان الوطني') + t('phone', 'الهاتف', 1) + t('email', 'البريد', 1) + t('accreditation', 'نص الاعتماد') + t('site', 'رابط الموقع (للروابط)', 1) + '</div>' +
       (b.logo_url ? '<img src="' + esc(extUrl(b.logo_url)) + '" alt="" style="height:48px;border-radius:10px">' : '<div class="ac-note">لا شعار بعد — ضع رابط صورة الشعار عند جاهزيته</div>') +
       '<div class="btns"><button class="btn pri" data-act="acSaveBrand">💾 حفظ الهوية</button></div></div>' +
-      '<div class="card"><h3 style="margin:0 0 6px">🏅 اعتماد البرامج على الشهادة</h3><div class="ac-note" style="margin-bottom:6px">المعتمد من LDI: تظهر شعارات معهد إعداد القادة ووزارة الرياضة ونص الاعتماد · غير المعتمد: «شهادة صادرة ومعتمدة من الأكاديمية» فقط. الشهادة بلا نسب حضور أو درجات.</div>' +
+      '<div class="card"><h3 style="margin:0 0 6px">🏅 اعتماد البرامج على الشهادة</h3><div class="ac-note" style="margin-bottom:6px">⚠️ لا تفعّلها لأي برنامج قبل قبول طلب اعتماده من LDI (قرار المالك 2026-10-21). المعتمد من LDI: تظهر شعارات معهد إعداد القادة ووزارة الرياضة ونص الاعتماد · غير المعتمد: «شهادة صادرة ومعتمدة من الأكاديمية» فقط. الشهادة بلا نسب حضور أو درجات.</div>' +
       (d.programs || []).map(function (p) { return '<div class="ac-row" style="justify-content:space-between;border-bottom:1px solid var(--soft);padding:6px 0"><span><b>' + esc(p.name_ar) + '</b> <span class="ac-note">' + esc(p.cert_title || '') + (p.hours ? ' · ' + p.hours + ' ساعة' : '') + '</span></span>' +
         '<label class="ac-row" style="gap:6px" data-tip="تشغيل/إيقاف شعارات LDI ووزارة الرياضة على شهادات هذا البرنامج">' + (p.accredited ? chip('معتمد LDI', 'good') : chip('الأكاديمية فقط')) + switchHtml(!!p.accredited, 'acAccr', p.id) + '</label></div>'; }).join('') + '</div>';
   }
@@ -7881,7 +7881,7 @@ function stMarket_(d) {
   var sw = d.sweep ? '<div class="muted tiny" style="margin-top:4px">🔎 مسح السوق الأسبوعي: ' + esc(stAgo_(d.sweep.at)) + ' · وجد ' + d.sweep.added + ' جهة جديدة للمراجعة' + (d.sweep.names && d.sweep.names.length ? ': ' + d.sweep.names.map(esc).join('، ') : '') + ' <a href="#" data-go="discovery">الاكتشافات ←</a></div>' : '';
   return '<details class="card" style="margin-top:6px"' + (ST.open === '__m' ? ' open' : '') + '><summary><b>🧠 ما تعلّمه العقل من السوق</b> <span class="muted tiny">— من ' + m.n + ' دورة مقروءة في صفحات الدفع · يغذّي بناء متجرنا وتسويقنا</span></summary>' +
     '<div style="margin-top:6px"><b class="small">نطاقات الأسعار لكل فئة</b>' + bands + '</div><div class="small" style="margin-top:6px">طريقة التقديم: ' + mix + ' · نساء فقط ' + m.women + ' · رجال فقط ' + m.men + ' · باقات ' + m.bundles + '</div>' +
-    '<div style="margin-top:6px"><b class="small">💡 قرارات لمتجرنا (من الأرقام)</b>' + tips + '</div>' + (m.accred && m.accred.phrases && m.accred.phrases.length ? '<div style="margin-top:6px"><b class="small">🎓 كيف يكتب المنافسون الاعتماد</b> <span class="muted tiny">— يُذكر في ' + m.accred.pct + '% من دوراتهم، والجهة الحكومية في ' + m.accred.gov_pct + '% فقط · جملنا: «معتمدة من وزارة الرياضة ومعهد إعداد القادة (LDI)»</span>' +
+    '<div style="margin-top:6px"><b class="small">💡 قرارات لمتجرنا (من الأرقام)</b>' + tips + '</div>' + (m.accred && m.accred.phrases && m.accred.phrases.length ? '<div style="margin-top:6px"><b class="small">🎓 كيف يكتب المنافسون الاعتماد</b> <span class="muted tiny">— يُذكر في ' + m.accred.pct + '% من دوراتهم، والجهة الحكومية في ' + m.accred.gov_pct + '% فقط · جملنا: «معهد رياضي مرخّص من وزارة الرياضة · ترخيص رقم STI-License00181»</span>' +
     m.accred.phrases.map(function (p) { return '<div class="small" style="margin:2px 0">«' + esc(p.text) + '» <span class="muted tiny">— ' + esc(p.who) + (p.n > 1 ? ' ×' + p.n : '') + '</span></div>'; }).join('') + '</div>' : '') +
     '<div style="margin-top:6px"><b class="small">⚠️ أخطاء عند المنافسين لنتجنبها</b>' + mis + '</div>' + nar + sw + '</details>';
 }
