@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvi3yo5s";
+  var APP_BUILD = "mvi45ky8";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -7434,6 +7434,8 @@ SCREENS.engage = { after: function () {
       return '<div class="eg2-post' + (p.q ? ' done' : '') + '"><span style="flex:1;min-width:0"><b>' + esc(egShort_(p.ac)) + '</b> <span class="muted">' + esc(p.platform || '') + ' · ' + fmtDate(p.at, true) + '</span>' +
         (p.q ? '<br>' + chip('✓ التُقط · ' + p.q + ' سؤال', 'good') : '') + '</span><a class="btn sm' + (p.q ? '' : ' pri') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + (p.q ? 'افتح مجدداً' : 'افتح ↗') + '</a></div>'; }).join('') + '</div>'
       : '<div class="muted small">لا منشورات بعد — تمتلئ هذه القائمة وحدها مع «جولة» الإضافة اليومية. وحتى ذلك: افتح حساب المنافس من الروابط تحت واختر أي منشور.</div>') +
+    ((d.missing || []).length ? '<div class="muted tiny" style="margin:8px 0 4px">منافسون لم تُلتقط منشوراتهم بعد (' + d.missing.length + ') — افتح حسابه واختر آخر منشور، فتلتقط الإضافة أسئلته:</div><div class="eg2-posts">' + d.missing.map(function (m) {
+      return '<div class="eg2-post"><span style="flex:1;min-width:0"><b>' + esc(egShort_(m.ac)) + '</b> <span class="muted">' + esc(m.platform || '') + ' · لا منشورات ملتقطة</span></span><a class="btn sm" href="' + esc(m.url) + '" target="_blank" rel="noopener">حسابه ↗</a></div>'; }).join('') + '</div>' : '') +
     egAccChips_(AC) + '</div>';
   // ② الأسئلة
   var Q = (d.rows || []).filter(function (e) { return e.status === 'ينتظر'; }).sort(function (a, b) { return (Number(b.intent) || 0) - (Number(a.intent) || 0); });
