@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvi298al";
+  var APP_BUILD = "mvi2emk6";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -740,7 +740,7 @@ NAV_MORE.push(['ads', '📣 الإعلانات الموجّهة'], ['sysmap', '�
 var TAB_GROUPS = [
   /* إعادة الترتيب المعتمدة 2026-10-10: ٨ سقوف بدل ٣٣ بنداً. كل تبويب = الشاشة القديمة بكل وظائفها، والأسماء الداخلية لم تتغيّر (كل الروابط تعمل) */
   ['control', '🎛 غرفة التحكم', [['control', 'اللوحة'], ['today', 'اليوم'], ['kpis', 'المؤشرات'], ['reports', 'التقارير'], ['health', 'فحص النظام']]],
-  ['ask', '👥 العملاء', [['ask', '🎯 يسألون الآن'], ['persons', '👤 الأشخاص'], ['sources', '📂 للتواصل'], ['inbox', '💬 الرسائل'], ['reply', '✍️ الرد'], ['pipeline', '🧲 المراحل'], ['members', '🪪 مسجّلون وأعضاء'], ['alumni', '🎓 خرّيجون']]],
+  ['ask', '👥 العملاء', [['ask', '🎯 يسألون الآن'], ['persons', '👤 الأشخاص'], ['sources', '📂 للتواصل'], ['customers', '💬 المحادثات (الرسائل + الرد)'], ['pipeline', '🧲 المراحل'], ['members', '🪪 مسجّلون وأعضاء'], ['alumni', '🎓 خرّيجون']]],
   ['targets', '🏢 الأندية والشركات', [['targets', 'مشغّلو الأندية'], ['opps', 'فرص الأندية'], ['people', 'صنّاع القرار'], ['b2b', 'B2B'], ['trainers', 'المدربون']]],
   ['compwatch', '📡 المنافسون', [['compwatch', 'ماذا تغيّر'], ['competitors', 'ملفاتهم'], ['comptimeline', 'الخط الزمني'], ['storecourses', 'دوراتهم بمواقع الدفع'], ['engage', '💬 أسئلة عند المنافسين'], ['supporters', 'مؤيدوهم'], ['radar', 'الفرص والتهديدات']]],
   ['news', '📰 السوق والبحث', [['news', 'الأخبار'], ['gaps', '🕳 فجوات السوق'], ['discovery', 'الاكتشافات'], ['search', 'البحث الذكي'], ['keywords', 'الكلمات'], ['homeapps', 'تطبيقات المدرب'], ['exams', 'الاختبارات']]],
@@ -846,6 +846,8 @@ function focusItem_(id) {
 }
 function go(screen, args, keepScroll) {
   if (screen === 'more') { renderMore(); return; }
+  // «👥 العملاء» المدمجة (الرسائل + الرد + المسودات + العقل — تصميم معتمد 2026-10-21) تعمل في /v2/
+  if (screen === 'customers') { window.open('https://alsaad-academy.com/v2/?go=customers', '_blank', 'noopener'); return; }
   // سجل التنقل لزر «رجوع» (لا يُسجَّل تحديث نفس الشاشة ولا الرجوع نفسه)
   S.hist = S.hist || [];
   if (!S.backing && S.screen && S.screen !== screen) { S.hist.push({ screen: S.screen, args: S.args }); if (S.hist.length > 30) S.hist.shift(); }
