@@ -13,7 +13,7 @@ button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;backg
 button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-height:1em}.ok{text-align:center;padding:30px 10px}.ok h2{color:var(--a)}
 .wa{display:inline-block;margin-top:10px;background:#25d366;color:#fff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:700}
 .foot{text-align:center;color:var(--mut);font-size:12.5px;margin-top:18px}.foot a{color:var(--a)}.hp{position:absolute;width:1px;height:1px;padding:0;border:0;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}html,body{overflow-x:hidden}
-.sbx{background:#c0392b;color:#fff;text-align:center;font-size:12.5px;padding:4px}</style></head><body>
+.sbx{background:#c0392b;color:#fff;text-align:center;font-size:12.5px;padding:4px} .sm-h{background:#14213d;color:#e8c46a;padding:10px 12px;border-radius:10px 10px 0 0;margin-top:14px}.sm-h small{display:block;color:#cdd6e6}.sm-lg{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;padding:8px 2px}.sm-lg i{width:12px;height:12px;border-radius:3px;display:inline-block;vertical-align:middle;margin-left:3px}.sm-stage{text-align:center;background:#14213d;color:#fff;border-radius:6px;padding:3px;font-size:12px;margin:4px 0}.sm-lab{font-size:12px;text-align:center;margin-top:8px;font-weight:bold}.sm-row{display:flex;justify-content:center;gap:6px;margin:6px auto;flex-wrap:wrap;max-width:308px}.sm-s{width:38px;height:34px;border-radius:7px 7px 4px 4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:bold;border:0;cursor:pointer;padding:0}.sm-s[disabled]{background:#c9c9c9!important;color:#888;cursor:default}.sm-sel{outline:3px solid #e04848;outline-offset:1px}.sm-card{border:1px solid #e0d7c0;border-radius:8px;padding:9px;margin-top:8px}.sm-price{font-size:19px;font-weight:bold}.sm-old{text-decoration:line-through;color:#999;font-size:13px;margin-right:6px}.sm-card ul{margin:4px 0;padding-right:18px}.sm-hot{background:#fff3e0;color:#b45309;border-radius:8px;padding:8px;margin-top:8px;font-size:14px}</style></head><body>
 
 <div class="wrap">
 <button type="button" class="thm" id="thm" aria-label="الوضع الليلي/النهاري">🌙</button>
@@ -24,6 +24,7 @@ button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-
 <label for="email">البريد الإلكتروني (اختياري)<small class="en">Email (optional)</small></label><input id="email" type="email" dir="ltr" autocomplete="email">
 <label for="city">المدينة<small class="en">City</small></label><select id="city"><option value="">اختر المدينة</option></select>
 <label for="course">الدورة التي تناسب طموحك<small class="en">The course that fits your goal</small></label><select id="course"><option value="">لم أحدد بعد</option></select>
+<div id="seatbox" style="display:none"></div>
 <label for="persona">أين أنت الآن؟<small class="en">Where are you now?</small></label><select id="persona"><option value="">اختر</option><option>أبدأ في المجال من الصفر</option><option>مدرب حالياً وأريد التطوير</option>
 <option>أحتاج رخصة أو شهادة لعملي</option><option>أقارن بين الشهادات</option></select>
 <label for="note">سؤالك — نجاوبك بصراحة (اختياري)<small class="en">Your question — we answer honestly (optional)</small></label><textarea id="note"></textarea>
@@ -52,6 +53,7 @@ fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j)
   (CFG.cities||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c;$('city').appendChild(o)});
   (CFG.courses||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c.name;$('course').appendChild(o)});
   var pre=P.get('course');if(pre)$('course').value=pre;
+  loadCohorts();$('course').addEventListener('change',renderSeats);
   // رابط ترشيح خريج (?ref=CODE): يُملأ تلقائياً ويُعرض الخصم — الخصم يُطبَّق عند التسجيل ولا ينزل عن الحد الأدنى
   var ref=(P.get('ref')||'').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,20);
   if(ref){$('member_no').value=ref;var AC={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
@@ -60,6 +62,33 @@ fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j)
   var b=CFG.biz||{},bits=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.phone].filter(Boolean);if(bits.length)$('foot').insertAdjacentHTML('afterbegin',bits.join(' · ')+'<br>');
   loadTrackers(CFG);
 }).catch(function(){});
+// 💺 خريطة المقاعد (فئات المقاعد — تصميم معتمد docs/mockups/seat-map.html): الفئة والحالة والمتبقي والسعر من الخادم فقط
+var SEAT={cohorts:[],tier:'',cohort:''},TC={premium:'#c99a2e',plus:'#6a3fa0',basic:'#2a8a55'};
+function sq(fn,b){var A={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};if(!A)return Promise.reject();return fetch(A.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:A.anon,Authorization:'Bearer '+A.anon,'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){return r.json()})}
+function loadCohorts(){sq('seat_cohorts').then(function(x){SEAT.cohorts=x||[];renderSeats()}).catch(function(){})}
+function fmt(n){return Number(n||0).toLocaleString('en-US')}
+function renderSeats(){var box=$('seatbox'),cn=$('course').value,h=(SEAT.cohorts||[]).filter(function(x){return x.course===cn})[0];SEAT.tier='';SEAT.cohort='';
+  if(!h){box.style.display='none';box.innerHTML='';return}
+  sq('seat_map',{p_cohort:h.cohort}).then(function(m){if(!m||!m.tiers)return;SEAT.cohort=h.cohort;SEAT.map=m;
+    var left=m.seats.filter(function(s){return s.status==='متاح'}).length,html='<div class="sm-h"><b>اختر مقعدك — '+cn+'</b><small>الدفعة القادمة · 25 مقعداً · بقي '+left+' مقعداً</small></div><div class="sm-lg">';
+    m.tiers.slice().reverse().forEach(function(t){html+='<span><i style="background:'+TC[t.tier]+'"></i>'+t.name+' −'+t.pct+'% '+(t.badge?'⭐':'')+'</span>'});
+    html+='<span><i style="background:#c9c9c9"></i>محجوز</span></div><div class="sm-stage">المدرب</div>';
+    ['premium','plus','basic'].forEach(function(k){var t=m.tiers.filter(function(x){return x.tier===k})[0];if(!t)return;
+      var ss=m.seats.filter(function(s){return s.tier===k}).sort(function(a,b){return a.pos-b.pos});
+      html+='<div class="sm-lab" style="color:'+TC[k]+'">'+t.name+(t.badge?' '+t.badge:'')+(k==='basic'?' — لأول المقاعد':'')+'</div><div class="sm-row">';
+      ss.forEach(function(s){html+='<button type="button" class="sm-s" data-t="'+k+'" data-p="'+s.pos+'" style="background:'+TC[k]+'"'+(s.status==='متاح'?'':' disabled')+'>'+s.pos+'</button>'});
+      html+='</div>';});
+    html+='<div id="smcard"></div>';box.innerHTML=html;box.style.display='block';
+    Array.prototype.forEach.call(box.querySelectorAll('.sm-s'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-t'),el.getAttribute('data-p'))}});
+    // فئة ممتلئة: رسالة أولوية الحجز بنفس العرض
+    m.tiers.forEach(function(t){if(!t.left)$('smcard').insertAdjacentHTML('beforeend','<div class="sm-hot">🔥 مقاعد '+t.name+' عليها طلب مرتفع الآن — سجّل بياناتك خلال دقيقة لتضمن عرض الخصم '+t.pct+'%، ويتواصل معك مستشار القبول لتأكيد مقعدك. <button type="button" class="sm-s" style="width:auto;padding:0 8px;background:'+TC[t.tier]+'" data-hot="'+t.tier+'">احجز أولويتي</button></div>')});
+    Array.prototype.forEach.call(box.querySelectorAll('[data-hot]'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-hot'),0)}});
+  }).catch(function(){box.style.display='none'})}
+function pickSeat(k,p){var m=SEAT.map,t=m.tiers.filter(function(x){return x.tier===k})[0];SEAT.tier=k;
+  Array.prototype.forEach.call(document.querySelectorAll('.sm-s'),function(el){el.classList.toggle('sm-sel',el.getAttribute('data-p')===String(p))});
+  $('smcard').innerHTML='<div class="sm-card"><b>'+(p?'مقعد '+p+' · ':'')+t.name+(t.badge?' ⭐':'')+'</b><br><span class="sm-price" style="color:'+TC[k]+'">'+fmt(t.price)+' ر.س</span><span class="sm-old">'+fmt(t.base)+'</span><ul>'+t.perks.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'+
+    '<label for="voucher" style="margin-top:6px">عندك قسيمة؟ (اختياري)</label><input id="voucher" dir="ltr" maxlength="20" placeholder="SA-XXXXXX"></div>';
+  $('go').firstChild.textContent=(p?'احجز مقعد '+p+' الآن':'احجز أولويتي في '+t.name)+' — دقيقة واحدة';}
 $('f').addEventListener('submit',function(e){
   e.preventDefault();$('err').textContent='';
   if($('name').value.trim().length<2)return $('err').textContent='اكتب اسمك';
@@ -67,7 +96,7 @@ $('f').addEventListener('submit',function(e){
   if(!$('consent').checked)return $('err').textContent='نحتاج موافقتك على التواصل لنرسل لك التفاصيل';
   $('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
   var body={name:$('name').value,phone:$('phone').value,email:$('email').value,city:$('city').value,course:$('course').value,persona:$('persona').value,note:$('note').value,
-    website:$('website').value,ft:CFG.ft||'',consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||''};
+    website:$('website').value,ft:CFG.ft||'',consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||'',cohort_id:SEAT.tier?SEAT.cohort:'',tier:SEAT.tier||'',voucher:($('voucher')&&$('voucher').value.trim())||''};
   // أولاً طابور Supabase (يتحمّل الضغط — اختبار الحمل 2026-10-14)، وإن تعذّر فالنقطة القديمة في جوجل
   var AQ={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var send=function(){return AQ?fetch(AQ.url+'/rest/v1/rpc/public_register',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({body:body})}).then(function(r){if(!r.ok)throw new Error('q');return r.json()}):Promise.reject()};
