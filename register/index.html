@@ -68,10 +68,12 @@ function sq(fn,b){var A={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon"
 // الخريطة والأسعار برابط حجز خاص فقط (?b=TOKEN — قرار المالك 2026-10-21)
 function loadCohorts(){SEAT.inv=(P.get('b')||'').replace(/[^a-f0-9]/g,'').slice(0,40);if(!SEAT.inv)return;sq('seat_invite_open',{p_token:SEAT.inv}).then(function(x){if(!x||!x.ok)return;SEAT.cohorts=x.cohorts||[];if(x.course&&!$('course').value)$('course').value=x.course;renderSeats()}).catch(function(){})}
 function fmt(n){return Number(n||0).toLocaleString('en-US')}
-function renderSeats(){var box=$('seatbox'),cn=$('course').value,h=(SEAT.cohorts||[]).filter(function(x){return x.course===cn})[0];SEAT.tier='';SEAT.cohort='';
+function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function pickPeriod(c){SEAT.pick=c;renderSeats()}
+function renderSeats(){var box=$('seatbox'),cn=$('course').value,list=(SEAT.cohorts||[]).filter(function(x){return x.course===cn}),h=list.filter(function(x){return x.cohort===SEAT.pick})[0]||list[0];SEAT.tier='';SEAT.cohort='';
   if(!h){box.style.display='none';box.innerHTML='';return}
   sq('seat_invite_open',{p_token:SEAT.inv,p_cohort:h.cohort}).then(function(xx){var m=xx&&xx.map;if(!m||!m.tiers)return;SEAT.cohort=h.cohort;SEAT.map=m;
-    var left=m.seats.filter(function(s){return s.status==='متاح'}).length,html='<div class="sm-h"><b>اختر مقعدك — '+cn+'</b><small>الدفعة القادمة · 25 مقعداً · بقي '+left+' مقعداً</small></div><div class="sm-lg">';
+    var left=m.seats.filter(function(s){return s.status==='متاح'}).length,html='<div class="sm-h"><b>اختر الفترة المناسبة لك ثم مقعدك — '+cn+'</b><small>'+esc(h.label||'')+' · 25 مقعداً · بقي '+left+' مقعداً</small></div>'+(list.length?'<div class="sm-lg">📅 الفترات: '+list.map(function(p){return '<button type="button" class="sm-s" style="width:auto;padding:0 10px;background:'+(p.cohort===h.cohort?'#14213d':'#8a8a8a')+'" data-c="'+p.cohort+'">'+(p.from&&p.to?'من '+p.from+' إلى '+p.to:esc(p.label))+'</button>'}).join('')+'</div>':'')+'<div class="sm-lg">';
     m.tiers.slice().reverse().forEach(function(t){html+='<span><i style="background:'+TC[t.tier]+'"></i>'+t.name+' −'+t.pct+'% '+(t.badge?'⭐':'')+'</span>'});
     html+='<span><i style="background:#c9c9c9"></i>محجوز</span></div><div class="sm-stage">المدرب</div>';
     ['premium','plus','basic'].forEach(function(k){var t=m.tiers.filter(function(x){return x.tier===k})[0];if(!t)return;
@@ -80,7 +82,7 @@ function renderSeats(){var box=$('seatbox'),cn=$('course').value,h=(SEAT.cohorts
       ss.forEach(function(s){html+='<button type="button" class="sm-s" data-t="'+k+'" data-p="'+s.pos+'" style="background:'+TC[k]+'"'+(s.status==='متاح'?'':' disabled')+'>'+s.pos+'</button>'});
       html+='</div>';});
     html+='<div id="smcard"></div>';box.innerHTML=html;box.style.display='block';
-    Array.prototype.forEach.call(box.querySelectorAll('.sm-s'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-t'),el.getAttribute('data-p'))}});
+    Array.prototype.forEach.call(box.querySelectorAll('.sm-s[data-t]'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-t'),el.getAttribute('data-p'))}});Array.prototype.forEach.call(box.querySelectorAll('[data-c]'),function(el){el.onclick=function(){pickPeriod(el.getAttribute('data-c'))}});
     // فئة ممتلئة: رسالة أولوية الحجز بنفس العرض
     m.tiers.forEach(function(t){if(!t.left)$('smcard').insertAdjacentHTML('beforeend','<div class="sm-hot">🔥 مقاعد '+t.name+' عليها طلب مرتفع الآن — سجّل بياناتك خلال دقيقة لتضمن عرض الخصم '+t.pct+'%، ويتواصل معك مستشار القبول لتأكيد مقعدك. <button type="button" class="sm-s" style="width:auto;padding:0 8px;background:'+TC[t.tier]+'" data-hot="'+t.tier+'">احجز أولويتي</button></div>')});
     Array.prototype.forEach.call(box.querySelectorAll('[data-hot]'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-hot'),0)}});
