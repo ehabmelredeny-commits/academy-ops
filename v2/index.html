@@ -68,7 +68,7 @@ function brMark(b){var d=b.dataset,res=null,enr=null,note='';
   if(d.s==='نُفذت'){var r=prompt('النتيجة (اختياري): كم مسجّلاً جاء منها؟ وكم ريالاً؟ اكتبها هكذا: 2، 9000');if(r===null)return;var m=String(r).match(/[0-9]+(?:[.][0-9]+)?/g)||[];enr=m[0]!=null?Number(m[0]):null;res=m[1]!=null?Number(m[1]):null}
   else{note=prompt('لماذا غير مناسبة؟ (يتعلّم منها العقل)')||'';}
   rpc('app_brain_mark',{token:TOK,id:Number(d.id),status:d.s,result_sar:res,result_enrolled:enr,note:note}).then(function(){brainCard()})}
-function home(){TAB='home';if(!TOK)return loginScreen();if(!window.GOW&&/[?&]go=customers/.test(location.search)){window.GOW=1;return customers()}setTimeout(function w(){if($('brn'))brainCard();else if(TAB==='home')setTimeout(w,300)},300);
+function home(){TAB='home';if(!TOK)return loginScreen();if(!window.GOW&&/[?&]go=customers/.test(location.search)){window.GOW=1;return customers()}if(!window.GOW&&/[?&]go=careers/.test(location.search)){window.GOW=1;return careers()}setTimeout(function w(){if($('brn'))brainCard();else if(TAB==='home')setTimeout(w,300)},300);
   Promise.all([rpc('app_me',{token:TOK}),rpc('app_devices',{token:TOK}).catch(function(){return[]}),rpc('app_status',{token:TOK}).catch(function(){return null}),rpc('app_today',{token:TOK}).catch(function(){return null}),rpc('app_shadow',{token:TOK}).catch(function(){return null})]).then(function(r){var me=r[0],ds=r[1]||[],st=r[2],td=r[3],sh=r[4];
     if(!me||!me.ok){TOK='';try{localStorage.removeItem('v2_sess')}catch(e){}return loginScreen('انتهت الجلسة — ادخل من جديد')}
     var tb=(st&&st.tables)||[],rows=tb.reduce(function(t,x){return t+(x.rows||0)},0);
