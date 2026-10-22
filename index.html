@@ -568,7 +568,7 @@ nav.side .navflat button.navi.navtop.on .muted { color: rgba(255,255,255,.75); }
 <body>
 <script>
   var EXEC_URL = "https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec";
-  var APP_BUILD = "mvjg0jdr";
+  var APP_BUILD = "mvjhkh2g";
   var ACAD_SUPA = {"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var CLAUDE_GET = ['runNow', 'postGenerate', 'angleRegen', 'kwUpload', 'searchRunClaude', 'sourcesAnalyzeClaude', 'sandboxCycle'];
   var RETRY_OK = ['personMessage', 'poll', 'engageLinkHelp', 'supaClient', 'leadMessage', 'channelStatus']; // قراءة فقط: تُعاد عند صفحة خطأ عابرة من Google
@@ -7714,7 +7714,7 @@ SCREENS.control = { render: function (d) {
   var autos = d.events.filter(function (e) { return e.auto; }).slice(0, 6);
   var html = '<div class="ct-auto"><span class="ct-auto-l">⚙️ الآلي الآن</span><span class="ct-auto-t">' + (autos.length ? autos.map(function (e) { return '<span data-tip="' + esc(e.auto) + '">' + esc(e.title) + ' <i>' + ctAgo_(e.at) + '</i></span>'; }).join('<b> · </b>') : '<span class="muted">لا عمليات آلية خلال ٢٤ ساعة — ستظهر هنا فور حدوثها</span>') + '</span>' + ((S.hist && S.hist.length) ? '<button class="btn sm" data-act="goBack" data-tip="رجوع">→</button>' : '') + '</div>';
   html += '<div class="row between ct-top"><h1 style="margin:0">🎛 غرفة التحكم <span class="muted tiny">· تتحدّث وحدها كل دقيقة · آخر تحديث ' + fmtDate(d.at, true).replace(/^.*?(\d+:\d+).*$/, '$1') + '</span></h1>' +
-    '<span class="row" style="gap:6px"><span class="tag ' + (d.tick_min === null || d.tick_min > 30 ? 'bad' : 'auto') + '">⚙️ الآلي ' + (d.tick_min === null ? 'لم يعمل بعد' : d.tick_min > 30 ? 'متوقف منذ ' + d.tick_min + ' د' : 'يعمل · آخر دورة منذ ' + d.tick_min + ' د') + '</span>' +
+    '<span class="row" style="gap:6px"><a class="btn" href="https://alsaad-academy.com/v2/" target="_blank" data-tip="اللوحة الجديدة: العملاء، العروض، 🗺️ خريطة المهن">🚀 اللوحة الجديدة ↗</a><span class="tag ' + (d.tick_min === null || d.tick_min > 30 ? 'bad' : 'auto') + '">⚙️ الآلي ' + (d.tick_min === null ? 'لم يعمل بعد' : d.tick_min > 30 ? 'متوقف منذ ' + d.tick_min + ' د' : 'يعمل · آخر دورة منذ ' + d.tick_min + ' د') + '</span>' +
     '<button class="btn sm" data-act="ctSound" data-tip="صوت قصير عند وصول شيء عاجل فقط (لا لكل حدث)">🔔 الصوت: ' + (ctSound_() ? 'للعاجل فقط' : 'مغلق') + '</button>' +
     '<button class="btn sm" data-act="themeToggle" data-tip="الشاشة البيضاء أو السوداء — يُحفظ اختيارك لكل الصفحات">' + (themeIs_() === 'dark' ? '☀️ فاتح' : '🌙 داكن') + '</button></span></div>';
   // شريط الصفحات
