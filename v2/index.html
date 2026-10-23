@@ -156,10 +156,10 @@ function cUseAlt(){var t=$('cbt').value.trim();if(!t||!CMSG)return;var hasDraft=
 /* 🎁 العروض والمزايا (تصميم معتمد docs/mockups/offers-admin.html 2026-10-21): الفئات من seat_tiers مباشرة — التعديل مسودة حتى ✓ اعتماد، ثم يُطبَّق فوراً على الخريطة والمالية والرد الآلي. لا حذف: أرشفة + سجل */
 var OT='tiers',OD=null;
 function offers(t){TAB='offers';if(t)OT=t;if(!TOK)return loginScreen();
-  var tabs=[['tiers','الفئات'],['perks','المزايا'],['vouchers','الخصومات والقسائم'],['temp','العروض المؤقتة'],['log','السجل']];
+  var tabs=[['tiers','الفئات'],['perks','🎁 مزايا الأكاديمية'],['vouchers','الخصومات والقسائم'],['temp','العروض المؤقتة'],['log','السجل']];
   $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b style="font-size:17px">🎁 العروض والمزايا</b><div class="chips" style="margin:0">'+tabs.map(function(x){return '<a class="'+(OT===x[0]?'on':'')+'" data-t="'+x[0]+'" onclick="offers(this.dataset.t)">'+x[1]+'</a>'}).join('')+'</div><span class="sp"></span><button class="btn s" style="background:#2a8a55;color:#fff" onclick="oNew()" title="فئة جديدة تبدأ مسودة مخفية">+ إضافة</button></div>'+
     '<div style="margin:6px 0;padding:5px 10px;background:rgba(58,160,200,.12);border-right:3px solid #3aa0c8;border-radius:4px;font-size:12.5px">⚡ أي تغيير هنا يُطبَّق فوراً على: خريطة المقاعد · المالية · الرد الآلي · رسالة الترحيب · كتالوج واتساب · البوابة. التغيير «مسودة» حتى تضغط ✓ اعتماد.</div><div id="ob"><div class="card mut c">جارٍ التحميل…</div></div><div id="oact" style="font-size:12px;margin:4px 0"></div>');
-  oLoad()}
+  if(OT==='perks')return tfLoad();oLoad()}
 function oLoad(){rpc('app_offers',{token:TOK}).then(function(d){OD=d;oRender()}).catch(function(e){if(/unauthorized/.test(e.message)){TOK='';return loginScreen('انتهت الجلسة — ادخل من جديد')}$('ob').innerHTML='<div class="card mut">تعذّر التحميل</div>'})}
 function oNum(v){return Number(v||0).toLocaleString('en-US')}
 function oEff(t,k){return t.draft&&t.draft[k]!==undefined?t.draft[k]:t[k]}
@@ -298,6 +298,36 @@ function pNew(){var n=prompt('اسم الدورة:');if(!n)return;var k=prompt('
 function pApprove(){var ids=(PD.rows||[]).filter(pDirty).map(function(r){return Number(r.id)});
   if(!ids.length)return alert('لا تعديلات للاعتماد');if(!confirm('اعتماد '+ids.length+' سطر؟ تُكتب في النظام (الحجز والمالية والرد الآلي والعقل) خلال ١٠ دقائق.'))return;
   rpc('app_pricing_approve',{token:TOK,ids:ids}).then(function(n){alert('اعتُمد: '+n+' — يصلك تأكيد عند الكتابة في النظام');pLoad()})}
+/* 🎁 مزايا الأكاديمية (اعتمده المالك 2026-10-23): مصفوفة tier_features × الفئات — التعديل مسودة حتى ✓ اعتماد ← بوابة المتدرب (ac_features). لا حذف: إخفاء */
+var TF=null;
+function tfLoad(){rpc('app_tier_features',{token:TOK}).then(function(d){TF=d||[];tfRender()}).catch(function(e){if(/unauthorized/.test(e.message)){TOK='';return loginScreen('انتهت الجلسة — ادخل من جديد')}$('ob').innerHTML='<div class="card mut">تعذّر التحميل</div>'})}
+function tfV(f,k){return f.draft&&k in f.draft?f.draft[k]:f[k]}
+function tfVisOf(f){return f.draft&&'active' in f.draft?tfOn(f.draft.active):!!f.active}
+function tfOn(v){return !(v===false||v==='false'||v===0||v==='0'||v==null||v==='')}
+function tfRender(){var T=[['basic','الأساسي'],['plus','البلس ⭐'],['premium','البريميوم']],KN={button:'زر',limit:'حد',info:'معلومة'};
+  var ed=TF.filter(function(f){return f.draft&&Object.keys(f.draft).length}).length;
+  var cell=function(f,t){var v=tfV(f,t),dr=f.draft&&t in f.draft,kind=tfV(f,'kind');
+    if(kind==='limit')return '<input data-k="'+esc(f.key)+'" data-t="'+t+'" onchange="tfSet(this.dataset.k,this.dataset.t,Number(this.value))" type="number" min="0" value="'+esc(String(v==null?0:v))+'" style="width:52px;text-align:center;padding:3px;border:1px solid '+(dr?'#c9a227':'var(--a)')+';border-radius:6px;background:var(--as);color:var(--ink)">';
+    var on=tfOn(v);return '<a data-k="'+esc(f.key)+'" data-t="'+t+'" onclick="tfSet(this.dataset.k,this.dataset.t,'+(on?'false':'true')+')" style="cursor:pointer;display:inline-block;min-width:40px;text-align:center;padding:2px 8px;border-radius:9px;'+(dr?'outline:1px solid #c9a227;':'')+(on?'background:#2a8a55;color:#fff':'background:var(--soft);color:var(--mut)')+'">'+(on?'✓':'—')+'</a>'};
+  var rows=TF.map(function(f){var vis=tfVisOf(f),isNew=f.draft&&f.draft._new;
+    return '<tr style="'+(vis?'':'opacity:.5')+'"><td>'+esc(tfV(f,'icon')||'')+' <input data-k="'+esc(f.key)+'" onchange="tfSet(this.dataset.k,&quot;label_ar&quot;,this.value)" value="'+esc(tfV(f,'label_ar')||'')+'" style="width:210px;padding:3px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font-size:12px">'+(isNew?' <span style="font-size:10px;padding:1px 6px;border-radius:9px;background:#8a6d1a;color:#fff">جديدة</span>':'')+(f.draft&&Object.keys(f.draft).length&&!isNew?' <span title="معدَّلة لم تُعتمد" style="color:#c9a227">●</span>':'')+'</td>'+
+      '<td><select data-k="'+esc(f.key)+'" onchange="tfSet(this.dataset.k,&quot;kind&quot;,this.value)" style="font-size:11px;padding:2px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:5px">'+['button','limit','info'].map(function(k){return '<option value="'+k+'"'+(tfV(f,'kind')===k?' selected':'')+'>'+KN[k]+'</option>'}).join('')+'</select></td>'+
+      T.map(function(t){return '<td style="text-align:center">'+cell(f,t[0])+'</td>'}).join('')+
+      '<td><input data-k="'+esc(f.key)+'" onchange="tfSet(this.dataset.k,&quot;hint&quot;,this.value)" value="'+esc(tfV(f,'hint')||'')+'" placeholder="وصف قصير للمتدرب" style="width:150px;padding:3px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink);font-size:11px"></td>'+
+      '<td style="text-align:center"><a data-k="'+esc(f.key)+'" onclick="tfVis(this.dataset.k)" title="'+(vis?'ظاهرة في البوابة — اضغط للإخفاء':'مخفية — اضغط للإظهار')+'" style="cursor:pointer">'+(vis?'●':'○')+'</a></td></tr>'}).join('');
+  var prev=function(t,l){return '<div class="card" style="margin:0;padding:8px"><b style="font-size:12px">معاينة: متدرب «'+l+'»</b>'+TF.filter(tfVisOf).map(function(f){var v=tfV(f,t),on=tfOn(v),kind=tfV(f,'kind');
+    var un=tfOn(tfV(f,'plus'))?'البلس ⭐':tfOn(tfV(f,'premium'))?'البريميوم':'فئة أعلى';
+    return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--line);'+(on?'':'opacity:.45')+'"><span>'+esc(tfV(f,'icon')||'')+' '+esc(tfV(f,'label_ar'))+(kind==='limit'&&on?' <b>'+esc(String(v))+'</b>':'')+'</span><span>'+(on?(kind==='button'?'[زر]':'✓'):'🔒 متاحة في '+un)+'</span></div>'}).join('')+'</div>'};
+  $('ob').innerHTML='<div style="display:flex;gap:6px;align-items:center;margin:6px 0"><span class="mut" style="font-size:12px">كل ميزة تظهر في بوابة المتدرب حسب فئته — المقفلة باهتة «متاحة في …»</span><span class="sp"></span><button class="btn s" onclick="tfNew()">+ ميزة جديدة</button><button class="btn s" style="background:#2a8a55;color:#fff" onclick="tfApprove()">✓ اعتماد ('+ed+')</button></div>'+
+    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr class="mut" style="font-size:11px;text-align:right"><th>الميزة</th><th>النوع</th>'+T.map(function(t){return '<th style="text-align:center">'+t[1]+'</th>'}).join('')+'<th>ما يراه المتدرب</th><th style="text-align:center">ظاهرة</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin-top:10px">'+prev('basic','الأساسي')+prev('plus','البلس')+prev('premium','البريميوم')+'</div>'+
+    '<div class="mut" style="font-size:11px;margin-top:6px">اضغط الخانة لتبديل ✓/— أو اكتب رقماً للحدود · ● ظاهرة · ○ مخفية · ● أصفر = معدَّلة لم تُعتمد · الاعتماد ينشرها في البوابة فوراً</div>';
+  document.querySelectorAll('#ob td').forEach(function(t){t.style.padding='5px 4px';t.style.borderBottom='1px solid var(--line)'})}
+function tfSet(k,field,v){var p={key:k};p[field]=v;rpc('app_tier_feature_save',{token:TOK,p:p}).then(function(r){TF=TF.map(function(f){return f.key===r.key?r:f});tfRender()}).catch(function(){alert('تعذّر الحفظ')})}
+function tfVis(k){var f=TF.filter(function(x){return x.key===k})[0];if(f)tfSet(k,'active',!tfVisOf(f))}
+function tfNew(){var l=prompt('اسم الميزة كما يراها المتدرب (مثلاً: استشارة خبير):');if(!l)return;var ic=prompt('أيقونة (إيموجي):','🎁')||'🎁';var kd=prompt('النوع: زر / حد / معلومة','زر')||'زر';
+  var key='f_'+Date.now().toString(36);rpc('app_tier_feature_save',{token:TOK,p:{key:key,label_ar:l,icon:ic,kind:kd==='حد'?'limit':kd==='معلومة'?'info':'button'}}).then(tfLoad).catch(function(){alert('تعذّر الإنشاء')})}
+function tfApprove(){if(!confirm('اعتماد تعديلات المزايا ونشرها في بوابة المتدربين؟'))return;rpc('app_tier_features_approve',{token:TOK}).then(function(n){alert('اعتُمد: '+n);tfLoad()})}
 var MQ='',MS='',MOFF=0,MROWS=[],MT=0;
 var MST={received:'جديدة',classified:'مصنّفة',drafted:'مسودة جاهزة',pending:'بانتظارك',approved:'معتمدة',sent:'أُرسلت',closed:'مغلقة',failed:'فشلت',ignored:'متجاهلة',spam:'مزعجة'};
 function mstl(s){return MST[s]||s||'—'}
