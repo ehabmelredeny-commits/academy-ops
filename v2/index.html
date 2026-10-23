@@ -248,7 +248,7 @@ function pN(v){return v==null||v===''||isNaN(v)?'—':Math.round(Number(v)).toLo
 function pV(r,k){if(k==='official_price')return r.official_price!=null?r.official_price:'';if(r.draft&&k in r.draft)return r.draft[k];if(k==='hours'||k==='conditions')return r[k]!=null?r[k]:'';var c=r.course||{};if(c[k]!=null&&c[k]!=='')return c[k];return r[k]!=null?r[k]:''}
 function pDirty(r){return (r.draft&&Object.keys(r.draft).length>0)||(r.official_price!=null&&Number(r.official_price)!==Number(r.approved_price))||(r.course_id&&r.enabled!==r.synced_enabled)||(!r.course_id&&r.enabled&&!r.approved_at)}
 function pRender(){var d=PD,s=d.settings||{},T=d.tiers||{basic:.5,plus:.65,premium:.95},B=s.corp_bands||[],K=d.kinds||[];
-  var R=(d.rows||[]).filter(function(r){var nm=(r.name_ar+' '+(r.variant||'')).toLowerCase();return (!PF.q||nm.indexOf(PF.q.toLowerCase())>-1)&&(!PF.kind||r.kind===PF.kind)&&(!PF.dl||r.delivery===PF.dl)&&(!PF.st||(PF.st==='on'?r.enabled:!r.enabled))});
+  var R=(d.rows||[]).filter(function(r){var nm=(r.name_ar+' '+(r.variant||'')).toLowerCase();return (!PF.q||nm.indexOf(PF.q.toLowerCase())>-1)&&(!PF.kind||r.kind===PF.kind)&&(!PF.dl||r.delivery===PF.dl)&&(!PF.st||(PF.st==='on'?r.enabled:!r.enabled))}).map(function(r,i){return [r,i]}).sort(function(a,b){return (b[0].enabled?1:0)-(a[0].enabled?1:0)||a[1]-b[1]}).map(function(x){return x[0]}); // المفعّلة أولاً، ثم الترتيب الحالي (عرض فقط — طلب المالك 2026-10-24)
   var G=PCOLS.filter(function(g){return PG[g.g]});
   var priced=0,hi=0,dsum=0,dn=0,ed=0;
   var cellIn=function(r,k,typ){var v=pV(r,k),dr=r.draft&&k in r.draft;var w=typ==='t'?140:typ==='d'?110:70;
