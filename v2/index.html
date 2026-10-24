@@ -237,7 +237,7 @@ var PD=null,PF={q:'',kind:'',dl:'',st:''},PG=null;
 var PCOLS=[
  {g:'price',t:'💰 السعر',c:'#1f6f8b',f:[['official_price','الرسمي','n'],['min_price_sar','الحد الأدنى','n'],['cost_per_seat_sar','تكلفة المقعد','n'],['_basic','أساسي','x'],['_plus','بلس','x'],['_prem','بريميوم','x'],['_corp','شركات','x'],['payment_url','رابط الدفع','t']]},
  {g:'market',t:'📊 السوق',c:'#2a8a55',f:[['_min','أقل','x'],['_minby','الجهة','x'],['_avg','متوسط','x'],['_max','أعلى','x'],['_maxby','الجهة','x'],['_diff','فرق','x']]},
- {g:'hours',t:'⏱ الساعات',c:'#8a6d1a',f:[['_ref','المعيار','x'],['_htot','كاملة (مجموع تلقائي)','x'],['h_theory','نظري','n'],['h_practical','عملي','n'],['h_ojt','داخل العمل','n'],['h_self','ذاتي','n'],['h_exams','اختبارات','n'],['h_workshops','ورش','n'],['h_project','مشروع','n']]},
+ {g:'hours',t:'⏱ الساعات',c:'#8a6d1a',f:[['_ref','المعيار','x'],['_hth','نظري كامل','x'],['_hpr','عملي كامل','x'],['_htot','الكل','x'],['h_theory','نظري','n'],['h_practical','عملي','n'],['h_ojt','داخل العمل','n'],['h_self','ذاتي','n'],['h_exams','اختبارات','n'],['h_workshops','ورش','n'],['h_project','مشروع','n']]},
  {g:'dates',t:'📅 المواعيد والمقاعد',c:'#6a3fa0',f:[['next_cohort_date','الدفعة القادمة','d'],['registration_closes','يغلق التسجيل','d'],['seats_total','المقاعد','n'],['seats_left','المتبقي','n']]},
  {g:'data',t:'📋 البيانات',c:'#555',f:[['name_en','الاسم بالإنجليزية','t'],['duration','المدة','t'],['segment_fit','الشرائح المناسبة','t'],['key_benefit','الفائدة الأساسية','t'],['conditions','الشروط','t']]},
  {g:'acc',t:'🏅 الاعتماد',c:'#7a3b3b',f:[['_ldi','شهادة LDI','x'],['_ldiv','الصلاحية','x'],['cert_body','جهة الاعتماد','t'],['credential','نوع الاعتماد','t'],['gov_requirement','الاشتراط الحكومي','t'],['recert_years','سنوات التجديد','n'],['ceu_body','جهة CEU','t'],['ceu_count','عدد CEU','n'],['ceu_approved','CEU معتمد','t']]}];
@@ -265,7 +265,7 @@ function pRender(){var d=PD,s=d.settings||{},T=d.tiers||{basic:.5,plus:.65,premi
       _ref:'<span class="mut" style="font-size:10px;opacity:.7" title="'+esc((r.ref||{}).src||'')+'">'+esc(((r.ref||{}).src||'—').split(' ').slice(0,3).join(' '))+'</span>',
       _ldi:'<a onclick="certs()" style="cursor:pointer;font-size:10px" title="من «📜 الشهادات»">'+esc((r.cert||{}).title||'—')+'</a>',
       _ldiv:'<span style="font-size:10px">'+(r.cert?esc(r.cert.status)+(r.cert.valid_to?' · '+esc(r.cert.valid_to):'')+(r.cert.ref_no?' · '+esc(r.cert.ref_no):''):'—')+'</span>',
-      _htot:pHtot(r),
+      _hth:pHgrp(r,'th'),_hpr:pHgrp(r,'pr'),_htot:pHtot(r),
       _diff:'<span style="color:'+(pc==null?'var(--mut)':pc>0?'var(--b)':'var(--g)')+'">'+(pc==null?'—':(pc>0?'+':'')+pc+'%')+'</span>'};
     var cells=G.map(function(g){return g.f.map(function(f){return '<td>'+(f[2]==='x'?'<span id="px'+r.id+f[0]+'">'+X[f[0]]+'</span>':cellIn(r,f[0],f[2]))+'</td>'}).join('')}).join('');
     var tg='<a data-id="'+r.id+'" onclick="pTog(this.dataset.id)" title="'+(r.enabled?'مفعّلة — نبيعها. اضغط للإيقاف':'غير مفعّلة: '+esc(r.disabled_reason||'')+' — اضغط للتفعيل')+'" style="cursor:pointer;display:inline-block;font-size:10px;padding:1px 7px;border-radius:9px;margin-inline-end:5px;color:#fff;background:'+(r.enabled?'#2a8a55':'#777')+'">'+(r.enabled?'● مفعّلة':'○ غير مفعّلة')+'</a>';
@@ -312,7 +312,10 @@ function pDel(el){rpc('app_pricing_set_delivery',{token:TOK,p_id:Number(el.datas
 var PHK=['h_theory','h_practical','h_ojt','h_self','h_exams','h_workshops','h_project'];
 function pHsum(r,over){var t=0,any=false;PHK.forEach(function(k){var v=over&&k in over?over[k]:pV(r,k);v=Number(String(v).replace(/[^0-9.]/g,''));if(v>0){t+=v;any=true}});return any?t:null}
 function pHtot(r,over){var t=pHsum(r,over),rf=r.ref||{};if(t!=null)return '<b title="نظري + عملي + داخل العمل + ذاتي + اختبارات + ورش + مشروع">'+pN(t)+'</b>';return rf.tqt?'<span style="opacity:.5" title="المعيار ('+esc(rf.src||'')+')">'+pN(rf.tqt)+'</span>':'—'}
-function pHrs(el){var r=pRow(el.dataset.id);if(!r)return;var o={};document.querySelectorAll('input[data-id="'+r.id+'"]').forEach(function(x){if(PHK.indexOf(x.dataset.k)>-1)o[x.dataset.k]=x.value});var e=document.getElementById('px'+r.id+'_htot');if(e)e.innerHTML=pHtot(r,o)}
+function pHrs(el){var r=pRow(el.dataset.id);if(!r)return;var o={};document.querySelectorAll('input[data-id="'+r.id+'"]').forEach(function(x){if(PHK.indexOf(x.dataset.k)>-1)o[x.dataset.k]=x.value});var e=document.getElementById('px'+r.id+'_htot');if(e)e.innerHTML=pHtot(r,o);['th','pr'].forEach(function(g){var x=document.getElementById('px'+r.id+'_h'+g);if(x)x.innerHTML=pHgrp(r,g,o)})}
+
+var PHG={th:['h_theory','h_self','h_exams'],pr:['h_practical','h_ojt','h_workshops','h_project']};
+function pHgrp(r,g,over){var t=0,any=false;PHG[g].forEach(function(k){var v=over&&k in over?over[k]:pV(r,k);v=Number(String(v).replace(/[^0-9.]/g,''));if(v>0){t+=v;any=true}});return any?'<b title="'+(g==='th'?'نظري + ذاتي + اختبارات':'عملي + داخل العمل + ورش + مشروع')+'">'+pN(t)+'</b>':'—'}
 /* 🎁 مزايا الأكاديمية (اعتمده المالك 2026-10-23): مصفوفة tier_features × الفئات — التعديل مسودة حتى ✓ اعتماد ← بوابة المتدرب (ac_features). لا حذف: إخفاء */
 var TF=null;
 function tfLoad(){rpc('app_tier_features',{token:TOK}).then(function(d){TF=d||[];tfRender()}).catch(function(e){if(/unauthorized/.test(e.message)){TOK='';return loginScreen('انتهت الجلسة — ادخل من جديد')}$('ob').innerHTML='<div class="card mut">تعذّر التحميل</div>'})}
