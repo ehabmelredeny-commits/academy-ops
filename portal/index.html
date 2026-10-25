@@ -181,7 +181,11 @@ function drawCard(){var cv=$('mcard');if(!cv)return;var bg=new Image(),base=(B.s
   var lg=new Image();lg.crossOrigin='anonymous';var n=0,done=function(){if(++n===2)go()};bg.onload=lg.onload=done;bg.onerror=function(){};lg.onerror=done;bg.src=base+'member-card-v2.png';lg.src=base+'logo-transparent.png'}
 function saveCard(){var cv=$('mcard');if(!cv)return;try{var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='membership-'+D.member_no+'.png';document.body.appendChild(a);a.click();a.remove()}catch(e){alert('اضغط مطوّلاً على البطاقة ثم «حفظ الصورة»')}}
 var STUDY=null;
-function myLessons(){return (STUDY||[]).filter(function(x){return E&&x.cohort===E.cohort.name})}
+function myLessons(){return (STUDY||[]).filter(function(x){return E&&(x.prog?x.prog===E.program.id:x.cohort===E.cohort.name)})}
+// أكثر من برنامج: أزرار التبديل بين الكتب (2026-10-25)
+function enrList(){return ((D&&D.enrollments)||[]).filter(function(x){return x.status!=="منسحب"})}
+function pickE(i){E=enrList()[i];PANE="study";nav();render()}
+function progTabs(){var L=enrList();if(L.length<2)return "";return "<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px'>"+L.map(function(x,i){return "<button class='btn"+(x===E?" p":"")+"' style='min-height:36px' onclick='pickE("+i+")'>📘 "+esc(x.program.id||x.program.name)+"</button>"}).join("")+"</div>"}
 /* الدروس داخل البوابة: الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · الاختبار يُصحَّح في القاعدة */
 /* المذاكرة (تصميم معتمد 2026-10-14 docs/mockup-study-flow.png): خريطة رحلة ← قراءة داخل البوابة (pdf.js، بلا تنزيل) ← إقرار ← اختبار سؤال بسؤال ← نتيجة تفتح التالي.
    الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · القفل والتصحيح في القاعدة · إعادة اختبار الفصل مفتوحة بلا حد حتى النجاح */
@@ -189,7 +193,7 @@ var PDFS={},RD={cur:null,doc:null,pg:1};
 function ls_(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function lessonsUI(){var el=$('stl');if(!el)return;var ls=myLessons();if(!ls.length){el.innerHTML='';return}
   var done=ls.filter(function(x){return x.done}).length,cur=ls.filter(function(x){return x.open&&!x.done})[0];
-  el.innerHTML='<div class="card"><h3>📚 رحلتي في البرنامج</h3><div style="height:8px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i style="display:block;height:100%;width:'+Math.round(done*100/ls.length)+'%;background:#D4A853"></i></div>'+
+  el.innerHTML=progTabs()+'<div class="card"><h3>📚 رحلتي في '+esc(E.program.cert_title||E.program.name||"البرنامج")+'</h3><div style="height:8px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i style="display:block;height:100%;width:'+Math.round(done*100/ls.length)+'%;background:#D4A853"></i></div>'+
     '<div class="xs mut">أنجزت '+done+' من '+ls.length+(cur?' · التالي: '+esc(cur.title):' · أنهيت كل الدروس المتاحة 🎉')+'</div>'+
     ls.map(function(x){var ic=!x.open?'🔒':x.done?'✅':'▶️',sub=!x.open?'يُفتح بعد اجتياز الدرس السابق':x.gate==='ack'?(x.done?'وافقت على نظام المذاكرة':'اقرأ ثم وافق على نظام المذاكرة'):(x.questions?'اختبار '+x.questions+' أسئلة'+(x.tries?' · أفضل نتيجة '+Number(x.best)+'%':''):'');
       return '<div data-id="'+x.id+'" onclick="'+(x.open?'stOpen(this.dataset.id)':'')+'" style="display:flex;gap:10px;align-items:center;padding:10px;margin:6px 0;border-radius:12px;cursor:'+(x.open?'pointer':'default')+';opacity:'+(x.open?1:.6)+';border:'+(cur&&cur.id===x.id?'2px solid #D4A853':'1px solid rgba(127,127,127,.25)')+'">'+
