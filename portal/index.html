@@ -373,13 +373,41 @@ function hdr(title,sub){$('bt').innerHTML=logoHtml(B)+'<div><b>'+esc(B.name||'ا
 // رمز النموذج صالح من ٤ ثوانٍ إلى ساعتين — نجدّده بعد ٩٠ دقيقة وننتظر حتى يبلغ ٥ ثوانٍ (صفحة مفتوحة طويلاً كانت تُتجاهل بصمت)
 var FTAT=0;function ftWait(){var age=Date.now()-FTAT;return new Promise(function(res){setTimeout(function(){res(FT)},Math.max(0,5000-age))})}
 function getFT(){if(FT&&Date.now()-FTAT<90*60e3)return ftWait();return fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){var c=(j&&j.data)||{};FT=c.ft||'';FTAT=Date.now();return ftWait()}).catch(function(){return ''})}
-function loginScreen(msg){hdr('أهلاً بك 👋','ادخل برقم جوالك المسجّل لدينا');
-  $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔐 الدخول</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
-  '<input id="ph" type="tel" inputmode="tel" autocomplete="tel" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:17px;margin-top:4px;background:var(--card);color:var(--ink)">'+
-  '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="sendCode()">أرسل رمز الدخول</button>'+
-  '<div class="sm mut" style="margin-top:8px;text-align:center">📧 سيصلك الرمز على بريدك المسجّل لدينا</div>'+
+// 🔑 الدخول بالجوال + كلمة سر (قرار المالك 2026-10-25) — رمز البريد صار لـ«نسيت كلمة السر» فقط
+var FORGOT=0,PWOLD='';
+var INP='width:100%;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:inherit;font-size:17px;margin-top:4px;background:var(--card);color:var(--ink)';
+function loginScreen(msg){FORGOT=0;hdr('أهلاً بك 👋','طريقك للمجد يبدأ من هنا');
+  $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔐 بوابة المتدرب</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
+  '<input id="ph" type="tel" inputmode="tel" autocomplete="username" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="'+INP+'">'+
+  '<label class="sm mut" for="pw" style="display:block;margin-top:10px">كلمة السر</label><input id="pw" type="password" autocomplete="current-password" dir="ltr" onkeydown="if(event.key===&quot;Enter&quot;)pwLogin()" style="'+INP+'">'+
+  '<label class="sm" style="display:flex;gap:6px;align-items:center;margin:10px 0 0"><input type="checkbox" id="rem" checked> تذكّر هذا الجهاز ٣٠ يوماً</label>'+
+  '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="pwLogin()">دخول</button>'+
+  '<div style="margin-top:10px;text-align:center"><a href="#" class="sm" onclick="forgotScreen();return false">نسيت كلمة السر؟</a></div>'+
   '<div class="sm" id="err" style="color:var(--b);margin-top:8px;text-align:center">'+esc(msg||'')+'</div></div>'+
-  '<div class="foot">لا كلمة سر تحفظها · الرمز يصل لبريدك المسجّل لدينا<br>ليس لديك حساب؟ تواصل مع الأكاديمية</div>';getFT()}
+  '<div class="foot">أول مرة؟ ادخل بكلمة السر الأولى التي أعطتك إياها الأكاديمية، ثم اختر كلمتك<br>ليس لديك حساب؟ تواصل مع الأكاديمية</div>'}
+function pwLogin(){var v=$('ph').value.replace(/[^0-9+]/g,''),p=$('pw').value;if(v.replace(/[^0-9]/g,'').length<9){$('err').textContent='اكتب رقم جوال صحيح';return}PHONE=v;$('go').disabled=true;
+  rpc('ac_pw_login',{phone:v,pw:p,device:device(),remember:$('rem').checked}).then(function(r){$('go').disabled=false;
+    if(r&&r.ok){saveSess(r.token);boot();return}
+    if(r&&r.reason==='set'){PWOLD=r.init?p:'';return setPwScreen()}
+    $('err').textContent=r&&r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':r&&r.reason==='none'?'لم تُنشأ لك كلمة سر بعد — اضغط «نسيت كلمة السر؟» أو تواصل معنا':'الرقم أو كلمة السر غير صحيحة'+(r&&r.left!=null?' (بقي '+r.left+' محاولات)':'')})
+  .catch(function(){$('go').disabled=false;$('err').textContent='تعذّر الاتصال — حاول مرة أخرى'})}
+function setPwScreen(msg){hdr('اختر كلمة سرك','خطوة واحدة وتبدأ رحلتك');
+  $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔑 كلمة سر جديدة</h3><div class="sm mut">٦ أحرف أو أكثر — احفظها، ستدخل بها كل مرة</div>'+
+  '<input id="n1" type="password" autocomplete="new-password" dir="ltr" placeholder="كلمة السر الجديدة" style="'+INP+';margin-top:10px">'+
+  '<input id="n2" type="password" autocomplete="new-password" dir="ltr" placeholder="أعدها للتأكيد" style="'+INP+';margin-top:8px">'+
+  '<label class="sm" style="display:flex;gap:6px;align-items:center;margin:10px 0 0"><input type="checkbox" id="rem" checked> تذكّر هذا الجهاز ٣٠ يوماً</label>'+
+  '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="setPw()">احفظ وادخل</button>'+
+  '<div class="sm" id="err" style="color:var(--b);margin-top:8px;text-align:center">'+esc(msg||'')+'</div></div>'}
+function setPw(){var a=$('n1').value,b=$('n2').value;if(a.length<6){$('err').textContent='٦ أحرف على الأقل';return}if(a!==b){$('err').textContent='الكلمتان غير متطابقتين';return}$('go').disabled=true;
+  var done=function(r){$('go').disabled=false;if(r&&r.ok){if(r.token)saveSess(r.token);PWOLD='';boot();return}$('err').textContent=r&&r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':'تعذّر الحفظ — ابدأ الدخول من جديد'};
+  (SESS&&!PWOLD?rpc('ac_pw_change',{token:SESS,pw:a}):rpc('ac_pw_set',{phone:PHONE,old:PWOLD,pw:a,device:device(),remember:$('rem').checked})).then(done).catch(function(){$('go').disabled=false;$('err').textContent='تعذّر الاتصال'})}
+function forgotScreen(){FORGOT=1;hdr('لا تقلق','نعيدك إلى حسابك خلال دقيقة');var wa=B.phone?'https://wa.me/'+String(B.phone).replace(/[^0-9]/g,'').replace(/^0/,'966')+'?text='+encodeURIComponent('نسيت كلمة سر بوابة المتدرب، رقمي: '+(PHONE||'')):'#';
+  $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔁 نسيت كلمة السر</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
+  '<input id="ph" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="'+INP+'">'+
+  '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="sendCode()">📧 أرسل رمزاً لبريدي</button>'+
+  '<a class="btn" style="width:100%;margin-top:8px;min-height:44px" href="'+esc(wa)+'" target="_blank" rel="noopener">💬 تواصل معنا على واتساب</a>'+
+  '<div class="sm" id="err" style="color:var(--b);margin-top:8px;text-align:center"></div>'+
+  '<div style="margin-top:8px;text-align:center"><a href="#" class="sm" onclick="loginScreen();return false">رجوع للدخول</a></div></div>'}
 function sendCode(){var v=$('ph').value.replace(/[^0-9+]/g,'');if(v.replace(/D/g,'').length<9){$('err').textContent='اكتب رقم جوال صحيح';return}PHONE=v;$('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
   getFT().then(function(ft){return fetch(EXEC+'?public=otp',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({phone:v,ft:ft})})}).then(function(r){return r.json()}).then(function(j){
     if(!j.ok){$('go').disabled=false;$('go').textContent='أرسل رمز الدخول';$('err').textContent=j.error||'تعذّر الإرسال';return}codeScreen(j.mask)}).catch(function(){$('go').disabled=false;$('go').textContent='أرسل رمز الدخول';$('err').textContent='تعذّر الاتصال — حاول مرة أخرى'})}
@@ -395,7 +423,7 @@ function codeScreen(mask,msg){hdr('أدخل الرمز','أرسلناه إلى '
 function tick(){var el=$('rs');if(!el)return;var s=Math.ceil((RESEND-Date.now())/1000);el.innerHTML=s>0?'لم يصلك؟ إعادة الإرسال بعد 0:'+('0'+s).slice(-2):'<a href="#" onclick="loginScreen();return false">أعد إرسال الرمز</a>';if(s>0)setTimeout(tick,1000)}
 function verify(){var c=($('otp').value||'').replace(/[^0-9]/g,'');if(c.length!==6){$('err').textContent='الرمز 6 أرقام';return}$('vb').disabled=true;
   rpc('ac_login_verify',{phone:PHONE,code:c,device:device(),remember:$('rem').checked}).then(function(r){
-    if(r&&r.ok){saveSess(r.token);boot();return}$('vb').disabled=false;
+    if(r&&r.ok){saveSess(r.token);if(FORGOT){FORGOT=0;PWOLD='';return setPwScreen()}boot();return}$('vb').disabled=false;
     $('err').textContent=r&&r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':r&&r.reason==='expired'?'انتهت صلاحية الرمز — اطلب رمزاً جديداً':'الرمز غير صحيح'+(r&&r.left!=null?' (بقي '+r.left+' محاولات)':'')}).catch(function(){$('vb').disabled=false;$('err').textContent='تعذّر الاتصال'})}
 function signedOutScreen(r){hdr('تم تسجيل الخروج من هذا الجهاز','');var d=r.at?new Date(r.at):null;
   $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto;text-align:center"><div style="font-size:42px">📱</div><h3 style="justify-content:center">دخلت إلى حسابك من جهاز آخر</h3>'+
