@@ -23,6 +23,7 @@ button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-
 <label for="phone">رقم الجوال (واتساب) *<small class="en">Mobile (WhatsApp) *</small></label><input id="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required>
 <label for="email">البريد الإلكتروني (اختياري)<small class="en">Email (optional)</small></label><input id="email" type="email" dir="ltr" autocomplete="email">
 <label for="city">المدينة<small class="en">City</small></label><select id="city"><option value="">اختر المدينة</option></select>
+<label for="gender">أنت *<small class="en">You are *</small></label><div id="gender" style="display:flex;gap:16px;margin:4px 0 2px"><label class="chk" style="margin:0"><input type="radio" name="gender" value="ذكر"> رجل</label><label class="chk" style="margin:0"><input type="radio" name="gender" value="أنثى"> امرأة</label></div>
 <label for="course">الدورة التي تناسب طموحك<small class="en">The course that fits your goal</small></label><select id="course"><option value="">لم أحدد بعد</option></select>
 <div id="seatbox" style="display:none"></div>
 <label for="persona">أين أنت الآن؟<small class="en">Where are you now?</small></label><select id="persona"><option value="">اختر</option><option>أبدأ في المجال من الصفر</option><option>مدرب حالياً وأريد التطوير</option>
@@ -71,13 +72,17 @@ function privateMode(){var sub=$('sub');if(sub)sub.innerHTML='✅ وصلنا ت�
   var cr=$('course');if(cr){cr.style.display='none';var lc=document.querySelector('label[for="course"]');if(lc)lc.style.display='none'}
   var sb=$('seatbox'),f=$('f');if(sb&&f&&!$('wzbar'))f.insertBefore(sb,f.firstChild);
   var nl=document.querySelector('label[for="name"]');if(nl&&!$('cfm')){nl.insertAdjacentHTML('beforebegin','<div id="cfm" style="margin-top:14px;font-weight:bold">لتأكيد مقعدك: اسمك وجوالك</div>')}}
-function loadCohorts(){if(P.get('b'))privateMode();if(P.get('from')==='form'){document.title='اختر مقعدك 🎯';var h1=$('t');if(h1)h1.textContent='اختر مقعدك 🎯';$('err').insertAdjacentHTML('beforebegin','');var fb=document.createElement('div');fb.className='sm-hot';fb.textContent='✅ وصلنا تسجيلك — اختر الفترة ومقعدك من الخريطة، ثم اضغط «احجز» — بياناتك جاهزة.';var sb=$('seatbox');if(sb)sb.parentNode.insertBefore(fb,sb);try{var me=JSON.parse(sessionStorage.getItem('reg_me')||'null');if(me){if($('name')&&!$('name').value)$('name').value=me.n||'';if($('phone')&&!$('phone').value)$('phone').value=me.p||'';if(me.c&&$('consent'))$('consent').checked=true}}catch(e){}setTimeout(function(){var b=$('seatbox');if(b)b.scrollIntoView({behavior:'smooth'})},1500)}SEAT.inv=(P.get('b')||'').replace(/[^a-f0-9]/g,'').slice(0,40);if(!SEAT.inv)return;sq('seat_invite_open',{p_token:SEAT.inv}).then(function(x){if(!x||!x.ok)return;SEAT.cohorts=x.cohorts||[];if(x.course&&!$('course').value)$('course').value=x.course;renderSeats()}).catch(function(){})}
+function loadCohorts(){if(P.get('b'))privateMode();if(P.get('from')==='form'){document.title='اختر مقعدك 🎯';var h1=$('t');if(h1)h1.textContent='اختر مقعدك 🎯';$('err').insertAdjacentHTML('beforebegin','');var fb=document.createElement('div');fb.className='sm-hot';fb.textContent='✅ وصلنا تسجيلك — اختر الفترة ومقعدك من الخريطة، ثم اضغط «احجز» — بياناتك جاهزة.';var sb=$('seatbox');if(sb)sb.parentNode.insertBefore(fb,sb);try{var me=JSON.parse(sessionStorage.getItem('reg_me')||'null');if(me){if($('name')&&!$('name').value)$('name').value=me.n||'';if($('phone')&&!$('phone').value)$('phone').value=me.p||'';if(me.c&&$('consent'))$('consent').checked=true}}catch(e){}setTimeout(function(){var b=$('seatbox');if(b)b.scrollIntoView({behavior:'smooth'})},1500)}SEAT.inv=(P.get('b')||'').replace(/[^a-f0-9]/g,'').slice(0,40);if(!SEAT.inv)return;sq('seat_invite_open_g',{p_token:SEAT.inv,p_gender:gnd()||null}).then(function(x){if(!x||!x.ok)return;SEAT.cohorts=x.cohorts||[];if(x.course&&!$('course').value)$('course').value=x.course;renderSeats()}).catch(function(){})}
 function fmt(n){return Number(n||0).toLocaleString('en-US')}
 function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function gnd(){var x=document.querySelector('input[name="gender"]:checked');return x?x.value:''}
+// تغيير الجنس يعيد تحميل الدفعات المناسبة له (قاعة النظري والعملي — قرار المالك 2026-10-26)
+document.addEventListener('change',function(e){if(!e.target||e.target.name!=='gender'||!SEAT.inv)return;sq('seat_invite_open_g',{p_token:SEAT.inv,p_gender:gnd()}).then(function(x){if(x&&x.ok){SEAT.cohorts=x.cohorts||[];SEAT.pick='';renderSeats()}}).catch(function(){})});
 function pickPeriod(c){SEAT.pick=c;renderSeats()}
 function renderSeats(){var box=$('seatbox'),cn=$('course').value,list=(SEAT.cohorts||[]).filter(function(x){return x.course===cn}),h=list.filter(function(x){return x.cohort===SEAT.pick})[0]||list[0];SEAT.tier='';SEAT.cohort='';
+  if(h&&!gnd()){box.style.display='block';box.innerHTML='<div class="sm-hot">اختر «رجل» أو «امرأة» أولاً — نعرض لك الفترات والقاعات المناسبة</div>';return}
   if(!h){box.style.display='none';box.innerHTML='';return}
-  sq('seat_invite_open',{p_token:SEAT.inv,p_cohort:h.cohort}).then(function(xx){var m=xx&&xx.map;if(!m||!m.tiers)return;SEAT.cohort=h.cohort;SEAT.map=m;
+  sq('seat_invite_open_g',{p_token:SEAT.inv,p_cohort:h.cohort,p_gender:gnd()||null}).then(function(xx){var m=xx&&xx.map;if(!m||!m.tiers)return;SEAT.cohort=h.cohort;SEAT.map=m;
     var left=m.seats.filter(function(s){return s.status==='متاح'}).length,html=(P.get('preview')==='1'?'<div class="sm-hot">👁 معاينة المالك — الحجز من هذا الرابط تجريبي ولا يُحسب</div>':'')+'<div class="sm-h"><b>اختر الفترة المناسبة لك ثم مقعدك — '+cn+'</b><small>'+esc(h.label||'')+' · 25 مقعداً · بقي '+left+' مقعداً</small></div>'+(list.length?'<div class="sm-lg">📅 الفترات: '+list.map(function(p){return '<button type="button" class="sm-s" style="width:auto;padding:0 10px;background:'+(p.cohort===h.cohort?'#14213d':'#8a8a8a')+'" data-c="'+p.cohort+'">'+(p.tba?'الفترة القادمة — يُعلن موعدها قريباً':p.from&&p.to?'من '+p.from+' إلى '+p.to:esc(p.label))+'</button>'}).join('')+'</div>':'')+'<div class="sm-lg">';
     m.tiers.slice().reverse().forEach(function(t){html+='<span><i style="background:'+TC[t.tier]+'"></i>'+t.name+' −'+t.pct+'% '+(t.badge?'⭐':'')+'</span>'});
     html+='<span><i style="background:#c9c9c9"></i>محجوز</span></div><div class="sm-stage">المدرب</div>';
@@ -103,7 +108,7 @@ function wzInit(){var f=$('f');if(!f||$('wzbar'))return;
   var mk=function(id){var d=document.createElement('div');d.id=id;return d};
   var s1=mk('wz1'),s2=mk('wz2'),s3=mk('wz3'),more=document.createElement('details');more.id='wzmore';more.innerHTML='<summary style="cursor:pointer;margin-top:12px;font-size:14px;color:var(--a)">معلومات إضافية (اختياري) — رشّحك صديق؟ سؤال؟</summary>';
   var lab=function(id){return document.querySelector('label[for="'+id+'"]')};
-  ['name','phone','course'].forEach(function(id){var l=lab(id);if(l)s1.appendChild(l);s1.appendChild($(id))});
+  ['name','phone','gender','course'].forEach(function(id){var l=lab(id);if(l)s1.appendChild(l);s1.appendChild($(id))});
   ['email','city','persona','note'].forEach(function(id){var l=lab(id);if(l)more.appendChild(l);more.appendChild($(id))});
   ['refbox'].forEach(function(id){more.appendChild($(id))});var ml=lab('member_no');if(ml)more.appendChild(ml);more.appendChild($('member_no'));more.appendChild($('member_consent').parentNode);
   s1.appendChild(more);s1.insertAdjacentHTML('beforeend','<div class="err" id="err1"></div><button type="button" id="wzn1">التالي: اختر مقعدك ←</button>');
@@ -124,6 +129,7 @@ function wzGo(n){if(n<1)n=1;WZ.s=n;[1,2,3].forEach(function(i){$('wz'+i).style.d
 function wz1(){var e=$('err1');e.textContent='';
   if($('name').value.trim().length<2)return e.textContent='اكتب اسمك';
   if($('phone').value.replace(/[^0-9]/g,'').length<9)return e.textContent='اكتب رقم جوال صحيح';
+  if(!gnd())return e.textContent='اختر: رجل أو امرأة — لنعرض لك الفترات المناسبة';
   if(!$('course').value)return e.textContent='اختر الدورة التي تناسب طموحك';
   try{sessionStorage.setItem('reg_me',JSON.stringify({n:$('name').value,p:$('phone').value}))}catch(x){}
   var b=$('wzn1');b.disabled=true;b.textContent='لحظة — نجهّز لك المقاعد…';
@@ -131,7 +137,7 @@ function wz1(){var e=$('err1');e.textContent='';
   if(SEAT.inv)return open();
   var AQ=window.WZAQ;if(!AQ)return open();
   fetch(AQ.url+'/rest/v1/rpc/seat_invite_public',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({p_phone:$('phone').value,p_name:$('name').value,p_course:$('course').value})})
-    .then(function(r){return r.json()}).then(function(t){if(t&&typeof t==='string')SEAT.inv=t;return sq('seat_invite_open',{p_token:SEAT.inv})}).then(function(x){if(x&&x.ok)SEAT.cohorts=x.cohorts||[];open()}).catch(open)}
+    .then(function(r){return r.json()}).then(function(t){if(t&&typeof t==='string')SEAT.inv=t;return sq('seat_invite_open_g',{p_token:SEAT.inv,p_gender:gnd()||null})}).then(function(x){if(x&&x.ok)SEAT.cohorts=x.cohorts||[];open()}).catch(open)}
 function wzSeats(){SEAT.tier='';$('wzn2').style.display='none';var cn=$('course').value,list=(SEAT.cohorts||[]).filter(function(x){return x.course===cn});
   if(!list.length){$('seatbox').style.display='none';$('wzno').style.display='block';$('wzno').textContent='🔥 مقاعد هذه الدورة تُفتح قريباً — أكمل حجز أولويتك ويتواصل معك مستشار القبول قبل الجميع.';$('wzn2').style.display='block';return}
   $('wzno').style.display='none';renderSeats()}
@@ -175,9 +181,10 @@ $('f').addEventListener('submit',function(e){
   e.preventDefault();$('err').textContent='';
   if($('name').value.trim().length<2)return $('err').textContent='اكتب اسمك';
   if($('phone').value.replace(/\D/g,'').length<9)return $('err').textContent='اكتب رقم جوال صحيح';
+  if(!gnd())return $('err').textContent='اختر: رجل أو امرأة';
   if(!$('consent').checked)return $('err').textContent='نحتاج موافقتك على التواصل لنرسل لك التفاصيل';
   $('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
-  var body={name:$('name').value,phone:$('phone').value,email:$('email').value,city:$('city').value,course:$('course').value,persona:$('persona').value,note:$('note').value,
+  var body={name:$('name').value,phone:$('phone').value,gender:gnd(),email:$('email').value,city:$('city').value,course:$('course').value,persona:$('persona').value,note:$('note').value,
     website:$('website').value,ft:CFG.ft||'',consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||'',cohort_id:SEAT.tier&&P.get('preview')!=='1'?SEAT.cohort:'',invite:SEAT.inv||'',tier:SEAT.tier||'',seat:SEAT.pos||0,voucher:($('voucher')&&$('voucher').value.trim())||''};
   // أولاً طابور Supabase (يتحمّل الضغط — اختبار الحمل 2026-10-14)، وإن تعذّر فالنقطة القديمة في جوجل
   var AQ={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
