@@ -120,7 +120,7 @@ function render(){
     html+='<div id="evl"></div>'+groupCard()+studyCard(true)+'</div></div>';
   } else if(PANE==='mine'){
     var L=(D.enrollments||[]).filter(function(x){return x.status!=='منسحب'});
-    html+='<div class="card"><h3>🎓 دوراتي ('+L.length+')</h3>'+L.map(function(x,i){var ls=(STUDY||[]).filter(function(l){return l.prog===x.program.id}),dn=ls.filter(function(l){return l.done}).length,p=ls.length?Math.round(dn*100/ls.length):0,on=x===E;
+    html+='<div class="card"><h3>🎓 دوراتي ('+L.length+')</h3>'+L.map(function(x,i){var ls=(STUDY||[]).filter(function(l){return l.prog===x.program.id&&l.cohort===x.cohort.name}),dn=ls.filter(function(l){return l.done}).length,p=ls.length?Math.round(dn*100/ls.length):0,on=x===E;
       var b=function(ic,t,pn,ex){return '<button class="btn" style="min-height:38px" data-i="'+(D.enrollments.indexOf(x))+'" onclick="E=D.enrollments[this.dataset.i];'+(ex?'go(&quot;study&quot;);setTimeout(examsUI,400)':'go(&quot;'+pn+'&quot;)')+'"><span>'+ic+'</span> '+t+'</button>'};
       return '<div style="border:'+(on?'2px solid #D4A853':'1px solid var(--line)')+';border-radius:14px;padding:12px;margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:15px">'+esc(x.program.cert_title||x.program.name)+'</b>'+(on?'<span class="chip cg">المعروضة</span>':'')+'</div>'+
         '<div class="xs mut" style="margin:2px 0 6px">'+esc(x.cohort.name)+(ls.length?' · أنجزت '+dn+' من '+ls.length+' فصل':'')+'</div>'+(ls.length?'<div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin-bottom:8px"><i style="display:block;height:100%;width:'+p+'%;background:#D4A853"></i></div>':'')+
@@ -189,7 +189,7 @@ function drawCard(){var cv=$('mcard');if(!cv)return;var bg=new Image(),base=(B.s
   var lg=new Image();lg.crossOrigin='anonymous';var n=0,done=function(){if(++n===2)go()};bg.onload=lg.onload=done;bg.onerror=function(){};lg.onerror=done;bg.src=base+'member-card-v2.png';lg.src=base+'logo-transparent.png'}
 function saveCard(){var cv=$('mcard');if(!cv)return;try{var a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download='membership-'+D.member_no+'.png';document.body.appendChild(a);a.click();a.remove()}catch(e){alert('اضغط مطوّلاً على البطاقة ثم «حفظ الصورة»')}}
 var STUDY=null;
-function myLessons(){return (STUDY||[]).filter(function(x){return E&&(x.prog?x.prog===E.program.id:x.cohort===E.cohort.name)})}
+function myLessons(){return (STUDY||[]).filter(function(x){return E&&x.cohort===E.cohort.name&&(!x.prog||x.prog===E.program.id)})}
 // أكثر من برنامج: أزرار التبديل بين الكتب (2026-10-25)
 function enrList(){return ((D&&D.enrollments)||[]).filter(function(x){return x.status!=="منسحب"})}
 function pickE(i){E=enrList()[i];PANE="study";nav();render()}
