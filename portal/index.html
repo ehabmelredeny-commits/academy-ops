@@ -113,7 +113,7 @@ function render(){
   var g=E.progress||{},c=E.cohort,p=E.program,ss=E.sessions||[],held=ss.filter(function(s){return s.st}).length;
   if(PANE==='home'){
     var hrs=ss.filter(function(s){return s.st}).reduce(function(t,s){return t+Number(s.hours||0)},0),ns=nextSess(E);
-    html+='<div class="pane on cols">';
+    html+='<div id="live"></div><div class="pane on cols">';
     html+='<div><div class="card"><h3>📈 تقدّمك في البرنامج</h3><div class="row" style="border:0;padding:0"><span class="sm mut">الجلسة '+held+' من '+ss.length+'</span><span class="sm mut">'+(p.hours?Math.round(hrs)+' / '+p.hours+' ساعة':'')+'</span></div><div class="m"><i style="width:'+(ss.length?Math.round(100*held/ss.length):0)+'%;background:var(--a)"></i></div></div>';
     html+='<div class="card"><div class="two">'+bar(pct(g.attendance_pct),r.attendance_min,'حضورك','المطلوب '+r.attendance_min+'%')+bar(pct(g.score_now),r.pass_min,'معدلك','النجاح '+r.pass_min+'%')+'</div><div class="xs mut" style="margin-top:6px">التأخير يُحسب حضوراً · الغياب بعذر مقبول لا يُحسب عليك</div></div></div>';
     html+='<div>'+(E.cert?certTeaser()+nextStep():'')+'<div class="card"><h3>🗓 الجلسة القادمة <a class="r" href="#" onclick="go(\'sch\');return false">الجدول كاملاً ‹</a></h3>'+(ns?'<div class="next"><div class="date">'+DAYS[new Date(ns.day+'T12:00:00').getDay()]+'<small>'+dAr(ns.day,{day:'numeric',month:'short'})+'</small></div><div><b>جلسة '+ns.n+(ns.topic?' — '+esc(ns.topic):'')+'</b><div class="sm mut">'+esc([(c.time_from||'')+(c.time_to?' – '+c.time_to:''),c.place,c.trainer?'المدرب: '+c.trainer:'',ns.kind].filter(function(x){return x&&x.trim()}).join(' · '))+'</div></div></div>':'<div class="sm mut">'+(ss.length?'انتهت الجلسات':'يُعلن الجدول قريباً')+'</div>')+'</div>';
@@ -151,7 +151,7 @@ function render(){
   if(PANE==='study'){retakes();lessonsUI()}
   if(PANE==='mine'&&STUDY===null&&SESS)rpc('ac_study',{token:SESS}).then(function(r){STUDY=r||[];render()}).catch(function(){STUDY=[]});
   if(PANE==='acc')refundCard();
-  if(PANE==='home')evalUI();
+  if(PANE==='home'){evalUI();liveUI()}
 }
 function retakes(){var el=$('rtk');if(!el||!SESS)return;rpc('ac_retakes',{token:SESS}).then(function(r){var it=(r.items||[]).filter(function(x){return x.cohort===E.cohort.name});if(!it.length){el.innerHTML='';return}RTU=r.pay_url||'';
   el.innerHTML='<div class="card"><h3>🔁 إعادة الاختبار</h3><div class="xs mut">تقييمات لم تصل فيها لدرجة النجاح — احجز إعادتها من هنا</div>'+it.map(function(x){var b=x.booking;
@@ -198,6 +198,12 @@ function progTabs(){var L=enrList();if(L.length<2)return "";return "<div style='
 /* المذاكرة (تصميم معتمد 2026-10-14 docs/mockup-study-flow.png): خريطة رحلة ← قراءة داخل البوابة (pdf.js، بلا تنزيل) ← إقرار ← اختبار سؤال بسؤال ← نتيجة تفتح التالي.
    الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · القفل والتصحيح في القاعدة · إعادة اختبار الفصل مفتوحة بلا حد حتى النجاح */
 function spinHtml(h){return '<div class="spinbox" style="padding:'+(h||30)+'px 0;perspective:800px;text-align:center"><img src="../brand/logo-transparent.png" alt="جارٍ التحميل" style="display:inline-block;width:40%;max-width:180px;height:auto;animation:rdspin 2.5s linear infinite"></div>'}
+function liveUI(){var el=$('live');if(!el||!SESS)return;rpc('ac_live',{token:SESS}).then(function(r){var L=r&&r.live;if(!L){el.innerHTML='';return}
+  el.innerHTML='<div class="card" style="border:2px solid #D4A853"><h3>🎥 محاضرتك أونلاين اليوم</h3><div class="sm">الجلسة '+L.n+(L.topic?' · '+esc(L.topic):'')+' · '+esc(L.from||'')+' – '+esc(L.to||'')+'</div>'+
+    (L.open?'<button class="btn p" style="width:100%;margin-top:10px;min-height:46px;font-size:15px" data-id="'+L.id+'" onclick="liveJoin(this)">▶ ادخل المحاضرة الآن</button><div class="xs mut" style="margin-top:6px">يُسجَّل حضورك تلقائياً عند الدخول · التأخر أكثر من 15 دقيقة يُحسب «متأخر»</div>'
+     :'<div class="xs mut" style="margin-top:8px">⏳ يُفتح زر الدخول قبل البداية بـ30 دقيقة (بعد '+L.mins_to_open+' دقيقة)</div>')+'</div>';
+  if(!L.open)setTimeout(liveUI,60000)}).catch(function(){})}
+function liveJoin(b){b.disabled=true;var w=window.open('about:blank','_blank');rpc('ac_live_join',{token:SESS,session_id:b.dataset.id}).then(function(r){b.disabled=false;if(!r.ok){if(w)w.close();alert({time:'خارج وقت الجلسة',day:'لا جلسة أونلاين اليوم',not_enrolled:'لست مسجّلاً في هذه الدفعة'}[r.reason]||'تعذّر الدخول');return}if(w)w.location.href=r.url;else location.href=r.url}).catch(function(){b.disabled=false;if(w)w.close();alert('تعذّر الاتصال')})}
 var PDFS={},RD={cur:null,doc:null,pg:1};
 function ls_(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function lessonsUI(){var el=$('stl');if(!el)return;var ls=myLessons();if(!ls.length){el.innerHTML='';return}
