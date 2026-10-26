@@ -99,7 +99,7 @@ document.addEventListener('mouseover',function(e){var el=e.target.closest&&e.tar
 document.addEventListener('touchstart',function(e){var el=e.target.closest&&e.target.closest('[data-tip]');if(!el)return;var r=el.getBoundingClientRect();clearTimeout(tm);tm=setTimeout(function(){show(el,r.left+r.width/2,r.top);setTimeout(hide,3000)},450)},{passive:true});
 document.addEventListener('touchend',function(){clearTimeout(tm)},{passive:true});document.addEventListener('scroll',hide,{passive:true})})();
 var D=null,B=Object.assign({},BDEF),PANE='home',E=null,TXT={};
-var NAV=[['home','🏠','الرئيسية'],['sch','🗓','الجدول'],['study','📚','المذاكرة'],['cert','🏅','شهادتي'],['acc','👤','حسابي']];
+var NAV=[['home','🏠','الرئيسية'],['mine','🎓','دوراتي'],['sch','🗓','الجدول'],['study','📚','المذاكرة'],['cert','🏅','شهادتي'],['acc','👤','حسابي']];
 function nav(){ $('nav').innerHTML=NAV.map(function(n){return '<button class="'+(PANE===n[0]?'on':'')+'" onclick="go(\''+n[0]+'\')" aria-label="'+n[2]+'"><span>'+n[1]+'</span>'+n[2]+'</button>'}).join('') }
 function go(p){PANE=p;nav();render();scrollTo(0,0)}
 function pct(v){return v==null?null:Number(v)}
@@ -118,6 +118,13 @@ function render(){
     html+='<div class="card"><div class="two">'+bar(pct(g.attendance_pct),r.attendance_min,'حضورك','المطلوب '+r.attendance_min+'%')+bar(pct(g.score_now),r.pass_min,'معدلك','النجاح '+r.pass_min+'%')+'</div><div class="xs mut" style="margin-top:6px">التأخير يُحسب حضوراً · الغياب بعذر مقبول لا يُحسب عليك</div></div></div>';
     html+='<div>'+(E.cert?certTeaser()+nextStep():'')+'<div class="card"><h3>🗓 الجلسة القادمة <a class="r" href="#" onclick="go(\'sch\');return false">الجدول كاملاً ‹</a></h3>'+(ns?'<div class="next"><div class="date">'+DAYS[new Date(ns.day+'T12:00:00').getDay()]+'<small>'+dAr(ns.day,{day:'numeric',month:'short'})+'</small></div><div><b>جلسة '+ns.n+(ns.topic?' — '+esc(ns.topic):'')+'</b><div class="sm mut">'+esc([(c.time_from||'')+(c.time_to?' – '+c.time_to:''),c.place,c.trainer?'المدرب: '+c.trainer:'',ns.kind].filter(function(x){return x&&x.trim()}).join(' · '))+'</div></div></div>':'<div class="sm mut">'+(ss.length?'انتهت الجلسات':'يُعلن الجدول قريباً')+'</div>')+'</div>';
     html+='<div id="evl"></div>'+groupCard()+studyCard(true)+'</div></div>';
+  } else if(PANE==='mine'){
+    var L=(D.enrollments||[]).filter(function(x){return x.status!=='منسحب'});
+    html+='<div class="card"><h3>🎓 دوراتي ('+L.length+')</h3>'+L.map(function(x,i){var ls=(STUDY||[]).filter(function(l){return l.prog===x.program.id}),dn=ls.filter(function(l){return l.done}).length,p=ls.length?Math.round(dn*100/ls.length):0,on=x===E;
+      var b=function(ic,t,pn,ex){return '<button class="btn" style="min-height:38px" data-i="'+(D.enrollments.indexOf(x))+'" onclick="E=D.enrollments[this.dataset.i];'+(ex?'go(&quot;study&quot;);setTimeout(examsUI,400)':'go(&quot;'+pn+'&quot;)')+'"><span>'+ic+'</span> '+t+'</button>'};
+      return '<div style="border:'+(on?'2px solid #D4A853':'1px solid var(--line)')+';border-radius:14px;padding:12px;margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font-size:15px">'+esc(x.program.cert_title||x.program.name)+'</b>'+(on?'<span class="chip cg">المعروضة</span>':'')+'</div>'+
+        '<div class="xs mut" style="margin:2px 0 6px">'+esc(x.cohort.name)+(ls.length?' · أنجزت '+dn+' من '+ls.length+' فصل':'')+'</div>'+(ls.length?'<div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin-bottom:8px"><i style="display:block;height:100%;width:'+p+'%;background:#D4A853"></i></div>':'')+
+        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">'+b('📚','الكتب والفصول','study')+b('📝','الاختبارات','',1)+b('🗓','الجدول والحضور','sch')+b('🏅','الشهادة','cert')+'</div></div>'}).join('')+'</div>';
   } else if(PANE==='sch'){
     var t=today();
     html+='<div class="card"><h3>🗓 جدول '+esc(c.name)+' <span class="r">'+(ss.length?'<a class="btn" href="#" onclick="ics();return false" data-tip="يضيف كل الجلسات لتقويم جوالك (آيفون/أندرويد/أوتلوك)">📅 أضف للتقويم</a>':'')+'</span></h3>'+
@@ -138,10 +145,11 @@ function render(){
       '<div class="card"><h3>📌 روابط</h3><div class="row"><span>📲 تسجيل الحضور بمسح رمز الجلسة</span><a href="#" onclick="scanHelp();return false">كيف؟</a></div><div class="row"><span>🔒 تسجيل الخروج من هذا الجهاز</span><a href="#" onclick="logout();return false">خروج</a></div><div class="row"><span>سياسة الخصوصية</span><a href="../privacy/">قراءة ‹</a></div><div class="row"><span>أضف البوابة لشاشة جوالك</span><span class="xs mut">آيفون: زر المشاركة ← «إضافة إلى الشاشة الرئيسية»</span></div>'+
       (B.phone?'<div class="row"><span>تواصل معنا</span><a href="tel:'+esc(B.phone)+'">'+esc(B.phone)+'</a></div>':'')+'</div></div></div>';
   }
-  if(D.enrollments.length>1)html+='<div class="card noprint"><h3>🎓 برامجي</h3>'+D.enrollments.map(function(x,i){return '<div class="row"><span>'+esc(x.program.name)+' <span class="xs mut">'+esc(x.cohort.name)+'</span></span><button class="btn" onclick="E=D.enrollments['+i+'];var q=document.getElementById(&quot;qz&quot;);if(q)q.innerHTML=&quot;&quot;;render()">'+(x===E?'✓ معروض':'عرض')+'</button></div>'}).join('')+'</div>';
+  if(false)html+='<div class="card noprint"><h3>🎓 برامجي</h3>'+D.enrollments.map(function(x,i){return '<div class="row"><span>'+esc(x.program.name)+' <span class="xs mut">'+esc(x.cohort.name)+'</span></span><button class="btn" onclick="E=D.enrollments['+i+'];var q=document.getElementById(&quot;qz&quot;);if(q)q.innerHTML=&quot;&quot;;render()">'+(x===E?'✓ معروض':'عرض')+'</button></div>'}).join('')+'</div>';
   $('main').innerHTML=(PV?'<div class="card noprint" style="background:#fff4d6;border:1px solid #e4b74a;color:#5a4300;text-align:center">👁 <b>معاينة المالك</b> — هذا ما يراه «'+esc(D.name)+'» بالضبط · للعرض فقط: الأزرار لا تُنفّذ شيئاً باسمه</div>':'')+html+footHtml(B);
   if(PANE==='cert'&&E.cert)qr();
   if(PANE==='study'){retakes();lessonsUI()}
+  if(PANE==='mine'&&STUDY===null&&SESS)rpc('ac_study',{token:SESS}).then(function(r){STUDY=r||[];render()}).catch(function(){STUDY=[]});
   if(PANE==='acc')refundCard();
   if(PANE==='home')evalUI();
 }
@@ -189,6 +197,7 @@ function progTabs(){var L=enrList();if(L.length<2)return "";return "<div style='
 /* الدروس داخل البوابة: الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · الاختبار يُصحَّح في القاعدة */
 /* المذاكرة (تصميم معتمد 2026-10-14 docs/mockup-study-flow.png): خريطة رحلة ← قراءة داخل البوابة (pdf.js، بلا تنزيل) ← إقرار ← اختبار سؤال بسؤال ← نتيجة تفتح التالي.
    الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · القفل والتصحيح في القاعدة · إعادة اختبار الفصل مفتوحة بلا حد حتى النجاح */
+function spinHtml(h){return '<div class="spinbox" style="padding:'+(h||30)+'px 0;perspective:800px;text-align:center"><img src="../brand/logo-transparent.png" alt="جارٍ التحميل" style="display:inline-block;width:40%;max-width:180px;height:auto;animation:rdspin 2.5s linear infinite"></div>'}
 var PDFS={},RD={cur:null,doc:null,pg:1};
 function ls_(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 function lessonsUI(){var el=$('stl');if(!el)return;var ls=myLessons();if(!ls.length){el.innerHTML='';return}
@@ -219,7 +228,7 @@ function pdfBytes(id){if(PDFS[id])return Promise.resolve(PDFS[id]);
     var bin=atob(j.b64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);PDFS[id]=u8;return u8})}
 function stOpen(id){var x=lessonById(id),el=$('qz');if(!x||!el)return;
   el.innerHTML='<div class="card" oncontextmenu="return false"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+esc(x.title)+'</b><button class="btn" onclick="$(\'qz\').innerHTML=\'\'" data-tip="إغلاق">✕</button></div>'+
-    '<div class="xs mut" id="rdi">⏳ جارٍ تحميل الدرس — قد يأخذ حتى ٢٠ ثانية أول مرة</div><div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i id="rdb" style="display:block;height:100%;width:0;background:#D4A853"></i></div>'+
+    '<div id="rdsp">'+spinHtml(20)+'</div><div class="xs mut" id="rdi"></div><div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i id="rdb" style="display:block;height:100%;width:0;background:#D4A853"></i></div>'+
     '<div style="background:#fff;border-radius:8px;overflow:hidden;min-height:200px;user-select:none;-webkit-user-select:none"><canvas id="rdc" style="width:100%;display:block"></canvas></div>'+
     '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="flex:1" onclick="rdGo(-1)">→ السابقة</button><button class="btn" style="flex:1" onclick="rdGo(1)">التالية ←</button></div><div id="rde"></div></div>';
   el.scrollIntoView({behavior:'smooth'});RD={cur:x,doc:null,pg:Number(ls_('rdp_'+id))||1};
@@ -235,7 +244,7 @@ function rdOpen(x){rdClose(1);var sc0,o=document.createElement('div'),fs=documen
   o.style.cssText='position:fixed;left:0;right:0;top:0;height:100vh;height:100dvh;z-index:9999;background:#fff;display:flex;flex-direction:column;direction:rtl;user-select:none;-webkit-user-select:none';
   o.innerHTML='<div id="rdt" style="position:absolute;top:0;left:0;right:0;z-index:4;background:#0B2D4B;transition:transform .25s;transform:translateY(-110%)"><div style="display:flex;align-items:center;gap:6px;padding:4px 8px;padding-top:max(4px,env(safe-area-inset-top));color:#fff;font-size:14px"><button id="rdx" style="'+bt+'background:#D4A853;color:#0B2D4B;padding:5px 10px;font-size:13px">→ رجوع</button><div style="flex:1;min-width:0;text-align:center"><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(x.title)+'</b><span id="rdi" style="font-size:11px;color:#D4A853"></span></div>'+(fs?'<button id="rdf" data-tip="ملء الشاشة" style="'+bt+'background:none;color:#fff;font-size:20px;padding:4px 8px">⛶</button>':'')+'</div>'+
     '<div style="height:3px;background:rgba(255,255,255,.15)"><i id="rdb" style="display:block;height:100%;width:0;background:#D4A853;transition:width .3s"></i></div></div>'+
-    '<div style="flex:1;position:relative;min-height:0"><div id="rds" style="position:absolute;top:0;left:0;right:0;bottom:0;height:100%;overflow:auto;background:#fff;touch-action:pan-x pan-y pinch-zoom;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column"><img id="rdm" alt="" draggable="false" style="width:calc(100% - 8px);height:auto;display:block;margin:auto 4px;flex:none;-webkit-touch-callout:none"></div>'+
+    '<div style="flex:1;position:relative;min-height:0"><div id="rds" style="position:absolute;top:0;left:0;right:0;bottom:0;height:100%;overflow:auto;background:#fff;touch-action:pan-x pan-y pinch-zoom;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column"><div id="rdsp" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:2">'+spinHtml(0)+'</div><img id="rdm" alt="" draggable="false" style="width:calc(100% - 8px);height:auto;display:block;margin:auto 4px;flex:none;-webkit-touch-callout:none"></div>'+
     (ls_('rdhint')?'':'<div id="rdh" style="position:absolute;left:50%;bottom:64px;transform:translateX(-50%);background:rgba(40,40,40,.85);color:#fff;padding:8px 16px;border-radius:20px;font-size:13px;transition:opacity .6s;pointer-events:none">⇆ اسحب لتقليب الصفحة</div>')+
     '<div id="rde" style="position:absolute;left:10px;right:10px;bottom:max(10px,env(safe-area-inset-bottom));z-index:3"></div></div>';
   document.body.appendChild(o);RD.ov=1;RD.bo=document.body.style.overflow;document.body.style.overflow='hidden';
@@ -269,10 +278,10 @@ function rdCrop(src){return new Promise(function(ok){var im=new Image();im.onloa
   var p=8;l0=Math.max(0,l0-p);r0=Math.min(W-1,r0+p);t=Math.max(0,t-p);b=Math.min(H-1,b+p);
   if((r0-l0)>W*0.97&&(b-t)>H*0.97)return ok(src);var o=document.createElement('canvas');o.width=r0-l0+1;o.height=b-t+1;o.getContext('2d').drawImage(c,l0,t,o.width,o.height,0,0,o.width,o.height);ok(o.toDataURL('image/png'))}catch(e){ok(src)}};im.onerror=function(){ok(src)};im.src=src})}
 function rdImg(){var id=RD.cur.id,n=RD.pg,tot=RD.doc.numPages;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';$('rdb').style.opacity=.4;
-  pgImg(id,n).then(function(src){if(RD.cur.id!==id||RD.pg!==n||!$('rdm'))return;$('rdm').src=src;$('rdb').style.opacity=1;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';ls_('rdp_'+id,String(n));
+  pgImg(id,n).then(function(src){if(RD.cur.id!==id||RD.pg!==n||!$('rdm'))return;$('rdm').src=src;if($('rdsp'))$('rdsp').remove();$('rdb').style.opacity=1;$('rdi').textContent='صفحة '+n+' من '+tot;$('rdb').style.width=Math.round(n*100/tot)+'%';ls_('rdp_'+id,String(n));
     if(n===tot){ls_('rd_'+id,'1');rdEnd()}else{$('rde').innerHTML='';pgImg(id,n+1).catch(function(){})}}).catch(function(e){$('rdi').textContent=e.message})}
 function rdDraw(){if(RD.doc&&RD.doc.img)return rdImg();var doc=RD.doc,id=RD.cur.id;doc.getPage(RD.pg).then(function(p){var c=$('rdc');if(!c)return;var w=c.parentNode.clientWidth||340,v1=p.getViewport({scale:1}),sc=w/v1.width*(window.devicePixelRatio||1),v=p.getViewport({scale:sc});
-  c.width=v.width;c.height=v.height;p.render({canvasContext:c.getContext('2d'),viewport:v});
+  if($('rdsp'))$('rdsp').remove();c.width=v.width;c.height=v.height;p.render({canvasContext:c.getContext('2d'),viewport:v});
   $('rdi').textContent='صفحة '+RD.pg+' من '+doc.numPages;$('rdb').style.width=Math.round(RD.pg*100/doc.numPages)+'%';ls_('rdp_'+id,String(RD.pg));
   if(RD.pg===doc.numPages){ls_('rd_'+id,'1');rdEnd()}else $('rde').innerHTML=''})}
 function rdEnd(){var x=RD.cur,el=$('rde');if(!el)return;
@@ -288,7 +297,7 @@ function examsUI(){var el=$('qz');if(!el||!E)return;var ls=myLessons(),pid=E.pro
     '<div class="xs mut" style="margin:4px 0 8px">اختبار كل فصل يُفتح بعد قراءته · فصلاً بعد فصل حتى الاختبار النهائي</div>'+
     ls.map(function(x){var ic=!x.open?'🔒':x.done?'✅':'▶️',sub=!x.open?'يُفتح بعد اجتياز الفصل السابق':x.tries?'أفضل نتيجة '+Number(x.best)+'% · '+x.tries+' محاولة':(ls_('rd_'+x.id)?'جاهز — ابدأ الآن':'اقرأ الفصل أولاً أو أقرّ وابدأ');
       return '<div data-id="'+x.id+'" onclick="'+(x.open&&x.questions?'quiz(this.dataset.id)':'')+'" style="display:flex;gap:10px;align-items:center;padding:9px;margin:5px 0;border-radius:12px;cursor:'+(x.open?'pointer':'default')+';opacity:'+(x.open?1:.55)+';border:1px solid rgba(127,127,127,.25)"><span style="font-size:18px">'+ic+'</span><span style="flex:1"><b>اختبار '+esc(x.title)+'</b><div class="xs mut">'+sub+'</div></span></div>'}).join('')+
-    '<div id="fxc" style="margin-top:10px"><div class="xs mut">جارٍ تحميل الاختبار النهائي…</div></div></div>';
+    '<div id="fxc" style="margin-top:10px">'+spinHtml(10)+'</div></div>';
   el.scrollIntoView({behavior:'smooth'});
   rpc('ac_final_status',{token:SESS,prog:pid}).then(function(s){var c=$('fxc');if(!c)return;
     if(s.active&&s.active.id){c.innerHTML='<div class="card" style="border:2px solid #D4A853"><b>⏳ لديك اختبار مفتوح</b><div class="xs mut">ينتهي '+new Date(s.active.deadline).toLocaleTimeString('ar-SA-u-nu-latn',{hour:'2-digit',minute:'2-digit'})+'</div><button class="btn p" style="width:100%;margin-top:8px" data-id="'+s.active.id+'" onclick="fxResume(this.dataset.id)">تابع الاختبار</button></div>';return}
@@ -301,7 +310,7 @@ function examsUI(){var el=$('qz');if(!el||!E)return;var ls=myLessons(),pid=E.pro
       (rl.length?'<div class="xs" style="margin-top:10px"><b>محاولاتك الحقيقية:</b> '+rl.map(function(r){return Number(r.score)+'% '+(r.passed?'✅':'❌')}).join(' · ')+'</div>':'')+'</div>'}).catch(function(){var c=$('fxc');if(c)c.innerHTML='<div class="xs mut">تعذّر تحميل الاختبار النهائي</div>'})}
 function fxStart(pid,mode){var k=mode==='real'?($('fxk').value||'').trim():'';if(mode==='real'&&!k){alert('اكتب كود التفعيل');return}
   if(!confirm(mode==='real'?'سيبدأ الاختبار الحقيقي الآن ومدته ساعتان، والكود يُستخدم مرة واحدة. ابدأ؟':'سيبدأ اختبار تجريبي مدته ساعتان (يمكنك التسليم قبلها). ابدأ؟'))return;
-  rpc('ac_final_start',{token:SESS,prog:pid,mode:mode,code:k}).then(function(r){if(!r.ok){alert({code:'الكود غير صحيح أو مستخدم من قبل',chapters:'أكمل كل الفصول أولاً',active:'لديك اختبار مفتوح — تابعه',empty:'لا أسئلة لهذا البرنامج بعد'}[r.reason]||'تعذّر البدء');return examsUI()}fxRun(r)}).catch(function(e){alert(e.message)})}
+  $('qz').innerHTML='<div class="card">'+spinHtml()+'</div>';rpc('ac_final_start',{token:SESS,prog:pid,mode:mode,code:k}).then(function(r){if(!r.ok){alert({code:'الكود غير صحيح أو مستخدم من قبل',chapters:'أكمل كل الفصول أولاً',active:'لديك اختبار مفتوح — تابعه',empty:'لا أسئلة لهذا البرنامج بعد'}[r.reason]||'تعذّر البدء');return examsUI()}fxRun(r)}).catch(function(e){alert(e.message)})}
 function fxResume(id){rpc('ac_final_resume',{token:SESS,attempt:id}).then(function(r){if(!r.ok)return examsUI();fxRun(r)})}
 function fxRun(r){var a={};try{a=JSON.parse(ls_('fx_'+r.id)||'{}')}catch(e){}FX={id:r.id,qs:r.qs||[],i:0,a:a,dl:new Date(r.deadline).getTime(),mode:r.mode};clearInterval(FXT);FXT=setInterval(fxTick,1000);fxDraw()}
 function fxLeft(){return Math.max(0,Math.floor((FX.dl-Date.now())/1000))}
@@ -323,7 +332,7 @@ var QZ=null;
 function quiz(id){rdClose();var x=lessonById(id),el=$('qz');if(!x||!el)return;
   if(!ls_('rd_'+id)){el.innerHTML='<div class="card" style="border:1px solid #D4A853"><b>قبل الاختبار</b><p style="line-height:1.9">لم تُكمل قراءة الفصل بعد.<br>أقرّ أنني اطّلعت على «'+esc(x.title)+'» كاملاً وأوافق على دخول الاختبار.</p>'+
     '<button class="btn" style="width:100%" data-id="'+id+'" onclick="ls_(\'rd_\'+this.dataset.id,\'1\');quiz(this.dataset.id)">✍️ أقرّ وأبدأ</button><button class="btn" style="width:100%;margin-top:6px" data-id="'+id+'" onclick="stOpen(this.dataset.id)">📖 أكمل القراءة أولاً</button></div>';el.scrollIntoView({behavior:'smooth'});return}
-  el.innerHTML='<div class="card">جارٍ التحميل…</div>';el.scrollIntoView({behavior:'smooth'});
+  el.innerHTML='<div class="card">'+spinHtml()+'</div>';el.scrollIntoView({behavior:'smooth'});
   rpc('ac_quiz_get',{token:SESS,lesson:id}).then(function(qs){QZ={id:id,qs:qs,i:0,a:{}};qzDraw()}).catch(function(e){el.innerHTML='';alert(e.message)})}
 function qzDraw(){var q=QZ.qs[QZ.i],n=QZ.qs.length,el=$('qz');
   el.innerHTML='<div class="card"><b>📝 '+esc(lessonById(QZ.id).title)+'</b><div class="xs mut">السؤال '+(QZ.i+1)+' من '+n+'</div><div style="height:6px;background:rgba(127,127,127,.25);border-radius:6px;overflow:hidden;margin:6px 0"><i style="display:block;height:100%;width:'+Math.round((QZ.i+1)*100/n)+'%;background:#D4A853"></i></div>'+
@@ -422,13 +431,13 @@ function loginScreen(msg){FORGOT=0;hdr('أهلاً بك 👋','طريقك للم
   $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔐 بوابة المتدرب</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
   '<input id="ph" type="tel" inputmode="tel" autocomplete="username" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="'+INP+'">'+
   '<label class="sm mut" for="pw" style="display:block;margin-top:10px">كلمة السر</label><input id="pw" type="password" autocomplete="current-password" dir="ltr" onkeydown="if(event.key===&quot;Enter&quot;)pwLogin()" style="'+INP+'">'+
-  '<label class="sm" style="display:flex;gap:6px;align-items:center;margin:10px 0 0"><input type="checkbox" id="rem" checked> تذكّر هذا الجهاز ٣٠ يوماً</label>'+
+  '<input type="hidden" id="rem" value="1">'+
   '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="pwLogin()">دخول</button>'+
   '<div style="margin-top:10px;text-align:center"><a href="#" class="sm" onclick="forgotScreen();return false">نسيت كلمة السر؟</a></div>'+
   '<div class="sm" id="err" style="color:var(--b);margin-top:8px;text-align:center">'+esc(msg||'')+'</div></div>'+
   '<div class="foot">أول مرة؟ ادخل بكلمة السر الأولى التي أعطتك إياها الأكاديمية، ثم اختر كلمتك<br>ليس لديك حساب؟ تواصل مع الأكاديمية</div>'}
 function pwLogin(){var v=$('ph').value.replace(/[^0-9+]/g,''),p=$('pw').value;if(v.replace(/[^0-9]/g,'').length<9){$('err').textContent='اكتب رقم جوال صحيح';return}PHONE=v;$('go').disabled=true;
-  rpc('ac_pw_login',{phone:v,pw:p,device:device(),remember:$('rem').checked}).then(function(r){$('go').disabled=false;
+  rpc('ac_pw_login',{phone:v,pw:p,device:device(),remember:false}).then(function(r){$('go').disabled=false;
     if(r&&r.ok){saveSess(r.token);boot();return}
     if(r&&r.reason==='set'){PWOLD=r.init?p:'';return setPwScreen()}
     $('err').textContent=r&&r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':r&&r.reason==='none'?'لم تُنشأ لك كلمة سر بعد — اضغط «نسيت كلمة السر؟» أو تواصل معنا':'الرقم أو كلمة السر غير صحيحة'+(r&&r.left!=null?' (بقي '+r.left+' محاولات)':'')})
@@ -437,12 +446,12 @@ function setPwScreen(msg){hdr('اختر كلمة سرك','خطوة واحدة و
   $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔑 كلمة سر جديدة</h3><div class="sm mut">٦ أحرف أو أكثر — احفظها، ستدخل بها كل مرة</div>'+
   '<input id="n1" type="password" autocomplete="new-password" dir="ltr" placeholder="كلمة السر الجديدة" style="'+INP+';margin-top:10px">'+
   '<input id="n2" type="password" autocomplete="new-password" dir="ltr" placeholder="أعدها للتأكيد" style="'+INP+';margin-top:8px">'+
-  '<label class="sm" style="display:flex;gap:6px;align-items:center;margin:10px 0 0"><input type="checkbox" id="rem" checked> تذكّر هذا الجهاز ٣٠ يوماً</label>'+
+  '<input type="hidden" id="rem" value="1">'+
   '<button class="btn p" id="go" style="width:100%;margin-top:12px;min-height:46px;font-size:15px" onclick="setPw()">احفظ وادخل</button>'+
   '<div class="sm" id="err" style="color:var(--b);margin-top:8px;text-align:center">'+esc(msg||'')+'</div></div>'}
 function setPw(){var a=$('n1').value,b=$('n2').value;if(a.length<6){$('err').textContent='٦ أحرف على الأقل';return}if(a!==b){$('err').textContent='الكلمتان غير متطابقتين';return}$('go').disabled=true;
   var done=function(r){$('go').disabled=false;if(r&&r.ok){if(r.token)saveSess(r.token);PWOLD='';boot();return}$('err').textContent=r&&r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':'تعذّر الحفظ — ابدأ الدخول من جديد'};
-  (SESS&&!PWOLD?rpc('ac_pw_change',{token:SESS,pw:a}):rpc('ac_pw_set',{phone:PHONE,old:PWOLD,pw:a,device:device(),remember:$('rem').checked})).then(done).catch(function(){$('go').disabled=false;$('err').textContent='تعذّر الاتصال'})}
+  (SESS&&!PWOLD?rpc('ac_pw_change',{token:SESS,pw:a}):rpc('ac_pw_set',{phone:PHONE,old:PWOLD,pw:a,device:device(),remember:false})).then(done).catch(function(){$('go').disabled=false;$('err').textContent='تعذّر الاتصال'})}
 function forgotScreen(){FORGOT=1;hdr('لا تقلق','نعيدك إلى حسابك خلال دقيقة');var wa=B.phone?'https://wa.me/'+String(B.phone).replace(/[^0-9]/g,'').replace(/^0/,'966')+'?text='+encodeURIComponent('نسيت كلمة سر بوابة المتدرب، رقمي: '+(PHONE||'')):'#';
   $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto"><h3>🔁 نسيت كلمة السر</h3><label class="sm mut" for="ph">رقم الجوال</label>'+
   '<input id="ph" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" value="'+esc(PHONE)+'" style="'+INP+'">'+
@@ -457,14 +466,14 @@ var RESEND=0;
 function codeScreen(mask,msg){hdr('أدخل الرمز','أرسلناه إلى '+(mask||'بريدك المسجّل'));RESEND=Date.now()+45000;
   $('main').innerHTML='<div class="card" style="max-width:420px;margin:0 auto;text-align:center"><h3 style="justify-content:center">🔢 الرمز من 6 أرقام</h3><div class="sm mut">إن كان رقمك مسجّلاً سيصلك خلال دقيقة · صالح ١٠ دقائق</div>'+
   '<input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" dir="ltr" oninput="if(this.value.replace(/[^0-9]/g,\'\').length===6)verify()" style="width:220px;letter-spacing:12px;text-align:center;font-size:28px;font-weight:800;padding:10px;border:1.5px solid var(--line);border-radius:12px;margin:12px auto 4px;display:block;background:var(--card);color:var(--ink)">'+
-  '<label class="sm" style="display:flex;gap:6px;justify-content:center;align-items:center;margin:6px 0"><input type="checkbox" id="rem" checked> تذكّر هذا الجهاز ٣٠ يوماً</label>'+
+  '<input type="hidden" id="rem" value="1">'+
   '<button class="btn p" id="vb" style="width:100%;min-height:46px;font-size:15px" onclick="verify()">دخول</button>'+
   '<div class="sm" id="err" style="color:var(--b);margin-top:8px">'+esc(msg||'')+'</div><div class="xs mut" id="rs" style="margin-top:6px"></div>'+
   '<div style="margin-top:8px"><a href="#" onclick="loginScreen();return false" class="sm">تغيير الرقم</a></div></div>';
   setTimeout(function(){var o=$('otp');if(o)o.focus()},200);tick()}
 function tick(){var el=$('rs');if(!el)return;var s=Math.ceil((RESEND-Date.now())/1000);el.innerHTML=s>0?'لم يصلك؟ إعادة الإرسال بعد 0:'+('0'+s).slice(-2):'<a href="#" onclick="loginScreen();return false">أعد إرسال الرمز</a>';if(s>0)setTimeout(tick,1000)}
 function verify(){var c=($('otp').value||'').replace(/[^0-9]/g,'');if(c.length!==6){$('err').textContent='الرمز 6 أرقام';return}$('vb').disabled=true;
-  rpc('ac_login_verify',{phone:PHONE,code:c,device:device(),remember:$('rem').checked}).then(function(r){
+  rpc('ac_login_verify',{phone:PHONE,code:c,device:device(),remember:false}).then(function(r){
     if(r&&r.ok){saveSess(r.token);if(FORGOT){FORGOT=0;PWOLD='';return setPwScreen()}boot();return}$('vb').disabled=false;
     $('err').textContent=r&&r.reason==='locked'?'محاولات كثيرة — حاول بعد ١٥ دقيقة':r&&r.reason==='expired'?'انتهت صلاحية الرمز — اطلب رمزاً جديداً':'الرمز غير صحيح'+(r&&r.left!=null?' (بقي '+r.left+' محاولات)':'')}).catch(function(){$('vb').disabled=false;$('err').textContent='تعذّر الاتصال'})}
 function signedOutScreen(r){hdr('تم تسجيل الخروج من هذا الجهاز','');var d=r.at?new Date(r.at):null;
