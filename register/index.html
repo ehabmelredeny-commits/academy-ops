@@ -106,12 +106,12 @@ function pickSeat(k,p){var m=SEAT.map,t=m.tiers.filter(function(x){return x.tier
 var WZ={s:1};
 function wzInit(){var f=$('f');if(!f||$('wzbar'))return;
   var mk=function(id){var d=document.createElement('div');d.id=id;return d};
-  var s1=mk('wz1'),s2=mk('wz2'),s3=mk('wz3'),more=document.createElement('details');more.id='wzmore';more.innerHTML='<summary style="cursor:pointer;margin-top:12px;font-size:14px;color:var(--a)">معلومات إضافية (اختياري) — رشّحك صديق؟ سؤال؟</summary>';
+  var s1=mk('wz1'),s2=mk('wz2'),s3=mk('wz3'),more=document.createElement('div');more.id='wzmore';more.style.display='none';var tg=document.createElement('button');tg.type='button';tg.id='wzmoreb';tg.style.cssText='width:100%;margin-top:12px;min-height:40px;padding:8px 10px;font-size:14px;background:transparent;color:var(--a);border:1px dashed var(--line);text-align:right';tg.textContent='▸ معلومات إضافية (اختياري) — رشّحك صديق؟ سؤال؟';tg.onclick=function(){var o=more.style.display==='none';more.style.display=o?'':'none';tg.textContent=(o?'▾':'▸')+' معلومات إضافية (اختياري) — رشّحك صديق؟ سؤال؟'};
   var lab=function(id){return document.querySelector('label[for="'+id+'"]')};
   ['name','phone','gender','course'].forEach(function(id){var l=lab(id);if(l)s1.appendChild(l);s1.appendChild($(id))});
   ['email','city','persona','note'].forEach(function(id){var l=lab(id);if(l)more.appendChild(l);more.appendChild($(id))});
   ['refbox'].forEach(function(id){more.appendChild($(id))});var ml=lab('member_no');if(ml)more.appendChild(ml);more.appendChild($('member_no'));more.appendChild($('member_consent').parentNode);
-  s1.appendChild(more);s1.insertAdjacentHTML('beforeend','<div class="err" id="err1"></div><button type="button" id="wzn1">التالي: اختر مقعدك ←</button>');
+  s1.appendChild(tg);s1.appendChild(more);s1.insertAdjacentHTML('beforeend','<div class="err" id="err1"></div><button type="button" id="wzn1">التالي: اختر مقعدك ←</button>');
   s2.appendChild($('seatbox'));s2.insertAdjacentHTML('beforeend','<div id="wzno" class="sm-hot" style="display:none"></div><button type="button" id="wzn2" style="display:none">التالي: ملخص حجزك ←</button>');
   s3.insertAdjacentHTML('beforeend','<div id="wzsum"></div><label for="voucher">عندك قسيمة؟ (اختياري)</label><input id="voucher" dir="ltr" maxlength="20" placeholder="SA-XXXXXX">');
   s3.appendChild($('consent').parentNode);s3.appendChild($('website'));s3.appendChild($('go'));s3.appendChild($('err'));
