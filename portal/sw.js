@@ -1,0 +1,7 @@
+const C='alsaad-portal-mvs3psb3';
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['/portal/','/brand/logo-icon.png']).catch(()=>{})));self.skipWaiting()});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x)))));self.clients.claim()});
+self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(e.request.method!=='GET'||u.origin!==location.origin)return;
+e.respondWith(fetch(e.request).then(r=>{if(r.ok&&(u.pathname.startsWith('/portal/')||u.pathname.startsWith('/brand/'))){const c=r.clone();caches.open(C).then(x=>x.put(e.request,c))}return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/portal/'))))});
+self.addEventListener('push',e=>{let d={};try{d=e.data.json()}catch(_){d={title:'السعد',body:e.data?e.data.text():''}}e.waitUntil(self.registration.showNotification(d.title||'أكاديمية السعد الرياضية',{body:d.body||'',icon:'/brand/logo-icon.png',badge:'/brand/logo-icon.png',tag:d.tag||'',dir:'rtl',lang:'ar',data:{url:d.url||'/portal/'}}))});
+self.addEventListener('notificationclick',e=>{e.notification.close();const url=(e.notification.data&&e.notification.data.url)||'/portal/';e.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(l=>{for(const w of l){if(w.url.includes('/portal/')){w.focus();return}}return clients.openWindow(url)}))});
