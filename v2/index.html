@@ -730,6 +730,13 @@ function fmtDate(iso,wt){if(!iso)return '—';var d=new Date(iso);if(isNaN(d))re
 function chip(t,c){return t===''||t===null||t===undefined?'':'<span class="chip '+(c||'')+'">'+esc(t)+'</span>'}
 function empty(t){return '<div class="empty">'+esc(t)+'</div>'}function north(){return ''}function Text_short_(t,n){t=String(t||'');return t.length>n?t.slice(0,n-1)+'…':t}
 function go(){window.dailyPost()}
+function attr(o) { return esc(JSON.stringify(o)); }
+function extUrl(u) {
+  u = String(u || '').trim();
+  if (/^(https?:|mailto:|tel:)/i.test(u)) return u;
+  var m = u.match(/(?:^|\s)((?:www\.)?[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?:\/\S*)?)\s*$/i);
+  return m ? 'https://' + m[1] : '';
+}
 
 /* ═══════════ 📣 منشور اليوم — الثلث للنشر (نوع ← منصات ← محتوى ← وقت ← 🚀 نشر) · الثلثان لآخر ما نشره المنافسون + 🧠 القرارات ═══════════ */
 var PLAT_ICONS = '<svg width="0" height="0" style="position:absolute" aria-hidden="true">' +
