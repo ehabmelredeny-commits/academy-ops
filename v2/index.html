@@ -914,7 +914,8 @@ function dpComp_(d) {
    صف = منشور على منصة (DailyPosts). المجموعة = نفس الوقت ونفس أول سطر. النشر: الكل المعتمد (متدرّج بالمُجدول) · مجموعة · منصة واحدة. */
 var DPC = { sel: {} };
 var DP_PL_ICON = { instagram: '📸', facebook: '📘', x: '𝕏', threads: '🧵', linkedin: 'in', whatsapp: '💬' };
-function dpcKey_(r) { return String(r.at) + '|' + String(r.body || '').split('\n')[0].slice(0, 60); }
+// بطاقة واحدة = نفس الموعد (لكل منصة نص مختلف، فلا يُجمَّع بالنص — ملاحظة المالك 2026-10-30)
+function dpcKey_(r) { var t = new Date(r.at); return isNaN(t) ? String(r.at) : String(Math.floor(t.getTime() / 60000)); }
 function dpcGroups_(rows) { var m = {}, out = []; rows.forEach(function (r) { var k = dpcKey_(r); if (!m[k]) { m[k] = { key: k, at: r.at, title: String(r.body || '').split('\n')[0], rows: [] }; out.push(m[k]); } m[k].rows.push(r); }); return out; }
 // معاينة (ملاحظة المالك 2026-10-30): الصورة المصغّرة تُفتح كاملة في Drive بضغطة · إن تعذّر عرضها (حساب Google آخر في المتصفح) يظهر زر «معاينة» بدلها
 function dpcThumb_(id) { return id ? '<a href="https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view" target="_blank" rel="noopener" title="معاينة بالحجم الكامل" style="flex:none;color:#D4A853;font-size:11px"><img class="dpc-img" src="https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w160" alt="" loading="lazy" onerror="this.outerHTML=\'🖼 معاينة\'"></a>' :'<span style="width:52px;height:52px;border-radius:8px;background:#1d3445;display:inline-block"></span>'; }
@@ -1028,12 +1029,11 @@ SCREENS.dailyPost = { render: function (d) {
   var mode = dpMode_();
   setTimeout(dpAutoRefresh_, 0);
   // أزرار تقسيم العرض فوق العمودين — تبقى ظاهرة في كل الأوضاع (حتى 100% لنا أو 100% منافسون)
-  var tab = DP.tab || 'pub', tb = [['pub', '🚀 النشر — اليوم'], ['week', '🗓 الأسبوع'], ['write', '✍️ اكتب منشوراً'], ['comp', '👁 المنافسون']];
-  var seg = '<span class="dp-seg">' + tb.map(function (m) { return '<button class="' + (tab === m[0] ? 'on' : '') + '" data-act="dpTab" data-t="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span>';
+  var tab = DP.tab || 'pub', tb = [['pub', '🚀 النشر — اليوم'], ['week', '🗓 الأسبوع'], ['write', '✍️ اكتب منشوراً'], ['split', '◧ لنا + المنافسون'], ['comp', '👁 المنافسون']];
+  var seg = '<span class="dp-seg">' + tb.map(function (m) { return '<button class="' + (tab === m[0] ? 'on' : '') + '" data-act="dpTab" data-t="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span><button class="btn sm" data-act="openOurAccounts" title="يفتح كل حسابات الأكاديمية في تبويبات — أول مرة اسمح للمتصفح بالنوافذ المنبثقة">🌐 افتح كل حساباتنا</button>';
   return north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">📣 منشور اليوم</h1>' + seg + '</div>' +
     '<div id="dp_cal" class="dp-tab"' + (tab === 'pub' || tab === 'week' ? '' : ' hidden') + '>' + dpCal_(d, tab === 'week') + '</div>' +
-    '<div class="dp2 mode-ours dp-tab"' + (tab === 'write' ? '' : ' hidden') + '><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div></div>' +
-    '<div class="dp2 mode-comp dp-tab"' + (tab === 'comp' ? '' : ' hidden') + '><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
+    '<div class="dp2 dp-tab mode-' + ({ write: 'ours', split: 'split', comp: 'comp' }[tab] || 'ours') + '"' + (tab === 'write' || tab === 'split' || tab === 'comp' ? '' : ' hidden') + '><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
 } };
 function dpKeep_() { var b = $('dp_body'); if (b) DP.body = b.value; var a = $('dp_at'); if (a) DP.at = a.value; }
 function dpRedrawOurs_() { dpKeep_(); var el = $('dp_ours'); if (el) el.innerHTML = dpOurs_(S.data); }
@@ -1052,7 +1052,7 @@ ACT.dpPlat = function (el) { var p = el.dataset.p; DP.off[p] = !DP.off[p]; dpRed
 ACT.dpWhen = function (el) { DP.when = el.dataset.w; dpRedrawOurs_(); };
 ACT.dpFilter = function (el) { DP.filter = el.dataset.k; dpRedrawComp_(); };
 ACT.dpTab = function (el) { DP.tab = el.dataset.t; var w = $('dp_cal'); if (w && (DP.tab === 'pub' || DP.tab === 'week')) w.innerHTML = dpCal_(S.data, DP.tab === 'week');
-  var ts = document.querySelectorAll('.dp-tab'); ts[0].hidden = !(DP.tab === 'pub' || DP.tab === 'week'); ts[1].hidden = DP.tab !== 'write'; ts[2].hidden = DP.tab !== 'comp';
+  var ts = document.querySelectorAll('.dp-tab'), pubT = DP.tab === 'pub' || DP.tab === 'week'; ts[0].hidden = !pubT; ts[1].hidden = pubT; ts[1].className = 'dp2 dp-tab mode-' + ({ write: 'ours', split: 'split', comp: 'comp' }[DP.tab] || 'ours');
   Array.prototype.forEach.call(document.querySelectorAll('.dp-seg button'), function (b) { b.classList.toggle('on', b.dataset.t === DP.tab); }); };
 ACT.dpMode = function (el) { DP.mode = el.dataset.m; try { localStorage.setItem('ops_dp_mode', DP.mode); } catch (e) {} var w = document.querySelector('.dp2'); if (w) w.className = 'dp2 mode-' + DP.mode;
   Array.prototype.forEach.call(document.querySelectorAll('.dp-seg button'), function (b) { b.classList.toggle('on', b.dataset.m === DP.mode); }); };
@@ -1094,10 +1094,15 @@ ACT.dpPublish = function (el) {
 ACT.dpPubOne = function (el) { el.disabled = true; api('action', 'postPublish', { post_ids: [el.dataset.id], at: '' }).then(dpAfterPublish_).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 document.addEventListener('change', function (e) { if (e.target && e.target.id === 'dp_media') { var f = e.target.files[0], n = $('dp_media_n'); if (n) n.textContent = f ? ' ✓ ' + f.name : ''; } });
 
+/* 🌐 افتح كل حساباتنا (الزر القديم — طلب المالك 2026-10-30): الروابط من الإعدادات ← الحسابات، تُحمَّل مسبقاً لأن المتصفح لا يفتح النوافذ إلا داخل الضغطة */
+var OUR_ACCS=null;function ourAccsLoad_(){OUR_ACCS=[];return api('screen','settings',{}).then(function(d){OUR_ACCS=(d.accounts||[]).filter(function(a){return a.url&&/^https?:/.test(a.url)&&a.status!=='موقوف'&&a.status!=='محذوف'}).map(function(a){return a.url})}).catch(function(){OUR_ACCS=null})}
+ACT.openOurAccounts=function(){if(!OUR_ACCS||!OUR_ACCS.length){ourAccsLoad_();return toast('⏳ يجهّز روابط الحسابات — اضغط مرة أخرى بعد ثانيتين',true)}
+  var n=0;OUR_ACCS.forEach(function(u){var w=window.open(u,'_blank');if(w){try{w.opener=null}catch(e){}n++}});
+  toast(n<OUR_ACCS.length?'فُتح '+n+' من '+OUR_ACCS.length+' — اسمح للموقع بالنوافذ المنبثقة (أيقونة 🚫 في شريط العنوان) ثم اضغط مرة أخرى':'🌐 فُتحت '+n+' حسابات',n<OUR_ACCS.length)};
 window.pkSave=function(){var t=$('pk_tok').value.trim(),f=$('pk_fb').value.trim(),g=$('pk_ig').value.trim(),m=$('pk_m');if(!t||!f)return m.textContent='المفتاح ورقم الصفحة مطلوبان';
   var q=[['FB_PAGE_TOKEN',t],['FB_PAGE_ID',f],['IG_TOKEN',t]];if(g)q.push(['IG_USER_ID',g]);m.textContent='جارٍ الحفظ…';
   q.reduce(function(p,x){return p.then(function(){return api('action','secretSet',{key:x[0],value:x[1]})})},Promise.resolve()).then(function(){$('pk_tok').value='';m.textContent='✓ رُبط — جارٍ إعادة التحميل';setTimeout(window.dailyPost,800)}).catch(function(e){m.textContent='تعذّر: '+errMsg(e)})}
-window.dailyPost=function(){TAB='dailyPost';if(!TOK)return loginScreen();$('app').innerHTML=shell(nav()+'<div id="dpw"><div class="mut">جارٍ تحميل المنشور اليومي…</div></div>');api('screen','dailyPost',{lite:1}).then(function(d){S.data=d;var w=$('dpw');if(w)w.innerHTML=SCREENS.dailyPost.render(d);
+window.dailyPost=function(){TAB='dailyPost';if(!TOK)return loginScreen();if(!OUR_ACCS)ourAccsLoad_();$('app').innerHTML=shell(nav()+'<div id="dpw"><div class="mut">جارٍ تحميل المنشور اليومي…</div></div>');api('screen','dailyPost',{lite:1}).then(function(d){S.data=d;var w=$('dpw');if(w)w.innerHTML=SCREENS.dailyPost.render(d);
   /* 🔑 ربط النشر بضغطة (طلب المالك 2026-10-30): فيسبوك/إنستغرام غير مربوطين ← خانات لصق مفتاح ميتا هنا (secretSet، حقول مخفية، لا يُعرض المفتاح) */
   var pa=d.publish_auto||{};if(w&&(!pa.facebook||!pa.instagram))w.insertAdjacentHTML('afterbegin','<div class="card" id="pkbox" style="border:1px solid #D4A853"><b>🔑 اربط النشر بضغطة — '+(!pa.facebook?'فيسبوك غير مربوط':'')+(!pa.facebook&&!pa.instagram?' · ':'')+(!pa.instagram?'إنستغرام بلا صلاحية نشر':'')+'</b><div class="mut" style="font-size:12px;margin:4px 0">الصق مفتاح الصفحة من Graph API Explorer (بصلاحيات instagram_content_publish و pages_manage_posts) — يُحفظ سراً ولا يظهر مرة أخرى</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px"><input id="pk_tok" type="password" placeholder="مفتاح الصفحة (Page Access Token)" autocomplete="off"><input id="pk_fb" placeholder="رقم صفحة فيسبوك (Page ID)" autocomplete="off"><input id="pk_ig" placeholder="رقم حساب إنستغرام (IG User ID) — اختياري" autocomplete="off"></div><button class="btn p" style="margin-top:6px" onclick="pkSave()">💾 حفظ وربط</button> <span id="pk_m" class="mut" style="font-size:12px"></span></div>');
   /* ⚡ المرحلة الثانية: المنافسون والعقل الآلي بعد ظهور جانبنا (بطء 2026-10-30) */
