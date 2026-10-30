@@ -75,7 +75,7 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .dpc-card{border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:12px}.dpc-card.dpc-ok{border-color:#3fae6a}.dpc-card.dpc-appr{border-color:#e6c34a}.dpc-card.dpc-part{border-color:#D4A853}
 .dpc-head{display:flex;align-items:center;gap:6px}.dpc-st{font-size:11px;border-radius:9px;padding:1px 8px;border:1px solid var(--line)}.dpc-ok .dpc-st{color:#3fae6a;border-color:#3fae6a}.dpc-appr .dpc-st{color:#e6c34a;border-color:#e6c34a}
 .dpc-body{display:flex;gap:10px;align-items:flex-start}.dpc-txt{font-size:12px;height:54px;overflow:hidden;min-width:0;flex:1}.dpc-img{width:72px;height:72px;object-fit:cover;border-radius:8px;transition:transform .18s;transform-origin:top right;position:relative;z-index:1}.dpc-img:hover{transform:scale(2.6);z-index:30;box-shadow:0 6px 24px rgba(0,0,0,.5)}
-.dpc-acc{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:12px}.dpc-a{display:flex;align-items:center;gap:4px;cursor:pointer}.dpc-a input{width:auto;margin:0}.dpc-a.is-pub{color:#3fae6a}.dpc-a.is-fail{color:#ff7b7b}.dpc-go{background:#D4A853;color:#111;font-weight:bold;border:0;font-size:12px;padding:4px 12px;align-self:flex-start;margin-top:auto}.dpc-tools{display:flex;gap:6px;flex-wrap:wrap}
+.dpc-acc{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:12px}.dpc-a{display:flex;align-items:center;gap:4px;cursor:pointer}.dpc-a input{width:auto;margin:0}.dpc-a.is-pub{color:#3fae6a}.dpc-a.is-fail{color:#ff7b7b}.dpc-go{background:#D4A853;color:#111;font-weight:bold;border:0;font-size:12px;padding:4px 12px;align-self:flex-start;margin-top:auto}.dpc-tools{display:flex;gap:6px;flex-wrap:wrap}.dpc-done{font-size:10.5px;padding:0 6px;border:1px solid #3fae6a;color:#3fae6a;background:none;border-radius:8px;cursor:pointer}
 .dp-brain{border-color:#8d6cd8}.dp-dec{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;margin-top:5px;border-inline-start:4px solid #2a9d8f;background:rgba(127,127,127,.06)}
 .dp-dec.bad{border-color:#c62828}.dp-dec.warn{border-color:#e9a23b}.dp-dec>span{font-size:18px}
 .dp-strips{display:flex;flex-direction:column;gap:5px}
@@ -947,15 +947,33 @@ function dpCal_(d, all) {
         var mode = pub ? '' : auto[k] ? 'آلي' : 'يدوي';
         return '<label class="dpc-a' + (pub ? ' is-pub' : fail ? ' is-fail' : '') + '" title="' + esc(r.platform + ' · ' + r.status + (r.result ? ' · ' + r.result : '')) + '">' +
           (pub ? '✓' : '<input type="checkbox" class="dpc-cb" value="' + esc(r.post_id) + '" checked>') + ' ' + (DP_PL_ICON[k] || '•') + ' ' + esc(k === 'other' ? String(r.platform).split(' ')[0] : k) +
-          (pub ? (url ? ' <a href="' + esc(url) + '" target="_blank" rel="noopener">فتح</a>' : ' نُشر') : ' <span class="muted tiny">' + (fail ? 'فشل — أعد' : mode) + '</span>') + '</label>';
+          (pub ? (url ? ' <a href="' + esc(url) + '" target="_blank" rel="noopener">فتح</a>' : ' نُشر') : ' <span class="muted tiny">' + (fail ? 'فشل — أعد' : mode) + '</span>' + (mode === 'يدوي' ? ' <button class="dpc-done" data-act="dpcDone" data-id="' + esc(r.post_id) + '" title="نشرته يدوياً؟ علّمه منشوراً">✓ نُشر</button>' : '')) + '</label>';
       }).join('') + '</div>' +
       (done < g.rows.length ? '<button class="btn dpc-go" data-act="dpcGo">🚀 اعتمد وانشر على المحدد</button>' : '') +
-      '<div class="dpc-tools"><select data-act="dpcCopy" class="btn sm" style="width:auto" title="انسخ نص منصة"><option value="">📋 نسخ…</option>' + g.rows.map(function (r) { return '<option value="' + esc(r.post_id) + '">' + esc(r.platform) + '</option>'; }).join('') + '</select>' +
+      '<div class="dpc-tools">' + (done < g.rows.length ? '<button class="btn sm" data-act="dpcPrep" data-k="' + esc(g.key) + '" title="ينزّل الملف ويفتح كل حساب على صفحة منشور جديد والنص جاهز — أرفق الملف واضغط نشر">📤 جهّز للنشر</button>' : '') + '<select data-act="dpcCopy" class="btn sm" style="width:auto" title="انسخ نص منصة"><option value="">📋 نسخ…</option>' + g.rows.map(function (r) { return '<option value="' + esc(r.post_id) + '">' + esc(r.platform) + '</option>'; }).join('') + '</select>' +
       (media ? '<a class="btn sm" target="_blank" rel="noopener" href="https://drive.google.com/uc?export=download&id=' + encodeURIComponent(media) + '" title="تنزيل الصورة أو الفيديو">⬇</a>' : '') +
       '<button class="btn sm" data-act="dpcPhoto" data-ids="' + esc(ids.join(',')) + '" title="تغيير الصورة">📷</button></div></div>';
   });
   return h + '</div><input type="file" id="dpc_img" accept="image/*" style="display:none"><input type="file" id="dpc_dir" webkitdirectory multiple style="display:none">';
 }
+/** 📤 جهّز للنشر (طلب المالك 2026-10-30): المتصفح لا يسمح بلصق ونشر داخل مواقع أخرى — فننزّل الملف ونفتح صفحة منشور جديد لكل حساب يدوي والنص جاهز فيها (إكس وثريدز)، وننسخ نص إنستغرام/فيسبوك/لينكدإن */
+ACT.dpcPrep = function (el) {
+  var g = dpcGroups_(dpcRows_()).filter(function (x) { return x.key === el.dataset.k; })[0]; if (!g) return;
+  var auto = (S.data && S.data.publish_auto) || {}, rows = g.rows.filter(function (r) { return r.status !== 'منشور'; }), n = 0, clip = '';
+  var media = (g.rows.filter(function (r) { return r.media_url; })[0] || {}).media_url, op = function (u) { var w = window.open(u, '_blank'); if (w) { try { w.opener = null; } catch (e) {} n++; } };
+  if (media) op('https://drive.google.com/uc?export=download&id=' + encodeURIComponent(media));
+  rows.forEach(function (r) { var k = platKey_(r.platform), t = String(r.body || '');
+    if (k === 'x') op('https://x.com/intent/post?text=' + encodeURIComponent(t.slice(0, 280)));
+    else if (k === 'threads') op('https://www.threads.net/intent/post?text=' + encodeURIComponent(t.slice(0, 500)));
+    else if (k === 'linkedin') { op('https://www.linkedin.com/company/146744523/admin/page-posts/published/?share=true'); clip = clip || t; }
+    else if (k === 'instagram' && !auto.instagram) { op('https://www.instagram.com/'); clip = t; }
+    else if (k === 'facebook' && !auto.facebook) { op('https://business.facebook.com/latest/composer'); clip = clip || t; } });
+  if (clip && navigator.clipboard) navigator.clipboard.writeText(clip).catch(function () {});
+  toast('📤 فُتحت ' + n + ' صفحات' + (media ? ' + تنزيل الملف' : '') + (clip ? ' · النص منسوخ (Ctrl+V)' : '') + ' — أرفق الملف واضغط نشر، ثم ✓ نُشر هنا');
+};
+ACT.dpcDone = function (el) { var id = el.dataset.id, r = dpcRows_().filter(function (x) { return x.post_id === id; })[0]; if (!r) return; el.disabled = true;
+  (r.status === 'معتمد' ? Promise.resolve() : api('action', 'postApproveMany', { post_ids: [id] })).then(function () { return api('action', 'postPublished', { post_id: id, ref: 'يدوي' }); })
+    .then(function () { r.status = 'منشور'; var w = $('dp_cal'); if (w) w.innerHTML = dpCal_(S.data, DP.tab === 'week'); toast('✓ عُلّم منشوراً'); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 /** «اعتمد وانشر على المحدد»: المعلَّم فقط — يُعتمد ما لم يُعتمد ثم يُنشر: المربوط آلياً، وغير المربوط يُجهَّز للنسخ («يدوي» لا «فشل») */
 ACT.dpcGo = function (el) {
   var card = el.closest('.dpc-card'), ids = Array.prototype.map.call(card.querySelectorAll('.dpc-cb:checked'), function (c) { return c.value; });
