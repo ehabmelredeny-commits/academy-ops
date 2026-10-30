@@ -1067,7 +1067,10 @@ ACT.dpPublish = function (el) {
 ACT.dpPubOne = function (el) { el.disabled = true; api('action', 'postPublish', { post_ids: [el.dataset.id], at: '' }).then(dpAfterPublish_).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
 document.addEventListener('change', function (e) { if (e.target && e.target.id === 'dp_media') { var f = e.target.files[0], n = $('dp_media_n'); if (n) n.textContent = f ? ' ✓ ' + f.name : ''; } });
 
-window.dailyPost=function(){TAB='dailyPost';if(!TOK)return loginScreen();$('app').innerHTML=shell(nav()+'<div id="dpw"><div class="mut">جارٍ تحميل المنشور اليومي…</div></div>');api('screen','dailyPost',{}).then(function(d){S.data=d;var w=$('dpw');if(w)w.innerHTML=SCREENS.dailyPost.render(d)}).catch(function(e){var w=$('dpw');if(w)w.innerHTML='<div class="card mut">تعذّر التحميل: '+esc(errMsg(e))+'</div>'})};
+window.dailyPost=function(){TAB='dailyPost';if(!TOK)return loginScreen();$('app').innerHTML=shell(nav()+'<div id="dpw"><div class="mut">جارٍ تحميل المنشور اليومي…</div></div>');api('screen','dailyPost',{lite:1}).then(function(d){S.data=d;var w=$('dpw');if(w)w.innerHTML=SCREENS.dailyPost.render(d);
+  /* ⚡ المرحلة الثانية: المنافسون والعقل الآلي بعد ظهور جانبنا (بطء 2026-10-30) */
+  var c=$('dp_comp');if(c&&!(d.comp_groups||[]).length)c.insertAdjacentHTML('afterbegin','<div class="mut" id="dp_compl">جارٍ تحميل المنافسين…</div>');
+  api('screen','dailyPost',{}).then(function(f){if(TAB!=='dailyPost'||S.data!==d)return;['comp_groups','brain','brain_text','updated','comp_sites','silent','silent_sum','comp_watch'].forEach(function(k){d[k]=f[k]});dpRedrawComp_()}).catch(function(){var l=$('dp_compl');if(l)l.textContent='تعذّر تحميل المنافسين'})}).catch(function(e){var w=$('dpw');if(w)w.innerHTML='<div class="card mut">تعذّر التحميل: '+esc(errMsg(e))+'</div>'})};
 document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('#dpw [data-act]');if(!el)return;var f=ACT[el.dataset.act];if(f){if(el.type!=='checkbox'&&el.tagName!=='SELECT')e.preventDefault();f(el)}});
 })();/*DP-END*/
 function v2Tab(f){if(typeof window[f]==='function')window[f]()}
