@@ -71,11 +71,11 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .dp-fi{background:none;border:2px solid transparent;border-radius:8px;padding:1px;cursor:pointer}.dp-fi.on{border-color:var(--accent)}
 .dp-seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-inline-start:6px}
 .dp-seg button{background:none;border:0;color:var(--text);padding:5px 8px;font-size:11.5px;border-inline-start:1px solid var(--line);cursor:pointer}.dp-seg button.on{background:var(--accent);color:#fff}
-.dp-tab[hidden]{display:none!important}.dpc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}.dpc-day{grid-column:1/-1;font-weight:bold;margin-top:6px}
-.dpc-card{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}.dpc-card.dpc-ok{border-color:#3fae6a}.dpc-card.dpc-appr{border-color:#e6c34a}.dpc-card.dpc-part{border-color:#D4A853}
+.dp-tab[hidden]{display:none!important}.dpc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px;align-items:stretch}.dpc-day{grid-column:1/-1;font-weight:bold;margin-top:6px}
+.dpc-card{border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:12px}.dpc-card.dpc-ok{border-color:#3fae6a}.dpc-card.dpc-appr{border-color:#e6c34a}.dpc-card.dpc-part{border-color:#D4A853}
 .dpc-head{display:flex;align-items:center;gap:6px}.dpc-st{font-size:11px;border-radius:9px;padding:1px 8px;border:1px solid var(--line)}.dpc-ok .dpc-st{color:#3fae6a;border-color:#3fae6a}.dpc-appr .dpc-st{color:#e6c34a;border-color:#e6c34a}
-.dpc-body{display:flex;gap:10px;align-items:flex-start}.dpc-txt{font-size:12.5px;min-width:0;flex:1}.dpc-img{width:72px;height:72px;object-fit:cover;border-radius:8px;transition:transform .18s;transform-origin:top right;position:relative;z-index:1}.dpc-img:hover{transform:scale(2.6);z-index:30;box-shadow:0 6px 24px rgba(0,0,0,.5)}
-.dpc-acc{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:12px}.dpc-a{display:flex;align-items:center;gap:4px;cursor:pointer}.dpc-a input{width:auto;margin:0}.dpc-a.is-pub{color:#3fae6a}.dpc-a.is-fail{color:#ff7b7b}.dpc-go{background:#D4A853;color:#111;font-weight:bold;border:0}.dpc-tools{display:flex;gap:6px;flex-wrap:wrap}
+.dpc-body{display:flex;gap:10px;align-items:flex-start}.dpc-txt{font-size:12px;height:54px;overflow:hidden;min-width:0;flex:1}.dpc-img{width:72px;height:72px;object-fit:cover;border-radius:8px;transition:transform .18s;transform-origin:top right;position:relative;z-index:1}.dpc-img:hover{transform:scale(2.6);z-index:30;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.dpc-acc{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:12px}.dpc-a{display:flex;align-items:center;gap:4px;cursor:pointer}.dpc-a input{width:auto;margin:0}.dpc-a.is-pub{color:#3fae6a}.dpc-a.is-fail{color:#ff7b7b}.dpc-go{background:#D4A853;color:#111;font-weight:bold;border:0;font-size:12px;padding:4px 12px;align-self:flex-start;margin-top:auto}.dpc-tools{display:flex;gap:6px;flex-wrap:wrap}
 .dp-brain{border-color:#8d6cd8}.dp-dec{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;margin-top:5px;border-inline-start:4px solid #2a9d8f;background:rgba(127,127,127,.06)}
 .dp-dec.bad{border-color:#c62828}.dp-dec.warn{border-color:#e9a23b}.dp-dec>span{font-size:18px}
 .dp-strips{display:flex;flex-direction:column;gap:5px}
@@ -804,6 +804,7 @@ function platKey_(p) {
   p = String(p || '').toLowerCase();
   if (/انستغرام|انستقرام|instagram/.test(p)) return 'instagram';
   if (/فيسبوك|facebook/.test(p)) return 'facebook';
+  if (/ثريدز|threads/.test(p)) return 'threads';
   if (/تيك|tiktok/.test(p)) return 'tiktok';
   if (/سناب|snap/.test(p)) return 'snapchat';
   if (/لينكد|linkedin/.test(p)) return 'linkedin';
@@ -945,7 +946,7 @@ function dpCal_(d, all) {
         var k = platKey_(r.platform), pub = r.status === 'منشور', fail = /^فشل/.test(String(r.result || '')), url = (String(r.result || '').match(/https?:\/\/\S+/) || [''])[0];
         var mode = pub ? '' : auto[k] ? 'آلي' : 'يدوي';
         return '<label class="dpc-a' + (pub ? ' is-pub' : fail ? ' is-fail' : '') + '" title="' + esc(r.platform + ' · ' + r.status + (r.result ? ' · ' + r.result : '')) + '">' +
-          (pub ? '✓' : '<input type="checkbox" class="dpc-cb" value="' + esc(r.post_id) + '" checked>') + ' ' + (DP_PL_ICON[k] || '•') + ' ' + esc(k) +
+          (pub ? '✓' : '<input type="checkbox" class="dpc-cb" value="' + esc(r.post_id) + '" checked>') + ' ' + (DP_PL_ICON[k] || '•') + ' ' + esc(k === 'other' ? String(r.platform).split(' ')[0] : k) +
           (pub ? (url ? ' <a href="' + esc(url) + '" target="_blank" rel="noopener">فتح</a>' : ' نُشر') : ' <span class="muted tiny">' + (fail ? 'فشل — أعد' : mode) + '</span>') + '</label>';
       }).join('') + '</div>' +
       (done < g.rows.length ? '<button class="btn dpc-go" data-act="dpcGo">🚀 اعتمد وانشر على المحدد</button>' : '') +
@@ -1095,14 +1096,13 @@ ACT.dpPubOne = function (el) { el.disabled = true; api('action', 'postPublish', 
 document.addEventListener('change', function (e) { if (e.target && e.target.id === 'dp_media') { var f = e.target.files[0], n = $('dp_media_n'); if (n) n.textContent = f ? ' ✓ ' + f.name : ''; } });
 
 /* 🌐 افتح كل حساباتنا (الزر القديم — طلب المالك 2026-10-30): الروابط من الإعدادات ← الحسابات، تُحمَّل مسبقاً لأن المتصفح لا يفتح النوافذ إلا داخل الضغطة */
-var OUR_ACCS=null;function ourAccsLoad_(){OUR_ACCS=[];return api('screen','settings',{}).then(function(d){OUR_ACCS=(d.accounts||[]).filter(function(a){return a.url&&/^https?:/.test(a.url)&&a.status!=='موقوف'&&a.status!=='محذوف'}).map(function(a){return a.url})}).catch(function(){OUR_ACCS=null})}
-ACT.openOurAccounts=function(){if(!OUR_ACCS||!OUR_ACCS.length){ourAccsLoad_();return toast('⏳ يجهّز روابط الحسابات — اضغط مرة أخرى بعد ثانيتين',true)}
-  var n=0;OUR_ACCS.forEach(function(u){var w=window.open(u,'_blank');if(w){try{w.opener=null}catch(e){}n++}});
-  toast(n<OUR_ACCS.length?'فُتح '+n+' من '+OUR_ACCS.length+' — اسمح للموقع بالنوافذ المنبثقة (أيقونة 🚫 في شريط العنوان) ثم اضغط مرة أخرى':'🌐 فُتحت '+n+' حسابات',n<OUR_ACCS.length)};
+ACT.openOurAccounts=function(){var L=(S.data&&S.data.our_accounts)||[];if(!L.length)return toast('لا روابط حسابات في الإعدادات ← الحسابات',true);
+  var n=0;L.forEach(function(u){var w=window.open(u,'_blank');if(w){try{w.opener=null}catch(e){}n++}});
+  toast(n<L.length?'فُتح '+n+' من '+L.length+' — اسمح للموقع بالنوافذ المنبثقة (أيقونة 🚫 يمين شريط العنوان ← «السماح دائماً») ثم اضغط مرة أخرى':'🌐 فُتحت '+n+' حسابات',n<L.length)};
 window.pkSave=function(){var t=$('pk_tok').value.trim(),f=$('pk_fb').value.trim(),g=$('pk_ig').value.trim(),m=$('pk_m');if(!t||!f)return m.textContent='المفتاح ورقم الصفحة مطلوبان';
   var q=[['FB_PAGE_TOKEN',t],['FB_PAGE_ID',f],['IG_TOKEN',t]];if(g)q.push(['IG_USER_ID',g]);m.textContent='جارٍ الحفظ…';
   q.reduce(function(p,x){return p.then(function(){return api('action','secretSet',{key:x[0],value:x[1]})})},Promise.resolve()).then(function(){$('pk_tok').value='';m.textContent='✓ رُبط — جارٍ إعادة التحميل';setTimeout(window.dailyPost,800)}).catch(function(e){m.textContent='تعذّر: '+errMsg(e)})}
-window.dailyPost=function(){TAB='dailyPost';if(!TOK)return loginScreen();if(!OUR_ACCS)ourAccsLoad_();$('app').innerHTML=shell(nav()+'<div id="dpw"><div class="mut">جارٍ تحميل المنشور اليومي…</div></div>');api('screen','dailyPost',{lite:1}).then(function(d){S.data=d;var w=$('dpw');if(w)w.innerHTML=SCREENS.dailyPost.render(d);
+window.dailyPost=function(){TAB='dailyPost';if(!TOK)return loginScreen();$('app').innerHTML=shell(nav()+'<div id="dpw"><div class="mut">جارٍ تحميل المنشور اليومي…</div></div>');api('screen','dailyPost',{lite:1}).then(function(d){S.data=d;var w=$('dpw');if(w)w.innerHTML=SCREENS.dailyPost.render(d);
   /* 🔑 ربط النشر بضغطة (طلب المالك 2026-10-30): فيسبوك/إنستغرام غير مربوطين ← خانات لصق مفتاح ميتا هنا (secretSet، حقول مخفية، لا يُعرض المفتاح) */
   var pa=d.publish_auto||{};if(w&&(!pa.facebook||!pa.instagram))w.insertAdjacentHTML('afterbegin','<div class="card" id="pkbox" style="border:1px solid #D4A853"><b>🔑 اربط النشر بضغطة — '+(!pa.facebook?'فيسبوك غير مربوط':'')+(!pa.facebook&&!pa.instagram?' · ':'')+(!pa.instagram?'إنستغرام بلا صلاحية نشر':'')+'</b><div class="mut" style="font-size:12px;margin:4px 0">الصق مفتاح الصفحة من Graph API Explorer (بصلاحيات instagram_content_publish و pages_manage_posts) — يُحفظ سراً ولا يظهر مرة أخرى</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px"><input id="pk_tok" type="password" placeholder="مفتاح الصفحة (Page Access Token)" autocomplete="off"><input id="pk_fb" placeholder="رقم صفحة فيسبوك (Page ID)" autocomplete="off"><input id="pk_ig" placeholder="رقم حساب إنستغرام (IG User ID) — اختياري" autocomplete="off"></div><button class="btn p" style="margin-top:6px" onclick="pkSave()">💾 حفظ وربط</button> <span id="pk_m" class="mut" style="font-size:12px"></span></div>');
   /* ⚡ المرحلة الثانية: المنافسون والعقل الآلي بعد ظهور جانبنا (بطء 2026-10-30) */
