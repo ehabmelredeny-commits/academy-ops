@@ -99,7 +99,7 @@ function when(t){if(!t)return '—';var d=new Date(t),m=Math.round((Date.now()-d
 // رمز النموذج صالح من ٤ ثوانٍ إلى ساعتين — صفحة مفتوحة طويلاً كانت تُرسل رمزاً منتهياً فيُتجاهل الطلب بصمت: نجدّده بعد ٩٠ دقيقة وننتظر حتى يبلغ ٥ ثوانٍ
 var FTAT=0;function ftWait(){var age=Date.now()-FTAT;return new Promise(function(res){setTimeout(function(){res(FT)},Math.max(0,5000-age))})}
 function getFT(){if(FT&&Date.now()-FTAT<90*60e3)return ftWait();return fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){FT=((j&&j.data)||{}).ft||'';FTAT=Date.now();return ftWait()}).catch(function(){return ''})}
-function shell(inner){try{document.body.classList.toggle('cw',TAB==='customers'||TAB==='offers')}catch(e){}try{setTimeout(pPing,50)}catch(e){}return '<div class="hd"><div class="logo"></div><div><b>Academy OPS — أكاديمية السعد الرياضية</b><small>لوحة الإدارة · النظام الجديد</small></div></div>'+inner}
+function shell(inner){try{document.body.classList.toggle('cw',TAB==='customers'||TAB==='offers')}catch(e){}try{setTimeout(pPing,50)}catch(e){}return '<div class="hd"><div class="logo"></div><div><b>Academy OPS — أكاديمية السعد الرياضية</b><small>لوحة الإدارة · النظام الجديد</small></div>'+(TOK?'<span style="flex:1"></span><button id="esbtn" class="btn s" onclick="esOpen()" title="إيقاف كل الأوتوماتيك فوراً (المالك)" style="background:#c62828;color:#fff;border:0;border-radius:16px;font-weight:bold">⛔ إيقاف الطوارئ</button>':'')+'</div><div id="esbar"></div>'+inner+(TOK?(setTimeout(esLoad,0),''):'')}
 var PALL=false,TAB='home',PQ='',PF='all',POFF=0,PROWS=[],PSEL='',PT=0;
 var ST={lead:'محتمل',trainee:'متدرب',grad:'خريج',optout:'لا تراسل'};
 function nav(){return '<div class="nav"><a class="'+(TAB==='home'?'on':'')+'" onclick="TAB=\'home\';home()">الرئيسية</a><a class="'+(TAB==='persons'?'on':'')+'" onclick="persons()">الأشخاص</a><a class="'+(TAB==='customers'?'on':'')+'" onclick="customers()">👥 العملاء</a><a class="'+(TAB==='dailyPost'?'on':'')+'" onclick="dailyPost()" title="إدارة حساباتنا على السوشال مقابل المنافسين">📣 المنشور اليومي</a><a class="'+(TAB==='offers'?'on':'')+'" onclick="offers()">🎁 العروض</a><a class="'+(TAB==='pricing'||TAB==='courses'?'on':'')+'" onclick="pricing()" title="كل دورة في سطر: السعر والسوق والساعات والمواعيد والاعتماد">📚 الدورات</a><a class="'+(TAB==='careers'?'on':'')+'" onclick="careers()" title="مسارات المهن ودوراتها ومواعيد اختباراتها">🗺️ خريطة المهن</a><a class="'+(TAB==='finance'?'on':'')+'" onclick="finance()">المالية</a><a class="'+(TAB==='settings'?'on':'')+'" onclick="settings()">الإعدادات</a><a class="'+(TAB==='academic'?'on':'')+'" onclick="academic()">الأكاديمي</a><a class="'+(TAB==='system'?'on':'')+'" onclick="system()">النظام</a>'+(window.V2_TABS||[]).map(function(t){return '<a class="'+(TAB===t.key?'on':'')+'" data-f="'+t.fn+'" onclick="v2Tab(this.dataset.f)" title="'+(t.tip||'')+'">'+t.label+'</a>'}).join('')+'</div>'}
@@ -215,6 +215,22 @@ function csOpen(act){var b=$('xbox');if(!b)return;if(act!=='now')b.innerHTML='<d
    '<button class="btn p" style="width:100%;margin-top:8px" '+(d.now_left?'':'disabled ')+'onclick="if(confirm(\'تشغيل فحص المنافسين الآن؟ (مرة في الأسبوع)\'))csOpen(\'now\')">🔍 افحص الآن <span style="font-weight:normal">(متبقٍ هذا الأسبوع: '+d.now_left+')</span></button>'+
    '<div class="mut" style="font-size:11.5px;margin-top:6px">التكرار والحد من الإعدادات (comp_scan_every_days · comp_scan_max_week) · قراءة صور المنافسين تقرأ عدداً أكبر في كل فحص لتعويض التباعد · الردود على أسئلة الجمهور ودليل الدورات الرسمية خارج هذا الحد · توصية: يُراجع التكرار بعد الإطلاق (قد يصبح أسبوعياً)</div>'+
    '<details style="margin-top:6px"><summary class="mut" style="font-size:12px;cursor:pointer">الوحدات ('+(d.modules||[]).length+')</summary>'+(d.modules||[]).map(function(m){return '<div class="row" style="font-size:12px"><span>'+esc(m.n||m.k)+'</span><span class="mut">'+ago(String(m.last||'').replace(/"/g,''))+' · '+esc(m.st||'')+'</span></div>'}).join('')+'</details></div>'}).catch(function(e){b.innerHTML='<div class="card mut">تعذّر التحميل: '+esc(e.message)+'</div>'})}
+/* ⛔ إيقاف الطوارئ (اعتماد المالك 2026-10-30): مفتاح واحد automation_paused — الاستقبال والحفظ ورد المالك اليدوي يستمر */
+var ES=null;
+function esLoad(){rpc('app_pause',{token:TOK,act:'status'}).then(function(d){ES=d;esPaint()}).catch(function(){})}
+function esPaint(){var b=$('esbar'),btn=$('esbtn');if(!ES)return;if(btn){btn.textContent=ES.paused?'▶ استئناف':'⛔ إيقاف الطوارئ';btn.style.background=ES.paused?'#3fae6a':'#c62828';btn.onclick=ES.paused?esResume:esOpen;btn.style.display=ES.owner?'':'none'}
+  if(b)b.innerHTML=ES.paused?'<div style="background:#c62828;color:#fff;padding:9px 12px;font-size:13.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="flex:1">⛔ الأوتوماتيك موقوف منذ '+when(ES.paused_at)+(ES.reason?' — «'+esc(ES.reason)+'»':'')+' · الاستقبال يعمل والرسائل محفوظة</b>'+(ES.owner?'<button class="btn s" onclick="esResume()" style="background:#fff;color:#c62828;border:0;font-weight:bold">▶ استئناف</button>':'')+'</div>':''}
+function esOpen(){var m=document.createElement('div');m.id='esm';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px';
+  var r=function(t,ok){return '<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid #2a303a"><span>'+t+'</span><b style="color:'+(ok?'#5fd08a':'#ff7b7b')+'">'+(ok?'يستمر ✓':'يتوقف')+'</b></div>'};
+  m.innerHTML='<div style="max-width:520px;width:100%;background:#1a1111;color:#e8ebef;border:1px solid #c62828;border-radius:14px;padding:14px;font-size:13px"><b style="color:#ff7b7b;font-size:15px">⛔ إيقاف كل الأوتوماتيك الآن؟</b>'+
+   r('الردود الآلية على الواتساب')+r('الرسائل التسويقية والتذكيرات والحملات')+r('الوحدات المجدولة (جوجل + Supabase)')+r('النشر الآلي على المنصات')+r('تنبيهات الجوال للمتدربين')+r('استقبال الرسائل والتسجيلات وحفظها',1)+r('البوابة والتسجيل ولوحة الإدارة وردّك اليدوي',1)+r('رمز الدخول وتنبيهاتك أنت',1)+
+   '<input id="esr" placeholder="السبب (اختياري): مثلاً رد خاطئ من النظام" style="margin-top:10px;width:100%">'+(ES&&ES.pin_set?'<input id="esp" type="password" autocomplete="off" placeholder="🔑 رمز الطوارئ" style="margin-top:8px;width:100%">':'<div style="margin-top:8px;color:#e6c34a">🔑 لم تعيّن رمز الطوارئ بعد — <a href="#" onclick="esPinSet();return false" style="color:#e6c34a">عيّنه الآن</a></div>')+'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn p" style="flex:1;background:#c62828;color:#fff;border:0" onclick="esDo(1)">⛔ أوقف الآن</button><button class="btn s" style="flex:1" onclick="this.closest(\'#esm\').remove()">إلغاء</button></div></div>';
+  document.body.appendChild(m)}
+function esDo(stop,pin){var r=$('esr'),why=r?r.value:'',pp=$('esp');pin=pin||(pp?pp.value:'');if(!pin)return alert('اكتب رمز الطوارئ');rpc('app_pause',{token:TOK,act:stop?'stop':'resume',reason:why,pin:pin}).then(function(d){if(d.ok===false)return alert(d.error);ES=d;var m=$('esm');if(m)m.remove();esPaint();alert(stop?'⛔ أُوقف الأوتوماتيك — يكتمل التوقف في كل الأماكن خلال دقائق، ويصلك بريد':'▶ استُؤنف الأوتوماتيك — يصلك بريد')}).catch(function(e){alert('تعذّر: '+e.message)})}
+function esResume(){if(!confirm('استئناف كل الأوتوماتيك؟ الرسائل التي وصلت أثناء الإيقاف ستُعالج الآن.'))return;esPinAsk(function(pin){esDo(0,pin)})}
+function esPinAsk(cb){var m=document.createElement('div');m.id='espm';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:210;display:flex;align-items:center;justify-content:center;padding:16px';m.innerHTML='<div style="background:#141a20;color:#e8ebef;border:1px solid #D4A853;border-radius:12px;padding:14px;width:320px"><b>🔑 رمز الطوارئ</b><input id="espi" type="password" autocomplete="off" style="width:100%;margin-top:8px"><div style="display:flex;gap:8px;margin-top:10px"><button class="btn p" style="flex:1" id="espok">تأكيد</button><button class="btn s" style="flex:1" id="espno">إلغاء</button></div></div>';document.body.appendChild(m);$('espi').focus();$('espno').onclick=function(){m.remove()};$('espok').onclick=function(){var v=$('espi').value;m.remove();if(v)cb(v)}}
+function esPinSet(){var cur=ES&&ES.pin_set;var go2=function(old){var a=window.prompt?null:null;esPinAsk2(old)};esPinAsk2('')}
+function esPinAsk2(){var m=document.createElement('div');m.id='espm';m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:220;display:flex;align-items:center;justify-content:center;padding:16px';m.innerHTML='<div style="background:#141a20;color:#e8ebef;border:1px solid #D4A853;border-radius:12px;padding:14px;width:340px"><b>🔑 تعيين رمز الطوارئ</b><div class="mut" style="font-size:12px">تختاره أنت وتكتبه بنفسك — يُحفظ مشفّراً ولا يراه أحد · 6 خانات على الأقل</div>'+(ES&&ES.pin_set?'<input id="espo" type="password" autocomplete="off" placeholder="الرمز الحالي" style="width:100%;margin-top:8px">':'')+'<input id="espn" type="password" autocomplete="new-password" placeholder="الرمز الجديد" style="width:100%;margin-top:8px"><input id="espn2" type="password" autocomplete="new-password" placeholder="أعد كتابة الرمز" style="width:100%;margin-top:8px"><div style="display:flex;gap:8px;margin-top:10px"><button class="btn p" style="flex:1" id="espsv">حفظ</button><button class="btn s" style="flex:1" id="espx">إلغاء</button></div></div>';document.body.appendChild(m);$('espx').onclick=function(){m.remove()};$('espsv').onclick=function(){var o=$('espo')?$('espo').value:'',n=$('espn').value,n2=$('espn2').value;if(n!==n2)return alert('الرمزان غير متطابقين');rpc('app_pause',{token:TOK,act:'setpin',pin:o,new_pin:n}).then(function(d){if(d.ok===false)return alert(d.error);m.remove();if(ES)ES.pin_set=true;var em=$('esm');if(em){em.remove();esOpen()}alert('✓ عُيّن رمز الطوارئ — يصلك بريد تأكيد')}).catch(function(e){alert('تعذّر: '+e.message)})}}
 var CGRP=[['customers','💬 المحادثات',''],['waManual','📱 واتساب يدوي','واتساب نصف آلي حتى يُفك قفل ميتا'],['persons','👤 الأشخاص',''],['refScreen','🤝 الإحالات','إحالات الخريجين'],['pipeScreen','🧲 المراحل','مراحل العملاء: من يقترب من الدفع اليوم'],['askScreen','🎯 يسألون الآن','كل السائلين في قائمة واحدة']];
 function custBar(cur){return '<div class="chips grpbar" style="margin:0">'+CGRP.map(function(g){return g[0]===cur?'<a class="on">'+g[1]+'</a>':'<a onclick="'+g[0]+'()"'+(g[2]?' title="'+g[2]+'"':'')+'>'+g[1]+'</a>'}).join('')+'</div>'}
 function grpBarEnsure(cur){if(document.querySelector('#app .grpbar'))return;var w=document.querySelector('#app .wrap')||$('app');if(!w)return;var d=document.createElement('div');d.style.cssText='display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0 8px';d.innerHTML='<b style="font-size:15px">👥 العملاء</b>'+custBar(cur);var nv=$('app').querySelector('.nav'),nb=$('navb'),ref=nb||nv;if(ref&&ref.parentNode)ref.parentNode.insertBefore(d,ref.nextSibling);else w.insertBefore(d,w.children[1]||null)}
@@ -860,6 +876,103 @@ function dpComp_(d) {
   return h;
 }
 
+
+/* ═══════════ 🗓 التقويم والنشر (2026-10-30، تصميم v2-social-publish-2.png + شروط «خريطة النظام» + قسم التسويق) ═══════════
+   صف = منشور على منصة (DailyPosts). المجموعة = نفس الوقت ونفس أول سطر. النشر: الكل المعتمد (متدرّج بالمُجدول) · مجموعة · منصة واحدة. */
+var DPC = { sel: {} };
+var DP_PL_ICON = { instagram: '📸', facebook: '📘', x: '𝕏', threads: '🧵', linkedin: 'in', whatsapp: '💬' };
+function dpcKey_(r) { return String(r.at) + '|' + String(r.body || '').split('\n')[0].slice(0, 60); }
+function dpcGroups_(rows) { var m = {}, out = []; rows.forEach(function (r) { var k = dpcKey_(r); if (!m[k]) { m[k] = { key: k, at: r.at, title: String(r.body || '').split('\n')[0], rows: [] }; out.push(m[k]); } m[k].rows.push(r); }); return out; }
+function dpcThumb_(id) { return id ? '<img src="https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w120" alt="" loading="lazy" style="width:52px;height:52px;object-fit:cover;border-radius:8px">' : '<span style="width:52px;height:52px;border-radius:8px;background:#1d3445;display:inline-block"></span>'; }
+function dpcChip_(r, auto) {
+  var k = platKey_(r.platform), done = r.status === 'منشور', fail = /^فشل/.test(String(r.result || '')), ok = r.status === 'معتمد';
+  var col = done ? '#3fae6a' : fail ? '#c62828' : ok ? '#e6c34a' : '#5f6b78';
+  return '<button class="dp-cc" data-act="dpcPubOne" data-id="' + esc(r.post_id) + '" title="' + esc(r.platform + ' · ' + r.status + (r.result ? ' · ' + r.result : '') + (done ? '' : ' — اضغط للنشر على هذه المنصة وحدها')) + '" style="border:1px solid ' + col + ';color:' + col + ';border-radius:9px;padding:1px 6px;font-size:11px;background:transparent;cursor:pointer">' + (DP_PL_ICON[k] || '•') + ' ' + (done ? '✓' : fail ? '✗ أعد' : auto[k] ? 'آلي' : 'نسخ') + '</button>';
+}
+function dpCal_(d) {
+  var rows = d.calendar || []; if (!rows.length) return '<div class="card small"><b>🗓 التقويم والنشر</b> <span class="muted tiny">لا منشورات مجدولة — استورد حزمة اليوم أو اكتب منشوراً</span> <button class="btn sm" data-act="dpcImport">📥 استيراد حزمة</button></div>';
+  var auto = d.publish_auto || {}, gs = dpcGroups_(rows), approved = rows.filter(function (r) { return r.status === 'معتمد'; });
+  var h = '<div class="card small"><div class="row" style="gap:6px;flex-wrap:wrap;align-items:center"><b>🗓 التقويم والنشر</b><span class="grow"></span>' +
+    '<button class="btn sm" data-act="dpcImport" title="مجلد الحزمة اليومية (posts.json + الصور + النصوص) — يدخل «مسودة»">📥 استيراد حزمة</button>' +
+    '<button class="btn sm" data-act="dpcApproveSel" title="اعتماد المجموعات المحددة">✓ اعتماد المحدد</button>' +
+    '<button class="btn sm" data-act="dpcPubAll" style="background:#D4A853;color:#111;font-weight:bold" title="كل المعتمد بصوره على كل منصاته — متدرّج">🚀 نشر كل المعتمد (' + approved.length + ')</button></div>' +
+    '<div class="tiny" style="margin:6px 0;border:1px solid #0a66c2;border-radius:8px;padding:4px 8px">in <b>لينكدإن:</b> يُنشر من صفحة <b>Al-Saad Sports Academy</b> لا من حسابك الشخصي · لا Repost من الحساب الشخصي</div>';
+  var lastDay = '';
+  gs.forEach(function (g) {
+    var day = fmtDate(g.at, false); if (day !== lastDay) { h += '<div class="tiny" style="margin-top:8px;font-weight:bold">' + esc(day) + '</div>'; lastDay = day; }
+    var ids = g.rows.map(function (r) { return r.post_id; }), media = (g.rows.filter(function (r) { return r.media_url; })[0] || {}).media_url, pend = g.rows.filter(function (r) { return r.status !== 'منشور'; }).map(function (r) { return r.post_id; });
+    var draft = g.rows.some(function (r) { return r.status === 'بانتظار الموافقة' || r.status === 'مسودة'; });
+    h += '<div class="dp-res" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line)">' +
+      '<input type="checkbox" data-act="dpcSel" data-k="' + esc(g.key) + '"' + (DPC.sel[g.key] ? ' checked' : '') + ' style="width:auto">' + dpcThumb_(media) +
+      '<div class="grow" style="min-width:160px"><b>' + esc(fmtDate(g.at, true)) + '</b> <span class="muted tiny">' + esc(Text_short_(g.title, 70)) + '</span><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">' + g.rows.map(function (r) { return dpcChip_(r, auto); }).join('') + '</div></div>' +
+      (draft ? '<button class="btn sm" data-act="dpcApprove" data-ids="' + esc(ids.join(',')) + '">✓ اعتمد</button>' : '') +
+      (pend.length ? '<button class="btn sm" data-act="dpcPubGroup" data-ids="' + esc(pend.join(',')) + '" title="انشر هذا المنشور على كل منصاته">🚀 كل منصاته</button>' : '') +
+      '<select data-act="dpcCopy" class="btn sm" style="width:auto" title="انسخ نص منصة"><option value="">📋 نسخ…</option>' + g.rows.map(function (r) { return '<option value="' + esc(r.post_id) + '">' + esc(r.platform) + '</option>'; }).join('') + '</select>' +
+      (media ? '<a class="btn sm" target="_blank" rel="noopener" href="https://drive.google.com/uc?export=download&id=' + encodeURIComponent(media) + '" title="تنزيل الصورة">⬇</a>' : '') +
+      '<button class="btn sm" data-act="dpcPhoto" data-ids="' + esc(ids.join(',')) + '" title="تغيير الصورة">📷</button></div>';
+  });
+  return h + '<input type="file" id="dpc_img" accept="image/*" style="display:none"><input type="file" id="dpc_dir" webkitdirectory multiple style="display:none"></div>';
+}
+function dpcRows_() { return (S.data && S.data.calendar) || []; }
+function dpcReload_(msg) { if (msg) toast(msg); go('dailyPost', {}, true); }
+ACT.dpcSel = function (el) { DPC.sel[el.dataset.k] = el.checked; };
+ACT.dpcPubOne = function (el) { var r = dpcRows_().filter(function (x) { return x.post_id === el.dataset.id; })[0]; if (!r || r.status === 'منشور') return;
+  if (!confirm('نشر على ' + r.platform + ' الآن؟')) return; el.disabled = true; api('action', 'postPublish', { post_ids: [r.post_id], at: '' }).then(function (x) { dpAfterPublish_(x); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
+ACT.dpcPubGroup = function (el) { var ids = el.dataset.ids.split(','); if (!confirm('نشر هذا المنشور على ' + ids.length + ' منصة الآن؟')) return; el.disabled = true;
+  api('action', 'postPublish', { post_ids: ids, at: '' }).then(dpAfterPublish_).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
+ACT.dpcApprove = function (el) { var ids = el.dataset.ids.split(','); el.disabled = true; api('action', 'postApproveMany', { post_ids: ids }).then(function (r) { dpcReload_('✓ اعتُمد ' + r.approved); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
+ACT.dpcApproveSel = function () { var gs = dpcGroups_(dpcRows_()).filter(function (g) { return DPC.sel[g.key]; }); if (!gs.length) return toast('حدّد منشوراً أو أكثر بالمربع', true);
+  var ids = []; gs.forEach(function (g) { g.rows.forEach(function (r) { if (r.status !== 'منشور' && r.status !== 'معتمد') ids.push(r.post_id); }); });
+  if (!confirm('اعتماد ' + gs.length + ' منشور (' + ids.length + ' منصة):\n' + gs.map(function (g) { return '• ' + Text_short_(g.title, 60); }).join('\n'))) return;
+  api('action', 'postApproveMany', { post_ids: ids }).then(function (r) { DPC.sel = {}; dpcReload_('✓ اعتُمد ' + r.approved); }).catch(function (e) { toast(errMsg(e), true); }); };
+ACT.dpcPubAll = function () { var rs = dpcRows_().filter(function (r) { return r.status === 'معتمد'; }); if (!rs.length) return toast('لا منشورات معتمدة — اعتمد أولاً', true);
+  var auto = (S.data && S.data.publish_auto) || {}, a = rs.filter(function (r) { return auto[platKey_(r.platform)]; }).length;
+  if (!confirm('🚀 نشر كل المعتمد؟\n• ' + rs.length + ' منشور/منصة\n• آلياً: ' + a + ' · تجهيز وتذكير للنسخ: ' + (rs.length - a) + '\n• متدرّج: منصة كل دقيقتين (حماية الحساب) — يكمل وحده حتى لو أغلقت الصفحة\n• يتوقف فوراً إن ضُغط «⛔ إيقاف الطوارئ»')) return;
+  api('action', 'postPublishAll', { post_ids: rs.map(function (r) { return r.post_id; }), gap: 2 }).then(function (r) { dpcReload_('🚀 جُدول ' + r.scheduled + ' — يكتمل خلال ' + r.minutes + ' دقيقة' + (r.skipped.length ? ' · تُخطّي ' + r.skipped.length + ': ' + r.skipped.map(function (x) { return x.platform + ' (' + x.why + ')'; }).join('، ') : '')); }).catch(function (e) { toast(errMsg(e), true); }); };
+document.addEventListener('change', function (e) {
+  var t = e.target; if (!t) return;
+  if (t.dataset && t.dataset.act === 'dpcCopy' && t.value) { var r = dpcRows_().filter(function (x) { return x.post_id === t.value; })[0]; t.value = ''; if (!r) return;
+    (navigator.clipboard ? navigator.clipboard.writeText(r.body || '') : Promise.reject()).then(function () { toast('📋 نُسخ نص ' + r.platform); }).catch(function () { prompt('انسخ النص:', r.body || ''); }); }
+  if (t.id === 'dpc_img' && t.files && t.files[0]) { var f = t.files[0], ids = (DPC.photoIds || []); if (f.size > 10 * 1024 * 1024) return toast('الصورة أكبر من ١٠ ميغا', true);
+    var rd = new FileReader(); rd.onload = function () { api('action', 'postMedia', { post_ids: ids, data: String(rd.result).split(',')[1], mime: f.type, name: f.name.replace(/\.[^.]+$/, '') }).then(function () { dpcReload_('📷 تغيّرت الصورة'); }).catch(function (x) { toast(errMsg(x), true); }); }; rd.readAsDataURL(f); t.value = ''; }
+  if (t.id === 'dpc_dir' && t.files && t.files.length) dpcImport_(t.files);
+});
+ACT.dpcPhoto = function (el) { DPC.photoIds = el.dataset.ids.split(','); var i = $('dpc_img'); if (i) i.click(); };
+ACT.dpcImport = function () { var i = $('dpc_dir'); if (i) i.click(); else toast('افتح التقويم أولاً', true); };
+/* 📥 الاستيراد: posts.json + الصور + caption.txt لكل منصة — يدخل «مسودة» دائماً، بفحص قواعد الصياغة، ويرفض المكرر والمنصة المجهولة */
+var DPC_BAD = [[/اعتماد\s*مهني|الاعتماد المهني|\bLDI\b/i, 'ذكر الاعتماد المهني/LDI قبل القبول'], [/\d+\s*(ر\.س|ريال|SAR)/i, 'سعر خارج كتالوج واتساب'], [/خصم يصل إلى (?!50%)/, 'صيغة الخصم غير المعتمدة']];
+function dpcText_(file) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok(String(r.result)); }; r.readAsText(file); }); }
+function dpcB64_(file) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1]); }; r.readAsDataURL(file); }); }
+function dpcCaption_(txt, img) { var secs = String(txt).replace(/^﻿/, '').split(/^=+.*=+$/m); for (var i = 0; i < secs.length; i++) { if (secs[i].indexOf(img) > -1) { return secs[i].split('\n').filter(function (l) { return !/^الصورة:/.test(l.trim()); }).join('\n').trim(); } } return ''; }
+function dpcImport_(files) {
+  var map = {}; Array.prototype.forEach.call(files, function (f) { var rel = (f.webkitRelativePath || f.name).split('/').slice(1).join('/'); map[rel] = f; });
+  if (!map['posts.json']) return toast('لم أجد posts.json في المجلد', true);
+  var known = { instagram: 1, facebook: 1, x: 1, threads: 1, linkedin: 1, 'whatsapp-status': 1 }, problems = [];
+  dpcText_(map['posts.json']).then(function (j) {
+    var posts = JSON.parse(j), jobs = [], seen = {};
+    posts.forEach(function (p) { (p.platforms || []).forEach(function (pl) {
+      if (!known[pl]) return problems.push((p.title || '') + ': منصة غير معروفة ' + pl);
+      var k = p.date + p.time + pl + p.title; if (seen[k]) return problems.push('مكرر: ' + p.title + ' · ' + pl); seen[k] = 1;
+      jobs.push({ p: p, pl: pl, img: (p.files || {})[pl], cap: (p.caption_files || {})[pl] }); }); });
+    if (problems.length) return toast('رُفض الملف: ' + problems.slice(0, 3).join(' · '), true);
+    if (!confirm('📥 استيراد ' + posts.length + ' منشور (' + jobs.length + ' منصة) كمسودات؟ (لا يُعتمد ولا يُنشر شيء تلقائياً)')) return;
+    var done = 0, warn = [];
+    return jobs.reduce(function (pr, jb) { return pr.then(function () {
+      var capF = jb.cap && map[jb.cap], imgF = jb.img && map[jb.img];
+      return (capF ? dpcText_(capF) : Promise.resolve('')).then(function (ct) {
+        var body = dpcCaption_(ct, String(jb.img || '').split('/').pop()) || ('📌 ' + (jb.p.title || ''));
+        DPC_BAD.forEach(function (b) { if (b[0].test(body)) warn.push(jb.pl + ' · ' + (jb.p.title || '') + ': ' + b[1]); });
+        var type = /story|status|1920/.test(String(jb.img)) ? 'يوميات' : 'صورة', pl = jb.pl === 'whatsapp-status' ? 'whatsapp' : jb.pl;
+        return api('action', 'postManual', { body: body + (jb.p.campaign_id ? '\n#' + jb.p.campaign_id : ''), platforms: [pl], post_type: type }).then(function (r) {
+          var ids = r.post_ids || [];
+          return (imgF ? dpcB64_(imgF).then(function (b64) { return api('action', 'postMedia', { post_ids: ids, data: b64, mime: imgF.type || 'image/png', name: (jb.p.campaign_id || 'post') + '-' + jb.p.time.replace(':', '') + '-' + pl }); }) : Promise.resolve())
+            .then(function () { return api('action', 'postSchedule', { post_id: ids[0], at: jb.p.date + 'T' + jb.p.time + ':00+03:00' }); })
+            .then(function () { done++; toast('📥 ' + done + ' / ' + jobs.length); });
+        });
+      }); }); }, Promise.resolve()).then(function () { dpcReload_('📥 استُورد ' + done + ' كمسودات' + (warn.length ? ' · ⚠️ راجع: ' + warn.slice(0, 3).join(' · ') : '')); });
+  }).catch(function (e) { toast('تعذّر الاستيراد: ' + errMsg(e), true); });
+}
+
 SCREENS.dailyPost = { render: function (d) {
   if (!document.getElementById('pi-instagram')) document.body.insertAdjacentHTML('afterbegin', PLAT_ICONS);
   var mode = dpMode_();
@@ -867,7 +980,7 @@ SCREENS.dailyPost = { render: function (d) {
   // أزرار تقسيم العرض فوق العمودين — تبقى ظاهرة في كل الأوضاع (حتى 100% لنا أو 100% منافسون)
   var seg = '<span class="dp-seg">' + [['ours', '⛶ 100% لنا'], ['split', '◧ ⅓ لنا · ⅔ منافسون'], ['comp', '⛶ 100% منافسون']].map(function (m) {
     return '<button class="' + (mode === m[0] ? 'on' : '') + '" data-act="dpMode" data-m="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span>';
-  return north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">📣 منشور اليوم</h1>' + seg + '</div><div class="dp2 mode-' + mode + '"><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
+  return north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">📣 منشور اليوم</h1>' + seg + '</div><div id="dp_cal">' + dpCal_(d) + '</div><div class="dp2 mode-' + mode + '"><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
 } };
 function dpKeep_() { var b = $('dp_body'); if (b) DP.body = b.value; var a = $('dp_at'); if (a) DP.at = a.value; }
 function dpRedrawOurs_() { dpKeep_(); var el = $('dp_ours'); if (el) el.innerHTML = dpOurs_(S.data); }
