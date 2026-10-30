@@ -71,6 +71,11 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .dp-fi{background:none;border:2px solid transparent;border-radius:8px;padding:1px;cursor:pointer}.dp-fi.on{border-color:var(--accent)}
 .dp-seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-inline-start:6px}
 .dp-seg button{background:none;border:0;color:var(--text);padding:5px 8px;font-size:11.5px;border-inline-start:1px solid var(--line);cursor:pointer}.dp-seg button.on{background:var(--accent);color:#fff}
+.dp-tab[hidden]{display:none!important}.dpc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}.dpc-day{grid-column:1/-1;font-weight:bold;margin-top:6px}
+.dpc-card{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}.dpc-card.dpc-ok{border-color:#3fae6a}.dpc-card.dpc-appr{border-color:#e6c34a}.dpc-card.dpc-part{border-color:#D4A853}
+.dpc-head{display:flex;align-items:center;gap:6px}.dpc-st{font-size:11px;border-radius:9px;padding:1px 8px;border:1px solid var(--line)}.dpc-ok .dpc-st{color:#3fae6a;border-color:#3fae6a}.dpc-appr .dpc-st{color:#e6c34a;border-color:#e6c34a}
+.dpc-body{display:flex;gap:10px;align-items:flex-start}.dpc-txt{font-size:12.5px;min-width:0;flex:1}.dpc-img{width:72px;height:72px;object-fit:cover;border-radius:8px;transition:transform .18s;transform-origin:top right;position:relative;z-index:1}.dpc-img:hover{transform:scale(2.6);z-index:30;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+.dpc-acc{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:12px}.dpc-a{display:flex;align-items:center;gap:4px;cursor:pointer}.dpc-a input{width:auto;margin:0}.dpc-a.is-pub{color:#3fae6a}.dpc-a.is-fail{color:#ff7b7b}.dpc-go{background:#D4A853;color:#111;font-weight:bold;border:0}.dpc-tools{display:flex;gap:6px;flex-wrap:wrap}
 .dp-brain{border-color:#8d6cd8}.dp-dec{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;margin-top:5px;border-inline-start:4px solid #2a9d8f;background:rgba(127,127,127,.06)}
 .dp-dec.bad{border-color:#c62828}.dp-dec.warn{border-color:#e9a23b}.dp-dec>span{font-size:18px}
 .dp-strips{display:flex;flex-direction:column;gap:5px}
@@ -912,36 +917,52 @@ var DP_PL_ICON = { instagram: '📸', facebook: '📘', x: '𝕏', threads: '�
 function dpcKey_(r) { return String(r.at) + '|' + String(r.body || '').split('\n')[0].slice(0, 60); }
 function dpcGroups_(rows) { var m = {}, out = []; rows.forEach(function (r) { var k = dpcKey_(r); if (!m[k]) { m[k] = { key: k, at: r.at, title: String(r.body || '').split('\n')[0], rows: [] }; out.push(m[k]); } m[k].rows.push(r); }); return out; }
 // معاينة (ملاحظة المالك 2026-10-30): الصورة المصغّرة تُفتح كاملة في Drive بضغطة · إن تعذّر عرضها (حساب Google آخر في المتصفح) يظهر زر «معاينة» بدلها
-function dpcThumb_(id) { return id ? '<a href="https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view" target="_blank" rel="noopener" title="معاينة بالحجم الكامل" style="display:inline-flex;width:64px;height:64px;border-radius:8px;overflow:hidden;background:#1d3445;align-items:center;justify-content:center;color:#D4A853;font-size:11px;text-decoration:none"><img src="https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w200" alt="" loading="lazy" style="width:64px;height:64px;object-fit:cover" onerror="this.outerHTML=\'🖼 معاينة\'"></a>' :'<span style="width:52px;height:52px;border-radius:8px;background:#1d3445;display:inline-block"></span>'; }
+function dpcThumb_(id) { return id ? '<a href="https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view" target="_blank" rel="noopener" title="معاينة بالحجم الكامل" style="flex:none;color:#D4A853;font-size:11px"><img class="dpc-img" src="https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w160" alt="" loading="lazy" onerror="this.outerHTML=\'🖼 معاينة\'"></a>' :'<span style="width:52px;height:52px;border-radius:8px;background:#1d3445;display:inline-block"></span>'; }
 function dpcChip_(r, auto) {
   var k = platKey_(r.platform), done = r.status === 'منشور', fail = /^فشل/.test(String(r.result || '')), ok = r.status === 'معتمد';
   var col = done ? '#3fae6a' : fail ? '#c62828' : ok ? '#e6c34a' : '#5f6b78';
   return '<button class="dp-cc" data-act="dpcPubOne" data-id="' + esc(r.post_id) + '" title="' + esc(r.platform + ' · ' + r.status + (r.result ? ' · ' + r.result : '') + (done ? '' : ' — اضغط للنشر على هذه المنصة وحدها')) + '" style="border:1px solid ' + col + ';color:' + col + ';border-radius:9px;padding:1px 6px;font-size:11px;background:transparent;cursor:pointer">' + (DP_PL_ICON[k] || '•') + ' ' + (done ? '✓' : fail ? '✗ أعد' : auto[k] ? 'آلي' : 'نسخ') + '</button>';
 }
-function dpCal_(d) {
-  var rows = d.calendar || []; if (!rows.length) return '<div class="card small"><b>🗓 التقويم والنشر</b> <span class="muted tiny">لا منشورات مجدولة — استورد حزمة اليوم أو اكتب منشوراً</span> <button class="btn sm" data-act="dpcImport">📥 استيراد حزمة</button></div>';
-  var auto = d.publish_auto || {}, gs = dpcGroups_(rows), approved = rows.filter(function (r) { return r.status === 'معتمد'; });
-  var h = '<div class="card small"><div class="row" style="gap:6px;flex-wrap:wrap;align-items:center"><b>🗓 التقويم والنشر</b><span class="grow"></span>' +
+function dpCal_(d, all) {
+  // 🃏 التصميم الثالث (اعتماد المالك 2026-10-30): بطاقة لكل منشور — الصورة والنص ومربعات الحسابات داخلها + زر واحد «اعتمد وانشر على المحدد»
+  var rows = d.calendar || []; if (!rows.length) return '<div class="card small"><b>🗓 لا منشورات مجدولة</b> <span class="muted tiny">استورد حزمة أو اكتب منشوراً من تبويب «✍️ اكتب»</span> <button class="btn sm" data-act="dpcImport">📥 استيراد حزمة</button></div>';
+  var auto = d.publish_auto || {}, today = fmtDate(new Date(), false), gs = dpcGroups_(rows).filter(function (g) { return all || fmtDate(g.at, false) === today; });
+  var approved = rows.filter(function (r) { return r.status === 'معتمد'; });
+  var h = '<div class="row" style="gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px"><span class="grow"></span>' +
     '<button class="btn sm" data-act="dpcImport" title="مجلد الحزمة اليومية (posts.json + الصور + النصوص) — يدخل «مسودة»">📥 استيراد حزمة</button>' +
-    '<button class="btn sm" data-act="dpcApproveSel" title="اعتماد المجموعات المحددة">✓ اعتماد المحدد</button>' +
-    '<button class="btn sm" data-act="dpcPubAll" style="background:#D4A853;color:#111;font-weight:bold" title="كل المعتمد بصوره على كل منصاته — متدرّج">🚀 نشر كل المعتمد (' + approved.length + ')</button></div>' +
-    '<div class="tiny" style="margin:6px 0;border:1px solid #0a66c2;border-radius:8px;padding:4px 8px">in <b>لينكدإن:</b> يُنشر من صفحة <b>Al-Saad Sports Academy</b> لا من حسابك الشخصي · لا Repost من الحساب الشخصي</div>';
+    '<button class="btn sm" data-act="dpcPubAll" title="كل المعتمد بصوره على كل منصاته — متدرّج">🚀 نشر كل المعتمد (' + approved.length + ')</button></div>';
+  if (!gs.length) h += '<div class="card small muted">لا منشورات اليوم — افتح «🗓 الأسبوع» لترى القادم</div>';
   var lastDay = '';
+  h += '<div class="dpc-grid">';
   gs.forEach(function (g) {
-    var day = fmtDate(g.at, false); if (day !== lastDay) { h += '<div class="tiny" style="margin-top:8px;font-weight:bold">' + esc(day) + '</div>'; lastDay = day; }
-    var ids = g.rows.map(function (r) { return r.post_id; }), media = (g.rows.filter(function (r) { return r.media_url; })[0] || {}).media_url, pend = g.rows.filter(function (r) { return r.status !== 'منشور'; }).map(function (r) { return r.post_id; });
-    var draft = g.rows.some(function (r) { return r.status === 'بانتظار الموافقة' || r.status === 'مسودة'; });
-    h += '<div class="dp-res" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px solid var(--line)">' +
-      '<input type="checkbox" data-act="dpcSel" data-k="' + esc(g.key) + '"' + (DPC.sel[g.key] ? ' checked' : '') + ' style="width:auto">' + dpcThumb_(media) +
-      '<div class="grow" style="min-width:160px"><b>' + esc(fmtDate(g.at, true)) + '</b> <span class="muted tiny">' + esc(Text_short_(g.title, 70)) + '</span><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">' + g.rows.map(function (r) { return dpcChip_(r, auto); }).join('') + '</div></div>' +
-      (draft ? '<button class="btn sm" data-act="dpcApprove" data-ids="' + esc(ids.join(',')) + '">✓ اعتمد</button>' : '') +
-      (pend.length ? '<button class="btn sm" data-act="dpcPubGroup" data-ids="' + esc(pend.join(',')) + '" title="انشر هذا المنشور على كل منصاته">🚀 كل منصاته</button>' : '') +
-      '<select data-act="dpcCopy" class="btn sm" style="width:auto" title="انسخ نص منصة"><option value="">📋 نسخ…</option>' + g.rows.map(function (r) { return '<option value="' + esc(r.post_id) + '">' + esc(r.platform) + '</option>'; }).join('') + '</select>' +
-      (media ? '<a class="btn sm" target="_blank" rel="noopener" href="https://drive.google.com/uc?export=download&id=' + encodeURIComponent(media) + '" title="تنزيل الصورة">⬇</a>' : '') +
-      '<button class="btn sm" data-act="dpcPhoto" data-ids="' + esc(ids.join(',')) + '" title="تغيير الصورة">📷</button></div>';
+    var day = fmtDate(g.at, false); if (all && day !== lastDay) { h += '<div class="dpc-day">' + esc(day) + '</div>'; lastDay = day; }
+    var media = (g.rows.filter(function (r) { return r.media_url; })[0] || {}).media_url, ids = g.rows.map(function (r) { return r.post_id; });
+    var done = g.rows.filter(function (r) { return r.status === 'منشور'; }).length, st = done === g.rows.length ? ['نُشر', 'ok'] : done ? ['نُشر جزئياً', 'part'] : g.rows.some(function (r) { return r.status === 'معتمد'; }) ? ['معتمد', 'appr'] : ['بانتظار', 'wait'];
+    h += '<div class="dpc-card dpc-' + st[1] + '"><div class="dpc-head"><b>' + esc(fmtDate(g.at, true)) + '</b><span class="grow"></span><span class="dpc-st">' + st[0] + '</span></div>' +
+      '<div class="dpc-body">' + dpcThumb_(media) + '<div class="dpc-txt">' + esc(Text_short_(g.title, 140)) + '</div></div><div class="dpc-acc">' +
+      g.rows.map(function (r) {
+        var k = platKey_(r.platform), pub = r.status === 'منشور', fail = /^فشل/.test(String(r.result || '')), url = (String(r.result || '').match(/https?:\/\/\S+/) || [''])[0];
+        var mode = pub ? '' : auto[k] ? 'آلي' : 'يدوي';
+        return '<label class="dpc-a' + (pub ? ' is-pub' : fail ? ' is-fail' : '') + '" title="' + esc(r.platform + ' · ' + r.status + (r.result ? ' · ' + r.result : '')) + '">' +
+          (pub ? '✓' : '<input type="checkbox" class="dpc-cb" value="' + esc(r.post_id) + '" checked>') + ' ' + (DP_PL_ICON[k] || '•') + ' ' + esc(k) +
+          (pub ? (url ? ' <a href="' + esc(url) + '" target="_blank" rel="noopener">فتح</a>' : ' نُشر') : ' <span class="muted tiny">' + (fail ? 'فشل — أعد' : mode) + '</span>') + '</label>';
+      }).join('') + '</div>' +
+      (done < g.rows.length ? '<button class="btn dpc-go" data-act="dpcGo">🚀 اعتمد وانشر على المحدد</button>' : '') +
+      '<div class="dpc-tools"><select data-act="dpcCopy" class="btn sm" style="width:auto" title="انسخ نص منصة"><option value="">📋 نسخ…</option>' + g.rows.map(function (r) { return '<option value="' + esc(r.post_id) + '">' + esc(r.platform) + '</option>'; }).join('') + '</select>' +
+      (media ? '<a class="btn sm" target="_blank" rel="noopener" href="https://drive.google.com/uc?export=download&id=' + encodeURIComponent(media) + '" title="تنزيل الصورة أو الفيديو">⬇</a>' : '') +
+      '<button class="btn sm" data-act="dpcPhoto" data-ids="' + esc(ids.join(',')) + '" title="تغيير الصورة">📷</button></div></div>';
   });
-  return h + '<input type="file" id="dpc_img" accept="image/*" style="display:none"><input type="file" id="dpc_dir" webkitdirectory multiple style="display:none"></div>';
+  return h + '</div><input type="file" id="dpc_img" accept="image/*" style="display:none"><input type="file" id="dpc_dir" webkitdirectory multiple style="display:none">';
 }
+/** «اعتمد وانشر على المحدد»: المعلَّم فقط — يُعتمد ما لم يُعتمد ثم يُنشر: المربوط آلياً، وغير المربوط يُجهَّز للنسخ («يدوي» لا «فشل») */
+ACT.dpcGo = function (el) {
+  var card = el.closest('.dpc-card'), ids = Array.prototype.map.call(card.querySelectorAll('.dpc-cb:checked'), function (c) { return c.value; });
+  if (!ids.length) return toast('علّم حساباً واحداً على الأقل', true);
+  var need = dpcRows_().filter(function (r) { return ids.indexOf(r.post_id) > -1 && r.status !== 'معتمد'; }).map(function (r) { return r.post_id; });
+  el.disabled = true; el.textContent = '⏳ جارٍ النشر على ' + ids.length + '…';
+  (need.length ? api('action', 'postApproveMany', { post_ids: need }) : Promise.resolve()).then(function () { return api('action', 'postPublish', { post_ids: ids, at: '' }); })
+    .then(dpAfterPublish_).catch(function (e) { el.disabled = false; el.textContent = '🚀 اعتمد وانشر على المحدد'; toast(errMsg(e), true); });
+};
 function dpcRows_() { return (S.data && S.data.calendar) || []; }
 function dpcReload_(msg) { if (msg) toast(msg); go('dailyPost', {}, true); }
 ACT.dpcSel = function (el) { DPC.sel[el.dataset.k] = el.checked; };
@@ -1007,9 +1028,12 @@ SCREENS.dailyPost = { render: function (d) {
   var mode = dpMode_();
   setTimeout(dpAutoRefresh_, 0);
   // أزرار تقسيم العرض فوق العمودين — تبقى ظاهرة في كل الأوضاع (حتى 100% لنا أو 100% منافسون)
-  var seg = '<span class="dp-seg">' + [['ours', '⛶ 100% لنا'], ['split', '◧ ⅓ لنا · ⅔ منافسون'], ['comp', '⛶ 100% منافسون']].map(function (m) {
-    return '<button class="' + (mode === m[0] ? 'on' : '') + '" data-act="dpMode" data-m="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span>';
-  return north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">📣 منشور اليوم</h1>' + seg + '</div><div id="dp_cal">' + dpCal_(d) + '</div><div class="dp2 mode-' + mode + '"><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
+  var tab = DP.tab || 'pub', tb = [['pub', '🚀 النشر — اليوم'], ['week', '🗓 الأسبوع'], ['write', '✍️ اكتب منشوراً'], ['comp', '👁 المنافسون']];
+  var seg = '<span class="dp-seg">' + tb.map(function (m) { return '<button class="' + (tab === m[0] ? 'on' : '') + '" data-act="dpTab" data-t="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</span>';
+  return north(d.north) + '<div class="row between" style="align-items:center;gap:8px;flex-wrap:wrap"><h1 style="margin:0">📣 منشور اليوم</h1>' + seg + '</div>' +
+    '<div id="dp_cal" class="dp-tab"' + (tab === 'pub' || tab === 'week' ? '' : ' hidden') + '>' + dpCal_(d, tab === 'week') + '</div>' +
+    '<div class="dp2 mode-ours dp-tab"' + (tab === 'write' ? '' : ' hidden') + '><div class="dp-ours" id="dp_ours">' + dpOurs_(d) + '</div></div>' +
+    '<div class="dp2 mode-comp dp-tab"' + (tab === 'comp' ? '' : ' hidden') + '><div class="dp-compcol" id="dp_comp">' + dpComp_(d) + '</div></div>';
 } };
 function dpKeep_() { var b = $('dp_body'); if (b) DP.body = b.value; var a = $('dp_at'); if (a) DP.at = a.value; }
 function dpRedrawOurs_() { dpKeep_(); var el = $('dp_ours'); if (el) el.innerHTML = dpOurs_(S.data); }
@@ -1027,6 +1051,9 @@ ACT.dpType = function (el) { DP.type = el.dataset.t; dpRedrawOurs_(); };
 ACT.dpPlat = function (el) { var p = el.dataset.p; DP.off[p] = !DP.off[p]; dpRedrawOurs_(); };
 ACT.dpWhen = function (el) { DP.when = el.dataset.w; dpRedrawOurs_(); };
 ACT.dpFilter = function (el) { DP.filter = el.dataset.k; dpRedrawComp_(); };
+ACT.dpTab = function (el) { DP.tab = el.dataset.t; var w = $('dp_cal'); if (w && (DP.tab === 'pub' || DP.tab === 'week')) w.innerHTML = dpCal_(S.data, DP.tab === 'week');
+  var ts = document.querySelectorAll('.dp-tab'); ts[0].hidden = !(DP.tab === 'pub' || DP.tab === 'week'); ts[1].hidden = DP.tab !== 'write'; ts[2].hidden = DP.tab !== 'comp';
+  Array.prototype.forEach.call(document.querySelectorAll('.dp-seg button'), function (b) { b.classList.toggle('on', b.dataset.t === DP.tab); }); };
 ACT.dpMode = function (el) { DP.mode = el.dataset.m; try { localStorage.setItem('ops_dp_mode', DP.mode); } catch (e) {} var w = document.querySelector('.dp2'); if (w) w.className = 'dp2 mode-' + DP.mode;
   Array.prototype.forEach.call(document.querySelectorAll('.dp-seg button'), function (b) { b.classList.toggle('on', b.dataset.m === DP.mode); }); };
 ACT.dpSuggest = function (el) {
