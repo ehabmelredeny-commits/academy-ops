@@ -1100,7 +1100,9 @@ ACT.dpPublish = function (el) {
   if (!DP.body.trim()) return toast('اكتب نص المنشور', true);
   if (!plats.length) return toast('اختر منصة واحدة على الأقل', true);
   if (DP.when === 'at' && !DP.at) return toast('اختر التاريخ والساعة', true);
-  if ((DP.type === 'يوميات' || DP.type === 'ريلز') && !($('dp_media') && $('dp_media').files[0])) return toast(DP.type === 'ريلز' ? 'أضف الفيديو' : 'أضف صورة اليوميات', true);
+  // إنستغرام لا يقبل نصاً بلا صورة (ملاحظة المالك 2026-10-31: نشر «صورة» بلا ملف فلم يُنشر شيء) — يُطلب الملف قبل الإرسال
+  var noFile = !($('dp_media') && $('dp_media').files[0]), igOn = plats.some(function (p) { return /انستغرام|انستقرام|instagram/i.test(p); });
+  if ((DP.type === 'يوميات' || DP.type === 'ريلز' || (DP.type === 'صورة' && igOn)) && noFile) return toast(DP.type === 'ريلز' ? 'أضف الفيديو' : DP.type === 'صورة' ? 'أضف الصورة — إنستغرام لا ينشر نصاً بلا صورة' : 'أضف صورة اليوميات', true);
   el.disabled = true; el.textContent = '⏳ ينشر…';
   var ids;
   dpFile_().then(function (file) {
