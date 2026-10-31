@@ -1117,6 +1117,13 @@ ACT.dpPubOne = function (el) { el.disabled = true; api('action', 'postPublish', 
 document.addEventListener('change', function (e) { if (e.target && e.target.id === 'dp_media') { var f = e.target.files[0], n = $('dp_media_n'); if (n) n.textContent = f ? ' ✓ ' + f.name : ''; } });
 
 /* 🌐 افتح كل حساباتنا (الزر القديم — طلب المالك 2026-10-30): الروابط من الإعدادات ← الحسابات، تُحمَّل مسبقاً لأن المتصفح لا يفتح النوافذ إلا داخل الضغطة */
+/* 🔧 أزرار المنشور اليومي القديمة كانت ميتة في v2 (فحص الأزرار 2026-10-31): معالجاتها في Screens.html غير المضمَّن — نُقلت هنا بنفس السلوك */
+function copyText(t){var fb=function(){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('نُسخ النص')}catch(e){toast('انسخ يدوياً: حدّد النص',true)}document.body.removeChild(ta)};try{if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(t).then(function(){toast('نُسخ النص')},fb)}catch(e){}fb()}
+function val(id){var e=$(id);return e?e.value:''}
+function act(name,args,okMsg){return api('action',name,args).then(function(r){if(okMsg)toast(okMsg);window.dailyPost();return r}).catch(function(e){toast(errMsg(e),true);throw e})}
+ACT.copyVal=function(el){copyText(el.dataset.text)};
+ACT.postReject=function(el){var r=prompt('سبب الرفض (يتعلّم منه النظام):');if(r)act('postReject',{post_id:el.dataset.id,reason:r},'رُفض — سيتجنّبه غداً')};
+ACT.postPub=function(el){act('postPublished',{post_id:el.dataset.id,ref:val('pu_'+el.dataset.id)},'سُجّل النشر')};
 ACT.openOurAccounts=function(){var L=(S.data&&S.data.our_accounts)||[];if(!L.length)return toast('لا روابط حسابات في الإعدادات ← الحسابات',true);
   var n=0;L.forEach(function(u){var w=window.open(u,'_blank');if(w){try{w.opener=null}catch(e){}n++}});
   toast(n<L.length?'فُتح '+n+' من '+L.length+' — اسمح للموقع بالنوافذ المنبثقة (أيقونة 🚫 يمين شريط العنوان ← «السماح دائماً») ثم اضغط مرة أخرى':'🌐 فُتحت '+n+' حسابات',n<L.length)};
