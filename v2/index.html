@@ -955,7 +955,7 @@ function dpCal_(d, all) {
       (done < g.rows.length ? '<button class="btn dpc-go" data-act="dpcGo">🚀 اعتمد وانشر على المحدد</button>' : '') +
       '<div class="dpc-tools">' + (done < g.rows.length ? '<button class="btn sm" data-act="dpcPrep" data-k="' + esc(g.key) + '" title="ينزّل الملف ويفتح كل حساب على صفحة منشور جديد والنص جاهز — أرفق الملف واضغط نشر">📤 جهّز للنشر</button>' : '') + '<select data-act="dpcCopy" class="btn sm" style="width:auto" title="انسخ نص منصة"><option value="">📋 نسخ…</option>' + g.rows.map(function (r) { return '<option value="' + esc(r.post_id) + '">' + esc(r.platform) + '</option>'; }).join('') + '</select>' +
       (media ? '<a class="btn sm" target="_blank" rel="noopener" href="https://drive.google.com/uc?export=download&id=' + encodeURIComponent(media) + '" title="تنزيل الصورة أو الفيديو">⬇</a>' : '') +
-      '<button class="btn sm" data-act="dpcPhoto" data-ids="' + esc(ids.join(',')) + '" title="تغيير الصورة">📷</button></div></div>';
+      '<button class="btn sm" data-act="dpcPhoto" data-ids="' + esc(ids.join(',')) + '" title="تغيير الصورة">📷</button>' + (done < g.rows.length ? '<button class="btn sm" data-act="dpcTime" data-k="' + esc(g.key) + '" title="غيّر يوم وساعة النشر لكل حسابات هذا المنشور">🕒</button>' : '') + '</div></div>';
   });
   return h + '</div><input type="file" id="dpc_img" accept="image/*" style="display:none"><input type="file" id="dpc_dir" webkitdirectory multiple style="display:none">';
 }
@@ -977,6 +977,16 @@ ACT.dpcPrep = function (el) {
 ACT.dpcDone = function (el) { var id = el.dataset.id, r = dpcRows_().filter(function (x) { return x.post_id === id; })[0]; if (!r) return; el.disabled = true;
   (r.status === 'معتمد' ? Promise.resolve() : api('action', 'postApproveMany', { post_ids: [id] })).then(function () { return api('action', 'postPublished', { post_id: id, ref: 'يدوي' }); })
     .then(function () { r.status = 'منشور'; var w = $('dp_cal'); if (w) w.innerHTML = dpCal_(S.data, DP.tab === 'week'); toast('✓ عُلّم منشوراً'); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); }); };
+/** 🕒 غيّر الموعد (طلب المالك 2026-10-31): يوم وساعة جديدان لكل حسابات البطاقة غير المنشورة — بتوقيت الرياض */
+ACT.dpcTime = function (el) {
+  var g = dpcGroups_(dpcRows_()).filter(function (x) { return x.key === el.dataset.k; })[0]; if (!g) return;
+  var t0 = new Date(g.at), pad = function (n) { return (n < 10 ? '0' : '') + n; }, cur = t0.getFullYear() + '-' + pad(t0.getMonth() + 1) + '-' + pad(t0.getDate()) + ' ' + pad(t0.getHours()) + ':' + pad(t0.getMinutes());
+  var v = prompt('الموعد الجديد (السنة-الشهر-اليوم الساعة:الدقيقة) بتوقيت الرياض:', cur); if (!v) return;
+  var m = String(v).trim().match(/^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})[ T]+([0-9]{1,2}):([0-9]{2})$/); if (!m) return toast('اكتب الموعد هكذا: 2026-11-01 19:30', true);
+  var at = m[1] + '-' + pad(+m[2]) + '-' + pad(+m[3]) + 'T' + pad(+m[4]) + ':' + m[5] + ':00+03:00', rows = g.rows.filter(function (r) { return r.status !== 'منشور'; });
+  el.disabled = true; rows.reduce(function (p, r) { return p.then(function () { return api('action', 'postSchedule', { post_id: r.post_id, at: at }); }); }, Promise.resolve())
+    .then(function () { dpcReload_('🕒 تغيّر موعد ' + rows.length + ' حساب إلى ' + v); }).catch(function (e) { el.disabled = false; toast(errMsg(e), true); });
+};
 /** «اعتمد وانشر على المحدد»: المعلَّم فقط — يُعتمد ما لم يُعتمد ثم يُنشر: المربوط آلياً، وغير المربوط يُجهَّز للنسخ («يدوي» لا «فشل») */
 ACT.dpcGo = function (el) {
   var card = el.closest('.dpc-card'), ids = Array.prototype.map.call(card.querySelectorAll('.dpc-cb:checked'), function (c) { return c.value; });
