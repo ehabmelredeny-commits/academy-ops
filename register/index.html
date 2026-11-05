@@ -94,7 +94,7 @@ function renderSeats(){var box=$('seatbox'),cn=$('course').value,list=(SEAT.coho
     html+='<div id="smcard"></div>';box.innerHTML=html;box.style.display='block';
     Array.prototype.forEach.call(box.querySelectorAll('.sm-s[data-t]'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-t'),el.getAttribute('data-p'))}});Array.prototype.forEach.call(box.querySelectorAll('[data-c]'),function(el){el.onclick=function(){pickPeriod(el.getAttribute('data-c'))}});
     // فئة ممتلئة: رسالة أولوية الحجز بنفس العرض
-    m.tiers.forEach(function(t){if(!t.left)$('smcard').insertAdjacentHTML('beforeend','<div class="sm-hot">🔥 مقاعد '+t.name+' عليها طلب مرتفع الآن — سجّل بياناتك خلال دقيقة لتضمن عرض الخصم '+t.pct+'%، ويتواصل معك مستشار القبول لتأكيد مقعدك. <button type="button" class="sm-s" style="width:auto;padding:0 8px;background:'+TC[t.tier]+'" data-hot="'+t.tier+'">احجز أولويتي</button></div>')});
+    m.tiers.forEach(function(t){if(!t.left)$('smcard').insertAdjacentHTML('beforeend','<div class="sm-hot">🔥 مقاعد '+t.name+' عليها طلب مرتفع الآن — سجّل بياناتك خلال دقيقة لتضمن عرضك، ويتواصل معك مستشار القبول لتأكيد مقعدك. <button type="button" class="sm-s" style="width:auto;padding:0 8px;background:'+TC[t.tier]+'" data-hot="'+t.tier+'">احجز أولويتي</button></div>')});
     Array.prototype.forEach.call(box.querySelectorAll('[data-hot]'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-hot'),0)}});
   }).catch(function(){box.style.display='none'})}
 function pickSeat(k,p){var m=SEAT.map,t=m.tiers.filter(function(x){return x.tier===k})[0];SEAT.tier=k;
