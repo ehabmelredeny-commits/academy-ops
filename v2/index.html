@@ -488,15 +488,15 @@ function pRender(){var d=PD,s=d.settings||{},T=d.tiers||{basic:.5,plus:.65,premi
   document.querySelectorAll('#ptb td,#ptb th').forEach(function(t){t.style.padding='4px 5px';t.style.borderBottom='1px solid var(--line)';t.style.textAlign='right'})}
 function pRow(id){return (PD.rows||[]).filter(function(y){return String(y.id)===String(id)})[0]}
 function prSave(el){var id=el.dataset.id,k=el.dataset.k,p={id:Number(id)};p[k]=el.value;rpc('app_pricing_save',{token:TOK,p:p}).then(function(r){var x=pRow(id);if(x){x.official_price=r.official_price;x.draft=r.draft;x.kind=r.kind;x.hours=r.hours;x.h_theory=r.h_theory;x.h_practical=r.h_practical;x.conditions=r.conditions}pRender()}).catch(function(){alert('تعذّر الحفظ')})}
-function pCfg(el){var o={};o[el.dataset.k]=Number(el.value);rpc('app_pricing_save',{token:TOK,p:{settings:o}}).then(pLoad)}
+function pCfg(el){var o={};o[el.dataset.k]=Number(el.value);rpc('app_pricing_save',{token:TOK,p:{settings:o}}).then(prLoad)}
 function pGrp(g){PG[g]=PG[g]?0:1;try{localStorage.setItem('pg',JSON.stringify(PG))}catch(e){}pRender()}
 function pTog(id){var r=pRow(id);if(!r)return;var p={id:Number(id),enabled:!r.enabled};
   if(r.enabled){var why=prompt('سبب الإيقاف (مثلاً: لا نملكها بعد، لا مدرب، موقوفة مؤقتاً):',r.disabled_reason||'');if(why===null)return;p.disabled_reason=why}
   else if(!r.course_id&&!confirm('لا دورة لها في النظام بعد — عند الاعتماد تُنشأ دورة جديدة باسمها وتظهر للحجز. متابعة؟'))return;
-  rpc('app_pricing_save',{token:TOK,p:p}).then(pLoad)}
-function pCopy(id){var dl=prompt('نوع الحضور للنسخة الجديدة (حضوري / أونلاين / هجين):','أونلاين');if(!dl)return;var v=prompt('وصف إضافي (اختياري: مكثف، إنجليزي، مسائي…):','');rpc('app_pricing_save',{token:TOK,p:{copy_of:Number(id),delivery:dl,variant:v||''}}).then(pLoad).catch(function(){alert('موجودة مسبقاً أو تعذّر الإنشاء')})}
+  rpc('app_pricing_save',{token:TOK,p:p}).then(prLoad)}
+function pCopy(id){var dl=prompt('نوع الحضور للنسخة الجديدة (حضوري / أونلاين / هجين):','أونلاين');if(!dl)return;var v=prompt('وصف إضافي (اختياري: مكثف، إنجليزي، مسائي…):','');rpc('app_pricing_save',{token:TOK,p:{copy_of:Number(id),delivery:dl,variant:v||''}}).then(prLoad).catch(function(){alert('موجودة مسبقاً أو تعذّر الإنشاء')})}
 function pNew(){var n=prompt('اسم الدورة:');if(!n)return;var k=prompt('نوع الدورة (مهنية / دورة / دورة قصيرة / ندوة / ورشة عمل / حدث / أخرى)\n• دورة قصيرة: ساعة تطوير لكل ساعة إن رُبطت بمعيار مهني\n• ندوة: نصف ساعة تطوير غالباً\n• ورشة/حدث: نصف ساعة تطوير لكل ساعة + شهادة حضور:','دورة قصيرة')||'دورة';var dl=prompt('الحضور (حضوري / أونلاين / هجين):','حضوري')||'حضوري';
-  rpc('app_pricing_save',{token:TOK,p:{'new':{name_ar:n,kind:k,delivery:dl}}}).then(pLoad).catch(function(){alert('موجودة مسبقاً أو تعذّر الإنشاء')})}
+  rpc('app_pricing_save',{token:TOK,p:{'new':{name_ar:n,kind:k,delivery:dl}}}).then(prLoad).catch(function(){alert('موجودة مسبقاً أو تعذّر الإنشاء')})}
 function pApprove(){var ids=(PD.rows||[]).filter(pDirty).map(function(r){return Number(r.id)});
   if(!ids.length)return alert('لا تعديلات للاعتماد');if(!confirm('اعتماد '+ids.length+' سطر؟ تُكتب في النظام (الحجز والمالية والرد الآلي والعقل) خلال ١٠ دقائق.'))return;
   rpc('app_pricing_approve',{token:TOK,ids:ids}).then(function(n){alert('اعتُمد: '+n+' — يصلك تأكيد عند الكتابة في النظام');prLoad()})}
