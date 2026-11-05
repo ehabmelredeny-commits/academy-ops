@@ -17,7 +17,7 @@ button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-
 
 <div class="wrap">
 <button type="button" class="thm" id="thm" aria-label="الوضع الليلي/النهاري">🌙</button>
-<div class="hero"><img src="../brand/logo-transparent.png" alt="أكاديمية السعد الرياضية" style="display:block;margin:0 auto 10px;width:150px;max-width:45%;height:auto"><h1 id="t">ابدأ مسيرتك كمدرب محترف</h1><span class="en">Start your journey as a professional trainer</span><p style="margin-top:6px" id="sub">احجز مقعدك في دقيقة — واختر فترتك ومقعدك بخصم يصل إلى 50% لأول المقاعد<span class="en">Book your seat in a minute — pick your period and seat with up to 50% off for the first seats</span></p></div>
+<div class="hero"><img src="../brand/logo-transparent.png" alt="أكاديمية السعد الرياضية" style="display:block;margin:0 auto 10px;width:150px;max-width:45%;height:auto"><h1 id="t">ابدأ مسيرتك كمدرب محترف</h1><span class="en">Start your journey as a professional trainer</span><p style="margin-top:6px" id="sub">احجز مقعدك في دقيقة — واختر فترتك ومقعدك بسعر إطلاق خاص لأول 8 مقاعد<span class="en">Book your seat in a minute — pick your period and seat with a special launch price for the first 8 seats</span></p></div>
 <form class="card" id="f" novalidate>
 <label for="name">الاسم *<small class="en">Full name *</small></label><input id="name" autocomplete="name" required>
 <div id="pconsent" style="font-size:10.5px;color:#d9a91a;margin:8px 0 -4px;line-height:1.5">نحفظ اسمك ورقمك فور كتابتهما — حتى لو لم تُكمل — لنتواصل معك بخصوص تسجيلك فقط، بلا رسائل تسويقية. <a href="../privacy/" target="_blank" style="color:inherit">سياسة الخصوصية</a></div><label for="phone">رقم الجوال (واتساب) *<small class="en">Mobile (WhatsApp) *</small></label><input id="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required>
@@ -67,7 +67,7 @@ fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j)
 var SEAT={cohorts:[],tier:'',cohort:''},TC={premium:'#c99a2e',plus:'#6a3fa0',basic:'#2a8a55'};
 function sq(fn,b){var A={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};if(!A)return Promise.reject();return fetch(A.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:A.anon,Authorization:'Bearer '+A.anon,'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){return r.json()})}
 // الخريطة والأسعار برابط حجز خاص فقط (?b=TOKEN — قرار المالك 2026-10-21)
-function privateMode(){var sub=$('sub');if(sub)sub.innerHTML='✅ وصلنا تسجيلك — اختر الفترة ومقعدك وشاهد سعرك بعد الخصم';
+function privateMode(){var sub=$('sub');if(sub)sub.innerHTML='✅ وصلنا تسجيلك — اختر الفترة ومقعدك وشاهد سعرك';
   ['email','city','persona','note','member_no','member_consent'].forEach(function(id){var el=$(id);if(!el)return;var lb=document.querySelector('label[for="'+id+'"]');if(lb)lb.style.display='none';el.style.display='none';if(el.parentNode&&el.parentNode.tagName==='LABEL')el.parentNode.style.display='none'});
   var cr=$('course');if(cr){cr.style.display='none';var lc=document.querySelector('label[for="course"]');if(lc)lc.style.display='none'}
   var sb=$('seatbox'),f=$('f');if(sb&&f&&!$('wzbar'))f.insertBefore(sb,f.firstChild);

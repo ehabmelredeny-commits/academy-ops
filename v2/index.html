@@ -1048,7 +1048,7 @@ document.addEventListener('change', function (e) {
 ACT.dpcPhoto = function (el) { DPC.photoIds = el.dataset.ids.split(','); var i = $('dpc_img'); if (i) i.click(); };
 ACT.dpcImport = function () { var i = $('dpc_dir'); if (i) i.click(); else toast('افتح التقويم أولاً', true); };
 /* 📥 الاستيراد: posts.json + الصور + caption.txt لكل منصة — يدخل «مسودة» دائماً، بفحص قواعد الصياغة، ويرفض المكرر والمنصة المجهولة */
-var DPC_BAD = [[/اعتماد\s*مهني|الاعتماد المهني|\bLDI\b/i, 'ذكر الاعتماد المهني/LDI قبل القبول'], [/\d+\s*(ر\.س|ريال|SAR)/i, 'سعر خارج كتالوج واتساب'], [/خصم يصل إلى (?!50%)/, 'صيغة الخصم غير المعتمدة']];
+var DPC_BAD = [[/اعتماد\s*مهني|الاعتماد المهني|\bLDI\b/i, 'ذكر الاعتماد المهني/LDI قبل القبول'], [/\d+\s*(ر\.س|ريال|SAR)/i, 'سعر خارج كتالوج واتساب'], [/خصم\s*(يصل إلى\s*)?\d+\s*%|\d+\s*%\s*خصم/, 'صيغة خصم غير معتمدة — استعمل «سعر إطلاق خاص لأول 8 مقاعد»']];
 function dpcText_(file) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok(String(r.result)); }; r.readAsText(file); }); }
 function dpcB64_(file) { return new Promise(function (ok) { var r = new FileReader(); r.onload = function () { ok(String(r.result).split(',')[1]); }; r.readAsDataURL(file); }); }
 function dpcCaption_(txt, img) { var secs = String(txt).replace(/^﻿/, '').split(/^=+.*=+$/m); for (var i = 0; i < secs.length; i++) { if (secs[i].indexOf(img) > -1) { return secs[i].split('\n').filter(function (l) { return !/^الصورة:/.test(l.trim()); }).join('\n').trim(); } } return ''; }
