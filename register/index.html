@@ -163,7 +163,7 @@ function seatsPaint(){var box=$('seatbox');if(!box)return;
   var lg=box.querySelector('.sm-lg:last-of-type');if(lg&&!box.querySelector('#lglater')&&box.querySelector('[data-later]'))lg.insertAdjacentHTML('beforeend','<span id="lglater">🔒 غير متاح</span>')}
 if(!window.CHST){window.CHST=1;var cs=document.createElement('style');cs.textContent='#seatbox .sm-s[data-sq].sm-sel{outline:3px solid #1D9E75;outline-offset:2px;transform:scale(1.1)}#seatbox .sm-s[data-sq].sm-sel::after{content:"✓";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:#1D9E75;color:#fff;border-radius:50%;width:15px;height:15px;font-size:10px;line-height:15px}';document.head.appendChild(cs);
   new MutationObserver(function(){seatsPaint();rectLayout()}).observe(document.body,{childList:true,subtree:true})}
-// ▭ القاعة بطاولة مستطيلة (قرار المالك 2026-10-25): الأقرب للمدرب بريميوم ثم بلس ثم أساسي · داخل الطاولة: برامجنا (الدورة المختارة أولاً)
+// ▭ القاعة بطاولة مستطيلة (قرار المالك 2026-10-25): الأقرب للمدرب بريميوم ثم بلاس ثم أساسي · داخل الطاولة: برامجنا (الدورة المختارة أولاً)
 function rectLayout(){var box=$('seatbox');if(!box||box.querySelector('#smrect'))return;var all=Array.prototype.slice.call(box.querySelectorAll('.sm-s[data-p]'));if(all.length<4)return;
   var rank={premium:0,plus:1,basic:2};all.sort(function(a,b){return (rank[a.dataset.t]-rank[b.dataset.t])||(a.dataset.p-b.dataset.p)});
   var n=all.length,bot=n>=8?(n%2?3:2):0,side=all.slice(0,n-bot),L=[],R=[];side.forEach(function(el,i){(i%2?L:R).push(el)});
