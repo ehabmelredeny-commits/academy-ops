@@ -295,14 +295,14 @@ var CGRP=[['customers','💬 المحادثات',''],['waManual','📱 واتس�
 function custBar(cur){return '<div class="chips grpbar" style="margin:0">'+CGRP.map(function(g){return g[0]===cur?'<a class="on">'+g[1]+'</a>':'<a onclick="'+g[0]+'()"'+(g[2]?' title="'+g[2]+'"':'')+'>'+g[1]+'</a>'}).join('')+'</div>'}
 function grpBarEnsure(cur){if(document.querySelector('#app .grpbar'))return;var w=document.querySelector('#app .wrap')||$('app');if(!w)return;var d=document.createElement('div');d.style.cssText='display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0 8px';d.innerHTML='<b style="font-size:15px">👥 العملاء</b>'+custBar(cur);var nv=$('app').querySelector('.nav'),nb=$('navb'),ref=nb||nv;if(ref&&ref.parentNode)ref.parentNode.insertBefore(d,ref.nextSibling);else w.insertBefore(d,w.children[1]||null)}
 setTimeout(function(){CGRP.slice(2).forEach(function(g){var f=window[g[0]];if(typeof f!=='function'||f.__grp)return;var w=function(){var r=f.apply(this,arguments);setTimeout(function(){grpBarEnsure(g[0])},0);setTimeout(function(){grpBarEnsure(g[0])},900);return r};w.__grp=1;window[g[0]]=w})},0);
-var CF='',CQ='',CROWS=[],CCK='',CT=0,CMSG=null,CCONTACT='',CLT=0;
+var CF='',CQ='',CROWS=[],CCK='',CTM=0,CMSG=null,CCONTACT='',CLT=0;
 function cLock(){if(Date.now()-CLT<60000)return;CLT=Date.now();rpc('app_lock',{token:TOK,ck:CCK,mins:10}).catch(function(){})}
 var CST={'جديد':'#21406a','مهتم':'#21406a','سجّل':'#5a4a12','دفع':'#1f5a3a','خريج':'#3a2a5a'};
 function customers(){TAB='customers';if(!TOK)return loginScreen();
   $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b style="font-size:17px">👥 العملاء</b>'+custBar('customers')+'<span class="sp"></span><button class="btn s" onclick="askScreen(1)" title="الصق رابط سؤال من منصة أخرى فيدخل «يسألون الآن» برد مقترح">+ رد على سؤال من منصة أخرى</button><button class="ib" title="تحديث" onclick="cLoad()">⟳</button></div>'+
     '<div id="pilotb" style="margin-top:6px"></div><div id="cal"></div><input id="cq" placeholder="🔍 ابحث بالاسم أو الجوال أو الرسالة أو الدورة" value="'+esc(CQ)+'" oninput="cType()" style="margin-top:6px"><div class="chips" id="cch"></div>'+
     '<div class="pg" id="pg"><div class="pl" id="pl" style="overflow-x:auto"><div class="pr h">جارٍ التحميل…</div></div><div class="pd" id="pd"><div class="card mut c">اختر عميلاً لفتح محادثته</div></div></div>');cLoad()}
-function cType(){clearTimeout(CT);CT=setTimeout(function(){CQ=$('cq').value;cLoad()},350)}
+function cType(){clearTimeout(CTM);CTM=setTimeout(function(){CQ=$('cq').value;cLoad()},350)}
 function cF(f){CF=f;cLoad()}
 function cLoad(){PLT=0;pPing();rpc('app_customers',{token:TOK,f:CF,q:CQ,lim:120,off:0}).then(function(r){var c=r.counts||{};CROWS=r.rows||[];
   var al=r.alerts||[];$('cal').innerHTML=al.length?'<div style="margin:6px 0;padding:5px 10px;background:rgba(240,160,32,.15);border-right:3px solid #f0a020;border-radius:6px;display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px">🔔 '+al.map(function(a){var ans=a.answers||{},bits=[ans.goal,ans.level,ans.exp,ans.mode].filter(Boolean).join('/');return '<a style="cursor:pointer;color:#e0a030" data-ck="'+esc(a.ck)+'" onclick="cOpen(this.dataset.ck)">'+esc(a.kind||'')+': '+esc(a.name||'—')+' · <span dir="ltr">'+esc(a.phone||'')+'</span>'+(a.pref?' · '+esc(a.pref):'')+(bits?' · الاستشارة: '+esc(bits):'')+(ans.suggested?' ← '+esc(ans.suggested):'')+' ← افتح</a>'}).join('')+'</div>':'';
@@ -532,17 +532,17 @@ function tfNew(){var l=prompt('اسم الميزة كما يراها المتد�
   var key='f_'+Date.now().toString(36);rpc('app_tier_feature_save',{token:TOK,p:{key:key,label_ar:l,icon:ic,kind:kd==='حد'?'limit':kd==='معلومة'?'info':'button'}}).then(tfLoad).catch(function(){alert('تعذّر الإنشاء')})}
 function tfApprove(){if(!confirm('اعتماد تعديلات المزايا ونشرها في بوابة المتدربين؟'))return;rpc('app_tier_features_approve',{token:TOK}).then(function(n){alert('اعتُمد: '+n);tfLoad()})}
 /* 📜 الشهادات والاعتمادات (تصميم اعتمده المالك 2026-10-23): سطر لكل شهادة — الاسم الرسمي، النوع، الجهة، الدورة، الرقم، الصلاحية، الملف. تنبيه قبل الانتهاء (cert_watch) */
-var CT=null,CK='';
+var CRT=null,CK='';
 function certs(){TAB='certs';if(!TOK)return loginScreen();$('app').innerHTML=shell(nav()+'<div id="cb2"><div class="card mut">جارٍ التحميل…</div></div>');document.body.classList.add('cw');cLoad2()}
-function cLoad2(){rpc('app_certificates',{token:TOK}).then(function(d){CT=d;cRender2()}).catch(function(e){if(/unauthorized/.test(e.message)){TOK='';return loginScreen('انتهت الجلسة — ادخل من جديد')}$('cb2').innerHTML='<div class="card mut">تعذّر التحميل</div>'})}
-function cRender2(){var K=['اعتماد برنامج','ترخيص','شهادة مدرب','أخرى'],S=['لم يُقدَّم','بانتظار القبول','سارية','مرفوضة','ملغاة'],A=CT.alert_days||[90,60];
-  var R=(CT.rows||[]).filter(function(r){return !CK||r.kind===CK});
-  var cnt=function(st){return (CT.rows||[]).filter(function(r){return r.state===st}).length};
+function cLoad2(){rpc('app_certificates',{token:TOK}).then(function(d){CRT=d;cRender2()}).catch(function(e){if(/unauthorized/.test(e.message)){TOK='';return loginScreen('انتهت الجلسة — ادخل من جديد')}$('cb2').innerHTML='<div class="card mut">تعذّر التحميل</div>'})}
+function cRender2(){var K=['اعتماد برنامج','ترخيص','شهادة مدرب','أخرى'],S=['لم يُقدَّم','بانتظار القبول','سارية','مرفوضة','ملغاة'],A=CRT.alert_days||[90,60];
+  var R=(CRT.rows||[]).filter(function(r){return !CK||r.kind===CK});
+  var cnt=function(st){return (CRT.rows||[]).filter(function(r){return r.state===st}).length};
   var pill=function(r){var c=r.state==='منتهية'?'#b42318':r.state==='تنتهي قريباً'?'#a86b00':r.state==='سارية'?'#2a8a55':'#777';
     return '<span style="font-size:11px;padding:2px 8px;border-radius:9px;color:#fff;background:'+c+'">'+(r.days_left!=null&&r.status==='سارية'?(r.days_left<0?'منتهية منذ '+(-r.days_left)+' يوماً':r.days_left+' يوماً'+(r.state==='تنتهي قريباً'?' ⚠️':'')):esc(r.state))+'</span>'};
   var inp=function(r,k,w,typ){return '<input data-id="'+r.id+'" data-k="'+k+'" onchange="cSave2(this)" '+(typ?'type="'+typ+'"':'')+' value="'+esc(r[k]==null?'':String(r[k]))+'" style="width:'+w+'px;padding:3px;border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--ink);font-size:11px">'};
   var sel=function(r,k,opts){return '<select data-id="'+r.id+'" data-k="'+k+'" onchange="cSave2(this)" style="font-size:11px;padding:2px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:5px">'+opts.map(function(o){var v=typeof o==='object'?o[0]:o,l=typeof o==='object'?o[1]:o;return '<option value="'+esc(String(v))+'"'+(String(r[k]==null?'':r[k])===String(v)?' selected':'')+'>'+esc(l)+'</option>'}).join('')+'</select>'};
-  var courses=[['','—']].concat((CT.courses||[]).map(function(c){return [c.id,c.name]}));
+  var courses=[['','—']].concat((CRT.courses||[]).map(function(c){return [c.id,c.name]}));
   var rows=R.map(function(r){return '<tr><td>'+inp(r,'title',230)+'</td><td>'+sel(r,'kind',K)+'</td><td>'+inp(r,'issuer',90)+'</td><td>'+sel(r,'pricing_id',courses)+'</td><td>'+inp(r,'ref_no',120)+'</td><td>'+sel(r,'status',S)+'</td><td>'+inp(r,'valid_from',120,'date')+'</td><td>'+inp(r,'valid_to',120,'date')+'</td><td>'+pill(r)+'</td><td>'+inp(r,'drive_id',90)+(r.drive_id?' <a target="_blank" rel="noopener" href="https://drive.google.com/file/d/'+encodeURIComponent(r.drive_id)+'/view">📎</a>':'')+'</td><td>'+inp(r,'notes',140)+'</td></tr>'}).join('');
   $('cb2').innerHTML='<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b style="font-size:17px">📜 الشهادات والاعتمادات</b><div class="chips" style="margin:0">'+[['','الكل']].concat(K.map(function(k){return [k,k]})).map(function(x){return '<a class="'+(CK===x[0]?'on':'')+'" data-k="'+x[0]+'" onclick="CK=this.dataset.k;cRender2()">'+x[1]+'</a>'}).join('')+'</div><span class="sp"></span>'+
     '<label class="mut" style="font-size:12px">التنبيه قبل (أيام) <input value="'+A.join(',')+'" onchange="cAlert2(this.value)" style="width:70px;padding:3px;border:1px solid var(--line);border-radius:5px;background:var(--card);color:var(--ink)"></label><button class="btn s" onclick="cNew2()">+ شهادة</button></div>'+
@@ -589,12 +589,12 @@ function wmSend(){var r=wmSel();if(!r)return;var t=$('wmd')?$('wmd').value:r.dra
 function wmSent(){var r=wmSel();if(!r)return;rpc('app_wa_manual_set',{token:TOK,p_id:r.id,p:{status:'أُرسلت',draft:$('wmd')?$('wmd').value:r.draft}}).then(wmLoad)}
 function wmDrop(){var r=wmSel();if(!r||!confirm('إخفاء هذه المحادثة بلا رد؟'))return;rpc('app_wa_manual_set',{token:TOK,p_id:r.id,p:{status:'تُرك'}}).then(function(){WMS=null;wmLoad()})}
 function wmRead(){window.location.href='whatsapp://';rpc('app_wa_read_request',{token:TOK}).then(function(){wmLoad()})}
-var MQ='',MS='',MOFF=0,MROWS=[],MT=0;
+var MQ='',MS='',MOFF=0,MROWS=[],MTM=0;
 var MST={received:'جديدة',classified:'مصنّفة',drafted:'مسودة جاهزة',pending:'بانتظارك',approved:'معتمدة',sent:'أُرسلت',closed:'مغلقة',failed:'فشلت',ignored:'متجاهلة',spam:'مزعجة'};
 function mstl(s){return MST[s]||s||'—'}
 function inbox(){TAB='inbox';if(!TOK)return loginScreen();
   $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">الرسائل</b><span class="mut" id="mc"></span><span class="sp"></span><button class="ib" title="تحديث" onclick="mLoad(true)">⟳</button></div><div class="mut" style="font-size:12px">قراءة فقط هنا الآن — الرد والإرسال من النظام الحالي حتى يوم الانتقال.</div><input id="mq" placeholder="ابحث بالاسم أو الجوال أو نص الرسالة" value="'+esc(MQ)+'" oninput="mType()" style="margin-top:8px"><div class="chips" id="mch"></div><div class="pg" id="pg"><div class="pl" id="pl"><div class="pr h">جارٍ التحميل…</div></div><div class="pd" id="pd"><div class="card mut c">اختر رسالة لعرضها</div></div></div>');mLoad(true)}
-function mType(){clearTimeout(MT);MT=setTimeout(function(){MQ=$('mq').value;mLoad(true)},350)}
+function mType(){clearTimeout(MTM);MTM=setTimeout(function(){MQ=$('mq').value;mLoad(true)},350)}
 function mFilter(s){MS=s;mLoad(true)}
 function mLoad(reset){if(reset){MOFF=0;MROWS=[]}
   rpc('app_inbox',{token:TOK,q:MQ,st:MS,lim:40,off:MOFF}).then(function(r){var c=r.counts||{},all=0;for(var k in c)all+=c[k];MROWS=MROWS.concat(r.rows||[]);
