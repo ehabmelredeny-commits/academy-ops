@@ -59,7 +59,7 @@ fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j)
   var ref=(P.get('ref')||'').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,20);
   if(ref){$('member_no').value=ref;var AC={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
     if(AC)fetch(AC.url+'/rest/v1/rpc/ac_ref_info',{method:'POST',headers:{apikey:AC.anon,Authorization:'Bearer '+AC.anon,'Content-Type':'application/json'},body:JSON.stringify({code:ref})}).then(function(r){return r.json()}).then(function(x){
-      if(x&&x.valid){$('refbox').style.display='block';$('refbox').textContent='🎁 رشّحك '+(x.by||'صديقك')+' — خصم '+x.discount_pct+'% يُطبَّق عند تسجيلك';}}).catch(function(){});}
+      if(x&&x.valid){$('refbox').style.display='block';$('refbox').textContent='🎁 رشّحك '+(x.by||'صديقك')+' — خصم '+x.discount_pct+'% يُطبَّق عند تسجيلك';}else if(x&&x.pending){$('refbox').style.display='block';$('refbox').textContent='🎁 رمز الترشيح يتفعّل عند إعلان البرامج · Referral code activates when programmes are announced';}}).catch(function(){});}
   var b=CFG.biz||{},bits=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.phone].filter(Boolean);if(bits.length)$('foot').insertAdjacentHTML('beforeend','<div style="font-size:9px;opacity:.55;margin-top:6px">'+bits.join(' · ')+'</div>');
   loadTrackers(CFG);
 }).catch(function(){});
