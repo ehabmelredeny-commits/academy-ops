@@ -190,6 +190,9 @@ $('f').addEventListener('submit',function(e){
   var AQ={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
   var send=function(){return AQ?fetch(AQ.url+'/rest/v1/rpc/public_register',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({body:body})}).then(function(r){if(!r.ok)throw new Error('q');return r.json()}):Promise.reject()};
   var old=function(){return fetch(EXEC+'?public=register',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()})};
+  // قسيمة حملة ومقاعدها مكتملة: النص من القاعدة قبل الإرسال، فلا يصل رفض صامت
+  var vq=($('voucher')&&$('voucher').value.trim())||'',vchk=vq&&SEAT.tier&&AQ?fetch(AQ.url+'/rest/v1/rpc/voucher_check_public',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({p_cohort:SEAT.cohort,p_tier:SEAT.tier,p_voucher:vq})}).then(function(r){return r.json()}).catch(function(){return {ok:true}}):Promise.resolve({ok:true});
+  vchk.then(function(v){if(v&&v.ok===false){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent=v.message||'';return}
   send().catch(old).then(function(j){
     if(!j.ok){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent=j.error||'حدث خطأ';return}
     track('Lead');
@@ -197,6 +200,6 @@ $('f').addEventListener('submit',function(e){
     if(!SEAT.inv&&AQ){fetch(AQ.url+'/rest/v1/rpc/seat_invite_public',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({p_phone:$('phone').value,p_name:$('name').value,p_course:crsVal()})}).then(function(r){return r.json()}).then(function(t){if(t&&typeof t==='string'){try{sessionStorage.setItem('reg_me',JSON.stringify({n:$('name').value,p:$('phone').value,c:!!($('consent')&&$('consent').checked)}))}catch(e){}location.href=location.pathname+'?b='+t+'&from=form'+(P.get('utm_source')?'&utm_source='+encodeURIComponent(P.get('utm_source')):'');}else{$('f').style.display='none';$('done').style.display='block'}}).catch(function(){$('f').style.display='none';$('done').style.display='block'});return}
     $('f').style.display='none';$('done').style.display='block';
     var w=(CFG.biz||{}).whatsapp;if(w){var wt=SEAT.map&&SEAT.tier?SEAT.map.tiers.filter(function(x){return x.tier===SEAT.tier})[0]:null;$('wa').href='https://wa.me/'+String(w).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(wt?'السلام عليكم، حجزت '+(SEAT.pos?'المقعد رقم '+SEAT.pos+' ':'')+'('+wt.name+') في '+crsVal()+' باسم '+$('name').value+' — أريد إكمال الدفع':'السلام عليكم، سجّلت اهتمامي بـ '+(crsVal()||'الدورات')+' باسم '+$('name').value);if(wt){$('done').querySelector('h2').textContent='🎉 مقعدك محجوز يا '+$('name').value.split(' ')[0];$('done').querySelector('p').textContent='السعر محجوز لك 24 ساعة — أكمل الدفع الآن عبر واتساب لتثبيت مقعدك.';$('wa').textContent='💳 أكمل الدفع عبر واتساب'}$('wa').style.display='inline-block'}
-  }).catch(function(){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent='تعذّر الإرسال — تحقق من الإنترنت وحاول مرة أخرى'});
+  }).catch(function(){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent='تعذّر الإرسال — تحقق من الإنترنت وحاول مرة أخرى'});});
 });
 </script></body></html>
