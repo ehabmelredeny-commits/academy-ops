@@ -2114,7 +2114,7 @@ function acgRevoke(b){var restore=b.dataset.r==='1',why=restore?'':prompt('سب�
   rpc('app_v2_cert_revoke',{token:TOK,id:b.dataset.id,reason:why||'',restore:restore}).then(function(){b2Msg('acgm',restore?'✓ استُعيدت':'✓ أُلغيت');acgLoad()}).catch(function(e){b2Msg('acgm','تعذّر: '+String(e&&e.message||e),1)})}
 
 // ═══ آخر ما كان يفتح النظام القديم (2026-10-26، تصميم معتمد docs/mockups/v2-last-six.png) ═══
-function l6Head(title){return '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b style="font-size:17px">👥 العملاء ← '+title+'</b><div class="chips" style="margin:0"><a onclick="customers()">💬 المحادثات</a><a onclick="pipeScreen()">🧲 المراحل</a><a onclick="askScreen()">🎯 يسألون الآن</a><a onclick="refScreen()">🤝 الإحالات</a></div><span class="sp"></span><span id="l6m" class="mut" style="font-size:12px"></span></div>'}
+function l6Head(title){return '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b style="font-size:17px">👥 العملاء ← '+title+'</b><div class="chips" style="margin:0"><a onclick="customers()">💬 المحادثات</a><a onclick="pipeScreen()">🧲 المراحل</a><a onclick="askScreen()">🎯 يسألون الآن</a><a onclick="scanScreen()" title="جمهور المنافسين: من سأل أو تفاعل عند منافس، راسله وتابعه بيدك">🔍 اسكان</a><a onclick="refScreen()">🤝 الإحالات</a></div><span class="sp"></span><span id="l6m" class="mut" style="font-size:12px"></span></div>'}
 // ── 🧲 مراحل العملاء: g_leads.status (نفس حقل قائمة العملاء) ──
 var PP={d:null,days:90,q:''};
 var PP_C={'جديد':'#3a86ff','تواصلنا':'#8d6cd8','رد':'#e9a23b','عرض مُرسل':'#e76f51','سجّل':'#2a9d8f','مفقود':'#8a817c','خامل':'#5c6470'};
@@ -2133,7 +2133,7 @@ function ppStage(sel){var st=sel.value,r='';if(st==='مفقود'){r=prompt('سب
 // ── 🎯 يسألون الآن: قائمة واحدة (AskOpps + أسئلة منشورات المنافسين) + ➕ سؤال من منصة أخرى ──
 var AK={d:null};
 function askScreen(paste){TAB='customers';if(!TOK)return loginScreen();
-  $('app').innerHTML=shell(nav()+l6Head('🎯 يسألون الآن — كل سائل ينتظر ردك')+'<div class="cx-acts" style="margin:6px 0"><button class="btn" onclick="akPasteForm()">➕ سؤال من منصة أخرى</button></div><div id="akp"></div><div id="akb"><div class="mut">جارٍ التحميل…</div></div>');
+  $('app').innerHTML=shell(nav()+l6Head('🎯 يسألون الآن — كل سائل ينتظر ردك')+'<div class="cx-acts" style="margin:6px 0"><button class="btn" onclick="akPasteForm()">➕ سؤال من منصة أخرى</button><button class="btn s" onclick="scanScreen()" title="جمهور المنافسين مجمّعاً بالحساب: راسله وتابعه بيدك">🔍 اسكان</button></div><div id="akp"></div><div id="akb"><div class="mut">جارٍ التحميل…</div></div>');
   if(paste)akPasteForm();
   gapi('action','screenAskAll',{}).then(function(r){if(!r||!r.ok)throw new Error((r&&r.error)||'خطأ');AK.d=r.data;akRender()}).catch(function(e){$('akb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
 function akRender(){var R=(AK.d||{}).rows||[];
@@ -2170,6 +2170,98 @@ function impGo(){var src=$('ims').value.trim(),basis=$('imb').value.trim();if(!s
   var next=function(){if(i>=parts){b2Msg('imr','✓ استُورد '+tot.imported+' · مكرر تُخطّي '+tot.duplicates+(tot.suppressed?' · 🚫 لا تراسل '+tot.suppressed:'')+(tot.in_trainers?' · موجود أيضاً في المدربين '+tot.in_trainers:''));if(IM.kind==='trainers'){TR.flags=null;setTimeout(b2bScreen,1200)}else setTimeout(scLoad,800);return}
     b2Msg('imr','جارٍ الجزء '+(i+1)+' من '+parts+'…');var a={rows:rows.slice(i*PART,(i+1)*PART),source_name:src,basis:basis};if(IM.kind==='sources'){a.consent_status=$('imcs').value||'غير معروف';if(batch)a.batch_id=batch}else a.list_name=src;
     gapi('action',fn,a).then(function(x){if(!x||x.ok===false)throw new Error((x&&x.error)||'خطأ');var d=x.data||{};Object.keys(tot).forEach(function(k){tot[k]+=Number(d[k])||0});batch=d.batch_id||batch;i++;next()}).catch(function(e){b2Msg('imr','تعذّر الجزء '+(i+1)+': '+String(e&&e.message||e),1)})};next()}
+// ── 🔍 اسكان (اعتماد المالك 2026-11-10، docs/mockups/v2-scan.html + v2-scan-mobile.html): جمهور المنافسين من CompEngage نفسه، مجمّعاً بالحساب ──
+//   الإرسال والمتابعة بيد المالك (لا أتمتة لإنستغرام) · الحدود اليومية من الإعدادات · «لا تراسل» ومؤيدو المنافسين بلا زر رسالة
+function snGroups(){return [['h1','👤 الحساب',3],['h2','❓ السؤال',4],['h3','✉ التواصل',3],['h4','➕ المتابعة',3]]}
+function snFilter(L,f){var q=String(f.q||'').trim().toLowerCase();return L.filter(function(a){
+  if(f.kind&&a.kind!==f.kind)return false;if(f.comp&&(a.competitors||[]).indexOf(f.comp)<0)return false;if(f.course&&a.course!==f.course)return false;
+  var s=f.st;if(s==='nodm'&&(a.dm_at||!a.can_dm))return false;if(s==='dm'&&!a.dm_at)return false;if(s==='replied'&&a.replied!=='نعم')return false;if(s==='lead'&&!a.lead_id)return false;if(s==='unfollow'&&!a.unfollow_due)return false;if(s==='stopped'&&!a.stopped)return false;
+  if(q&&(a.handle+' '+(a.rows||[]).map(function(r){return r.question}).join(' ')).toLowerCase().indexOf(q)<0)return false;return true})}
+function snDmWhy(a,c){if(a.stopped)return '🚫 طلب «لا تراسل»';if(a.supporter)return '🛡 من مؤيدي المنافس';if(!a.can_dm)return 'مهتم بلا سؤال: تابعه فقط';if(!a.dm_at&&c&&c.dm_left<=0)return 'بلغت حد رسائل اليوم ('+c.dm_cap+') — يعود غداً';return ''}
+function snFollowWhy(a,c){if(!a.follow_at&&c&&c.follow_left<=0)return 'بلغت حد المتابعة اليوم ('+c.follow_cap+') — يعود غداً';return ''}
+/*scan-end*/
+var SN={d:null,f:{kind:'',comp:'',course:'',st:'',q:''},mob:null,ex:null,imgs:[]};
+function snMob(){if(SN.mob!==null)return SN.mob;var v='';try{v=localStorage.getItem('scan_mode')||''}catch(e){}return v?v==='m':window.innerWidth<760}
+function snToggle(){SN.mob=!snMob();try{localStorage.setItem('scan_mode',SN.mob?'m':'d')}catch(e){}snDraw()}
+function scanScreen(){TAB='customers';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+l6Head('🔍 اسكان — جمهور المنافسين يسأل، وأنت أول من يرد')+'<div id="snn"><div class="mut">جارٍ التحميل…</div></div>');
+  gapi('action','screenScan',{}).then(function(r){if(!r||!r.ok)throw new Error((r&&r.error)||'خطأ');SN.d=r.data;snDraw()}).catch(function(e){$('snn').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function snCss(){return '<style>#snn input,#snn select,#snn textarea{border:2px solid #D4A853!important;border-radius:8px}#snn .k{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:3px;min-width:92px;font-size:12px}#snn .k b{display:block;font-size:17px;color:#f3e3b8}#snn .k.lim b{color:#7ee0a1}#snn .k.full b{color:#ff7b7b}'+
+  '#snn table{border-collapse:collapse;width:100%;font-size:12px}#snn th,#snn td{border:1px solid var(--line);padding:5px;vertical-align:middle}#snn th.h1{background:#2d6a4f;color:#fff}#snn th.h2{background:#7a4fb0;color:#fff}#snn th.h3{background:#2c5d8a;color:#fff}#snn th.h4{background:#8a5a1c;color:#fff}'+
+  '#snn .acc{color:#8ec5ff;font-weight:bold;text-decoration:underline;cursor:pointer;background:none;border:0;font:inherit}#snn .tA{background:#1f5c3a;color:#bff2d2;padding:1px 8px;border-radius:10px}#snn .tI{background:#3c3460;color:#d9cffd;padding:1px 8px;border-radius:10px}#snn .okc{color:#7ee0a1}#snn .wt{color:#f0c060}'+
+  '#snn .paste{border:2px dashed #D4A853;border-radius:10px;padding:10px;margin:8px 0}#snn .snc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0}#snn .big button{flex:1;min-height:44px;font-size:14px}#snn .tbw{overflow-x:auto}</style>'}
+function snDraw(){var d=SN.d||{},c=d.caps||{},k=d.kpi||{},m=snMob(),f=SN.f,A=d.accounts||[];
+  var opt=function(v,l,cur){return '<option value="'+esc(v)+'"'+(v===cur?' selected':'')+'>'+esc(l)+'</option>'};
+  var comps='<select title="المنافس" onchange="SN.f.comp=this.value;snList()">'+opt('','كل المنافسين',f.comp)+(d.competitors||[]).map(function(x){return opt(x.name,x.name,f.comp)}).join('')+'</select>';
+  var crs='<select title="الدورة" onchange="SN.f.course=this.value;snList()">'+opt('','كل الدورات',f.course)+(d.courses||[]).map(function(x){return opt(x.name,x.name,f.course)}).join('')+'</select>';
+  var kind='<select title="النوع" onchange="SN.f.kind=this.value;snList()">'+opt('','سائل + مهتم',f.kind)+opt('سائل','سائل فقط',f.kind)+opt('مهتم','مهتم فقط',f.kind)+'</select>';
+  var st='<select title="الحالة" onchange="SN.f.st=this.value;snList()">'+[['','كل الحالات'],['nodm','لم أراسله'],['dm','راسلته'],['replied','ردّوا'],['lead','صاروا عملاء'],['unfollow','ألغِ متابعتهم'],['stopped','🚫 لا تراسل']].map(function(x){return opt(x[0],x[1],f.st)}).join('')+'</select>';
+  var dmT='<div class="k '+(c.dm_left>0?'lim':'full')+'" title="الحد من الإعدادات: ig_dm_daily_cap"><b>'+(c.dm_today||0)+' / '+(c.dm_cap||0)+'</b>رسائل اليوم</div>',foT='<div class="k '+(c.follow_left>0?'lim':'full')+'" title="الحد من الإعدادات: ig_follow_daily_cap"><b>'+(c.follow_today||0)+' / '+(c.follow_cap||0)+'</b>متابعة اليوم</div>';
+  var unT='<div class="k"><b style="color:#f0c060">'+(k.unfollow||0)+'</b>ألغِ متابعتهم</div>';
+  var paste='<div class="paste"><div style="margin-bottom:6px"><b>الصق تعليقات منشور منافس</b> <span class="mut" style="font-size:11.5px">أو اسحب صور الشاشة هنا · 🖼 الصور تُقرأ في جوجل وتحليل الأسئلة يحتاج رصيد Claude</span></div>'+
+    '<textarea id="snt" style="width:100%;min-height:'+(m?'60':'54')+'px" placeholder="الصق التعليقات كما نسختها…" onpaste="snPasteImg(event)"></textarea>'+
+    '<div class="fl-bar" style="margin-top:6px"><input id="snu" dir="ltr" placeholder="🔗 رابط المنشور (يُعرف المنافس منه تلقائياً)"><select id="sna" title="المنافس — يُختار تلقائياً من الرابط إن عُرف">'+opt('','المنافس: من الرابط','')+(d.competitors||[]).map(function(x){return opt(x.ac_id,x.name,'')}).join('')+'</select></div>'+
+    '<div class="cx-acts'+(m?' big':'')+'"><label class="btn s" title="ارفع صور شاشة التعليقات (حتى 10)" style="cursor:pointer">🖼 صورة<input type="file" accept="image/*" multiple style="display:none" onchange="snFiles(this.files)"></label><button class="btn" onclick="snExtract()" title="اقرأ التعليقات واعرضها للمراجعة قبل الحفظ">⚡ استخرج</button><span id="snim" class="mut" style="font-size:12px"></span></div><div id="snx"></div></div>';
+  var h='';
+  if(m){h=snCss()+'<div style="display:flex;align-items:center;gap:6px"><b style="font-size:16px">🔍 اسكان</b><span class="sp"></span><button class="btn s" onclick="snToggle()" title="بدّل إلى الجدول الكامل">🖥 وضع الكمبيوتر</button></div>'+
+    '<div>'+dmT+foT+'<div class="k"><b>'+(k.ask||0)+'</b>سائل</div>'+unT+'</div><details style="font-size:12px;margin:2px 4px"><summary class="mut">▸ المزيد</summary>محفوظ '+(k.saved||0)+' · مهتم '+(k.int||0)+' · ردّوا '+(k.replied||0)+' · صاروا عملاء '+(k.leads||0)+'</details>'+
+    '<div class="fl-bar" style="margin-top:6px">'+comps+crs+st+'</div>'+paste+'<div id="snl"></div>'}
+  else{h=snCss()+'<div class="fl-bar" style="margin-top:6px">'+comps+crs+kind+st+'<input placeholder="🔎 ابحث بالحساب أو النص" value="'+esc(f.q)+'" oninput="SN.f.q=this.value;snList()"><button class="btn" onclick="snToggle()" title="بطاقات بأزرار كبيرة للجوال">📱 وضع الجوال</button></div>'+
+    '<div><div class="k"><b>'+(k.saved||0)+'</b>محفوظ</div><div class="k"><b>'+(k.ask||0)+'</b>سائل</div><div class="k"><b>'+(k.int||0)+'</b>مهتم</div>'+dmT+foT+'<div class="k"><b>'+(k.replied||0)+'</b>ردّوا</div><div class="k"><b>'+(k.leads||0)+'</b>صاروا عملاء</div>'+unT+'</div>'+paste+'<div id="snl"></div>'+
+    '<div class="mut" style="font-size:11.5px;margin-top:6px">• الضغط على الحساب يفتح ig.me/m/الحساب ونص الدورة منسوخ · الإرسال والمتابعة بيدك (لا أتمتة) · الحدود اليومية من الإعدادات · «لا تراسل» يُحترم · الحساب لا يتكرر ويحفظ تاريخ أسئلته</div>'}
+  $('snn').innerHTML=h;snList()}
+function snBtn(a,i,what,label,tip,why){return '<button class="btn s" data-i="'+i+'" data-w="'+what+'" onclick="snAct(this)" title="'+esc(why||tip)+'"'+(why?' disabled':'')+'>'+label+'</button>'}
+function snActs(a,i,c){var o='';
+  if(a.can_dm&&!a.dm_at)o+=snBtn(a,i,'dm','✓ راسلته','سجّل أنك أرسلت له الرسالة الآن',snDmWhy(a,c));
+  if(!a.follow_at)o+=snBtn(a,i,'follow','➕ تابعته','سجّل أنك تابعت حسابه الآن',snFollowWhy(a,c));
+  if(a.unfollow_due)o+=snBtn(a,i,'unfollow','✕ ألغِ المتابعة','مرّت '+a.follow_days+' يوماً بلا متابعة بالمثل');
+  if(!a.lead_id&&!a.stopped&&!a.supporter)o+=snBtn(a,i,'lead','➜ عميل','أدخله «مراحل العملاء» عند «تواصلنا» عبر نفس مسار «تم الرد»');
+  if(!a.stopped)o+=snBtn(a,i,'stop','🚫 لا تراسل','لا يُراسل أبداً — يدخل قائمة المنع ويُحترم في كل النظام');
+  return o||'<span class="mut">—</span>'}
+function snSel(i,what,cur,opts,tip){return '<select data-i="'+i+'" data-w="'+what+'" title="'+tip+'" onchange="snAct(this)">'+opts.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===cur?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select>'}
+function snList(){var d=SN.d||{},c=d.caps||{},L=snFilter(d.accounts||[],SN.f),m=snMob();SN.L=L;if(!$('snl'))return;
+  if(!L.length){$('snl').innerHTML='<div class="card mut">لا حسابات هنا بعد — الصق تعليقات منشور منافس بالأعلى</div>';return}
+  var dd=function(x){return x?esc(String(x).slice(5,10)):''};
+  if(m){$('snl').innerHTML=L.slice(0,200).map(function(a,i){var r=a.rows[0]||{},why=snDmWhy(a,c);
+    return '<div class="snc"><div style="display:flex;gap:6px;align-items:center"><button class="acc" data-i="'+i+'" onclick="snOpen(this)" title="'+(a.can_dm?'افتح المحادثة وانسخ النص':'افتح حسابه')+'">@'+esc(a.handle)+'</button><span class="'+(a.kind==='سائل'?'tA':'tI')+'">'+a.kind+'</span>'+(a.stopped?' 🚫':'')+(a.supporter?' 🛡':'')+'</div>'+
+      '<div class="mut" style="font-size:12px">'+esc((a.competitors||[]).join('، '))+(a.course?' · '+esc(a.course):'')+' · '+dd(r.at)+(a.rows.length>1?' · '+a.rows.length+' تعليقات':'')+'</div><div class="cx-q">'+esc(r.question||'')+'</div>'+
+      (a.dm_at||a.follow_at?'<div class="mut" style="font-size:12px">'+(a.dm_at?'✓ راسلناه '+dd(a.dm_at)+' · '+(a.replied==='نعم'?'✓ ردّ':a.replied==='لا'?'لم يرد':'ينتظر الرد'):'')+(a.follow_at?' · ✓ تابعناه':'')+'</div>':'')+
+      '<div class="cx-acts big">'+(a.can_dm&&!a.dm_at?'<button class="btn" data-i="'+i+'" onclick="snOpen(this)" title="'+esc(why||'افتح المحادثة وانسخ النص')+'"'+(why?' disabled':'')+'>✉ راسله</button>':'')+(a.dm_at?snSel(i,'replied',a.replied,[['','💬 ردّ؟'],['نعم','نعم ردّ'],['لا','لم يرد']],'هل ردّ على رسالتك؟'):'')+snActs(a,i,c)+'</div></div>'}).join('')+(L.length>200?'<div class="mut">+'+(L.length-200)+'</div>':'');return}
+  $('snl').innerHTML='<div class="tbw"><table><tr>'+snGroups().map(function(g){return '<th class="'+g[0]+'" colspan="'+g[2]+'">'+g[1]+'</th>'}).join('')+'</tr><tr><th>الحساب ↗ (يفتح المحادثة)</th><th>النوع</th><th>المنافس</th><th>الدورة</th><th>نوع السؤال</th><th>التعليق</th><th>التاريخ</th><th>الرسالة</th><th>راسلناه</th><th>ردّ؟</th><th>تابعناه</th><th>ردّ المتابعة</th><th>إجراء</th></tr>'+
+    L.slice(0,400).map(function(a,i){var r=a.rows[0]||{},why=snDmWhy(a,c),hist=a.rows.slice(1).map(function(x){return dd(x.at)+' '+x.question}).join(' | ');
+      return '<tr><td><button class="acc" data-i="'+i+'" onclick="snOpen(this)" title="'+(a.can_dm?'افتح المحادثة وانسخ النص':'افتح حسابه')+'">@'+esc(a.handle)+'</button>'+(a.stopped?' 🚫':'')+(a.supporter?' <span title="من مؤيدي المنافس — لا رسالة">🛡</span>':'')+'</td><td><span class="'+(a.kind==='سائل'?'tA':'tI')+'">'+a.kind+'</span></td><td>'+esc((a.competitors||[]).join('، '))+'</td><td>'+esc(a.course||'—')+'</td>'+
+        '<td>'+esc(r.qtype==='تفاعل'?'👍 تفاعل':r.qtype||'')+'</td><td style="max-width:260px" title="'+esc(hist)+'">'+esc(r.question||'')+(a.rows.length>1?' <span class="cx-th">+'+(a.rows.length-1)+'</span>':'')+'</td><td>'+dd(r.at)+'</td>'+
+        '<td>'+(a.can_dm?'<button class="btn s" data-i="'+i+'" onclick="snOpen(this)" title="'+esc(why||'انسخ النص وافتح المحادثة')+'"'+(why&&!a.dm_at?' disabled':'')+'>📋 انسخ + ✉ افتح</button>':'<span class="mut" title="'+esc(why)+'">لا رسالة</span>')+'</td>'+
+        '<td>'+(a.dm_at?'<span class="okc">✓ '+dd(a.dm_at)+'</span>':'—')+'</td><td>'+(a.dm_at?snSel(i,'replied',a.replied,[['','ينتظر'],['نعم','✓ ردّ'],['لا','لم يرد']],'هل ردّ على رسالتك؟'):'—')+'</td>'+
+        '<td>'+(a.follow_at?'<span class="okc">✓ '+dd(a.follow_at)+'</span>':'—')+'</td><td>'+(a.follow_at?(a.follow_back==='نعم'?'<span class="okc">✓ تابعنا</span>':snSel(i,'follow_back','',[['','⏳ ينتظر ('+a.follow_days+' يوماً)'],['نعم','✓ تابعنا']],'هل تابعنا بالمثل؟')):'—')+'</td><td><div class="cx-acts">'+snActs(a,i,c)+'</div></td></tr>'}).join('')+'</table></div>'+(L.length>400?'<div class="mut">يعرض 400 من '+L.length+' — ضيّق بالفلاتر</div>':'')}
+function snCopy(t){try{navigator.clipboard.writeText(t)}catch(e){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(e2){}x.remove()}}
+function snOpen(b){var a=SN.L[Number(b.dataset.i)];if(!a)return;var why=snDmWhy(a,(SN.d||{}).caps);
+  if(a.can_dm&&!why&&a.text){snCopy(a.text);window.open(a.ig||('https://www.instagram.com/'+a.handle+'/'),'_blank','noopener');toast('📋 نُسخ النص — الصقه في المحادثة');return}
+  window.open(/^ig/.test(a.key)?'https://www.instagram.com/'+a.handle+'/':(a.rows[0].comment_url||a.rows[0].post_url||'about:blank'),'_blank','noopener');if(why)toast(why,1)}
+function snAct(el){var a=SN.L[Number(el.dataset.i)],w=el.dataset.w;if(!a)return;var p;
+  if(w==='replied'){if(!el.value)return;w=el.value==='نعم'?'replied_yes':'replied_no'}
+  if(w==='follow_back'&&!el.value)return;
+  if(w==='stop'){if(!confirm('🚫 لا تراسل @'+a.handle+' أبداً؟ يدخل قائمة المنع ويُحترم في كل النظام.'))return;p=gapi('action','scanStop',{key:a.key})}
+  else if(w==='lead')p=gapi('action','scanLead',{key:a.key});
+  else p=gapi('action','scanMark',{key:a.key,what:w});
+  el.disabled=true;p.then(function(x){if(!x||x.ok===false)throw new Error((x&&x.error)||'خطأ');toast(w==='lead'?'✓ صار في مراحل العملاء':w==='stop'?'✓ لن يُراسل أبداً':'✓ سُجّل');scanScreen()}).catch(function(e){el.disabled=false;toast('تعذّر: '+String(e&&e.message||e),1)})}
+function snFiles(fl){var L=[].slice.call(fl||[]).filter(function(f){return String(f.type).indexOf('image/')===0}).slice(0,10);if(!L.length)return;var n=0;SN.imgs=[];
+  L.forEach(function(f){var r=new FileReader();r.onload=function(){var s=String(r.result);SN.imgs.push({mime:f.type,data:s.slice(s.indexOf(',')+1)});n++;if(n===L.length)b2Msg('snim','🖼 '+n+' صورة جاهزة — اضغط ⚡ استخرج')};r.readAsDataURL(f)})}
+function snPasteImg(e){var it=[].slice.call((e.clipboardData||{}).items||[]).filter(function(x){return String(x.type).indexOf('image/')===0}).map(function(x){return x.getAsFile()});if(it.length){e.preventDefault();snFiles(it)}}
+function snExtract(){var t=$('snt').value,u=$('snu').value.trim();if(!t.trim()&&!SN.imgs.length&&!u)return b2Msg('snim','الصق التعليقات أو ارفع صورة',1);
+  b2Msg('snim','جارٍ القراءة…');gapi('action','engageExtract',{text:t,images:SN.imgs,url:u}).then(function(r){if(!r||r.ok===false)throw new Error((r&&r.error)||'خطأ');SN.ex=r.data||{};
+    var ac=SN.ex.ac_detected||'';if(ac&&!$('sna').value)$('sna').value=ac;
+    var errs=(SN.ex.errors||[]);b2Msg('snim',errs.length?'⚠ '+errs.join(' · ')+' — إن كان السبب الرصيد: انتظر تجديد رصيد Claude أو الصق النص بدل الصورة':'',errs.length?1:0);snReview()}).catch(function(e){var m=String(e&&e.message||e);b2Msg('snim','تعذّر: '+m+(/budget|ميزانية|رصيد|credit/i.test(m)?' — رصيد Claude انتهى اليوم؛ الصق النص يدوياً أو حاول بعد التجديد':''),1)})}
+function snReview(){var X=(SN.ex||{}).items||[];if(!X.length){$('snx').innerHTML='<div class="mut">لم أقرأ تعليقات — جرّب لقطة أوضح أو الصق النص</div>';return}
+  $('snx').innerHTML='<div class="card" style="margin-top:6px"><b>راجع قبل الحفظ</b> <span class="mut" style="font-size:12px">'+X.length+' تعليقاً · أزل علامة ما لا تريد حفظه · 🛡 مؤيدو المنافس لا يُحفظون</span>'+
+    X.map(function(c,i){var on=!c.supporter&&!!c.asker;return '<div style="display:flex;gap:6px;align-items:center;margin:3px 0;font-size:12px"><input type="checkbox" data-i="'+i+'"'+(on?' checked':'')+(c.supporter?' disabled':'')+' title="احفظه"><b>@'+esc(c.asker||'؟')+'</b>'+
+      '<select data-q="'+i+'" title="سائل أم مهتم">'+[['1','سائل'],['0','مهتم']].map(function(x){return '<option value="'+x[0]+'"'+((c.question?'1':'0')===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select><span>'+esc(c.text)+'</span>'+(c.supporter?' <span class="cx-th h">🛡 '+esc(c.supporter)+'</span>':'')+'</div>'}).join('')+
+    '<div class="cx-acts" style="margin-top:6px"><button class="btn" onclick="snSave()" title="احفظ المختار في الاسكان">💾 احفظ المختار</button><button class="btn s" onclick="$(&#39;snx&#39;).innerHTML=&#39;&#39;" title="ألغِ المراجعة">✕</button></div></div>'}
+function snSave(){var X=(SN.ex||{}).items||[],items=[];
+  [].slice.call(document.querySelectorAll('#snx input[type=checkbox]')).forEach(function(cb){if(!cb.checked)return;var i=Number(cb.dataset.i),c=X[i],q=document.querySelector('#snx select[data-q="'+i+'"]');if(c&&c.asker)items.push({asker:c.asker,text:c.text,q:!!(q&&q.value==='1')})});
+  if(!items.length)return b2Msg('snim','اختر تعليقاً واحداً على الأقل',1);
+  b2Msg('snim','جارٍ الحفظ والتحليل…');gapi('action','engageAnalyze',{ac_id:$('sna').value,post_url:$('snu').value.trim(),items:items,keep_interest:true,source:SN.imgs.length?'صورة':'لصق'}).then(function(r){if(!r||r.ok===false)throw new Error((r&&r.error)||'خطأ');var d=r.data||{};
+    SN.imgs=[];toast('✓ حُفظ: سائل '+(d.added||0)+' · مهتم '+(d.interested||0)+(d.excluded?' · 🛡 استُبعد '+d.excluded:''));scanScreen()}).catch(function(e){b2Msg('snim','تعذّر: '+String(e&&e.message||e),1)})}
 // ── القفل الكامل (§6، 2026-10-26): لا رابط للنظام القديم ──
 function sysEmergency(){fullSys()}
 
