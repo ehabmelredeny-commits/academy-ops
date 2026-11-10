@@ -2268,11 +2268,13 @@ function snReview(){var X=(SN.ex||{}).items||[];if(!X.length){$('snx').innerHTML
     X.map(function(c,i){var on=!c.supporter&&!!c.asker;return '<div style="display:flex;gap:6px;align-items:center;margin:3px 0;font-size:12px"><input type="checkbox" data-i="'+i+'"'+(on?' checked':'')+(c.supporter?' disabled':'')+' title="احفظه"><b>@'+esc(c.asker||'؟')+'</b>'+
       '<select data-q="'+i+'" title="سائل أم مهتم">'+[['1','سائل'],['0','مهتم']].map(function(x){return '<option value="'+x[0]+'"'+((c.question?'1':'0')===x[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select><span>'+esc(c.text)+'</span>'+(c.supporter?' <span class="cx-th h">🛡 '+esc(c.supporter)+'</span>':'')+'</div>'}).join('')+
     '<div class="cx-acts" style="margin-top:6px"><button class="btn" onclick="snSave()" title="احفظ المختار في الاسكان">💾 احفظ المختار</button><button class="btn s" onclick="$(&#39;snx&#39;).innerHTML=&#39;&#39;" title="ألغِ المراجعة">✕</button></div></div>'}
+// 2026-11-10 طلب المالك: رسالة ثابتة ظاهرة لا تختفي إلا بانتهاء الحفظ
+function snBusy(on){var b=document.getElementById('snbusy');if(!on){if(b)b.remove();return}if(b)return;document.body.insertAdjacentHTML('beforeend','<div id="snbusy" style="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center"><div style="background:#1b1f26;border:2px solid #c9a84c;border-radius:12px;padding:18px 22px;color:#f3e3b8;font-size:16px;text-align:center">⏳ جارٍ حفظ البيانات وتحليلها…<br><small style="color:#aaa">لا تغلق الصفحة — ستختفي هذه الرسالة عند انتهاء الحفظ</small></div></div>')}
 function snSave(){var X=(SN.ex||{}).items||[],items=[];
   [].slice.call(document.querySelectorAll('#snx input[type=checkbox]')).forEach(function(cb){if(!cb.checked)return;var i=Number(cb.dataset.i),c=X[i],q=document.querySelector('#snx select[data-q="'+i+'"]');if(c&&c.asker)items.push({asker:c.asker,text:c.text,q:!!(q&&q.value==='1')})});
   if(!items.length)return b2Msg('snim','اختر تعليقاً واحداً على الأقل',1);
-  b2Msg('snim','جارٍ الحفظ والتحليل…');gapi('action','engageAnalyze',{ac_id:$('sna').value,post_url:$('snu').value.trim(),items:items,keep_interest:true,source:SN.imgs.length?'صورة':'لصق'}).then(function(r){if(!r||r.ok===false)throw new Error((r&&r.error)||'خطأ');var d=r.data||{};
-    SN.imgs=[];toast('✓ حُفظ: سائل '+(d.added||0)+' · مهتم '+(d.interested||0)+(d.excluded?' · 🛡 استُبعد '+d.excluded:''));scanScreen()}).catch(function(e){b2Msg('snim','تعذّر: '+String(e&&e.message||e),1)})}
+  b2Msg('snim','جارٍ الحفظ والتحليل…');snBusy(1);gapi('action','engageAnalyze',{ac_id:$('sna').value,post_url:$('snu').value.trim(),items:items,keep_interest:true,source:SN.imgs.length?'صورة':'لصق'}).then(function(r){if(!r||r.ok===false)throw new Error((r&&r.error)||'خطأ');var d=r.data||{};
+    snBusy(0);SN.imgs=[];toast('✓ حُفظ: سائل '+(d.added||0)+' · مهتم '+(d.interested||0)+(d.excluded?' · 🛡 استُبعد '+d.excluded:''));scanScreen()}).catch(function(e){snBusy(0);b2Msg('snim','تعذّر: '+String(e&&e.message||e),1)})}
 // ── القفل الكامل (§6، 2026-10-26): لا رابط للنظام القديم ──
 function sysEmergency(){fullSys()}
 
