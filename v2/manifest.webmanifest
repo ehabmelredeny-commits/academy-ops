@@ -1,0 +1,32 @@
+{
+  "id": "alsaad-admin",
+  "name": "إدارة أكاديمية السعد الرياضية",
+  "short_name": "إدارة السعد",
+  "start_url": "/v2/",
+  "scope": "/v2/",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#0c1f2c",
+  "theme_color": "#0c1f2c",
+  "icons": [
+    {
+      "src": "/brand/logo-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

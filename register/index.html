@@ -1,0 +1,206 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ابدأ مسيرتك كمدرب محترف</title><meta name="robots" content="noindex"><style>:root{--a:#0B2D4B;--gold:#D4A853;--bg:#fbf8f1;--ink:#0B2D4B;--mut:#5d6b73;--line:#e3d9c2;--card:#fff;--in:#fff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--a:#D4A853;--bg:#0e1a27;--ink:#e8eef5;--mut:#9fb0c2;--line:#2f4560;--card:#16263a;--in:#0f1f31;color-scheme:dark}}
+:root[data-theme=dark]{--a:#D4A853;--bg:#0e1a27;--ink:#e8eef5;--mut:#9fb0c2;--line:#2f4560;--card:#16263a;--in:#0f1f31;color-scheme:dark}
+.en{display:block;font:500 11.5px 'Segoe UI',Arial,sans-serif;opacity:.65;direction:ltr;text-align:right;margin-top:1px}.hero .en{font-size:13px;opacity:.85;color:var(--gold)}
+.thm{position:fixed;top:10px;left:10px;z-index:9;width:auto;margin:0;padding:6px 10px;border-radius:20px;background:var(--card);color:var(--ink);border:1px solid var(--gold);font-size:15px}
+*{box-sizing:border-box}body{margin:0;font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}.hero{background:linear-gradient(160deg,#0f3a60,#081f36);color:#fff;border:1px solid var(--gold);border-radius:18px;padding:20px 18px;margin-bottom:14px}
+.hero h1{margin:0 0 4px;font-size:22px}.hero p{margin:0;opacity:.92}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+label{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:var(--in);color:var(--ink)}
+textarea{min-height:80px}.chk{display:flex;gap:8px;align-items:flex-start;font-weight:400;font-size:13.5px}.chk input{width:auto;margin-top:5px}
+button{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:var(--gold);color:#0B2D4B;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
+button:disabled{opacity:.6}.err{color:#b3261e;font-size:14px;margin-top:8px;min-height:1em}.ok{text-align:center;padding:30px 10px}.ok h2{color:var(--a)}
+.wa{display:inline-block;margin-top:10px;background:#25d366;color:#fff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:700}
+.foot{text-align:center;color:var(--mut);font-size:12.5px;margin-top:18px}.foot a{color:var(--a)}.hp{position:absolute;width:1px;height:1px;padding:0;border:0;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}html,body{overflow-x:hidden}
+.sbx{background:#c0392b;color:#fff;text-align:center;font-size:12.5px;padding:4px} .sm-h{background:#14213d;color:#e8c46a;padding:10px 12px;border-radius:10px 10px 0 0;margin-top:14px}.sm-h small{display:block;color:#cdd6e6}.sm-lg{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;padding:8px 2px}.sm-lg i{width:12px;height:12px;border-radius:3px;display:inline-block;vertical-align:middle;margin-left:3px}.sm-stage{text-align:center;background:#14213d;color:#fff;border-radius:6px;padding:3px;font-size:12px;margin:4px 0}.sm-lab{font-size:12px;text-align:center;margin-top:8px;font-weight:bold}.sm-row{display:flex;justify-content:center;gap:6px;margin:6px auto;flex-wrap:wrap;max-width:308px}.sm-s{width:38px;height:34px;border-radius:7px 7px 4px 4px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:bold;border:0;cursor:pointer;padding:0}.sm-s[disabled]{background:#c9c9c9!important;color:#888;cursor:default}.sm-sel{outline:3px solid #e04848;outline-offset:1px}.sm-card{border:1px solid #e0d7c0;border-radius:8px;padding:9px;margin-top:8px}.sm-price{font-size:19px;font-weight:bold}.sm-old{text-decoration:line-through;color:#999;font-size:13px;margin-right:6px}.sm-card ul{margin:4px 0;padding-right:18px}.sm-hot{background:#fff3e0;color:#b45309;border-radius:8px;padding:8px;margin-top:8px;font-size:14px}</style></head><body>
+
+<div class="wrap">
+<button type="button" class="thm" id="thm" aria-label="الوضع الليلي/النهاري">🌙</button>
+<div class="hero"><img src="../brand/logo-transparent.png" alt="أكاديمية السعد الرياضية" style="display:block;margin:0 auto 10px;width:150px;max-width:45%;height:auto"><h1 id="t">ابدأ مسيرتك كمدرب محترف</h1><span class="en">Start your journey as a professional trainer</span><p style="margin-top:6px" id="sub">احجز مقعدك في دقيقة — واختر فترتك ومقعدك بسعر إطلاق خاص لأول 8 مقاعد<span class="en">Book your seat in a minute — pick your period and seat with a special launch price for the first 8 seats</span></p></div>
+<form class="card" id="f" novalidate>
+<label for="name">الاسم *<small class="en">Full name *</small></label><input id="name" autocomplete="name" required>
+<div id="pconsent" style="font-size:10.5px;color:#d9a91a;margin:8px 0 -4px;line-height:1.5">نحفظ اسمك ورقمك فور كتابتهما — حتى لو لم تُكمل — لنتواصل معك بخصوص تسجيلك فقط، بلا رسائل تسويقية. <a href="../privacy/" target="_blank" style="color:inherit">سياسة الخصوصية</a></div><label for="phone">رقم الجوال (واتساب) *<small class="en">Mobile (WhatsApp) *</small></label><input id="phone" type="tel" inputmode="tel" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required>
+<label for="email">البريد الإلكتروني (اختياري)<small class="en">Email (optional)</small></label><input id="email" type="email" dir="ltr" autocomplete="email">
+<label for="city">المدينة<small class="en">City</small></label><select id="city"><option value="">اختر المدينة</option></select>
+<label for="gender">أنت *<small class="en">You are *</small></label><div id="gender" style="display:flex;gap:16px;margin:4px 0 2px"><label class="chk" style="margin:0"><input type="radio" name="gender" value="ذكر"> ذكر</label><label class="chk" style="margin:0"><input type="radio" name="gender" value="أنثى"> أنثى</label></div>
+<label for="course">الدورة التي تناسب طموحك<small class="en">The course that fits your goal</small></label><select id="course"><option value="">لم أحدد بعد</option></select>
+<div id="seatbox" style="display:none"></div>
+<label for="persona">أين أنت الآن؟<small class="en">Where are you now?</small></label><select id="persona"><option value="">اختر</option><option>أبدأ في المجال من الصفر</option><option>مدرب حالياً وأريد التطوير</option>
+<option>أحتاج رخصة أو شهادة لعملي</option><option>أقارن بين الشهادات</option></select>
+<label for="note">سؤالك — نجاوبك بصراحة (اختياري)<small class="en">Your question — we answer honestly (optional)</small></label><textarea id="note"></textarea>
+<div id="refbox" style="display:none;background:#e3f5e8;color:#15803d;border-radius:10px;padding:8px 10px;margin-top:12px;font-size:14px"></div>
+<label for="member_no">رشّحك صديق؟ اكتب رقم عضويته وتحصل على خصم (اختياري)<small class="en">Referred by a friend? Enter their member no. for a discount (optional)</small></label><input id="member_no" dir="ltr" placeholder="مثال: M-23456" autocomplete="off" maxlength="30">
+<label class="chk"><input type="checkbox" id="member_consent"> أوافق (اختيارياً) على عضويتي في مجتمع الأكاديمية بعد إتمام دورتي، وأن يُستخدم رقم عضويتي لمنح أصدقائي خصومات تساعد الأكاديمية في التسويق. يمكنني الانسحاب في أي وقت.</label>
+<input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<label class="chk"><input type="checkbox" id="consent"> أوافق على تواصل الأكاديمية معي عبر واتساب أو الاتصال بخصوص الدورات. يمكنني إيقاف التواصل في أي وقت بكتابة «إيقاف». <a href="../privacy/" target="_blank">سياسة الخصوصية</a></label>
+<script>(function(){var k="ao_theme",r=document.documentElement,b=document.getElementById("thm");function cur(){return r.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light")}function show(){b.textContent=cur()==="dark"?"☀️":"🌙"}try{var v=localStorage.getItem(k);if(v)r.dataset.theme=v}catch(e){}show();b.onclick=function(){var n=cur()==="dark"?"light":"dark";r.dataset.theme=n;try{localStorage.setItem(k,n)}catch(e){}show()}})()</script>
+<button id="go" type="submit">احجز مقعدك — دقيقة واحدة<small class="en" style="text-align:center;opacity:.8">Reserve your seat — 1 minute</small></button><div class="err" id="err"></div></form>
+<div class="card ok" id="done" style="display:none"><h2>✅ وصلنا طلبك</h2><p>سنتواصل معك قريباً بالتفاصيل.</p><a class="wa" id="wa" style="display:none" target="_blank" rel="noopener">راسلنا على واتساب الآن</a></div>
+<div class="foot" id="foot"><a href="../privacy/">سياسة الخصوصية</a><br><span style="color:#b8892f;font-weight:500;letter-spacing:.5px">السعد طريق المجد</span></div></div>
+<script>
+var EXEC="https://script.google.com/macros/s/AKfycbxi0KbhfDt4Uu7CNd19KlJ6F84vUJY9SEhbyA2Qggz_Ic5X-SGdeSUKzOD7dGVDpya2/exec",CFG={},P=new URLSearchParams(location.search);
+function $(i){return document.getElementById(i)}
+function track(ev){try{if(window.gtag)gtag('event',ev==='Lead'?'generate_lead':ev);if(window.fbq)fbq('track',ev);if(window.ttq)ttq.track(ev==='Lead'?'SubmitForm':ev)}catch(e){}}
+function loadTrackers(c){
+  if(c.ga4){var s=document.createElement('script');s.async=1;s.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(c.ga4);document.head.appendChild(s);
+    window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('js',new Date());gtag('config',c.ga4);}
+  if(c.meta_pixel){!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init',c.meta_pixel);fbq('track','PageView');}
+  if(c.tiktok_pixel){!function(w,d,t){w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=['page','track','identify','instances','debug','on','off','once','ready','alias','group','enableCookie','disableCookie'];ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.load=function(e){var n='https://analytics.tiktok.com/i18n/pixel/events.js';var a=d.createElement('script');a.type='text/javascript';a.async=!0;a.src=n+'?sdkid='+e+'&lib='+t;var s=d.getElementsByTagName('script')[0];s.parentNode.insertBefore(a,s)};ttq.load(c.tiktok_pixel);ttq.page()}(window,document,'ttq');}
+}
+fetch(EXEC+'?public=config').then(function(r){return r.json()}).then(function(j){
+  CFG=j.data||{};
+  if(CFG.academy){document.title='ابدأ مسيرتك كمدرب محترف — '+CFG.academy;}
+  (CFG.cities||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c;$('city').appendChild(o)});
+  (CFG.courses||[]).forEach(function(c){var o=document.createElement('option');o.textContent=c.name;$('course').appendChild(o)});var oo=document.createElement('option');oo.value='__other';oo.textContent='أخرى — اكتب الدورة التي تريدها';$('course').appendChild(oo);var ci=document.createElement('input');ci.id='course_other';ci.maxLength=80;ci.placeholder='اكتب اسم الدورة التي تبحث عنها';ci.style.display='none';$('course').insertAdjacentElement('afterend',ci);$('course').addEventListener('change',function(){ci.style.display=$('course').value==='__other'?'':'none';if(ci.style.display==='')ci.focus()});
+  var pre=P.get('course');if(pre)$('course').value=pre;
+  loadCohorts();$('course').addEventListener('change',renderSeats);
+  // رابط ترشيح خريج (?ref=CODE): يُملأ تلقائياً ويُعرض الخصم — الخصم يُطبَّق عند التسجيل ولا ينزل عن الحد الأدنى
+  var ref=(P.get('ref')||'').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,20);
+  if(ref){$('member_no').value=ref;var AC={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
+    if(AC)fetch(AC.url+'/rest/v1/rpc/ac_ref_info',{method:'POST',headers:{apikey:AC.anon,Authorization:'Bearer '+AC.anon,'Content-Type':'application/json'},body:JSON.stringify({code:ref})}).then(function(r){return r.json()}).then(function(x){
+      if(x&&x.valid){$('refbox').style.display='block';$('refbox').textContent='🎁 رشّحك '+(x.by||'صديقك')+' — خصم '+x.discount_pct+'% يُطبَّق عند تسجيلك';}else if(x&&x.pending){$('refbox').style.display='block';$('refbox').textContent='🎁 رمز الترشيح يتفعّل عند إعلان البرامج · Referral code activates when programmes are announced';}}).catch(function(){});}
+  var b=CFG.biz||{},bits=[b.legal_name,b.cr?'س.ت '+b.cr:'',b.phone].filter(Boolean);if(bits.length)$('foot').insertAdjacentHTML('beforeend','<div style="font-size:9px;opacity:.55;margin-top:6px">'+bits.join(' · ')+'</div>');
+  loadTrackers(CFG);
+}).catch(function(){});
+// 💺 خريطة المقاعد (فئات المقاعد — تصميم معتمد docs/mockups/seat-map.html): الفئة والحالة والمتبقي والسعر من الخادم فقط
+var SEAT={cohorts:[],tier:'',cohort:''},TC={premium:'#c99a2e',plus:'#6a3fa0',basic:'#2a8a55'};
+function sq(fn,b){var A={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};if(!A)return Promise.reject();return fetch(A.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:A.anon,Authorization:'Bearer '+A.anon,'Content-Type':'application/json'},body:JSON.stringify(b||{})}).then(function(r){return r.json()})}
+// الخريطة والأسعار برابط حجز خاص فقط (?b=TOKEN — قرار المالك 2026-10-21)
+function privateMode(){var sub=$('sub');if(sub)sub.innerHTML='✅ وصلنا تسجيلك — اختر الفترة ومقعدك وشاهد سعرك';
+  ['email','city','persona','note','member_no','member_consent'].forEach(function(id){var el=$(id);if(!el)return;var lb=document.querySelector('label[for="'+id+'"]');if(lb)lb.style.display='none';el.style.display='none';if(el.parentNode&&el.parentNode.tagName==='LABEL')el.parentNode.style.display='none'});
+  var cr=$('course');if(cr){cr.style.display='none';var lc=document.querySelector('label[for="course"]');if(lc)lc.style.display='none'}
+  var sb=$('seatbox'),f=$('f');if(sb&&f&&!$('wzbar'))f.insertBefore(sb,f.firstChild);
+  var nl=document.querySelector('label[for="name"]');if(nl&&!$('cfm')){nl.insertAdjacentHTML('beforebegin','<div id="cfm" style="margin-top:14px;font-weight:bold">لتأكيد مقعدك: اسمك وجوالك</div>')}}
+function emT(){var v='';try{v=(new URLSearchParams(location.search).get('t')||'').toLowerCase();if(/^[0-9a-f]{32}$/.test(v))sessionStorage.setItem('em_t',v);else v=sessionStorage.getItem('em_t')||''}catch(e){}return /^[0-9a-f]{32}$/.test(v)?v:''}emT();
+var PSAVED='';function partialSave(){var n=($('name').value||'').trim(),p=($('phone').value||'').replace(/[^0-9]/g,''),g=gnd();if(n.length<2||p.length<9||!g||PSAVED===p)return;var AQ=window.WZAQ;if(!AQ)return;PSAVED=p;var u=new URLSearchParams(location.search),b={partial:true,name:n,phone:p,gender:g,course:crsVal(),consent_ver:'v1',consent_text:"نحفظ اسمك ورقمك فور كتابتهما — حتى لو لم تُكمل — لنتواصل معك بخصوص تسجيلك فقط، بلا رسائل تسويقية.",utm_source:u.get('utm_source')||'',utm_medium:u.get('utm_medium')||'',utm_campaign:u.get('utm_campaign')||'',utm_content:u.get('utm_content')||'',em_t:emT()};fetch(AQ.url+'/rest/v1/rpc/public_register',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({body:b})}).catch(function(){PSAVED=''})}var PST=null;document.addEventListener('input',function(e){if(e.target&&(e.target.id==='name'||e.target.id==='phone')){clearTimeout(PST);PST=setTimeout(partialSave,1500)}});document.addEventListener('change',function(e){if(e.target&&e.target.name==='gender')partialSave()});function crsVal(){var v=$('course').value;if(v!=='__other')return v;var t=(($('course_other')||{}).value||'').trim();return t?'أخرى: '+t:''}function loadCohorts(){if(P.get('b'))privateMode();if(P.get('from')==='form'){document.title='اختر مقعدك 🎯';var h1=$('t');if(h1)h1.textContent='اختر مقعدك 🎯';$('err').insertAdjacentHTML('beforebegin','');var fb=document.createElement('div');fb.className='sm-hot';fb.textContent='✅ وصلنا تسجيلك — اختر الفترة ومقعدك من الخريطة، ثم اضغط «احجز» — بياناتك جاهزة.';var sb=$('seatbox');if(sb)sb.parentNode.insertBefore(fb,sb);try{var me=JSON.parse(sessionStorage.getItem('reg_me')||'null');if(me){if($('name')&&!$('name').value)$('name').value=me.n||'';if($('phone')&&!$('phone').value)$('phone').value=me.p||'';if(me.c&&$('consent'))$('consent').checked=true}}catch(e){}setTimeout(function(){var b=$('seatbox');if(b)b.scrollIntoView({behavior:'smooth'})},1500)}SEAT.inv=(P.get('b')||'').replace(/[^a-f0-9]/g,'').slice(0,40);if(!SEAT.inv)return;sq('seat_invite_open_g',{p_token:SEAT.inv,p_gender:gnd()||null}).then(function(x){if(!x||!x.ok)return;SEAT.cohorts=x.cohorts||[];if(x.course&&!$('course').value)$('course').value=x.course;renderSeats()}).catch(function(){})}
+function fmt(n){return Number(n||0).toLocaleString('en-US')}
+function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function gnd(){var x=document.querySelector('input[name="gender"]:checked');return x?x.value:''}
+// تغيير الجنس يعيد تحميل الدفعات المناسبة له (قاعة النظري والعملي — قرار المالك 2026-10-26)
+document.addEventListener('change',function(e){if(!e.target||e.target.name!=='gender'||!SEAT.inv)return;sq('seat_invite_open_g',{p_token:SEAT.inv,p_gender:gnd()}).then(function(x){if(x&&x.ok){SEAT.cohorts=x.cohorts||[];SEAT.pick='';renderSeats()}}).catch(function(){})});
+function pickPeriod(c){SEAT.pick=c;renderSeats()}
+function renderSeats(){var box=$('seatbox'),cn=$('course').value,list=(SEAT.cohorts||[]).filter(function(x){return x.course===cn}),h=list.filter(function(x){return x.cohort===SEAT.pick})[0]||list[0];SEAT.tier='';SEAT.cohort='';
+  if(h&&!gnd()){box.style.display='block';box.innerHTML='<div class="sm-hot">اختر «ذكر» أو «أنثى» أولاً — نعرض لك الفترات والقاعات المناسبة</div>';return}
+  if(!h){box.style.display='none';box.innerHTML='';return}
+  sq('seat_invite_open_g',{p_token:SEAT.inv,p_cohort:h.cohort,p_gender:gnd()||null}).then(function(xx){var m=xx&&xx.map;if(!m||!m.tiers)return;SEAT.cohort=h.cohort;SEAT.map=m;
+    var left=m.seats.filter(function(s){return s.status==='متاح'}).length,html=(P.get('preview')==='1'?'<div class="sm-hot">👁 معاينة المالك — الحجز من هذا الرابط تجريبي ولا يُحسب</div>':'')+'<div class="sm-h"><b>اختر الفترة المناسبة لك ثم مقعدك — '+cn+'</b><small>'+esc(h.label||'')+' · 25 مقعداً · بقي '+left+' مقعداً</small></div>'+(list.length?'<div class="sm-lg">📅 الفترات: '+list.map(function(p){return '<button type="button" class="sm-s" style="width:auto;padding:0 10px;background:'+(p.cohort===h.cohort?'#14213d':'#8a8a8a')+'" data-c="'+p.cohort+'">'+(p.tba?'الفترة القادمة — يُعلن موعدها قريباً':p.from&&p.to?'من '+p.from+' إلى '+p.to:esc(p.label))+'</button>'}).join('')+'</div>':'')+'<div class="sm-lg">';
+    m.tiers.slice().reverse().forEach(function(t){html+='<span><i style="background:'+TC[t.tier]+'"></i>'+t.name+' −'+t.pct+'% '+(t.badge?'⭐':'')+'</span>'});
+    html+='<span><i style="background:#c9c9c9"></i>محجوز</span></div><div class="sm-stage">المدرب</div>';
+    ['premium','plus','basic'].forEach(function(k){var t=m.tiers.filter(function(x){return x.tier===k})[0];if(!t)return;
+      var ss=m.seats.filter(function(s){return s.tier===k}).sort(function(a,b){return a.pos-b.pos});
+      html+='<div class="sm-lab" style="color:'+TC[k]+'">'+t.name+(t.badge?' '+t.badge:'')+(k==='basic'?' — لأول المقاعد':'')+'</div><div class="sm-row">';
+      ss.forEach(function(s){html+='<button type="button" class="sm-s" data-t="'+k+'" data-p="'+s.pos+'" style="background:'+TC[k]+'"'+(s.status==='متاح'?'':' disabled')+'>'+s.pos+'</button>'});
+      html+='</div>';});
+    html+='<div id="smcard"></div>';box.innerHTML=html;box.style.display='block';
+    Array.prototype.forEach.call(box.querySelectorAll('.sm-s[data-t]'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-t'),el.getAttribute('data-p'))}});Array.prototype.forEach.call(box.querySelectorAll('[data-c]'),function(el){el.onclick=function(){pickPeriod(el.getAttribute('data-c'))}});
+    // فئة ممتلئة: رسالة أولوية الحجز بنفس العرض
+    m.tiers.forEach(function(t){if(!t.left)$('smcard').insertAdjacentHTML('beforeend','<div class="sm-hot">🔥 مقاعد '+t.name+' عليها طلب مرتفع الآن — سجّل بياناتك خلال دقيقة لتضمن عرضك، ويتواصل معك مستشار القبول لتأكيد مقعدك. <button type="button" class="sm-s" style="width:auto;padding:0 8px;background:'+TC[t.tier]+'" data-hot="'+t.tier+'">احجز أولويتي</button></div>')});
+    Array.prototype.forEach.call(box.querySelectorAll('[data-hot]'),function(el){el.onclick=function(){pickSeat(el.getAttribute('data-hot'),0)}});
+  }).catch(function(){box.style.display='none'})}
+function pickSeat(k,p){var m=SEAT.map,t=m.tiers.filter(function(x){return x.tier===k})[0];SEAT.tier=k;
+  Array.prototype.forEach.call(document.querySelectorAll('.sm-s'),function(el){el.classList.toggle('sm-sel',el.getAttribute('data-p')===String(p))});
+  SEAT.pos=p;if($('wzn2'))$('wzn2').style.display='block';$('smcard').innerHTML='<div class="sm-card"><b>'+(p?'مقعد '+p+' · ':'')+t.name+(t.badge?' ⭐':'')+'</b><ul>'+t.perks.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>'+
+    '</div>';
+  }
+// 🧭 التسجيل بثلاث خطوات (تصميم اعتمده المالك 2026-10-25): ١ بياناتك ودورتك ← ٢ كرسيك ومزاياه ← ٣ الملخص والسعر في الأخير (مثل الطيران) ← الدفع مؤقتاً عبر واتساب
+var WZ={s:1};
+function wzInit(){var f=$('f');if(!f||$('wzbar'))return;
+  var mk=function(id){var d=document.createElement('div');d.id=id;return d};
+  var s1=mk('wz1'),s2=mk('wz2'),s3=mk('wz3'),more=document.createElement('div');more.id='wzmore';more.style.display='none';var tg=document.createElement('button');tg.type='button';tg.id='wzmoreb';tg.style.cssText='width:100%;margin-top:12px;min-height:40px;padding:8px 10px;font-size:14px;background:transparent;color:var(--a);border:1px dashed var(--line);text-align:right';tg.textContent='▸ معلومات إضافية (اختياري) — رشّحك صديق؟ سؤال؟';tg.onclick=function(){var o=more.style.display==='none';more.style.display=o?'':'none';tg.textContent=(o?'▾':'▸')+' معلومات إضافية (اختياري) — رشّحك صديق؟ سؤال؟'};
+  var lab=function(id){return document.querySelector('label[for="'+id+'"]')};
+  ['name','phone','gender','course'].forEach(function(id){var l=lab(id);if(l)s1.appendChild(l);s1.appendChild($(id))});
+  ['email','city','persona','note'].forEach(function(id){var l=lab(id);if(l)more.appendChild(l);more.appendChild($(id))});
+  ['refbox'].forEach(function(id){more.appendChild($(id))});var ml=lab('member_no');if(ml)more.appendChild(ml);more.appendChild($('member_no'));more.appendChild($('member_consent').parentNode);
+  s1.appendChild(tg);s1.appendChild(more);s1.insertAdjacentHTML('beforeend','<div class="err" id="err1"></div><button type="button" id="wzn1">التالي: اختر مقعدك ←</button>');
+  s2.appendChild($('seatbox'));s2.insertAdjacentHTML('beforeend','<div id="wzno" class="sm-hot" style="display:none"></div><button type="button" id="wzn2" style="display:none">التالي: ملخص حجزك ←</button>');
+  s3.insertAdjacentHTML('beforeend','<div id="wzsum"></div><label for="voucher">عندك قسيمة؟ (اختياري)</label><input id="voucher" dir="ltr" maxlength="20" placeholder="SA-XXXXXX">');
+  s3.appendChild($('consent').parentNode);s3.appendChild($('website'));s3.appendChild($('go'));s3.appendChild($('err'));
+  f.insertAdjacentHTML('afterbegin','<div id="wzbar" style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button type="button" id="wzb" style="display:none;width:auto;min-height:34px;padding:0 12px;margin:0;font-size:14px;background:transparent;color:var(--a);border:1px solid var(--line)">→ رجوع</button><div style="flex:1;display:flex;gap:4px"><i class="wzp"></i><i class="wzp"></i><i class="wzp"></i></div><span id="wzl" style="font-size:12px;color:var(--mut)"></span></div>');
+  f.appendChild(s1);f.appendChild(s2);f.appendChild(s3);
+  var st=document.createElement('style');st.textContent='.wzp{flex:1;height:4px;border-radius:2px;background:var(--line)}.wzp.on{background:#b8932f}#wz1>label:first-child{margin-top:0}';document.head.appendChild(st);
+  $('wzn1').onclick=wz1;$('wzn2').onclick=function(){wzGo(3)};$('wzb').onclick=function(){wzGo(WZ.s-1)};
+  if(P.get('course'))setTimeout(function(){if($('course').value)$('course').dispatchEvent(new Event('change'))},800);
+  try{var me=JSON.parse(sessionStorage.getItem('reg_me')||'null');if(me){if(!$('name').value)$('name').value=me.n||'';if(!$('phone').value)$('phone').value=me.p||''}}catch(e){}
+  wzGo(1)}
+function wzGo(n){if(n<1)n=1;WZ.s=n;[1,2,3].forEach(function(i){$('wz'+i).style.display=i===n?'block':'none'});
+  Array.prototype.forEach.call(document.querySelectorAll('.wzp'),function(el,i){el.classList.toggle('on',i<n)});
+  $('wzb').style.display=n>1?'inline-block':'none';$('wzl').textContent=['','بياناتك ودورتك','اختر مقعدك','ملخص حجزك'][n];
+  if(n===3)wzSum();window.scrollTo({top:Math.max(0,$('f').offsetTop-10),behavior:'smooth'})}
+function wz1(){var e=$('err1');e.textContent='';
+  if($('name').value.trim().length<2)return e.textContent='اكتب اسمك';
+  if($('phone').value.replace(/[^0-9]/g,'').length<9)return e.textContent='اكتب رقم جوال صحيح';
+  if(!gnd())return e.textContent='اختر: ذكر أو أنثى — لنعرض لك الفترات المناسبة';
+  if(!$('course').value)return e.textContent='اختر الدورة التي تناسب طموحك';if(!crsVal())return e.textContent='اكتب اسم الدورة التي تريدها';
+  try{sessionStorage.setItem('reg_me',JSON.stringify({n:$('name').value,p:$('phone').value}))}catch(x){}
+  var b=$('wzn1');b.disabled=true;b.textContent='لحظة — نجهّز لك المقاعد…';
+  var open=function(){b.disabled=false;b.textContent='التالي: اختر مقعدك ←';wzGo(2);wzSeats()};
+  if(SEAT.inv)return open();
+  var AQ=window.WZAQ;if(!AQ)return open();
+  fetch(AQ.url+'/rest/v1/rpc/seat_invite_public',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({p_phone:$('phone').value,p_name:$('name').value,p_course:crsVal()})})
+    .then(function(r){return r.json()}).then(function(t){if(t&&typeof t==='string')SEAT.inv=t;return sq('seat_invite_open_g',{p_token:SEAT.inv,p_gender:gnd()||null})}).then(function(x){if(x&&x.ok)SEAT.cohorts=x.cohorts||[];open()}).catch(open)}
+function wzSeats(){SEAT.tier='';$('wzn2').style.display='none';var cn=$('course').value,list=(SEAT.cohorts||[]).filter(function(x){return x.course===cn});
+  if(!list.length){$('seatbox').style.display='none';$('wzno').style.display='block';$('wzno').textContent='🔥 مقاعد هذه الدورة تُفتح قريباً — أكمل حجز أولويتك ويتواصل معك مستشار القبول قبل الجميع.';$('wzn2').style.display='block';return}
+  $('wzno').style.display='none';renderSeats()}
+function wzSum(){var cn=$('course').value,m=SEAT.map,t=m&&SEAT.tier?m.tiers.filter(function(x){return x.tier===SEAT.tier})[0]:null,h=(SEAT.cohorts||[]).filter(function(x){return x.cohort===SEAT.cohort})[0];
+  var row=function(a,b,st){return '<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0'+(st||'')+'"><span style="color:var(--mut)">'+a+'</span><span>'+b+'</span></div>'};
+  $('wzsum').innerHTML='<div class="sm-card" style="line-height:1.9"><b style="font-size:16px">ملخص حجزك</b>'+row('الاسم',esc($('name').value))+row('الدورة',esc(cn))+
+    (h?row('الفترة',h.tba?'الفترة القادمة':h.from&&h.to?'من '+h.from+' إلى '+h.to:esc(h.label||'')):'')+(t?row('المقعد',(SEAT.pos?'رقم '+SEAT.pos+' · ':'')+t.name+(t.badge?' ⭐':'')):row('الحجز','أولوية — يتواصل معك مستشار القبول'))+
+    (t?'<div style="border-top:1px dashed var(--line);margin:6px 0"></div>'+row('السعر الأصلي','<s style="color:var(--mut)">'+fmt(t.base)+' ر.س</s>')+row('خصم فئتك','<span style="color:var(--g)">−'+t.pct+'%</span>')+row('<b style="color:var(--ink)">سعرك</b>','<b style="font-size:20px;color:'+TC[t.tier]+'">'+fmt(t.price)+' ر.س</b>'):'')+
+    '</div><div class="sm-hot" style="margin-top:8px">⏳ السعر والمقعد محجوزان لك 24 ساعة بعد التثبيت</div>';
+  $('go').firstChild.textContent=t?'ثبّت مقعدك الآن':'احجز أولويتك الآن'}
+// ▢ المقاعد مربعات (قرار المالك 2026-10-25) + فتح على دفعات: نصف مقاعد كل فئة (ربع البريميوم) «يُفتح لاحقاً» ولا يُفتح إلا بعد امتلاء البقية من نفس الفئة
+var HOLD={premium:0.25,plus:0.5,basic:0.5};
+function seatsPaint(){var box=$('seatbox');if(!box)return;
+  ['premium','plus','basic'].forEach(function(k){var ss=Array.prototype.slice.call(box.querySelectorAll('.sm-s[data-p][data-t="'+k+'"]'));if(!ss.length||ss[0].dataset.hd)return;
+    ss.sort(function(a,b){return a.dataset.p-b.dataset.p});var h=Math.floor(ss.length*HOLD[k]),front=ss.slice(0,ss.length-h),back=ss.slice(ss.length-h);
+    var open=front.some(function(el){return !el.disabled});
+    ss.forEach(function(el){el.dataset.hd='1'});
+    if(open)back.forEach(function(el){if(el.disabled)return;el.disabled=true;el.dataset.later='1';el.title='غير متاح'})});
+  Array.prototype.forEach.call(box.querySelectorAll('.sm-s[data-p]'),function(el){if(el.dataset.sq)return;el.dataset.sq='1';
+    el.style.width='34px';el.style.height='34px';el.style.borderRadius='8px';el.style.padding='0';el.style.fontSize='12px';el.style.fontWeight='700';el.style.position='relative';
+    if(el.dataset.later||el.disabled){var bk=!el.dataset.later;el.disabled=false;el.dataset.off=bk?'booked':'later';el.style.opacity='.42';el.style.cursor='help';el.innerHTML='<span style="font-size:10px;line-height:1">'+el.dataset.p+'</span><span style="position:absolute;top:-6px;right:-6px;font-size:11px">'+(bk?'⛔':'🔒')+'</span>';
+      el.onclick=function(){var m=SEAT.map,t=m&&m.tiers.filter(function(x){return x.tier===el.dataset.t})[0],nm=t?t.name+(t.badge?' ⭐':''):'';$('smcard').innerHTML='<div class="sm-card"><b>مقعد '+el.dataset.p+' · '+nm+'</b><div style="margin-top:4px">'+(el.dataset.off==='booked'?'⛔ محجوز — اختر مقعداً آخر من نفس الفئة أو غيرها':'🔒 غير متاح — سارع قبل النفاد')+'</div></div>'}}});
+  var lg=box.querySelector('.sm-lg:last-of-type');if(lg&&!box.querySelector('#lglater')&&box.querySelector('[data-later]'))lg.insertAdjacentHTML('beforeend','<span id="lglater">🔒 غير متاح</span>')}
+if(!window.CHST){window.CHST=1;var cs=document.createElement('style');cs.textContent='#seatbox .sm-s[data-sq].sm-sel{outline:3px solid #1D9E75;outline-offset:2px;transform:scale(1.1)}#seatbox .sm-s[data-sq].sm-sel::after{content:"✓";position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);background:#1D9E75;color:#fff;border-radius:50%;width:15px;height:15px;font-size:10px;line-height:15px}';document.head.appendChild(cs);
+  new MutationObserver(function(){seatsPaint();rectLayout()}).observe(document.body,{childList:true,subtree:true})}
+// ▭ القاعة بطاولة مستطيلة (قرار المالك 2026-10-25): الأقرب للمدرب بريميوم ثم بلاس ثم أساسي · داخل الطاولة: برامجنا (الدورة المختارة أولاً)
+function rectLayout(){var box=$('seatbox');if(!box||box.querySelector('#smrect'))return;var all=Array.prototype.slice.call(box.querySelectorAll('.sm-s[data-p]'));if(all.length<4)return;
+  var rank={premium:0,plus:1,basic:2};all.sort(function(a,b){return (rank[a.dataset.t]-rank[b.dataset.t])||(a.dataset.p-b.dataset.p)});
+  var n=all.length,bot=n>=8?(n%2?3:2):0,side=all.slice(0,n-bot),L=[],R=[];side.forEach(function(el,i){(i%2?L:R).push(el)});
+  var cur=$('course').value,progs=Array.prototype.map.call($('course').options,function(o){return o.value}).filter(function(v){return v&&v!==cur});
+  var rect=document.createElement('div');rect.id='smrect';rect.style.cssText='display:flex;justify-content:center;align-items:stretch;gap:6px;margin:6px 0';
+  var col=function(arr,rot){var d=document.createElement('div');d.style.cssText='display:flex;flex-direction:column;gap:2px;justify-content:space-between';arr.forEach(function(el){var s=el.querySelector('svg');if(s)s.style.transform='rotate('+rot+'deg)';d.appendChild(el)});return d};
+  var tb=document.createElement('div');tb.style.cssText='flex:1;max-width:190px;border-radius:14px;background:linear-gradient(180deg,#14213d,#0b1a2e);border:1px solid #b8932f;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;color:#fff';
+  tb.innerHTML='<div style="font-size:10px;color:#d4a853;letter-spacing:1px">دورتك</div><div style="font-weight:700;font-size:14px;line-height:1.5">'+esc(cur||'')+'</div><div style="width:40%;height:1px;background:#b8932f;opacity:.6"></div><div style="font-size:10px;color:#d4a853">دوراتنا الأخرى</div>'+progs.slice(0,6).map(function(p){return '<div style="font-size:10.5px;opacity:.8;line-height:1.4">'+esc(p)+'</div>'}).join('')+'<div style="font-size:10px;color:#d4a853;margin-top:4px">السعد طريق المجد</div>';
+  rect.appendChild(col(R,90));rect.appendChild(tb);rect.appendChild(col(L,-90));
+  var bt=document.createElement('div');bt.style.cssText='display:flex;justify-content:center;gap:4px';all.slice(n-bot).forEach(function(el){var s=el.querySelector('svg');if(s)s.style.transform='rotate(0deg)';bt.appendChild(el)});
+  Array.prototype.forEach.call(box.querySelectorAll('.sm-lab,.sm-row'),function(e){e.remove()});
+  var st=box.querySelector('.sm-stage');if(st){st.after(rect);rect.after(bt)}else{box.appendChild(rect);box.appendChild(bt)}}
+window.WZAQ={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};wzInit();
+$('f').addEventListener('submit',function(e){
+  e.preventDefault();$('err').textContent='';
+  if($('name').value.trim().length<2)return $('err').textContent='اكتب اسمك';
+  if($('phone').value.replace(/\D/g,'').length<9)return $('err').textContent='اكتب رقم جوال صحيح';
+  if(!gnd())return $('err').textContent='اختر: ذكر أو أنثى';
+  if(!$('consent').checked)return $('err').textContent='نحتاج موافقتك على التواصل لنرسل لك التفاصيل';
+  $('go').disabled=true;$('go').textContent='جارٍ الإرسال…';
+  var body={name:$('name').value,phone:$('phone').value,gender:gnd(),email:$('email').value,city:$('city').value,course:crsVal(),persona:$('persona').value,note:$('note').value,
+    website:$('website').value,ft:CFG.ft||'',consent:$('consent').checked,member_no:$('member_no').value.trim(),member_consent:$('member_consent').checked,utm_source:P.get('utm_source')||'',utm_medium:P.get('utm_medium')||'',utm_campaign:P.get('utm_campaign')||'',utm_content:P.get('utm_content')||'',cohort_id:SEAT.tier&&P.get('preview')!=='1'?SEAT.cohort:'',invite:SEAT.inv||'',tier:SEAT.tier||'',seat:SEAT.pos||0,voucher:($('voucher')&&$('voucher').value.trim())||'',em_t:emT()};
+  // أولاً طابور Supabase (يتحمّل الضغط — اختبار الحمل 2026-10-14)، وإن تعذّر فالنقطة القديمة في جوجل
+  var AQ={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
+  var send=function(){return AQ?fetch(AQ.url+'/rest/v1/rpc/public_register',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({body:body})}).then(function(r){if(!r.ok)throw new Error('q');return r.json()}):Promise.reject()};
+  var old=function(){return fetch(EXEC+'?public=register',{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json()})};
+  // قسيمة حملة ومقاعدها مكتملة: النص من القاعدة قبل الإرسال، فلا يصل رفض صامت
+  var vq=($('voucher')&&$('voucher').value.trim())||'',vchk=vq&&SEAT.tier&&AQ?fetch(AQ.url+'/rest/v1/rpc/voucher_check_public',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({p_cohort:SEAT.cohort,p_tier:SEAT.tier,p_voucher:vq})}).then(function(r){return r.json()}).catch(function(){return {ok:true}}):Promise.resolve({ok:true});
+  vchk.then(function(v){if(v&&v.ok===false){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent=v.message||'';return}
+  send().catch(old).then(function(j){
+    if(!j.ok){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent=j.error||'حدث خطأ';return}
+    track('Lead');
+    // بعد التسجيل: انتقال فوري إلى «اختر مقعدك 🎯» برابط العميل الخاص (قرار المالك 2026-10-21)، ونسخة على واتساب
+    if(!SEAT.inv&&AQ){fetch(AQ.url+'/rest/v1/rpc/seat_invite_public',{method:'POST',headers:{apikey:AQ.anon,Authorization:'Bearer '+AQ.anon,'Content-Type':'application/json'},body:JSON.stringify({p_phone:$('phone').value,p_name:$('name').value,p_course:crsVal()})}).then(function(r){return r.json()}).then(function(t){if(t&&typeof t==='string'){try{sessionStorage.setItem('reg_me',JSON.stringify({n:$('name').value,p:$('phone').value,c:!!($('consent')&&$('consent').checked)}))}catch(e){}location.href=location.pathname+'?b='+t+'&from=form'+(P.get('utm_source')?'&utm_source='+encodeURIComponent(P.get('utm_source')):'');}else{$('f').style.display='none';$('done').style.display='block'}}).catch(function(){$('f').style.display='none';$('done').style.display='block'});return}
+    $('f').style.display='none';$('done').style.display='block';
+    var w=(CFG.biz||{}).whatsapp;if(w){var wt=SEAT.map&&SEAT.tier?SEAT.map.tiers.filter(function(x){return x.tier===SEAT.tier})[0]:null;$('wa').href='https://wa.me/'+String(w).replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(wt?'السلام عليكم، حجزت '+(SEAT.pos?'المقعد رقم '+SEAT.pos+' ':'')+'('+wt.name+') في '+crsVal()+' باسم '+$('name').value+' — أريد إكمال الدفع':'السلام عليكم، سجّلت اهتمامي بـ '+(crsVal()||'الدورات')+' باسم '+$('name').value);if(wt){$('done').querySelector('h2').textContent='🎉 مقعدك محجوز يا '+$('name').value.split(' ')[0];$('done').querySelector('p').textContent='السعر محجوز لك 24 ساعة — أكمل الدفع الآن عبر واتساب لتثبيت مقعدك.';$('wa').textContent='💳 أكمل الدفع عبر واتساب'}$('wa').style.display='inline-block'}
+  }).catch(function(){$('go').disabled=false;$('go').textContent='احجز مقعدك — دقيقة واحدة';$('err').textContent='تعذّر الإرسال — تحقق من الإنترنت وحاول مرة أخرى'});});
+});
+</script></body></html>
