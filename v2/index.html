@@ -1825,6 +1825,18 @@ function bbRender(){var d=BB.d||{},O=d.ops||[],C=d.clubs||[],T=d.trainers||[],st
   else h=trRender(T);
   $('bbb').innerHTML=h;
 }
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'lvl',label:'🏅 المستويات',fn:'lvlScreen',tip:'مستويات السعد: عضو ← متدرب ← خريج. الترقية تلقائية من الحجز المدفوع والشهادة'}]);
+var LV={k:'عضو',q:'',d:null},LV_L=[['عضو','member','طلب البطاقة'],['متدرب','trainee','تلقائياً عند تأكيد الحجز'],['خريج','graduate','تلقائياً عند اجتياز البرنامج']];
+function lvlScreen(){TAB='lvl';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">🏅 مستويات السعد</b><span class="mut" style="font-size:12px">عضو ← متدرب ← خريج — اضغط بطاقة لترى أصحابها</span><span class="sp"></span><button class="ib" title="تحديث" onclick="lvlScreen()">⟳</button></div><div id="lvc" style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0"></div><input id="lvq" style="border:2px solid #7B3FB0" placeholder="🔍 بحث بالاسم أو الرقم أو البرنامج" oninput="LV.q=this.value;lvRender()"><div id="lvb"><div class="mut">جارٍ التحميل…</div></div>');
+  rpc('app_member_levels',{token:TOK}).then(function(d){LV.d=d;lvRender()}).catch(function(e){$('lvb').innerHTML='<div class="card">تعذّر التحميل: '+esc(String(e&&e.message||e))+'</div>'})}
+function lvPick(i){LV.k=LV_L[i][0];lvRender()}
+function lvRender(){var d=LV.d||{},c=d.counts||{},q=LV.q.trim().toLowerCase();
+  $('lvc').innerHTML=LV_L.map(function(l,i){var on=LV.k===l[0];return '<div onclick="lvPick('+i+')" title="'+l[2]+'" style="cursor:pointer;width:180px;border-radius:10px;overflow:hidden;background:var(--card,#13243a);border:2px solid '+(on?'#D4A853':'transparent')+(on?';box-shadow:0 0 10px #D4A85366':'')+'"><img src="https://alsaad-academy.com/brand/level-'+l[1]+'.jpg" style="width:100%;display:block" alt=""><div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px"><span style="font-size:13px">'+l[0]+' السعد<br><span class="mut" style="font-size:11px">'+l[2]+'</span></span><b style="font-size:20px;color:#D4A853">'+(c[l[0]]||0)+'</b></div></div>'}).join('');
+  var R=(d.rows||[]).filter(function(r){return r.level===LV.k&&(!q||[r.name,r.no,r.phone,r.program].join(' ').toLowerCase().indexOf(q)>=0)});
+  var dt=function(x){return x?String(x).slice(0,10):''};
+  $('lvb').innerHTML='<div class="card"><b>حاملو «'+LV.k+' السعد» ('+R.length+')</b>'+(R.length?R.map(function(r){var h=[r.m?'عضو '+dt(r.m):'',r.t?'متدرب '+dt(r.t):'',r.g?'خريج '+dt(r.g):''].filter(Boolean).join(' ← ');
+    return '<div class="row"><span><b>كابتن '+esc(r.name||'—')+'</b> <span class="mut" style="font-size:12px">'+esc(r.no||'')+' '+(r.phone?mask(r.phone):'')+'</span><br><span class="mut" style="font-size:12px">'+esc(r.program||'')+' · '+esc(h)+'</span></span><span>'+(r.person_id?'<a href="#" data-p="'+esc(r.person_id)+'" onclick="goPerson(this.dataset.p);return false" style="color:var(--a);font-size:12px">👤 الشخص</a>':'')+'</span></div>'}).join(''):'<div class="mut">لا أحد في هذا المستوى بعد</div>')+'</div>'}
 window.V2_TABS=(window.V2_TABS||[]).concat([{key:'pays',label:'المدفوعات',fn:'paysScreen',tip:'كل المدفوعات: بحث وفلترة وربط بالشخص'}]);
 var PY={q:'',st:'',d:null,t:null};
 function paysScreen(){TAB='pays';if(!TOK)return loginScreen();
