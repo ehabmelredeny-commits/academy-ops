@@ -1,5 +1,5 @@
 <!doctype html>
-<html dir="rtl" lang="ar"><head><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content=noindex><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html dir="rtl" lang="ar"><head><style>body{visibility:hidden}</style><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content=noindex><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>دليل رحلتك — أكاديمية السعد الرياضية</title>
 <!--
   قالب «دليل رحلتك» — قالب واحد لكل البرامج. A4 عمودي للطباعة/PDF، ومتجاوب للجوال.
@@ -203,13 +203,13 @@ document.querySelectorAll("img[data-src]").forEach(function(i){i.src=i.getAttrib
   fetch(S.url+'/rest/v1/rpc/ac_program_guide',{method:'POST',headers:{apikey:S.anon,Authorization:'Bearer '+S.anon,'Content-Type':'application/json'},body:JSON.stringify({p:p})})
    .then(function(r){return r.json()}).catch(function(){return {}})
    .then(function(d){
-     d=(d&&!d.error)?d:{};
+     d=(d&&!d.error)?d:{}; if(!d.program){document.body.innerHTML='<div style="padding:40px;text-align:center;font:20px Tahoma">الدليل غير متاح — تواصل معنا على واتساب 0536818008</div>';document.body.style.visibility='visible';return}
      var h=document.body.innerHTML;
      ['program','hours','format','chapters','ldi_no','learn','outcomes','weekly_hours','cover_url','start_date','practical_place','member_no','name'].forEach(function(k){
        var v=d[k]; if(v===undefined||v===null||v==='') return; h=h.split('{{'+k+'}}').join(esc(v));
      });
      h=h.split('{{name}}').join('');
-     document.body.innerHTML=h; hideEmpty(); document.body.innerHTML=document.body.innerHTML.replace(/[{][{][a-z_]+[}][}]/g,''); bar();
+     document.body.innerHTML=h; hideEmpty(); document.body.innerHTML=document.body.innerHTML.replace(/[{][{][a-z_]+[}][}]/g,''); bar(); document.body.style.visibility='visible';
    });
 })();
 </script><style>@media print{.noprint{display:none}}</style></body></html>
