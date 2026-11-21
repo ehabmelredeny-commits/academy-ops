@@ -1,0 +1,19 @@
+<!doctype html><html dir=rtl><head><meta charset=utf-8><title>بطاقة إهداء — أكاديمية السعد</title><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content=noindex>
+<!-- قالب بطاقة الإهداء T1 — المتغيرات: {{to}} {{from}} {{msg}} {{program}}. للمعاينة: ?to=..&from=..&msg=..&program=.. -->
+<style>@font-face{font-family:C;src:url(/brand/card/Cairo.ttf)}*{margin:0;box-sizing:border-box}
+html{background:#071d31}body{transform-origin:top right;width:1080px;height:1350px;overflow:hidden;font-family:C;color:#fff;text-align:center;position:relative;padding-top:330px;background:radial-gradient(circle at 50% 30%,#3b1f6e,#1a1446 55%,#071d31 95%)}
+.fr{position:absolute;inset:34px;border:3px solid #D4A853;border-radius:28px}.fr2{position:absolute;inset:48px;border:1px solid rgba(212,168,83,.45);border-radius:22px}
+.rose{position:absolute;top:66px;left:50%;margin-left:-90px;width:180px;height:216px}
+.g{color:#D4A853}.to{margin:0 70px;font-size:72px;font-weight:900;line-height:1.2;word-break:break-word}
+.from{font-size:36px;color:#e9e1ff;margin:14px 70px 0;word-break:break-word}
+.msg{margin:40px auto 0;width:820px;height:300px;border:2px solid #D4A853;border-radius:22px;background:rgba(109,63,192,.35);display:flex;align-items:center;justify-content:center;padding:30px 40px;line-height:1.6;font-weight:700}
+.pr{margin-top:40px;font-size:30px;color:#e9e1ff}.pr b{display:block;color:#D4A853;font-size:44px;font-weight:900;margin-top:4px}
+.ft{position:absolute;left:0;right:0;bottom:70px}.ft img{height:90px}.ft .t{color:#D4A853;font-size:28px;font-weight:700}.ft .lic{font-size:17px;color:#cfd3e6;margin-top:6px}</style></head><body>
+<div class=fr></div><div class=fr2></div>
+<img class=rose src="/gift/rose.svg">
+<div class=to>كابتن <span class=g id=to>{{to}}</span></div>
+<div class=from>هدية من كابتن <span id=from>{{from}}</span></div>
+<div class=msg id=msg>{{msg}}</div>
+<div class=pr>هديتك برنامج<b id=program>{{program}}</b></div>
+<div class=ft><img src="/brand/logo-transparent.png"><div class=t>السعد طريق المجد</div><div class=lic>معهد رياضي مرخّص من وزارة الرياضة · ترخيص رقم STI-License00181</div></div>
+<script>var S={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};function fit(){var s=Math.min(innerWidth/1080,innerHeight/1350);document.body.style.transform="scale("+s+")";document.body.style.marginRight=Math.max(0,(innerWidth-1080*s)/2)+"px"}addEventListener("resize",fit);fit();var c=new URLSearchParams(location.search).get("c")||"";fetch(S.url+"/rest/v1/rpc/gift_card",{method:"POST",headers:{apikey:S.anon,Authorization:"Bearer "+S.anon,"Content-Type":"application/json"},body:JSON.stringify({c:c})}).then(function(r){return r.json()}).then(function(d){if(!d||d.error){document.getElementById("to").textContent="";document.getElementById("from").textContent="";document.getElementById("msg").textContent="هذه البطاقة غير موجودة";document.getElementById("program").textContent="";return}["to","from","msg","program"].forEach(function(k){document.getElementById(k).textContent=d[k]||""});var m=document.getElementById("msg");if(!m.textContent.trim())m.textContent="يؤمن بك… ويرى فيك كابتن المستقبل.";var fs=48;m.style.fontSize=fs+"px";while(m.scrollHeight>m.clientHeight&&fs>18){fs--;m.style.fontSize=fs+"px"}var t=document.getElementById("to").textContent.length;if(t>20)document.querySelector(".to").style.fontSize=(t>32?48:58)+"px"})</script></body></html>
