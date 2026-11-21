@@ -207,7 +207,7 @@ var S={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_m
        var v=d[k]; if(v===undefined||v===null||v==='') return; h=h.split('{{'+k+'}}').join(esc(v));
      });
      h=h.split('{{name}}').join('');
-     document.body.innerHTML=h; hideEmpty(); bar();
+     document.body.innerHTML=h; hideEmpty(); document.body.innerHTML=document.body.innerHTML.replace(/{{w+}}/g,''); bar();
    });
 })();
 </script><style>@media print{.noprint{display:none}}</style></body></html>
