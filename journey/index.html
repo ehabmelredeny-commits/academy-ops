@@ -1,0 +1,194 @@
+<!doctype html>
+<html dir="rtl" lang="ar"><head><meta name=viewport content="width=device-width,initial-scale=1"><meta name=robots content=noindex><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دليل رحلتك — أكاديمية السعد الرياضية</title>
+<!--
+  قالب «دليل رحلتك» — قالب واحد لكل البرامج. A4 عمودي للطباعة/PDF، ومتجاوب للجوال.
+  المتغيرات: {{name}} {{program}} {{hours}} {{format}} {{chapters}} {{ldi_no}} {{weekly_hours}} {{cover_url}}
+             {{start_date}} {{practical_place}} {{member_no}}
+  القوائم: {{learn}} و{{outcomes}} تُمرَّر عناصر <li>…</li> جاهزة (أو نص مفصول بسطر جديد — يحوّله السكربت أسفل الصفحة).
+  إخفاء الأقسام: أي عنصر عليه data-if="field" يُحذف إن كان الحقل فارغاً أو بقي {{field}} بلا تعبئة.
+  الثوابت (80%، 70%، 7/10، 150 سؤالاً، حزمة الخريج) مكتوبة في القالب.
+  لقطات البوابة في الصفحات 5–7 رسومات توضيحية مبسّطة الآن؛ تُستبدل بلقطات حساب الاختبار TEST-Claude بوضع <img> مكان .mock.
+-->
+<style>
+@font-face{font-family:C;src:url(Cairo.ttf)}
+:root{--navy:#0B2D4B;--deep:#071d31;--pur:#3b1f6e;--pur2:#6d3fc0;--gold:#D4A853;--ink:#e9e1ff}
+*{margin:0;box-sizing:border-box}
+html{background:#0b0a1f}
+body{font-family:C,'Segoe UI',Tahoma,sans-serif;color:#fff;line-height:1.6}
+.page{width:210mm;min-height:297mm;margin:0 auto 8mm;position:relative;overflow:hidden;padding:18mm 16mm 22mm;
+ background:radial-gradient(circle at 50% 20%,var(--pur),#1a1446 55%,var(--deep) 95%);display:flex;flex-direction:column;align-items:center;text-align:center}
+.page:before{content:'';position:absolute;inset:7mm;border:1.5px solid rgba(212,168,83,.55);border-radius:6mm;pointer-events:none}
+.no{position:absolute;top:10mm;left:12mm;color:var(--gold);font-weight:900;font-size:11pt}
+.logo{height:18mm}
+.g{color:var(--gold)}
+h1{font-size:26pt;font-weight:900;line-height:1.3;margin-top:6mm}
+h2{font-size:21pt;font-weight:900;line-height:1.3;margin:4mm 0 2mm}
+.lead{font-size:13pt;color:var(--ink);max-width:150mm}
+.vis{margin:8mm 0 6mm;display:flex;gap:6mm;justify-content:center;align-items:center;flex-wrap:wrap}
+.vis img.shot{max-width:100%;border-radius:4mm;box-shadow:0 8mm 16mm rgba(0,0,0,.55)}
+.txt{font-size:12.5pt;color:var(--ink);max-width:160mm;text-align:right}
+.txt li{margin:1.5mm 0;list-style:none;padding-right:7mm;position:relative}.txt li:before{content:'◆';color:var(--gold);position:absolute;right:0;font-size:9pt;top:1.5mm}
+.foot{position:absolute;bottom:11mm;left:0;right:0;font-size:8.5pt;color:#cfd3e6}
+.card{border:1.5px solid var(--gold);border-radius:5mm;background:rgba(109,63,192,.35);padding:5mm 7mm}
+.ladder{display:flex;align-items:center;gap:4mm;font-weight:900;font-size:14pt}
+.ladder span{border:2px solid var(--gold);border-radius:4mm;padding:3mm 6mm}.ladder .on{background:var(--gold);color:#1a1446}
+.bar{width:140mm;height:5mm;border-radius:3mm;background:rgba(255,255,255,.15);overflow:hidden;margin-top:6mm}.bar i{display:block;width:3%;height:100%;background:var(--gold)}
+.steps{display:grid;gap:3.5mm;width:150mm}.steps div{display:flex;gap:5mm;align-items:center;text-align:right;font-size:13pt;font-weight:700}
+.steps b{flex:none;width:11mm;height:11mm;border-radius:50%;background:var(--gold);color:#1a1446;display:flex;align-items:center;justify-content:center;font-size:14pt}
+.mock{width:62mm;height:118mm;border:3mm solid #05050f;border-radius:9mm;background:#120d33;position:relative;overflow:hidden;box-shadow:0 8mm 16mm rgba(0,0,0,.55);text-align:right;padding:6mm 4mm;font-size:8pt}
+.mock .row{background:rgba(109,63,192,.5);border-radius:2mm;padding:2.5mm;margin-bottom:2.5mm}.mock .hl{outline:2px solid var(--gold)}
+.tag{position:absolute;background:var(--gold);color:#1a1446;font-weight:900;font-size:8.5pt;border-radius:2mm;padding:.5mm 2mm;white-space:nowrap}
+.plan{width:150mm;border-collapse:collapse;font-size:12pt}.plan td{border:1px solid rgba(212,168,83,.7);padding:4mm;height:13mm}.plan td:first-child{width:35mm;color:var(--gold);font-weight:700}
+.icons{display:flex;gap:6mm;justify-content:center;flex-wrap:wrap}.icons div{width:34mm;font-size:10.5pt;font-weight:700}.icons img{width:15mm;display:block;margin:0 auto 2mm;border:2px solid var(--gold);border-radius:50%;padding:2.5mm;background:rgba(109,63,192,.45)}
+.big{font-size:40pt;font-weight:900;color:var(--gold);line-height:1}
+@media print{html{background:none}.page{margin:0;page-break-after:always}}
+@media (max-width:820px){
+ .page{width:100%;min-height:auto;padding:14vw 6vw 18vw;margin:0 0 3vw}
+ .page:before{inset:3vw}.no{top:5vw;left:6vw}
+ .logo{height:14vw}h1{font-size:7.5vw}h2{font-size:6.5vw}.lead,.txt{font-size:4.2vw}
+ .steps,.plan,.bar{width:100%}.steps div{font-size:4vw}.mock{width:56vw;height:106vw;font-size:2.8vw}
+ .ladder{font-size:4.2vw;gap:2vw}.ladder span{padding:2vw 3vw}.foot{font-size:2.6vw;bottom:6vw}
+ .icons div{width:27vw;font-size:3.4vw}.icons img{width:12vw}.big{font-size:11vw}
+ .vis img.shot{max-width:80vw!important}
+}
+</style></head><body>
+
+<!-- 1 الغلاف -->
+<section class="page">
+ <img class="logo" src="logo-transparent.png" alt="أكاديمية السعد الرياضية">
+ <h1>كابتن <span class="g">{{name}}</span>…<br>هكذا ستنتهي رحلتك</h1>
+ <div class="vis">
+  <img class="shot" src="cert-sample.png" style="width:78mm;transform:rotate(-3deg)" alt="نموذج الشهادة">
+  <img class="shot" src="card-graduate.png" style="width:72mm;transform:rotate(3deg)" alt="بطاقة الخريج">
+ </div>
+ <h2>{{program}}</h2>
+ <div class="lead">برنامج معتمد من LDI · رقم الاعتماد {{ldi_no}}</div>
+ <div class="lead" data-if="cover_url"><img src="{{cover_url}}" alt="" style="height:38mm;margin-top:5mm;border-radius:3mm;border:1.5px solid var(--gold)"></div>
+ <div class="foot">دليل رحلتك · رقم العضوية {{member_no}}</div>
+</section>
+
+<!-- 2 ما ستجنيه -->
+<section class="page"><span class="no">2</span>
+ <h1>ما <span class="g">ستجنيه</span> في النهاية</h1>
+ <div class="card txt" style="margin-top:8mm;width:160mm"><b class="g">بعد البرنامج تستطيع:</b><ul data-list="outcomes" style="margin-top:2mm">{{outcomes}}</ul></div>
+ <h2 style="margin-top:9mm">حزمة الخريج</h2>
+ <div class="icons">
+  <div><img src="ic-cap.svg" alt="">شهادة برقم وQR يتحقق منها أي أحد</div>
+  <div><img src="ic-gift.svg" alt="">بطاقة خريج السعد</div>
+  <div><img src="ic-pen.svg" alt="">درع الخريج</div>
+  <div><img src="ic-mail.svg" alt="">مشاركة على LinkedIn بضغطة</div>
+ </div>
+</section>
+
+<!-- 3 أنت هنا -->
+<section class="page"><span class="no">3</span>
+ <h1>أنت <span class="g">هنا</span></h1>
+ <div class="vis"><img class="shot" src="card-trainee.png" style="width:110mm" alt="بطاقة متدرب"></div>
+ <div class="ladder"><span>عضو</span><b class="g">←</b><span class="on">متدرب ✓</span><b class="g">←</b><span>خريج</span></div>
+ <div class="bar"><i></i></div>
+ <div class="lead" style="margin-top:6mm">المسافة بينك وبين الخريج: <b class="g">{{chapters}} فصلاً</b> فقط.<br>كل فصل تنجزه يقرّبك خطوة.</div>
+</section>
+
+<!-- 4 خمس خطوات -->
+<section class="page"><span class="no">4</span>
+ <h1>رحلتك في <span class="g">5 خطوات</span></h1>
+ <div class="steps" style="margin-top:12mm">
+  <div><b>1</b>ثبّت تطبيق البوابة على جوالك</div>
+  <div><b>2</b>ابدأ بالمقدمة — دقائق وتعرف الطريق</div>
+  <div><b>3</b>ادرس فصلاً، ثم اختبار قصير من 10 أسئلة</div>
+  <div data-if="practical_place"><b>4</b>احضر التطبيق العملي</div>
+  <div><b>5</b>الاختبار النهائي… ثم شهادتك</div>
+ </div>
+ <div class="card txt" style="margin-top:10mm;width:150mm"><b class="g">ما ستتعلّمه:</b><ul data-list="learn" style="margin-top:2mm">{{learn}}</ul></div>
+ <div class="lead" style="margin-top:6mm">{{program}} · {{hours}} ساعة · {{format}}</div>
+</section>
+
+<!-- 5 الدخول والتثبيت -->
+<section class="page"><span class="no">5</span>
+ <h1>ادخل <span class="g">وثبّت التطبيق</span></h1>
+ <div class="vis">
+  <div class="mock"><div class="g" style="font-weight:900;margin-bottom:3mm">آيفون</div><div class="row">افتح الرابط في Safari</div><div class="row hl">زر المشاركة ⬆️</div><div class="row hl">«إضافة إلى الشاشة الرئيسية»</div></div>
+  <div class="mock"><div class="g" style="font-weight:900;margin-bottom:3mm">أندرويد</div><div class="row">افتح الرابط في Chrome</div><div class="row hl">القائمة ⋮</div><div class="row hl">«تثبيت التطبيق»</div></div>
+ </div>
+ <div class="txt">ادخل برقم جوالك وكلمة المرور. ثبّت البوابة كتطبيق لتصل لدروسك بلمسة.</div>
+</section>
+
+<!-- 6 الشاشة الرئيسية -->
+<section class="page"><span class="no">6</span>
+ <h1>شاشتك <span class="g">الرئيسية</span></h1>
+ <div class="vis" style="position:relative">
+  <div class="mock">
+   <div class="row hl">📚 دوراتي</div><div class="row hl">▶️ الفصل التالي</div><div class="row hl">📈 تقدّمي</div><div class="row hl">🎓 الشهادات</div><div class="row hl">💬 الدعم</div>
+  </div>
+ </div>
+ <div class="txt"><ul><li><b class="g">دوراتي:</b> برنامجك وكل فصوله.</li><li><b class="g">الفصل التالي:</b> تكمل من حيث توقفت.</li><li><b class="g">تقدّمي:</b> نسبتك وما بقي لك.</li><li><b class="g">الشهادات والدعم:</b> شهادتك، ومن يساعدك.</li></ul></div>
+</section>
+
+<!-- 7 كيف تدرس فصلاً -->
+<section class="page"><span class="no">7</span>
+ <h1>كيف تدرس <span class="g">فصلاً</span></h1>
+ <div class="steps" style="margin-top:12mm">
+  <div><b>1</b>اقرأ أو شاهد الفصل بهدوء</div>
+  <div><b>2</b>اختبار قصير: 10 أسئلة</div>
+  <div><b>3</b>7 من 10 تفتح لك الفصل التالي</div>
+  <div><b>4</b>ما نجحت؟ أعد المحاولة بلا قلق</div>
+ </div>
+ <div class="big" style="margin-top:12mm">7/10</div>
+</section>
+
+<!-- 8 خطتي الأسبوعية -->
+<section class="page"><span class="no">8</span>
+ <h1>خطتي <span class="g">الأسبوعية</span></h1>
+ <div class="lead" style="margin:4mm 0 8mm">من يحدّد «متى وأين» يلتزم أكثر. اقتراحنا: <b class="g">{{weekly_hours}} ساعات</b> أسبوعياً.</div>
+ <table class="plan">
+  <tr><td>سأدرس يوم</td><td></td></tr><tr><td>الساعة</td><td></td></tr><tr><td>في (المكان)</td><td></td></tr>
+  <tr><td>يوم ثانٍ</td><td></td></tr><tr><td>الساعة</td><td></td></tr>
+ </table>
+ <div class="lead" data-if="start_date" style="margin-top:8mm">تبدأ رحلتك: <b class="g">{{start_date}}</b></div>
+</section>
+
+<!-- 9 التطبيق العملي (يختفي إن لم يوجد) -->
+<section class="page" data-if="practical_place"><span class="no">9</span>
+ <h1>التطبيق <span class="g">العملي</span></h1>
+ <div class="card" style="margin-top:10mm;width:150mm"><div class="lead">المكان</div><h2 class="g">{{practical_place}}</h2></div>
+ <div class="big" style="margin-top:10mm">80%</div>
+ <div class="txt" style="margin-top:4mm"><ul><li>حضورك 80% من الجلسات شرط للتخرج — والتأخير يُحسب حضوراً.</li><li>أحضر ملابس رياضية مريحة وقارورة ماء.</li><li>المواعيد تصلك في البوابة.</li></ul></div>
+</section>
+
+<!-- 10 النهائي -->
+<section class="page"><span class="no">10</span>
+ <h1>الاختبار <span class="g">النهائي</span></h1>
+ <div style="display:flex;gap:14mm;margin-top:12mm"><div><div class="big">150</div><div class="lead">سؤالاً</div></div><div><div class="big">70%</div><div class="lead">للنجاح</div></div></div>
+ <div class="txt" style="margin-top:10mm"><ul><li>يُفتح بعد إكمال كل الفصول 🔓</li><li>راجع اختبارات الفصول قبله.</li><li>خذ وقتك، واختر مكاناً هادئاً.</li></ul></div>
+</section>
+
+<!-- 11 يوم تخرجك -->
+<section class="page"><span class="no">11</span>
+ <h1>يوم <span class="g">تخرّجك</span></h1>
+ <div class="vis"><img class="shot" src="cert-sample.png" style="width:70mm" alt=""><img class="shot" src="card-graduate.png" style="width:70mm" alt=""></div>
+ <div class="txt"><ul><li>شهادة برقم وQR تُتحقق على alsaad-academy.com/verify</li><li>بطاقة خريج السعد، ودرع تختار طريقة استلامه</li><li>شاركها على LinkedIn بضغطة… وافخر بها</li><li>رشّح صديقاً، وقيّم تجربتك على Google</li></ul></div>
+</section>
+
+<!-- 12 نحن معك -->
+<section class="page"><span class="no">12</span>
+ <img class="logo" src="logo-transparent.png" alt="" style="margin-top:14mm;height:26mm">
+ <h1>نحن <span class="g">معك</span></h1>
+ <div class="icons" style="margin-top:10mm"><div><img src="ic-wa.svg" alt="">واتساب<br><span dir="ltr">+966 53 681 8008</span></div><div><img src="ic-mail.svg" alt="">البريد<br>info@alsaad-academy.com</div></div>
+ <div class="txt" style="margin-top:10mm"><ul><li>نسيت كلمة المرور؟ من شاشة الدخول «نسيت كلمة المرور».</li><li>فصل لا يفتح؟ تأكد أنك أكملت اختبار الفصل السابق.</li></ul></div>
+ <div class="foot">معهد رياضي مرخّص من وزارة الرياضة · ترخيص رقم STI-License00181<br><b class="g" style="font-size:11pt">السعد طريق المجد</b></div>
+</section>
+
+<script>var S={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};(function(){var p=new URLSearchParams(location.search).get("p")||"";var bar=document.createElement("div");bar.className="noprint";bar.style.cssText="position:fixed;bottom:12px;left:12px;z-index:9;background:#0B2D4B;color:#fff;border-radius:10px;padding:8px 14px;font:14px Tahoma;cursor:pointer";bar.textContent="📄 حفظ PDF / طباعة";bar.onclick=function(){window.print()};document.body.appendChild(bar);fetch(S.url+"/rest/v1/rpc/ac_program_guide",{method:"POST",headers:{apikey:S.anon,Authorization:"Bearer "+S.anon,"Content-Type":"application/json"},body:JSON.stringify({p:p})}).then(function(r){return r.json()}).then(function(d){d=d&&!d.error?d:{};var h=document.body.innerHTML;var e=function(s){return String(s==null?"":s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})};["program","hours","format","chapters","ldi_no","learn","outcomes","weekly_hours","cover_url","start_date","practical_place","member_no","name"].forEach(function(k){var v=d[k];if(v===undefined||v===null||v==="")return;h=h.split("{{"+k+"}}").join(e(v))});h=h.replace(/{{name}}/g,"");document.body.innerHTML=h;document.body.appendChild(bar);// إخفاء الأقسام الفارغة + تحويل القوائم النصية
+(function(){
+ document.querySelectorAll('[data-if]').forEach(function(el){
+  var html=el.outerHTML,f=el.getAttribute('data-if');
+  if(html.indexOf('{{'+f+'}}')>-1&&el.getAttribute('data-filled')!=='1'){el.remove();return}
+  if(!el.textContent.trim()&&!el.querySelector('img'))el.remove();
+ });
+ document.querySelectorAll('[data-list]').forEach(function(ul){
+  var t=ul.innerHTML.trim();
+  if(t.indexOf('{{')===0){ul.parentNode.remove();return}
+  if(t.indexOf('<li')<0)ul.innerHTML=t.split(/\n+/).filter(Boolean).map(function(s){return'<li>'+s+'</li>'}).join('');
+ });
+})})();</script><style>@media print{.noprint{display:none}}</style></body></html>
