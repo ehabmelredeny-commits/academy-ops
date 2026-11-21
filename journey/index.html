@@ -64,8 +64,8 @@ h2{font-size:21pt;font-weight:900;line-height:1.3;margin:4mm 0 2mm}
  </div>
  <h2>{{program}}</h2>
  <div class="lead">برنامج معتمد من LDI · رقم الاعتماد {{ldi_no}}</div>
- <div class="lead" data-if="cover_url"><img src="{{cover_url}}" alt="" style="height:38mm;margin-top:5mm;border-radius:3mm;border:1.5px solid var(--gold)"></div>
- <div class="foot">دليل رحلتك · رقم العضوية {{member_no}}</div>
+ <div class="lead" data-if="cover_url"><img data-src="{{cover_url}}" alt="" style="height:38mm;margin-top:5mm;border-radius:3mm;border:1.5px solid var(--gold)"></div>
+ <div class="foot">دليل رحلتك<span data-if="member_no"> · رقم العضوية {{member_no}}</span></div>
 </section>
 
 <!-- 2 ما ستجنيه -->
@@ -101,7 +101,7 @@ h2{font-size:21pt;font-weight:900;line-height:1.3;margin:4mm 0 2mm}
   <div><b>5</b>الاختبار النهائي… ثم شهادتك</div>
  </div>
  <div class="card txt" style="margin-top:10mm;width:150mm"><b class="g">ما ستتعلّمه:</b><ul data-list="learn" style="margin-top:2mm">{{learn}}</ul></div>
- <div class="lead" style="margin-top:6mm">{{program}} · {{hours}} ساعة · {{format}}</div>
+ <div class="lead" style="margin-top:6mm">{{program}} · {{hours}} ساعة<span data-if="format"> · {{format}}</span></div>
 </section>
 
 <!-- 5 الدخول والتثبيت -->
@@ -140,7 +140,7 @@ h2{font-size:21pt;font-weight:900;line-height:1.3;margin:4mm 0 2mm}
 <!-- 8 خطتي الأسبوعية -->
 <section class="page"><span class="no">8</span>
  <h1>خطتي <span class="g">الأسبوعية</span></h1>
- <div class="lead" style="margin:4mm 0 8mm">من يحدّد «متى وأين» يلتزم أكثر. اقتراحنا: <b class="g">{{weekly_hours}} ساعات</b> أسبوعياً.</div>
+ <div class="lead" style="margin:4mm 0 8mm">من يحدّد «متى وأين» يلتزم أكثر. <span data-if="weekly_hours">اقتراحنا: <b class="g">{{weekly_hours}} ساعات</b> أسبوعياً.</span></div>
  <table class="plan">
   <tr><td>سأدرس يوم</td><td></td></tr><tr><td>الساعة</td><td></td></tr><tr><td>في (المكان)</td><td></td></tr>
   <tr><td>يوم ثانٍ</td><td></td></tr><tr><td>الساعة</td><td></td></tr>
@@ -197,6 +197,8 @@ var S={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_m
   if(t.indexOf('{{')===0){ul.parentNode.remove();return}
   if(t.indexOf('<li')<0)ul.innerHTML=t.split(/\n+/).filter(Boolean).map(function(s){return'<li>'+s+'</li>'}).join('');
  });
+document.querySelectorAll("img[data-src]").forEach(function(i){i.src=i.getAttribute("data-src")});
+ var k=0;document.querySelectorAll("section.page").forEach(function(p){k++;var n=p.querySelector(".no");if(n)n.textContent=k});
 })(); }
   fetch(S.url+'/rest/v1/rpc/ac_program_guide',{method:'POST',headers:{apikey:S.anon,Authorization:'Bearer '+S.anon,'Content-Type':'application/json'},body:JSON.stringify({p:p})})
    .then(function(r){return r.json()}).catch(function(){return {}})
