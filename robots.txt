@@ -2,6 +2,7 @@ User-agent: *
 Allow: /links/
 Allow: /membership/
 Allow: /privacy/
+Allow: /terms/
 Allow: /verify/
 Disallow: /
 Sitemap: https://alsaad-academy.com/sitemap.xml
