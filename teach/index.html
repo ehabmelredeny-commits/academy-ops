@@ -1,0 +1,44 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>صفحة المحاضرة — أكاديمية السعد</title>
+<style>
+body{margin:0;background:#12151b;color:#eee;font-family:Tahoma,Arial,sans-serif;font-size:15px;-webkit-user-select:none;user-select:none}
+.w{max-width:560px;margin:0 auto;padding:16px}.c{background:#1b1f27;border:1px solid #2c323d;border-radius:14px;padding:16px;margin:12px 0}
+h1{color:#D4A853;font-size:20px;margin:6px 0}.m{color:#9aa3ad;font-size:12.5px;line-height:1.8}
+input[type=text],input[type=url],input[type=tel]{width:100%;box-sizing:border-box;padding:11px;border-radius:10px;border:2px solid #7B3FB0;background:#0f1217;color:#fff;font-size:15px;margin:6px 0}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:bold;font-size:15px;cursor:pointer;background:#D4A853;color:#111;width:100%;margin:6px 0}
+button:disabled{opacity:.5}.go{background:#1f7a3f;color:#fff;font-size:18px;padding:16px}
+.row{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid #2c323d}.row b{flex:1}.row .t{color:#9aa3ad;font-size:12px;min-width:70px}
+.st{width:auto;padding:6px 10px;margin:0;font-size:13px;background:#0f1217;color:#ddd;border:1px solid #444}.st.on{border:2px solid #D4A853;color:#D4A853}
+.pill{background:#3b2a5c;color:#d8c4ff;border-radius:8px;padding:2px 8px;font-size:12px}.e{color:#ff8a8a;min-height:18px;font-size:13px}.ok{color:#7fd69a}
+label.k{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.7;margin:8px 0}
+</style></head><body><div class="w"><h1>🎤 صفحة المحاضرة</h1><div id="app" class="c">جارٍ التحميل…</div></div>
+<script>
+var SUPA={"url":"https://qdshwelyowdeqpsgihtn.supabase.co","anon":"sb_publishable_mbMGzQD1YKyjN91PDTQkbQ_osXflpEi"};
+var T=(new URLSearchParams(location.search).get('t')||'').replace(/[^a-fA-F0-9]/g,'').slice(0,80),K='';try{K=sessionStorage.getItem('tk_'+T)||''}catch(e){}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function rpc(fn,b){return fetch(SUPA.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SUPA.anon,Authorization:'Bearer '+SUPA.anon,'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json()})}
+var WHY={link:'الرابط غير صحيح — اطلب من الإدارة رابطاً جديداً',revoked:'أُلغي هذا الرابط من الإدارة',cancelled:'أُلغيت هذه الجلسة',early:'لم تفتح النافذة بعد — تفتح قبل المحاضرة بساعة',ended:'انتهت نافذة هذه الجلسة — التعديل الآن للإدارة فقط',
+  wait:'انتظر دقيقة قبل طلب رمز جديد',max:'تجاوزت عدد الرموز — تواصل مع الإدارة',rate:'محاولات كثيرة — حاول بعد قليل',pledge:'ضع علامة التعهّد بالسرية أولاً',code:'الرمز غير صحيح',code_expired:'انتهى الرمز — اطلب رمزاً جديداً',locked:'محاولات خاطئة كثيرة — اطلب رمزاً جديداً',url:'الرابط يجب أن يبدأ بـ https ومن Google Meet أو Zoom أو Teams',auth:'انتهت جلستك — ادخل من جديد'};
+function why(r){return WHY[r&&r.reason]||'تعذّر — حاول مرة أخرى'}
+function start(){if(!T)return $('app').innerHTML='<div class="e">'+WHY.link+'</div>';if(K)return view();
+  rpc('ac_teach_open',{t:T}).then(function(o){if(!o.ok&&!o.mail)return $('app').innerHTML='<div class="e">'+why(o)+'</div>';
+    $('app').innerHTML='<b>① الدخول</b><div class="m">رابط خاص بمحاضرتك يصله الرمز على بريدك: <span dir="ltr">'+esc(o.mail)+'</span><br>يعمل من '+esc(o.from)+' إلى '+esc(o.to)+' (توقيت الرياض) · لجلسة واحدة فقط · تلغيه الإدارة بزر</div>'+
+    (o.ok?'<button id="sc" onclick="sendCode()">📩 أرسل رمز الدخول إلى بريدي</button><input id="cd" type="tel" inputmode="numeric" maxlength="6" placeholder="الرمز المكوّن من 6 أرقام" dir="ltr">'+
+    '<label class="k"><input type="checkbox" id="pl"> <span>أتعهّد بسرية بيانات المتدربين وعدم نسخها أو تصويرها أو مشاركتها</span></label><button onclick="verify()">🎓 ادخل المحاضرة</button>':'')+'<div id="er" class="e">'+(o.ok?'':why(o))+'</div>'})}
+function sendCode(){var b=$('sc');b.disabled=true;rpc('ac_teach_send_code',{t:T}).then(function(r){$('er').innerHTML=r.ok?'<span class="ok">✓ أُرسل الرمز — يصل بريدك خلال دقائق (تحقق من الرسائل غير المرغوبة)</span>':why(r);setTimeout(function(){b.disabled=false},60000)})}
+function verify(){rpc('ac_teach_verify',{t:T,code:($('cd').value||'').replace(/\D/g,''),pledge:$('pl').checked,pledge_text:'أتعهّد بسرية بيانات المتدربين وعدم نسخها أو تصويرها أو مشاركتها'}).then(function(r){if(!r.ok)return $('er').textContent=why(r);K=r.k;try{sessionStorage.setItem('tk_'+T,K)}catch(e){}view()})}
+var LB={P:'حاضر',L:'متأخر',A:'غائب'};
+function view(){rpc('ac_teach_view',{t:T,k:K}).then(function(d){if(!d.ok){K='';try{sessionStorage.removeItem('tk_'+T)}catch(e){}if(d.reason==='auth')return start();return $('app').innerHTML='<div class="e">'+why(d)+'</div>'}
+  var L=d.list||[],n=L.filter(function(x){return x.st==='P'||x.st==='L'}).length;
+  $('app').innerHTML='<b>② '+esc(d.prog||'')+' · الجلسة '+esc(d.n)+'</b><div class="m">'+esc(d.day)+' · '+esc(d.from)+' – '+esc(d.to)+' · '+esc(d.cohort||'')+(d.kind?' <span class="pill">'+esc(d.kind)+'</span>':'')+(d.topic?'<br>'+esc(d.topic):'')+'</div>'+
+   '<div class="m" style="margin-top:8px">🔗 رابط المحاضرة — ضعه أو غيّره متى شئت، فيصل المتدربين فوراً من زر «انضم» في البوابة</div><input id="mu" type="url" dir="ltr" placeholder="https://meet.google.com/… أو Zoom أو Teams" value="'+esc(d.meet_url||'')+'"><button onclick="saveMeet()">💾 احفظ رابط المحاضرة</button>'+
+   (d.meet_url?'<button class="go" onclick="window.open(\''+esc(d.meet_url).replace(/'/g,'')+'\',\'_blank\',\'noopener\')">🎥 ابدأ المحاضرة</button>':'')+'<div id="er" class="e"></div>'+
+   '<div style="margin-top:10px"><b>الحضور ('+n+' من '+L.length+')</b> <span class="m">يُسجَّل تلقائياً عند دخول المتدرب · صحّحه عند الحاجة</span></div>'+
+   L.map(function(x){return '<div class="row"><b>'+esc(x.name)+'</b><span class="t">'+(x.at&&x.src==='online'?'دخل '+esc(x.at):x.st?esc(LB[x.st]||''):'لم يدخل')+'</span>'+['P','L','A'].map(function(s){return '<button class="st'+(x.st===s?' on':'')+'" data-e="'+esc(x.e)+'" data-s="'+s+'" onclick="mark(this)">'+LB[s]+'</button>'}).join('')+'</div>'}).join('')+
+   '<div class="m" style="margin-top:10px">🔒 لا يظهر: الجوال · البريد · المدفوعات · الدرجات · الدفعات الأخرى · المتأخر يُحسب حاضراً في شرط 80% · بعد '+esc(d.until)+' التعديل للإدارة فقط</div>'})}
+function saveMeet(){var u=($('mu').value||'').trim();rpc('ac_teach_set_meet',{t:T,k:K,url:u}).then(function(r){if(!r.ok)return $('er').textContent=why(r);view()})}
+function mark(b){b.disabled=true;rpc('ac_teach_mark',{t:T,k:K,enrollment_id:b.dataset.e,st:b.dataset.s}).then(function(r){if(!r.ok){b.disabled=false;return $('er').textContent=why(r)}view()})}
+document.addEventListener('contextmenu',function(e){e.preventDefault()});
+start();setInterval(function(){if(K&&document.activeElement!==$('mu'))view()},60000);
+</script></body></html>
