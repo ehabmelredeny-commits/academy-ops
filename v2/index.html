@@ -65,6 +65,9 @@ input:focus{outline:0;border-color:var(--a);box-shadow:0 0 0 3px #123138}
 .clsave{width:100%;margin-top:10px;background:#D4A853;color:#14233c;border:0;border-radius:11px;padding:10px;font:inherit;font-weight:bold;font-size:15px;cursor:pointer}
 .clg{cursor:pointer;margin-left:3px}
 .clchip.hot{border:1.5px solid #e04848}
+.tmw{max-width:900px}.tmf{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.tmf input,.tmf select{border:2px solid #7B3FB0;border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;padding:7px;min-width:0;flex:1 1 160px}
+.tmr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:1px solid var(--line);padding:8px 2px}.tmr .nm{flex:1 1 220px;min-width:0;overflow-wrap:anywhere}
+.tms{display:inline-block;padding:1px 9px;border-radius:10px;font-size:11.5px;font-weight:bold}
 .mbx,.mbm2{display:none}
 @media(max-width:768px){
 #app .nav,.mbt,.mbm,.hd .btn,.hd #esbtn,.hd small{display:none!important}
@@ -211,7 +214,7 @@ var NAVT=[{k:'home',l:'🏠 الرئيسية',fn:'home',tip:'ملخص يومك �
 {k:'fin',l:'💰 المال',tip:'الملخص المالي والمدفوعات والاسترداد',kids:[['finance','💰 الملخص المالي','الملخص المالي والفئات والمصروفات'],['paysScreen','💳 المدفوعات','كل المدفوعات: بحث وفلترة وربط بالشخص'],['refundsScreen','↩️ الاسترداد','طلبات الإلغاء والنقل والاسترداد: القرار لك']]},
 {k:'adm',l:'🎛 الإدارة',hl:1,tip:'غرفة التحكم وصحة النظام والتقارير والإعدادات',kids:[['ctlScreen','🎛 غرفة التحكم','فحص النظام والمؤشرات'],['healthRun','🩺 صحة النظام','كل الفحوص بالتفصيل'],['monScreen','📺 المراقبة','النظام يعمل أمامك لحظة بلحظة'],['rptScreen','📊 التقارير','مباشر ويومي وأسبوعي وشهري'],['system','🖥 النظام','إعدادات النظام وأدواته وحماية الرقم'],['systemMap','🗺 خريطة النظام','رحلة العميل كاملة في صفحة واحدة، واضغط أي مربع لتفتح شاشته'],['settings','⚙️ الإعدادات','بيانات المنشأة والإعدادات']]},
 {k:'links',l:'🔗 روابطنا',fn:'linksScreen',plain:1,tip:'كل روابطنا العامة: نسخ وQR والردود والبيانات'}];
-var NAVP={home:'home',persons:'sale',calls:'sale',customers:'sale',offers:'sale',mkt:'mkt',dailyPost:'mkt',market:'mkt',gaps:'mkt',srch:'mkt',comp:'mkt',b2b:'mkt',osint:'mkt',academic:'edu',pricing:'edu',courses:'edu',careers:'edu',cal:'edu',certs:'edu',complaints:'edu',finance:'fin',pays:'fin',refunds:'fin',ctl:'adm',healthRun:'adm',mon:'adm',rpt:'adm',system:'adm',sysmap:'adm',settings:'adm',links:'links'};
+var NAVP={home:'home',team:'adm',persons:'sale',calls:'sale',customers:'sale',offers:'sale',mkt:'mkt',dailyPost:'mkt',market:'mkt',gaps:'mkt',srch:'mkt',comp:'mkt',b2b:'mkt',osint:'mkt',academic:'edu',pricing:'edu',courses:'edu',careers:'edu',cal:'edu',certs:'edu',complaints:'edu',finance:'fin',pays:'fin',refunds:'fin',ctl:'adm',healthRun:'adm',mon:'adm',rpt:'adm',system:'adm',sysmap:'adm',settings:'adm',links:'links'};
 /* تبويبات الشاشة نفسها تُرسم في الشريط، فلا صفان: الشاشة تملأ هذا المعرّف */
 var NAVS_SLOT={mkt:'mtt',market:'mkt',b2b:'bbt',ctl:'ctt',comp:'cxt',srch:'srt'},NAVF_TAB={mktScreen:'mkt',marketScreen:'market',b2bScreen:'b2b',ctlScreen:'ctl',compScreen:'comp',srchScreen:'srch',dailyPost:'dailyPost',finance:'finance',paysScreen:'pays',refundsScreen:'refunds',pricing:'pricing',careers:'careers',gapsScreen:'gaps',monScreen:'mon',rptScreen:'rpt',system:'system',systemMap:'sysmap',academic:'academic',calScreen:'cal',certs:'certs',cmpAdmin:'complaints',healthRun:'healthRun',settings:'settings',linksScreen:'links',osintScreen:'osint'};
 /* 🗺 خريطة النظام للمدير (owner) فقط: الرابط يظهر بعد جواب الخادم app_campaign_is_owner لهذه الجلسة، وأي شك = مخفي */
@@ -583,7 +586,7 @@ function pOpen(id){PSEL=id;if(window.innerWidth<=760&&!$('pg').classList.contain
 /* ↩ زر الرجوع العام (تصميم docs/mockups/v2-back-button.png 2026-10-29 + مراجعة «خريطة النظام» الست):
    يُسجَّل الانتقال فقط (نفس الشاشة بنفس المعامل = إعادة رسم لا تُسجَّل) · المعامل محفوظ (offers:t) · الدخول/الرمز لا يُسجَّلان والمكدّس يُفرَّغ عند الخروج
    · hash في الرابط (التحديث يعيد نفس الشاشة) · زر الجوال/المتصفح = نفس الزر · التفاصيل (pg.det) تُغلق أولاً · المسار قابل للضغط */
-var NAVS=[],NAVB=0,NAVL={home:'🏠 الرئيسية',persons:'👤 الأشخاص',customers:'👥 العملاء',offers:'🎁 العروض',pricing:'📚 الدورات',careers:'🗺️ خريطة المهن',finance:'💰 المالية',settings:'⚙️ الإعدادات',academic:'🎓 الأكاديمي',system:'🖥 النظام',waManual:'📱 واتساب يدوي',refScreen:'🤝 الإحالات',pipeScreen:'🧲 المراحل',askScreen:'🎯 يسألون الآن',certs:'🏅 الشهادات',cmpAdmin:'📨 الشكاوى',healthRun:'🩺 فحص الصحة',dailyPost:'📣 المنشور اليومي',ofOpen:'🏛 الدليل الرسمي',systemMap:'🗺 خريطة النظام',refundsScreen:'↩️ الاسترداد',linksScreen:'🔗 روابطنا',calScreen:'📅 التقويم'};
+var NAVS=[],NAVB=0,NAVL={home:'🏠 الرئيسية',callsScreen:'📞 الاتصالات',osintScreen:'🛰 الرادار',teamScreen:'👥 الفريق والصلاحيات',persons:'👤 الأشخاص',customers:'👥 العملاء',offers:'🎁 العروض',pricing:'📚 الدورات',careers:'🗺️ خريطة المهن',finance:'💰 المالية',settings:'⚙️ الإعدادات',academic:'🎓 الأكاديمي',system:'🖥 النظام',waManual:'📱 واتساب يدوي',refScreen:'🤝 الإحالات',pipeScreen:'🧲 المراحل',askScreen:'🎯 يسألون الآن',certs:'🏅 الشهادات',cmpAdmin:'📨 الشكاوى',healthRun:'🩺 فحص الصحة',dailyPost:'📣 المنشور اليومي',ofOpen:'🏛 الدليل الرسمي',systemMap:'🗺 خريطة النظام',refundsScreen:'↩️ الاسترداد',linksScreen:'🔗 روابطنا',calScreen:'📅 التقويم'};
 function navKey(e){return e.fn+(e.a&&e.a.length?':'+e.a.join(','):'')}
 function navInstall(){(window.V2_TABS||[]).forEach(function(t){if(t.fn&&!NAVL[t.fn])NAVL[t.fn]=t.label});
   Object.keys(NAVL).forEach(function(fn){var f=window[fn];if(typeof f!=='function'||f.__nav)return;var w=function(){var a=[].slice.call(arguments).filter(function(x){return x!==undefined&&x!==null&&typeof x!=='object'}).map(String);
@@ -2768,6 +2771,39 @@ function gdCohort(cid){rpc('app_guide_cohort',{token:TOK,p_cohort:cid,p_program:
 /* ملف الشخص: زر الدليل */
 (function(){if(typeof hbTasks!=='function')return;var o=hbTasks;hbTasks=function(id){o.apply(this,arguments);setTimeout(function(){var w=$('hbtasks');if(!w||!id||$('gdpb'))return;var d=document.createElement('div');d.className='hbc';d.innerHTML='<button id="gdpb" class="clbtn" style="background:#D4A853;color:#14233c;font-weight:bold" onclick="gdOpen(\''+esc(id)+'\')" title="رابط دليل البرنامج: التثبيت والدخول والدراسة حتى الشهادة">📘 أرسل دليل رحلتك</button>';w.insertBefore(d,w.firstChild)},0)}})();
 </script><script>
+window.V2_TABS=(window.V2_TABS||[]).concat([{key:'team',label:'👥 الفريق والصلاحيات',fn:'teamScreen',tip:'ادعُ موظف اتصالات أو مدرّباً خارجياً ببريده، واقطع صلته بلمسة — للمالك فقط'}]);
+var TMS={'مدعو':['#5a4a12','#ffe08a','✉️'],'مفعّل':['#163d2c','#9fe5c0','🟢'],'موقوف':['#5a1f24','#ffb3b3','⛔'],'انتهت الدعوة':['#333','#bbb','⌛']};
+var TMR={caller:'📞 موظف اتصالات',instructor:'👨‍🏫 مدرّب خارجي'};
+function teamScreen(){TAB='team';window.NAVCUR='teamScreen';if(!TOK)return loginScreen();
+  $('app').innerHTML=shell(nav()+'<div class="tmw"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><b style="font-size:17px">👥 الفريق والصلاحيات</b><span class="mut">فريقك الخارجي من مكان واحد: دعوة ببريده، وقطع الصلة فوراً</span><span class="sp"></span><button class="ib" title="تحديث" onclick="tmLoad()">⟳</button></div>'+
+    '<div class="card" style="margin-top:8px"><b>➕ أضف عضواً</b><div class="tmf" style="margin-top:6px"><input id="tm_n" placeholder="الاسم"><input id="tm_e" dir="ltr" type="email" placeholder="email@example.com"><select id="tm_r" title="الدور يحدد ما يراه فقط"><option value="caller">📞 موظف اتصالات</option><option value="instructor">👨‍🏫 مدرّب خارجي</option></select><button class="btn p" onclick="tmInvite(this)" title="تُرسل الدعوة من info@ برابط صالح لمرة واحدة، ويؤكدها برمز يصل بريده">✉️ إرسال الدعوة</button></div><div id="tm_m" class="mut" style="font-size:12px;margin-top:4px">موظف الاتصالات يرى «📞 الاتصالات» لعملائه المسندين فقط · المدرّب يرى صفحة جلساته فقط</div></div>'+
+    '<div class="card" id="tml"><div class="mut">جارٍ التحميل…</div></div><div class="card" id="tmg"></div></div>');
+  tmLoad()}
+function tmErr(e){var m=String(e&&e.message||e);return /owner/.test(m)?'🔒 للمالك فقط':m}
+function tmLoad(){rpc('app_team_list',{token:TOK}).then(function(d){var R=(d&&d.rows)||[],el=$('tml');if(!el)return;
+  el.innerHTML='<b>الأعضاء ('+R.length+')</b>'+(R.length?R.map(function(r){var c=TMS[r.status]||TMS['مدعو'];return '<div class="tmr"><span class="nm"><b>كابتن '+esc(r.name)+'</b> <span class="mut" dir="ltr">'+esc(r.email)+'</span><br><span class="mut" style="font-size:12px">'+(TMR[r.role]||esc(r.role))+(r.src==='الإعدادات'?' · أُضيف من الإعدادات':'')+' · آخر دخول: '+(r.last_login?when(r.last_login):'—')+(r.sessions!=null?' · روابط جلسات نشطة: '+r.sessions:'')+'</span></span><span class="tms" style="background:'+c[0]+';color:'+c[1]+'">'+c[2]+' '+esc(r.status)+'</span>'+
+    (r.src!=='الإعدادات'&&r.status!=='مفعّل'?'<button class="btn s" data-e="'+esc(r.email)+'" onclick="tmResend(this)" title="رابط جديد صالح لمرة واحدة — الرابط القديم يتوقف">🔁 إعادة إرسال الدعوة</button>':'')+
+    (r.status!=='موقوف'?'<button class="btn s" style="background:#c62828;color:#fff;border:0" data-safe="1" data-e="'+esc(r.email)+'" onclick="tmRevoke(this)" title="فوراً: يخرج من كل أجهزته وتتوقف روابطه">⛔ قطع الصلة</button>':'')+'</div>'}).join(''):'<div class="mut c" style="padding:10px">لا أحد بعد — ادعُ أول عضو من الأعلى</div>');
+  var g=$('tmg');if(g)g.innerHTML='<b>🧾 السجل</b>'+((d.log||[]).slice(0,15).map(function(x){return '<div class="mut" style="font-size:12px">'+esc(when(x.at))+' · '+esc(x.action)+' · <span dir="ltr">'+esc(x.email)+'</span></div>'}).join('')||'<div class="mut">—</div>')}).catch(function(e){var el=$('tml');if(el)el.innerHTML='<div class="mut">تعذّر: '+esc(tmErr(e))+'</div>'})}
+function tmInvite(b){var n=$('tm_n').value.trim(),e=$('tm_e').value.trim(),r=$('tm_r').value;if(n.length<2||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){$('tm_m').textContent='اكتب الاسم والبريد الصحيح';return}
+  if(!confirm('إرسال دعوة '+(TMR[r]||r)+' إلى '+e+'؟'))return;b.disabled=true;
+  rpc('app_team_invite',{token:TOK,p_name:n,p_email:e,p_role:r}).then(function(){b.disabled=false;$('tm_m').textContent='✓ أُرسلت الدعوة إلى '+e;$('tm_n').value='';$('tm_e').value='';tmLoad()}).catch(function(x){b.disabled=false;$('tm_m').textContent='تعذّر: '+tmErr(x)})}
+function tmResend(b){if(!confirm('إعادة إرسال الدعوة إلى '+b.dataset.e+'؟'))return;b.disabled=true;rpc('app_team_resend',{token:TOK,p_email:b.dataset.e}).then(function(){alert('✓ أُرسلت');tmLoad()}).catch(function(x){b.disabled=false;alert('تعذّر: '+tmErr(x))})}
+function tmRevoke(b){if(!confirm('قطع صلة '+b.dataset.e+' الآن؟ يخرج فوراً من كل أجهزته وتتوقف كل روابطه.'))return;b.disabled=true;rpc('app_team_revoke',{token:TOK,p_email:b.dataset.e}).then(function(r){alert('✓ قُطعت الصلة'+(r.links?' · أُلغي '+r.links+' رابط جلسة':''));tmLoad()}).catch(function(x){b.disabled=false;alert('تعذّر: '+tmErr(x))})}
+/* صفحة قبول الدعوة: قبل الدخول، بدل شاشة الدخول */
+function invTok(){var m=location.search.match(/[?&]invite=([0-9a-f]{20,})/);return m?m[1]:''}
+var _tmLogin=loginScreen;loginScreen=function(msg){if(invTok()&&!window.INVD)return invScreen();return _tmLogin(msg)};
+function invScreen(){var t=invTok();$('app').innerHTML=shell('<div class="card login c" id="invc"><div class="mut">جارٍ فتح الدعوة…</div></div>');
+  rpc('app_team_invite_open',{t:t}).then(function(r){var c=$('invc');if(!r||!r.ok){c.innerHTML='<h3>⌛ الرابط غير صالح</h3><div class="mut">انتهت الدعوة أو استُخدمت أو أُلغيت — اطلب من الإدارة إعادة إرسالها</div>';return}
+    c.innerHTML='<h3>👋 أهلاً كابتن '+esc(r.name)+'</h3><div class="mut">دعوتك للانضمام بصفة <b>'+(TMR[r.role]||'')+'</b>. نرسل رمزاً من ٦ أرقام إلى <b dir="ltr">'+esc(r.mail)+'</b></div><button class="btn p" id="invs" onclick="invCode()" style="margin-top:10px">أرسل رمز التأكيد</button><input id="otp" inputmode="numeric" maxlength="6" placeholder="••••••" dir="ltr" style="margin-top:10px;border:2px solid #7B3FB0"><button class="btn p" id="vb" onclick="invOk()">✅ تأكيد الانضمام</button><div class="err" id="err"></div>'}).catch(function(){$('invc').innerHTML='<div class="err">تعذّر الاتصال</div>'})}
+function invCode(){var b=$('invs');b.disabled=true;rpc('app_team_invite_code',{t:invTok()}).then(function(r){b.disabled=false;$('err').textContent=r&&r.ok?'✓ أُرسل الرمز — افتح بريدك':r.reason==='wait'?'انتظر دقيقة ثم أعد الطلب':r.reason==='max'?'طلبات كثيرة — اطلب دعوة جديدة':'الرابط غير صالح'}).catch(function(){b.disabled=false;$('err').textContent='تعذّر الاتصال'})}
+function invOk(){var c=($('otp').value||'').replace(/[^0-9]/g,'');if(c.length!==6){$('err').textContent='الرمز ٦ أرقام';return}$('vb').disabled=true;
+  rpc('app_team_invite_accept',{t:invTok(),code:c,device:(typeof dev==='function'?dev():'')}).then(function(r){$('vb').disabled=false;if(!r||!r.ok){$('err').textContent=r.reason==='bad'?'الرمز غير صحيح (بقي '+r.left+')':r.reason==='expired'?'انتهى الرمز — اطلب رمزاً جديداً':r.reason==='locked'?'محاولات كثيرة — اطلب دعوة جديدة':'تعذّر التفعيل';return}
+    window.INVD=1;if(r.role==='caller'){TOK=r.token;try{localStorage.setItem('v2_sess',TOK)}catch(e){}location.replace('/v2/?go=calls');return}
+    $('invc').innerHTML='<h3>✅ تم تفعيل حسابك</h3><div class="mut">عند إسنادك لأي جلسة يصلك رابطها على بريدك، وتفتح منه صفحة المحاضرة والحضور.</div><a class="btn p" href="/teach/" style="display:inline-block;margin-top:10px">👨‍🏫 صفحة المدرّب</a>'}).catch(function(){$('vb').disabled=false;$('err').textContent='تعذّر الاتصال'})}
+/* محرر الجلسة: اختيار مدرّب مفعّل يملأ الاسم والبريد */
+if(typeof insLoad==='function'){var _tmIns=insLoad;insLoad=function(sid){_tmIns(sid);rpc('app_team_instructors',{token:TOK}).then(function(L){var t=0;(function put(){var e=$('in_e');if(!e){if(++t<20)setTimeout(put,250);return}if(!L||!L.length||$('in_pick'))return;var s=document.createElement('select');s.id='in_pick';s.title='المدرّبون المفعّلون من 👥 الفريق والصلاحيات';s.style.cssText='border:2px solid #7B3FB0;border-radius:8px';s.innerHTML='<option value="">👥 اختر مدرّباً مفعّلاً</option>'+L.map(function(x,i){return '<option value="'+i+'">'+esc(x.name)+'</option>'}).join('');s.onchange=function(){var x=L[s.value];if(x){$('in_n').value=x.name;$('in_e').value=x.email}};e.parentNode.insertBefore(s,$('in_n'))})()}).catch(function(){})}}
+</script><script>
 var MOB={pins:null,ld:0,q:'',seq:0};
 var MOB_SEC=[['sale','🤝 البيع'],['mkt','📣 التسويق'],['fin','💰 المال'],['edu','🎓 التعليم'],['adm','🎛 الإدارة والنظام']];
 /* أين تُوضع الشاشات غير الموجودة في NAVT (قرار المالك 2026-11-22): المستويات والهدايا في البيع، ورسوم التقسيط في المال */
@@ -2777,12 +2813,12 @@ var MOB_DESK={marketScreen:1,gapsScreen:1,srchScreen:1,compScreen:1,osintScreen:
 /* الافتراضي = التسع «الضرورية» في الحصر */
 var MOB_DAY=['customers','callsScreen','linksScreen','persons','askScreen','paysScreen','refundsScreen','calScreen','academic'];
 /* «أحياناً» في التصميم المعتمد v2 */
-var MOB_SOME=['mktScreen','dailyPost','cmpAdmin','pipeScreen','offers','certs','healthRun'];
+var MOB_SOME=['teamScreen','mktScreen','dailyPost','cmpAdmin','pipeScreen','offers','certs','healthRun'];
 var MOB_DEF=MOB_DAY.concat(MOB_SOME);
 function mobOn(){return window.innerWidth<=768&&!!TOK}
 function mobIc(l){var m=String(l||'').match(/^[^ء-يA-Za-z0-9 ]+/);return m?m[0].trim():'📄'}
 function mobTx(l){return String(l||'').replace(/^[^ء-يA-Za-z0-9]+/,'').trim()}
-function mobAll(){var R=[],seen={};var add=function(fn,l,tip,sec){if(!fn||seen[fn])return;if(fn==='systemMap'&&!(typeof navMapOk==='function'&&navMapOk()))return;seen[fn]=1;R.push({fn:fn,l:l,tip:tip||'',sec:sec})};
+function mobAll(){var R=[],seen={};var add=function(fn,l,tip,sec){if(!fn||seen[fn])return;if(fn==='systemMap'&&!(typeof navMapOk==='function'&&navMapOk()))return;if(fn==='teamScreen'&&window.CLROLE&&window.CLROLE!=='owner')return;seen[fn]=1;R.push({fn:fn,l:l,tip:tip||'',sec:sec})};
   NAVT.forEach(function(n){if(n.k==='home')return;if(n.fn)return add(n.fn,n.l,n.tip,n.k==='links'?'sale':n.k);(n.k==='sale'?CGRP:(n.kids||[])).forEach(function(c){add(c[0],c[1],c[2],n.k)})});
   (window.V2_TABS||[]).forEach(function(t){if(!t.fn||seen[t.fn])return;var s=MOB_ORPH[t.fn]||NAVP[t.key]||'adm';add(t.fn,t.label,t.tip,s==='home'||s==='links'?'adm':s)});
   return R}
