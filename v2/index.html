@@ -114,6 +114,13 @@ body{padding-bottom:70px}
 .mmi .pin.on{color:#D4A853;border-color:#D4A853}
 .optb{position:fixed;left:12px;bottom:140px;z-index:86;width:46px;height:46px;border-radius:50%;border:2px solid #D4A853;background:#0b2340;color:#D4A853;font-size:20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .mhi:active i,.mmi:active,.mbx a:active{transform:scale(.94);transition:transform .08s}
+.mmw{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:6px 0}.mmw>.mmi{border:0;margin:0;background:none}
+.mmx{margin:0 8px 8px;border:1px solid #D4A853;border-radius:14px;background:none;color:#D4A853;font:inherit;font-size:12.5px;padding:5px 12px;cursor:pointer;min-height:34px}
+.mml{border-top:1px dashed var(--line);margin:0 8px;padding:2px 0 8px}
+.mmr{display:flex;align-items:center;gap:8px;padding:6px 2px;border-bottom:1px solid var(--line);min-height:44px}.mmr:last-of-type{border-bottom:0}
+.mmr span{flex:1;font-size:14px}.mmr small{color:var(--mut);font-size:11px}
+.mmt{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--mut);background:none;color:var(--mut);font-size:16px;cursor:pointer;flex:0 0 auto}
+.mmt.on{background:#D4A853;border-color:#D4A853;color:#0b2340;font-weight:bold}
 .mmd{font-size:11px;border:1px solid var(--line);border-radius:10px;padding:1px 6px;color:var(--mut);white-space:nowrap}
 
 /* 📣 المنشور اليومي: أنماط الشاشة من src/ui/Styles.html (مصدر واحد) */
@@ -2804,7 +2811,7 @@ function mobBar(){var c=TAB,it=function(on,ic,l,act,tip,x){return '<a class="'+(
 function mobMenu(){var m=$('mbm2');if(!m){m=document.createElement('div');m.id='mbm2';m.className='mbm2';document.body.appendChild(m)}m.classList.add('op');m.innerHTML='<div class="mmh"><b>☰ كل الشاشات</b><button class="ib" onclick="mobMenuClose()" title="إغلاق">✕</button></div><input class="mhq" id="mmq" type="search" placeholder="🔍 ابحث عن أي شاشة…" oninput="mobMenuDraw()" autocomplete="off"><div class="mut" id="mmmsg" style="font-size:12px">⭐ = مثبّتة في الرئيسية · 💻 = أوضح على الكمبيوتر وتعمل هنا أيضاً</div><div id="mmb"></div>';mobMenuDraw();mobLoadPins(mobMenuDraw)}
 function mobMenuClose(){var m=$('mbm2');if(m)m.classList.remove('op')}
 function mobMenuDraw(){var b=$('mmb');if(!b)return;var q=(($('mmq')||{}).value||'').trim().toLowerCase(),P=(MOB.pins&&MOB.pins.length?MOB.pins:MOB_DEF),A=mobAll().filter(function(x){return !q||(x.l+' '+x.tip).toLowerCase().indexOf(q)>-1});
-  b.innerHTML=MOB_SEC.map(function(s){var L=A.filter(function(x){return x.sec===s[0]});if(!L.length)return '';return '<div class="mms">'+s[1]+'</div>'+L.map(function(x){var on=P.indexOf(x.fn)>-1;return '<div class="mmi"><button class="go" data-f="'+x.fn+'" onclick="mobGo(this.dataset.f)" title="'+esc(x.tip||'')+'"><span style="font-size:22px">'+mobIc(x.l)+'</span><span style="flex:1">'+esc(mobTx(x.l))+(x.tip?'<small>'+esc(x.tip)+'</small>':'')+'</span>'+(MOB_DESK[x.fn]?'<span class="mmd" title="أوضح على الكمبيوتر">💻</span>':'')+'</button><button class="pin'+(on?' on':'')+'" data-f="'+x.fn+'" onclick="mobPin(this.dataset.f)" title="'+(on?'أزل من الرئيسية':'ثبّت في الرئيسية')+'">'+(on?'⭐':'☆')+'</button></div>'}).join('')}).join('')||'<div class="mut" style="margin-top:12px">لا شاشة بهذا الاسم</div>'}
+  b.innerHTML=MOB_SEC.map(function(s){var L=A.filter(function(x){return x.sec===s[0]});if(!L.length)return '';return '<div class="mms">'+s[1]+'</div>'+L.map(function(x){var on=P.indexOf(x.fn)>-1;var I=mobInner(x.fn),sh=I.filter(function(i){return OPT.hid.indexOf(i.k)<0}).length,op=MOB.open===x.fn;return '<div class="mmw"><div class="mmi"><button class="go" data-f="'+x.fn+'" onclick="mobGo(this.dataset.f)" title="'+esc(x.tip||'')+'"><span style="font-size:22px">'+mobIc(x.l)+'</span><span style="flex:1">'+esc(mobTx(x.l))+(x.tip?'<small>'+esc(x.tip)+'</small>':'')+'</span>'+(MOB_DESK[x.fn]?'<span class="mmd" title="أوضح على الكمبيوتر">💻</span>':'')+'</button><button class="pin'+(on?' on':'')+'" data-f="'+x.fn+'" onclick="mobPin(this.dataset.f)" title="'+(on?'أزل من الرئيسية':'ثبّت في الرئيسية')+'">'+(on?'⭐':'☆')+'</button></div><button class="mmx" data-f="'+x.fn+'" onclick="mobInOpen(this.dataset.f)" title="اعرض الشاشات الفرعية والفلاتر والأزرار داخل هذه الشاشة وأظهر أو أخفِ أياً منها">'+(op?'▾':'◂')+' ما بداخلها ('+I.length+') — '+sh+' ظاهرة</button>'+(op?mobInList(x.fn,I):'')+'</div>'}).join('')}).join('')||'<div class="mut" style="margin-top:12px">لا شاشة بهذا الاسم</div>'}
 /* ⚙️ تخصيص هذه الشاشة (إضافة المالك 2026-11-22): كل عنصر اختياري له مفتاح ثابت data-opt="screen.block"، والمخفي يُحفظ في sys_settings.ui_hidden_opts ويُطبَّق بـ CSS عند كل رسم.
    شاشة تشترك بوضع data-opt صريح، والشاشات الرئيسية (المحادثات، الاتصالات، الأشخاص، روابطنا، الرئيسية) تُوسَم آلياً بـ optTag. عناصر الأمان لا تُوسَم أبداً */
 var OPT={hid:[],ld:0};
@@ -2822,10 +2829,33 @@ function optClose(){var m=$('optp');if(m)m.className='mbm2'}
 function optSave(){gapi('action','saveSetting',{key:'ui_hidden_opts',value:OPT.hid.join(',')}).then(function(r){var m=$('optmsg');if(m)m.textContent=r&&r.ok?'✓ حُفظ':'✗ '+((r&&r.error)||'تعذّر الحفظ')}).catch(function(){var m=$('optmsg');if(m)m.textContent='✗ تعذّر الاتصال'})}
 function optSet(k,show){var i=OPT.hid.indexOf(k);if(show&&i>-1)OPT.hid.splice(i,1);if(!show&&i<0)OPT.hid.push(k);optCss();optSave()}
 function optReset(){OPT.hid=OPT.hid.filter(function(k){return k.indexOf(TAB+'.')!==0});optCss();optSave();optOpen()}
+/* «▾ ما بداخلها» في ☰ القائمة (اعتماد المالك 2026-11-22، sub.png): سجل العناصر الداخلية لكل شاشة مشتق آلياً:
+   • الشاشات الفرعية = إخوة الشاشة في شريط التنقل نفسه (navKids من NAVT/CGRP) — المفتاح sub.<الشاشة>.<الفرعية>
+   • الفلاتر والأزرار والأقسام = مفاتيح data-opt التي يوسمها optTag عند فتح الشاشة (تُتذكَّر في هذا الجهاز opt_reg)، + كل مفتاح مخفي في ui_hidden_opts حتى يمكن إرجاعه
+   الحفظ = ui_hidden_opts نفسه (optSet). عناصر الأمان لا تُسجَّل (optSafe/OPT_SAFE) */
+var MOBR=(function(){try{return JSON.parse(localStorage.getItem('opt_reg')||'{}')||{}}catch(e){return {}}})();
+function mobCur(){var t=NAVS[NAVS.length-1];return (t&&t.fn)||window.NAVCUR||''}
+function mobSubs(fn){var g=CGRP.some(function(c){return c[0]===fn})?CGRP:null;if(!g)NAVT.forEach(function(n){if(!g&&!n.fn&&n.k!=='sale'&&navKids(n).some(function(c){return c[0]===fn}))g=navKids(n)});return (g||[]).filter(function(c){return c[0]!==fn})}
+function mobOptType(e){if(e.matches('.chip,.clchip,select,.cx-tabs a,#cch a,.chips>*'))return 'فلتر';if(e.matches('th,td'))return 'عمود';if(e.matches('.hsec,.card>h3,.mhh,.card'))return 'قسم';return 'زر'}
+function mobInner(fn){var R=[],seen={},add=function(k,l,t){if(!k||seen[k]||OPT_SAFE.test(l))return;seen[k]=1;R.push({k:k,l:l,t:t})};
+  mobSubs(fn).forEach(function(c){add('sub.'+fn+'.'+c[0],c[1],'شاشة فرعية')});
+  var r=MOBR[fn]||{},it=r.it||{};Object.keys(it).forEach(function(k){add(k,it[k][0],it[k][1])});
+  var tb=r.tab||NAVF_TAB[fn];OPT.hid.forEach(function(k){if((tb&&k.indexOf(tb+'.')===0&&!MOBR[fn])||k.indexOf('sub.'+fn+'.')===0)add(k,k.slice(k.indexOf('.')+1),'—')});
+  return R}
+function mobInList(fn,I){if(!I.length)return '<div class="mml mut" style="font-size:12px">لا شيء مسجّل بعد — افتح الشاشة مرة ليُعرف ما بداخلها</div>';
+  return '<div class="mml">'+I.map(function(i){var on=OPT.hid.indexOf(i.k)<0;return '<div class="mmr"><span>'+esc(i.l)+'</span><small>'+esc(i.t)+'</small><button class="mmt'+(on?' on':'')+'" data-k="'+esc(i.k)+'" onclick="mobInSet(this.dataset.k)" title="'+(on?'ظاهر — اضغط لإخفائه':'مخفي — اضغط لإظهاره')+'">'+(on?'✓':'✕')+'</button></div>'}).join('')+'<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><button class="btn s" data-f="'+fn+'" onclick="mobInAll(this.dataset.f)" title="أظهر كل ما بداخل هذه الشاشة">↺ إظهار الكل</button><small class="mut">الذهبية ✓ ظاهر · الرمادية ✕ مخفي</small></div></div>'}
+function mobInOpen(fn){MOB.open=MOB.open===fn?'':fn;mobMenuDraw()}
+function mobInSet(k){optSet(k,OPT.hid.indexOf(k)>-1);mobMenuDraw()}
+function mobInAll(fn){var K=mobInner(fn).map(function(i){return i.k});OPT.hid=OPT.hid.filter(function(k){return K.indexOf(k)<0});optCss();optSave();mobMenuDraw()}
+/* يسجّل ما بداخل الشاشة المفتوحة، ويوسم أزرار شريطها الفرعي بمفتاح sub. (الجوال فقط — الكمبيوتر لا يُوسم فلا يتغير) */
+function mobReg(){if(!mobOn())return;var fn=mobCur();if(!fn||fn==='home')return;
+  [].forEach.call(document.querySelectorAll('#app .navbar [data-f]'),function(e){var k='sub.'+fn+'.'+e.getAttribute('data-f');if(e.getAttribute('data-opt')!==k)e.setAttribute('data-opt',k)});
+  var it={};[].forEach.call(document.querySelectorAll('#app [data-opt^="'+TAB+'."]'),function(e){if(optSafe(e))return;var k=e.getAttribute('data-opt');if(!it[k])it[k]=[e.getAttribute('data-optl')||k.slice(TAB.length+1),mobOptType(e)]});
+  if(!Object.keys(it).length&&!MOBR[fn])return;var o=JSON.stringify(MOBR[fn]||{}),n={tab:TAB,it:it};if(o===JSON.stringify(n))return;MOBR[fn]=n;try{localStorage.setItem('opt_reg',JSON.stringify(MOBR))}catch(e){}}
 /* يفصل الرمز الأول في زر التنقل إلى أيقونة كبيرة فوق الاسم (الجوال فقط، مرة لكل زر) */
 function sbTile(){if(!mobOn())return;[].forEach.call(document.querySelectorAll('#app .navbar>a,#app .navbar>button,#app .navbar .cx-tabs.navs>*,#app .cx-tabs>a,#app .cx-tabs>button,#app .chips>a,#app .chips>button,#cch>a'),function(e){if(e.querySelector('.sbi'))return;var t=e.firstChild;if(!t||t.nodeType!==3)return;var m=t.nodeValue.match(/^[^ء-يA-Za-z0-9(«]+/);if(!m||!m[0].trim())return;t.nodeValue=t.nodeValue.slice(m[0].length);var i=document.createElement('i');i.className='sbi';i.textContent=m[0].trim();e.insertBefore(i,t)})}
 function optBtn(){var o=$('optb');if(o)o.remove();return;if(!$('optb')){var b=document.createElement('button');b.id='optb';b.type='button';b.className='optb';b.title='⚙️ تخصيص هذه الشاشة: أظهر أو أخفِ أزرارها وأقسامها';b.textContent='⚙️';b.onclick=optOpen;document.body.appendChild(b)}}
-(function(){var t=0;var run=function(){clearTimeout(t);t=setTimeout(function(){try{optTag();optBtn();sbTile();mobNr();clChipN()}catch(e){}},250)};var go=function(){var a=document.getElementById('app');if(!a)return setTimeout(go,300);new MutationObserver(run).observe(a,{childList:true,subtree:true});if(typeof TOK==='string'&&TOK)mobLoadPins()};go()})();
+(function(){var t=0;var run=function(){clearTimeout(t);t=setTimeout(function(){try{optTag();optBtn();sbTile();mobReg();mobNr();clChipN()}catch(e){}},250)};var go=function(){var a=document.getElementById('app');if(!a)return setTimeout(go,300);new MutationObserver(run).observe(a,{childList:true,subtree:true});if(typeof TOK==='string'&&TOK)mobLoadPins()};go()})();
 /* QA @789: 🔔 في الشريط السفلي = NR.n (app_needs_count) نفسه في كل شاشة — يُعاد ضبطه بعد كل رسم، ولا يلمس DOM إن لم يتغير (لا حلقة مع المراقب) */
 function mobNr(){if(!mobOn())return;var v=String(NR.n||0);[].forEach.call(document.querySelectorAll('.mbx .nrb'),function(e){if(e.textContent!==v)e.textContent=v;var d=NR.n?'':'none';if(e.style.display!==d)e.style.display=d})}
 /* QA @789: شرائح «اتصل اليوم/مهتم/لم يرد مرتين» في العملاء تأخذ عددها من app_calls_list counts (today/hot/noans2) — الجوال فقط، تخزين 60 ثانية */
