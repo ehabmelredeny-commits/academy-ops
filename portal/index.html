@@ -37,6 +37,17 @@ a{color:var(--a)}button{font:inherit;color:inherit}
 .nav button{background:none;border:0;font-size:11px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:56px;cursor:pointer}.nav button span{font-size:19px}.nav button.on{color:var(--a);font-weight:700}
 .pane{display:none}.pane.on{display:block}
 .tip{position:fixed;z-index:20;background:#fff3b0;color:#3a2e00;border:1px solid #e6c84f;border-radius:10px;padding:6px 10px;font-size:12.5px;box-shadow:0 6px 18px rgba(0,0,0,.2);display:none;max-width:260px}
+.cgc{border:2px solid var(--gold);background:linear-gradient(180deg,var(--goldS),var(--card) 70%)}.cgc h3{color:#7a5a10}:root[data-theme=dark] .cgc h3{color:#e6c76a}:root[data-theme=dark] .cgn b{color:var(--ink)!important}@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .cgc h3{color:#e6c76a}:root:not([data-theme=light]) .cgn b{color:var(--ink)!important}}.cgok{border:2px solid var(--g);background:linear-gradient(180deg,var(--gs),var(--card) 70%)}.cgok h3{color:var(--g)}
+.cgn{display:flex;align-items:baseline;gap:6px;margin:2px 0}.cgn b{font-size:30px;font-weight:800;color:var(--navy)}.cgn span{font-size:14px;color:var(--mut)}
+.cgs{display:flex;gap:5px;margin:6px 0 4px}.cgs i{flex:1;height:14px;border-radius:5px;background:var(--soft);border:1px solid var(--line)}.cgs i.f{background:var(--gold);border-color:var(--gold)}.cgs.full i{background:var(--g);border-color:var(--g)}
+.btn.wide{width:100%;min-height:44px;font-size:14.5px;font-weight:700;margin-top:8px}.cgnote{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--mut);margin-top:7px}.cgdot{width:7px;height:7px;border-radius:50%;background:var(--g);box-shadow:0 0 0 3px var(--gs);flex:none}
+.cgwn{font-size:12px;background:var(--k3);border-right:4px solid #8d5fd3;border-radius:9px;padding:6px 9px;margin-top:8px}.cgo{display:flex;gap:8px;align-items:flex-start;padding:7px 0;font-size:13.5px;border-bottom:1px solid var(--soft)}
+.cgsel{width:100%;margin-top:8px;border:2px solid var(--gold);border-radius:10px;padding:8px;background:var(--card);color:var(--ink);font:inherit}
+.cgdim{position:fixed;inset:0;background:rgba(12,31,44,.55);z-index:60}.cgsheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:var(--card);border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.25);padding:10px 16px calc(env(safe-area-inset-bottom) + 22px);z-index:61}
+.cggrab{width:42px;height:5px;border-radius:5px;background:var(--line);margin:0 auto 10px}.cglnk{display:flex;gap:6px;align-items:center;border:2px solid #4a8fe7;border-radius:11px;padding:7px 10px;font-size:12.5px;direction:ltr;justify-content:space-between;background:var(--k1);margin-top:10px}.cglnk a{direction:rtl;color:#2d5fa8;font-weight:700;text-decoration:none}
+.cgmsg{background:var(--soft);border-radius:12px;padding:8px 10px;font-size:12.5px;margin-top:10px;border:1px dashed var(--line)}.cgapps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center;font-size:11.5px}.cgapps a{color:inherit;text-decoration:none}.cgapps span{display:flex;width:50px;height:50px;margin:0 auto 4px;border-radius:14px;align-items:center;justify-content:center;font-size:24px;background:var(--soft)}
+.tnp{border:3px double var(--gold);border-radius:12px;padding:16px;text-align:center;background:#fff;color:#101828}.tnp .mut{color:#667085}.tnt{font-size:19px;font-weight:800;color:#0c1f2c;margin:8px 0}.tnn{font-size:20px;font-weight:800;margin:6px 0;border-bottom:2px solid var(--gold);display:inline-block;padding:0 18px}.tnd{margin:10px 0;padding:8px;border-radius:10px;background:#fdf1dc;color:#b45309;font-weight:700;font-size:13px}
+@media print{body.tnprint>*:not(#cgsh){display:none!important}body.tnprint #cgsh .cgdim{display:none}body.tnprint #cgsh .cgsheet{position:static;box-shadow:none}}
 .empty{text-align:center;padding:26px 10px;color:var(--mut)}
 /* لابتوب وآيباد أفقي: قائمة جانبية + عمودان */
 @media (min-width:900px){
@@ -114,7 +125,7 @@ function render(){
   var g=E.progress||{},c=E.cohort,p=E.program,ss=E.sessions||[],held=ss.filter(function(s){return s.st}).length;
   if(PANE==='home'){
     var hrs=ss.filter(function(s){return s.st}).reduce(function(t,s){return t+Number(s.hours||0)},0),ns=nextSess(E);
-    html+='<div id="live"></div><div id="pwah"></div><div class="pane on cols">';
+    html+='<div id="cgw"></div><div id="live"></div><div id="pwah"></div><div class="pane on cols">';
     html+='<div><div class="card"><h3>📈 تقدّمك في البرنامج</h3><div class="row" style="border:0;padding:0"><span class="sm mut">الجلسة '+held+' من '+ss.length+'</span><span class="sm mut">'+(p.hours?Math.round(hrs)+' / '+p.hours+' ساعة':'')+'</span></div><div class="m"><i style="width:'+(ss.length?Math.round(100*held/ss.length):0)+'%;background:var(--a)"></i></div></div>';
     html+='<div class="card"><div class="two">'+bar(pct(g.attendance_pct),r.attendance_min,'حضورك','المطلوب '+r.attendance_min+'%')+bar(pct(g.score_now),r.pass_min,'معدلك','النجاح '+r.pass_min+'%')+'</div><div class="xs mut" style="margin-top:6px">التأخير يُحسب حضوراً · الغياب بعذر مقبول لا يُحسب عليك</div></div></div>';
     html+='<div>'+(E.cert?certTeaser()+nextStep():'')+'<div class="card"><h3>🗓 الجلسة القادمة <a class="r" href="#" onclick="go(\'sch\');return false">الجدول كاملاً ‹</a></h3>'+(ns?'<div class="next"><div class="date">'+DAYS[new Date(ns.day+'T12:00:00').getDay()]+'<small>'+dAr(ns.day,{day:'numeric',month:'short'})+'</small></div><div><b>جلسة '+ns.n+(ns.topic?' — '+esc(ns.topic):'')+'</b><div class="sm mut">'+esc([(c.time_from||'')+(c.time_to?' – '+c.time_to:''),c.place,c.trainer?'المدرب: '+c.trainer:'',ns.kind].filter(function(x){return x&&x.trim()}).join(' · '))+'</div></div></div>':'<div class="sm mut">'+(ss.length?'انتهت الجلسات':'يُعلن الجدول قريباً')+'</div>')+'</div>';
@@ -152,7 +163,7 @@ function render(){
   if(PANE==='study'){retakes();lessonsUI()}
   if(PANE==='mine'&&STUDY===null&&SESS)rpc('ac_study',{token:SESS}).then(function(r){STUDY=r||[];render()}).catch(function(){STUDY=[]});
   if(PANE==='acc')refundCard();
-  if(PANE==='home'){evalUI();liveUI()}
+  if(PANE==='home'){evalUI();liveUI();cgUI()}
 }
 function retakes(){var el=$('rtk');if(!el||!SESS)return;rpc('ac_retakes',{token:SESS}).then(function(r){var it=(r.items||[]).filter(function(x){return x.cohort===E.cohort.name});if(!it.length){el.innerHTML='';return}RTU=r.pay_url||'';
   el.innerHTML='<div class="card"><h3>🔁 إعادة الاختبار</h3><div class="xs mut">تقييمات لم تصل فيها لدرجة النجاح — احجز إعادتها من هنا</div>'+it.map(function(x){var b=x.booking;
@@ -199,6 +210,47 @@ function progTabs(){var L=enrList();if(L.length<2)return "";return "<div style='
 /* المذاكرة (تصميم معتمد 2026-10-14 docs/mockup-study-flow.png): خريطة رحلة ← قراءة داخل البوابة (pdf.js، بلا تنزيل) ← إقرار ← اختبار سؤال بسؤال ← نتيجة تفتح التالي.
    الملف من Drive الخاص عبر Apps Script بعد التحقق من الجلسة · القفل والتصحيح في القاعدة · إعادة اختبار الفصل مفتوحة بلا حد حتى النجاح */
 function spinHtml(h){return '<div class="spinbox" style="padding:'+(h||30)+'px 0;perspective:800px;text-align:center"><img src="../brand/logo-transparent.png" alt="جارٍ التحميل" style="display:inline-block;width:40%;max-width:180px;height:auto;animation:rdspin 2.5s linear infinite"></div>'}
+/* 🏙️ مجموعة التطبيق العملي في مدينتك (v2-154، تصميم city-group-2026-11-23-portal.png): لبرامج «أونلاين + حضوري» الخيار (ب) فقط — العدد والحد والحالة ورمز الدعوة، بلا أسماء ولا أرقام */
+var CGD=null;function cgSeats(n,mn,full){var h='';for(var i=0;i<mn;i++)h+='<i class="'+(i<n?'f':'')+'"></i>';return '<div class="cgs'+(full?' full':'')+'">'+h+'</div>'}
+function cgLeft(k){return k===1?'متدرب واحد':k===2?'متدربان':k+' متدربين'}
+function cgUI(){var el=$('cgw');if(!el||!SESS)return;rpc('city_group_progress',{token:SESS}).then(function(d){CGD=d;var el=$('cgw');if(!el)return;var mn=d.min||8;
+  el.innerHTML=(d.items||[]).map(function(x,i){var W='<div class="cgwn">👩 للسيدات: التطبيق العملي في صالات نسائية دائماً</div>',N='<div class="cgnote"><span class="cgdot"></span>العدد حقيقي ويتحدّث تلقائياً</div>',T=x.theory_done&&x.notice_no?'<button class="btn wide" data-i="'+i+'" onclick="cgNotice(this)">📄 إشعار إتمام الجزء النظري</button>':'';
+    if(x.state==='riyadh')return T?'<div class="card">'+T+'</div>':'';
+    if(x.state==='pick'||x.state==='pick_gender'){var ask=x.state==='pick';return '<div class="card cgc"><h3>🏙️ أين تريد التطبيق العملي؟</h3><div class="sm mut">'+esc(x.program)+' · تختار مرة واحدة</div>'+
+      (ask?'<label class="cgo"><input type="radio" name="cgo'+i+'" value="أ" onchange="cgOpt('+i+')"> (أ) في الرياض</label><label class="cgo"><input type="radio" name="cgo'+i+'" value="ب" checked onchange="cgOpt('+i+')"> (ب) في مدينتي أو أقرب مدينة لي — يُفتح عند اكتمال '+mn+' متدربين</label>'+
+        '<select id="cgc'+i+'" class="cgsel"><option value="">اختر مدينتك…</option>'+(d.cities||[]).map(function(c){return '<option>'+esc(c)+'</option>'}).join('')+'</select>':'')+
+      (x.need_gender?'<select id="cgg'+i+'" class="cgsel"><option value="">القسم…</option><option value="ذكر">رجال</option><option value="أنثى">نساء</option></select>':'')+
+      '<button class="btn g wide" data-i="'+i+'" onclick="cgPick(this)">✓ احفظ اختياري</button>'+W+'</div>'}
+    var n=x.count||0,full=x.status==='اكتملت'||x.status==='أُبلغت',late=x.status==='تجاوزت المهلة';
+    if(full)return '<div class="card cgok"><h3>✅ اكتملت مجموعتك</h3><div class="cgn"><b style="color:var(--g)">'+n+'</b><span>من '+mn+' متدربين</span></div>'+cgSeats(mn,mn,1)+
+      (x.practical_date?'<div class="sm" style="font-weight:600">📅 موعد التطبيق العملي: '+esc(x.practical_date)+(x.partner_gym?' · 📍 '+esc(x.partner_gym):'')+'</div>':'<div class="sm" style="font-weight:600">سنبلغك بموعد التطبيق العملي ومكانه — تابع بريدك وواتساب الأكاديمية</div>')+N+W+T+'</div>';
+    return '<div class="card cgc"><h3>🏙️ مجموعة التطبيق العملي في مدينتك</h3><div class="cgn"><b>'+n+'</b><span>من '+mn+' متدربين</span></div>'+cgSeats(Math.min(n,mn),mn)+
+      '<div class="sm" style="font-weight:600">باقي <b style="color:#8a6a16">'+cgLeft(Math.max(mn-n,0))+'</b> ويُفتح العملي في مدينتك أو أقرب مدينة لك</div>'+
+      (late&&x.hold_until?'<div class="sm mut">⏳ مقعدك محفوظ حتى '+esc(x.hold_until)+'</div>':'')+
+      '<button class="btn g wide" data-i="'+i+'" onclick="cgShare(this)">👥 ادعُ زميلك من مدينتك</button>'+N+W+T+'</div>'}).join('')}).catch(function(){})}
+function cgOpt(i){var r=document.querySelector('input[name="cgo'+i+'"]:checked'),c=$('cgc'+i);if(c)c.style.display=r&&r.value==='أ'?'none':''}
+function cgPick(b){var i=+b.dataset.i,x=CGD.items[i],r=document.querySelector('input[name="cgo'+i+'"]:checked'),o=x.state==='pick_gender'?'ب':(r?r.value:'ب'),c=$('cgc'+i),g=$('cgg'+i);
+  if(x.state==='pick'&&o==='ب'&&(!c||!c.value))return alert('اختر مدينتك');if(x.need_gender&&o==='ب'&&(!g||!g.value))return alert('اختر القسم');
+  if(!confirm(o==='أ'?'التطبيق العملي في الرياض — تأكيد؟':'التطبيق العملي في '+(c&&c.value||'مدينتك')+' — تأكيد؟ (مرة واحدة)'))return;b.disabled=true;
+  rpc('city_group_pick',{token:SESS,p_enrollment:x.enrollment_id,p_option:o,p_city:c?c.value:null,p_gender:g?g.value:null}).then(function(r){b.disabled=false;if(!r.ok)return alert(r.error||'تعذّر الحفظ');cgUI()}).catch(function(){b.disabled=false;alert('تعذّر الاتصال')})}
+function cgLink(x){return 'https://alsaad-academy.com/j/'+x.invite_code}
+function cgMsg(x){return 'كابتن، أنا سجّلت في برنامج '+x.program+' بأكاديمية السعد. النظري أونلاين والعملي في مدينتنا إذا اكتملنا '+(CGD.min||8)+' — سجّل من رابطي 👇'}
+function cgShare(b){var x=CGD.items[+b.dataset.i],u=cgLink(x),m=cgMsg(x);
+  if(navigator.share){navigator.share({title:'ادعُ زميلك من مدينتك',text:m,url:u}).catch(function(){});return}
+  var t=encodeURIComponent(m+' '+u),s=document.createElement('div');s.id='cgsh';
+  s.innerHTML='<div class="cgdim" onclick="cgClose()"></div><div class="cgsheet"><div class="cggrab"></div><b style="font-size:15px">👥 ادعُ زميلك من مدينتك</b><div class="sm mut">كل زميل ينضم يقرّب موعد العملي لكما معاً</div>'+
+    '<div class="cglnk"><span>'+esc(u.replace('https://',''))+'</span><a href="#" onclick="cgCopy();return false">📋 نسخ</a></div><div class="cgmsg">«'+esc(m)+'»</div>'+
+    '<div class="cgapps"><a href="https://wa.me/?text='+t+'" target="_blank" rel="noopener"><span style="background:#25d366">💬</span>واتساب</a><a href="sms:?&body='+t+'"><span>✉️</span>رسائل</a><a href="mailto:?subject='+encodeURIComponent('ادعُ زميلك من مدينتك')+'&body='+t+'"><span>📧</span>بريد</a><a href="#" onclick="cgClose();return false"><span>✕</span>إغلاق</a></div></div>';
+  document.body.appendChild(s);window.CGU=u}
+function cgClose(){var s=$('cgsh');if(s)s.remove()}
+function cgCopy(){var u=window.CGU||'';try{navigator.clipboard.writeText(u).then(function(){alert('✓ نُسخ الرابط')})}catch(e){prompt('انسخ الرابط',u)}}
+/* 📄 إشعار إتمام الجزء النظري — ليس شهادة: لا شعار LDI ولا «معتمد» في العنوان، والنص من الإعداد city_group_notice_text */
+function cgNotice(b){var x=CGD.items[+b.dataset.i];rpc('city_group_notice',{token:SESS,p_enrollment:x.enrollment_id}).then(function(n){if(!n.ok)return alert(n.error||'غير متاح بعد');var s=document.createElement('div');s.id='cgsh';
+  s.innerHTML='<div class="cgdim" onclick="cgClose()"></div><div class="cgsheet cgnt"><div class="tnp"><img src="'+esc((B&&B.logo_url)||'../brand/logo-transparent.png')+'" alt="" style="height:54px"><div class="tnt">'+esc(n.title)+'</div>'+
+    '<div class="tnn">'+esc(n.name)+'</div><div class="sm">أتمّ الجزء النظري من برنامج <b>'+esc(n.program)+'</b> بتاريخ '+esc(n.date)+'</div>'+
+    '<div class="tnd">⚠️ '+esc(n.disclaimer)+'</div><div class="xs mut">رقم الإشعار: <b dir="ltr">'+esc(n.no)+'</b></div><div class="xs mut" style="margin-top:6px">'+esc(n.licence).replace(/(STI-License[0-9]+)/,'<bdi>$1</bdi>')+'<br><span class="tg">السعد طريق المجد</span></div></div>'+
+    '<div class="noprint" style="display:flex;gap:8px;margin-top:10px"><button class="btn p" style="flex:1" onclick="cgPrint()">🖨 طباعة / حفظ PDF</button><button class="btn" onclick="cgClose()">إغلاق</button></div></div>';document.body.appendChild(s)}).catch(function(){alert('تعذّر الاتصال')})}
+function cgPrint(){document.body.classList.add('tnprint');setTimeout(function(){print();document.body.classList.remove('tnprint')},50)}
 function liveUI(){var el=$('live');if(!el||!SESS)return;rpc('ac_live',{token:SESS}).then(function(r){var L=r&&r.live;if(!L){el.innerHTML='';return}
   el.innerHTML='<div class="card" style="border:2px solid #D4A853"><h3>🎥 محاضرتك أونلاين اليوم</h3><div class="sm">الجلسة '+L.n+(L.topic?' · '+esc(L.topic):'')+' · '+esc(L.from||'')+' – '+esc(L.to||'')+'</div>'+
     (L.open?'<button class="btn p" style="width:100%;margin-top:10px;min-height:46px;font-size:15px" data-id="'+L.id+'" onclick="liveJoin(this)">▶ ادخل المحاضرة الآن</button><div class="xs mut" style="margin-top:6px">يُسجَّل حضورك تلقائياً عند الدخول · التأخر أكثر من 15 دقيقة يُحسب «متأخر»</div>'
