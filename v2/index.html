@@ -858,7 +858,7 @@ function cSmsOpen(pid){var x=CROWS.filter(function(r){return r.person_id===pid})
 function cOpts(x,ms,win){var ph=cPhoneOf(x),ch=cChs(x),s=CSR||{},cs=typeof smsCan==='function'&&smsCan(),O=[];
   O.push({k:'wa',l:'واتساب',ok:!!ph&&win>0,tip:'النافذة مفتوحة '+Math.ceil(win)+' س',why:!ph?'لا جوال':'خارج نافذة 24 ساعة'});
   O.push({k:'ig',l:'إنستغرام',ok:!!CIGM,why:'لم يراسلنا على إنستغرام'});
-  var own=HB.owner===true;O.push({k:'sms',l:'SMS (رسائل الجوال)',ok:!!(ph&&x.person_id&&cs&&(s.sms==='need'||own)),tip:s.sms==='sent'?'أُرسل '+(typeof smsDay==='function'?smsDay(s.sms_at):'')+' — إعادة إرسال':'نص الخانة هو ما يُرسل',why:!ph?'لا جوال':!x.person_id?'بلا ملف شخص':s.sms==='sent'?'أُرسل SMS '+(typeof smsDay==='function'?smsDay(s.sms_at):'')+' — لا تكرار قبل 3 أيام':win>0?'لا يحتاج: نافذة واتساب مفتوحة':!s.sms?'لا يحتاج (دفع أو لا رسالة تنتظر)':'يحتاج صلاحية الرقم الكامل'});
+  var own=typeof HB!=='undefined'&&HB.owner===true;O.push({k:'sms',l:'SMS (رسائل الجوال)',ok:!!(ph&&x.person_id&&cs&&(s.sms==='need'||own)),tip:s.sms==='sent'?'أُرسل '+(typeof smsDay==='function'?smsDay(s.sms_at):'')+' — إعادة إرسال':'نص الخانة هو ما يُرسل',why:!ph?'لا جوال':!x.person_id?'بلا ملف شخص':s.sms==='sent'?'أُرسل SMS '+(typeof smsDay==='function'?smsDay(s.sms_at):'')+' — لا تكرار قبل 3 أيام':win>0?'لا يحتاج: نافذة واتساب مفتوحة':!s.sms?'لا يحتاج (دفع أو لا رسالة تنتظر)':'يحتاج صلاحية الرقم الكامل'});
   O.push({k:'wam',l:'واتساب جوالي (يدوي)',ok:!!ph,tip:'يفتح wa.me',why:'لا جوال'});
   O.push({k:'mail',l:'بريد info@',ok:false,why:ch.indexOf('mail')>-1?'رد من صندوق info@ مباشرة — الإرسال من هنا غير مربوط':'لا بريد مسجّل'});
   O.push({k:'xm',l:'X / ماسنجر',ok:false,why:'غير مربوطة'});return O}
