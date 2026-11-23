@@ -3084,7 +3084,7 @@ function optBtn(){var o=$('optb');if(o)o.remove();return;if(!$('optb')){var b=do
 function mobNr(){if(!mobOn())return;var v=String(NR.n||0);[].forEach.call(document.querySelectorAll('.mbx .nrb'),function(e){if(e.textContent!==v)e.textContent=v;var d=NR.n?'':'none';if(e.style.display!==d)e.style.display=d})}
 /* QA @789: شرائح «اتصل اليوم/مهتم/لم يرد مرتين» في العملاء تأخذ عددها من app_calls_list counts (today/hot/noans2) — الجوال فقط، تخزين 60 ثانية */
 var CLN={t:0,c:null,p:0};
-function clChipN(){if(!mobOn()||TAB!=='customers')return;var L=document.querySelectorAll('#cch .clchip');if(!L.length)return;var put=function(){var k=['today','hot','noans2'];[].forEach.call(L,function(e,i){if(i>2||e.querySelector('.cln'))return;var n=document.createElement('span');n.className='cln';n.textContent=' '+(Number(CLN.c[k[i]])||0);e.appendChild(n)})};
+function clChipN(){if(!mobOn()||TAB!=='customers')return;var L=document.querySelectorAll('#cch .clchip:not(.sms)');if(!L.length)return;var put=function(){var k=['today','hot','noans2'];[].forEach.call(L,function(e,i){if(i>2||e.querySelector('.cln'))return;var n=document.createElement('span');n.className='cln';n.textContent=' '+(Number(CLN.c[k[i]])||0);e.appendChild(n)})};
   if(CLN.c&&Date.now()-CLN.t<60000)return put();if(CLN.p)return;CLN.p=1;rpc('app_calls_list',{token:TOK,f:'',q:'',lim:1}).then(function(r){CLN.c=(r&&r.counts)||{};CLN.t=Date.now();CLN.p=0;put()}).catch(function(){CLN.p=0})}
 /* على الجوال الأزرار شبكة بلا تمرير، و scrollIntoView كان يزيح الصفحة كلها جانبياً (QA @788) — يُعطَّل هنا فقط */
 (function(){var o=navShow;navShow=function(){if(!mobOn())return o()}})();
