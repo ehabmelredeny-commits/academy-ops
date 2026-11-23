@@ -2699,7 +2699,7 @@ function gfIn(id,ph,tip){return '<input id="'+id+'" placeholder="'+ph+'" title="
 function giftsScreen(){TAB='gifts';if(!TOK)return loginScreen();
   $('app').innerHTML=shell(nav()+'<div style="display:flex;gap:8px;align-items:center"><b style="font-size:17px">💝 الهدايا — أهدِ من تحب</b><span class="mut" style="font-size:12px">انسخ البيانات من إيميل طلب سلة (خانة الملاحظة)، والنظام يرسل البطاقة ويجهّز رسالة واتساب</span><span class="sp"></span><button class="ib" title="تحديث" onclick="giftsScreen()">⟳</button></div>'+
   '<div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:8px 0">'+
-  '<select id="gf_program" title="البرنامج المختار في الطلب" style="border:2px solid #7B3FB0;border-radius:8px;padding:7px">'+GF_P.map(function(p){return '<option>'+esc(p)+'</option>'}).join('')+'</select>'+
+  '<select id="gf_program" title="البرنامج المختار في الطلب" style="border:2px solid #7B3FB0;border-radius:8px;padding:7px">'+GF_P.map(function(p){return '<option value="'+esc(p)+'">'+(/السريع/.test(p)?'🔒 داخلي (لا يُعلن — تواصل مباشر فقط): ':'')+esc(p)+'</option>'}).join('')+'</select>'+
   '<select id="gf_tier" title="الباقة" style="border:2px solid #7B3FB0;border-radius:8px;padding:7px"><option>أساسي</option><option>بلاس</option><option>بريميوم</option><option>باقة واحدة</option></select>'+
   gfIn('gf_order','رقم طلب سلة','من إيميل سلة')+gfIn('gf_to_name','اسم المُهدى إليه *','كما كتبه المُهدي')+gfIn('gf_to_phone','جوال المُهدى إليه (05xxxxxxxx) *','سعودي فقط')+gfIn('gf_to_email','بريد المُهدى إليه','تصله البطاقة عليه')+
   gfIn('gf_from','اسم المُهدي كما يظهر في البطاقة *','يظهر: هدية من كابتن …')+gfIn('gf_buyer_name','اسم المشتري','من طلب سلة')+gfIn('gf_buyer_phone','جوال المشتري','لتأكيد الوصول')+
