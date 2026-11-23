@@ -2748,7 +2748,7 @@ function clKd(k){return ((CLS.meta&&CLS.meta.kinds_def)||[]).filter(function(x){
 function clMeta(){return CLS.meta?Promise.resolve(CLS.meta):rpc('app_calls_meta',{token:TOK}).then(function(m){CLS.meta=m;CLS.role=m.role;return m})}
 /* 📱 يحتاج SMS (v2-156): لمن ينتظر ردنا ولا نافذة واتساب مفتوحة له. العلامة من الخادم (sms_flags_) — هنا العرض والرابط فقط */
 function smsTxt(r){r=r||{};var f=String(r.first||'').trim();return (r.gender==='أنثى'?'كابتنة':'كابتن')+(f?' '+f:'')+'، وصلنا اهتمامك '+(r.program?'بـ'+r.program:'ببرامج الأكاديمية')+' 🌟 اضغط هنا ليصلك دليل البرنامج على واتساب: wa.me/966536818008?text='+encodeURIComponent('أريد التفاصيل')+' — أكاديمية السعد. للإيقاف أرسل 0'}
-function smsHref(tel,body){return 'sms:'+String(tel||'').replace(/[^0-9+]/g,'')+'?&body='+encodeURIComponent(body)}
+function smsHref(tel,body){var n=String(tel||'').replace(/[^0-9+]/g,''),b=encodeURIComponent(body);return /android/i.test(navigator.userAgent)?'smsto:'+n+'?body='+b:/iphone|ipad|ipod/i.test(navigator.userAgent)?'sms:'+n+'&body='+b:'sms:'+n+'?body='+b}
 function smsCan(){return clCan('phone_full')}
 function smsDay(at){if(!at)return '';var d=new Date(new Date(at).getTime()+3*3600000).toISOString().slice(0,10);return d===clToday()?'اليوم':when(at)}
 function smsBadge(x){if(!x||!x.sms)return '';if(x.sms==='sent')return ' <span class="smsok" title="أُرسلت له دعوة SMS لفتح واتساب — لا تذكير قبل 3 أيام">✓ أُرسل SMS '+smsDay(x.sms_at)+'</span>';return ' <span class="smsb" title="ينتظر ردنا ('+(x.sms_why==='form'?'سجّل من النموذج':'راسلنا على واتساب')+') ولم يكتب لنا على واتساب خلال 24 ساعة، فلا نصله هناك مجاناً — رسالة SMS منك تفتح المحادثة">📱 يحتاج SMS</span>'}
