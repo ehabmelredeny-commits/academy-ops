@@ -831,7 +831,9 @@ function cChs(x){var o=[];String(x.channels||'').split('+').forEach(function(s){
 function cIco(k,s){s=s||14;return k==='form'?'<span style="font-size:'+s+'px;line-height:1">📝</span>':k==='oth'?'<span style="font-size:'+s+'px;line-height:1">💬</span>':(typeof ico==='function'?ico(k,s):'')}
 function cIsPh(v){return /^[+]?[0-9 -]{7,}$/.test(String(v||''))}
 function cPhoneOf(x){var a=[x.contact].concat(x.contacts||[]).filter(cIsPh);return a[0]||''}
-function cCap(x){var n=String(x.name||'').trim();if(!n||n===x.contact||cIsPh(n)||n.indexOf('@')>0)return n?cPh(n):'—';return /^كابتن/.test(n)?n:'كابتن '+n}
+/* المالك 2026-11-26 «هل سلة أصبح كابتن؟»: «كابتن» للأشخاص فقط — لا للشركات والإشعارات الآلية (سلة، فيسبوك، جوجل، تابي، تمارا، noreply…) */
+function cOrg(x){var c=String(x.contact||'').toLowerCase(),n=String(x.name||'');return /(no-?reply|notification|mailer|facebookmail|@salla.|salla.sa|google.com|tabby|tamara|partners?@|support@|dmarc)/.test(c)||/(on Facebook|Salla|سلة|Partners|Facebook|Google|Tabby|Tamara|تابي|تمارا)/i.test(n)}
+function cCap(x){var n=String(x.name||'').trim();if(!n||n===x.contact||cIsPh(n)||n.indexOf('@')>0)return n?cPh(n):'—';if(cOrg(x))return n;return /^كابتن/.test(n)?n:'كابتن '+n}
 function cAge(t){var m=Math.max(0,Math.round((Date.now()-new Date(t))/60000));return [m<60?m+' د':m<1440?Math.round(m/60)+' س':Math.round(m/1440)+' يوم',m<30?'g':m<120?'o':'r']}
 function cRowOf(ck){return CROWS.filter(function(r){return r.ck===ck||(r.cks||[]).indexOf(ck)>-1})[0]||null}
 /* صف واحد لكل شخص: نفس person_id (ربط موجود في g_leads) يُجمع، وما لا شخص له يبقى بمفتاحه — لا دمج جديد */
